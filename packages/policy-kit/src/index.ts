@@ -83,6 +83,11 @@ export {
   PolicyValidationError,
 } from './loader';
 
+// Canonical peac.txt policy-document loader. Alias over parsePolicyDocument
+// introduced in v0.13.0 to consolidate discovery surfaces: @peac/disc is
+// deprecated; callers should import loadPolicyDocument from @peac/policy-kit.
+export { parsePolicyDocument as loadPolicyDocument } from './loader';
+
 // Evaluation
 export {
   evaluate,

@@ -1,3 +1,29 @@
+# @peac/access — ARCHIVED (empty pillar stub, v0.13.0)
+
+> **ARCHIVED (v0.13.0).** `@peac/access` was an empty Layer-6 pillar
+> stub in v0.12.14 (workspace-internal, never published to npm `latest`).
+> As part of the v0.13.0 package-surface reduction pass (see
+> `docs/PACKAGE_STATUS.md`), the workspace entry was removed and the
+> source was moved from
+> `packages/access/` to `archive/pillars/access/`.
+>
+> **This package is NOT published** at v0.13.0 or later. It was never
+> published at v0.12.14. No throwing-stub replacement is published. No
+> migration is required for external consumers, because none existed.
+>
+> The access pillar concept remains part of the PEAC 10-pillar taxonomy.
+> It is a taxonomy label, not a shipped package. Any concrete
+> implementation would be proposed in its own roadmap review and
+> committed under `packages/access/` with real content.
+>
+> Below this banner is the historical README preserved verbatim for
+> archaeology. It described the (unshipped) intent; it is no longer
+> authoritative.
+
+---
+
+## Historical README (pre-archive)
+
 # @peac/access
 
 PEAC access pillar: reserved package for access-control evidence types and utilities.

@@ -2,7 +2,7 @@
 
 Do not edit manually. Source: `REPO_SURFACE_STATUS.json`. Rebuild via `node scripts/generate-surface-status.mjs`.
 
-**Version:** 0.12.14 | **Updated:** 2026-04-22
+**Version:** 0.13.0 | **Updated:** 2026-04-24
 
 ## Layer 1
 
@@ -27,13 +27,13 @@ Do not edit manually. Source: `REPO_SURFACE_STATUS.json`. Rebuild via `node scri
 
 ## Layer 3
 
-| Surface               | npm                | State   | Wire |
-| --------------------- | ------------------ | ------- | ---- |
-| `packages/audit`      | `@peac/audit`      | default | 0.2  |
-| `packages/control`    | `@peac/control`    | default | 0.2  |
-| `packages/discovery`  | `@peac/disc`       | default | 0.2  |
-| `packages/policy-kit` | `@peac/policy-kit` | default | 0.2  |
-| `packages/protocol`   | `@peac/protocol`   | default | 0.2  |
+| Surface               | npm                | State      | Wire |
+| --------------------- | ------------------ | ---------- | ---- |
+| `packages/audit`      | `@peac/audit`      | default    | 0.2  |
+| `packages/control`    | `@peac/control`    | default    | 0.2  |
+| `packages/discovery`  | `@peac/disc`       | deprecated | 0.2  |
+| `packages/policy-kit` | `@peac/policy-kit` | default    | 0.2  |
+| `packages/protocol`   | `@peac/protocol`   | default    | 0.2  |
 
 ## Layer 3.5
 
@@ -58,7 +58,6 @@ Do not edit manually. Source: `REPO_SURFACE_STATUS.json`. Rebuild via `node scri
 | `packages/adapters/x402/daydreams`     | `@peac/adapter-x402-daydreams`     | supported    | 0.2  |
 | `packages/adapters/x402/fluora`        | `@peac/adapter-x402-fluora`        | supported    | 0.2  |
 | `packages/adapters/x402/pinata`        | `@peac/adapter-x402-pinata`        | supported    | 0.2  |
-| `packages/aipref`                      | `@peac/pref`                       | deprecated   | 0.2  |
 | `packages/contracts`                   | `@peac/contracts`                  | supported    | 0.2  |
 | `packages/http-signatures`             | `@peac/http-signatures`            | supported    | 0.2  |
 | `packages/jwks-cache`                  | `@peac/jwks-cache`                 | supported    | 0.2  |
@@ -106,15 +105,15 @@ Do not edit manually. Source: `REPO_SURFACE_STATUS.json`. Rebuild via `node scri
 
 ## Layer 6
 
-| Surface                 | npm                 | State     | Wire |
-| ----------------------- | ------------------- | --------- | ---- |
-| `packages/access`       | -                   | supported | 0.2  |
-| `packages/attribution`  | `@peac/attribution` | supported | 0.2  |
-| `packages/compliance`   | -                   | supported | 0.2  |
-| `packages/consent`      | -                   | supported | 0.2  |
-| `packages/intelligence` | -                   | supported | 0.2  |
-| `packages/privacy`      | -                   | supported | 0.2  |
-| `packages/provenance`   | -                   | supported | 0.2  |
+| Surface                        | npm                 | State     | Wire |
+| ------------------------------ | ------------------- | --------- | ---- |
+| `archive/pillars/access`       | -                   | archived  | null |
+| `archive/pillars/compliance`   | -                   | archived  | null |
+| `archive/pillars/consent`      | -                   | archived  | null |
+| `archive/pillars/intelligence` | -                   | archived  | null |
+| `archive/pillars/provenance`   | -                   | archived  | null |
+| `packages/attribution`         | `@peac/attribution` | supported | 0.2  |
+| `packages/privacy`             | -                   | supported | 0.2  |
 
 ## Layer 0
 
@@ -135,3 +134,9 @@ Do not edit manually. Source: `REPO_SURFACE_STATUS.json`. Rebuild via `node scri
 | Surface   | npm | State     | Wire |
 | --------- | --- | --------- | ---- |
 | `sdks/go` | -   | supported | 0.2  |
+
+## Layer null
+
+| Surface        | npm          | State    | Wire |
+| -------------- | ------------ | -------- | ---- |
+| `archive/pref` | `@peac/pref` | archived | null |

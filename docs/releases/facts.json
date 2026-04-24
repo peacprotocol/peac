@@ -6,10 +6,10 @@
   "dist_tag": "latest",
   "release_date": "2026-04-22",
   "metrics": {
-    "tests": 7680,
-    "test_files": 308,
+    "tests": 7672,
+    "test_files": 309,
     "published_packages": 37,
-    "build_targets": 106,
+    "build_targets": 100,
     "conformance_requirement_ids": 224,
     "conformance_sections": 25
   },

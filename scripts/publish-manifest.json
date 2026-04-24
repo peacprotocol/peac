@@ -124,7 +124,6 @@
     "@peac/adapter-x402-daydreams",
     "@peac/adapter-x402-fluora",
     "@peac/adapter-x402-pinata",
-    "@peac/pref",
     "@peac/receipts",
     "@peac/pay402",
     "@peac/server",

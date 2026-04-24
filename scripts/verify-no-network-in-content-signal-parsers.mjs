@@ -15,8 +15,8 @@
  *
  * Other mapping packages (for example `packages/mappings/ucp/`) that
  * legitimately fetch upstream profile documents are intentionally out of
- * scope. Broadening the rule to `packages/mappings/**` is tracked as a
- * follow-up in the roadmap when each mapping has been classified.
+ * scope. Broadening the rule to `packages/mappings/**` depends on each
+ * mapping being individually classified first.
  *
  * This script scans every tracked `.ts` / `.mjs` / `.js` file under the
  * watched globs for:
@@ -49,8 +49,10 @@ const REPO_ROOT = fileURLToPath(new URL('..', import.meta.url));
 // content-signal entries or AIPrefPolicy. UCP and other mapping packages
 // that legitimately fetch their upstream profile documents are not in
 // scope; any future broadening of the rule is tracked separately.
+// @peac/pref (packages/aipref/) archived in v0.13.0 and moved to archive/pref/;
+// the canonical content-signals parser lives in @peac/mappings-content-signals.
+// Historical parser source under archive/pref/ is not on the active lint path.
 const WATCHED_ROOTS = [
-  join(REPO_ROOT, 'packages', 'aipref', 'src'),
   join(REPO_ROOT, 'packages', 'mappings', 'content-signals', 'src'),
 ];
 

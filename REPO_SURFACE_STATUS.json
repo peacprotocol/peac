@@ -1,7 +1,7 @@
 {
   "description": "Machine-readable surface classification for PEAC Protocol workspace. CI fails if any workspace member is missing. See docs/PACKAGE_STATUS.md for human-readable view.",
-  "version": "0.12.14",
-  "updated": "2026-04-22",
+  "version": "0.13.0",
+  "updated": "2026-04-24",
   "states": {
     "default": "Current recommended path. Actively maintained, Wire 0.2 native.",
     "supported": "Actively maintained, published, production-ready. May not be on default quickstart path.",
@@ -48,10 +48,12 @@
     },
     "packages/discovery": {
       "npm": "@peac/disc",
-      "state": "default",
+      "state": "deprecated",
       "wire": "0.2",
       "layer": 3,
-      "published": true
+      "published": true,
+      "removal": "v0.13.1",
+      "note": "Published deprecated compatibility alias. Re-exports tolerant peac.txt parse / emit / validate / discover + constants; barrel emits one-shot PEAC_DISC_DEPRECATED DeprecationWarning. Canonical loader is @peac/policy-kit loadPolicyDocument. Retained at v0.13.0 to preserve publish closure with @peac/cli and apps/api; full retirement deferred until workspace consumers migrate."
     },
     "packages/audit": {
       "npm": "@peac/audit",
@@ -386,23 +388,6 @@
       "layer": 4,
       "published": true
     },
-    "packages/aipref": {
-      "npm": "@peac/pref",
-      "state": "deprecated",
-      "removal": "v0.13.0",
-      "wire": "0.2",
-      "layer": 4,
-      "published": true,
-      "note": "Thin deprecated facade over @peac/mappings-content-signals (RFC 8941/9651 Structured Fields Content-Usage, RFC 9309 robots.txt, tdmrep). No in-package network I/O. Full RFC 8785 JCS + SHA-256 digest. Emits PEAC_DEPRECATED_PREF DeprecationWarning on instantiation."
-    },
-    "packages/access": {
-      "npm": null,
-      "state": "supported",
-      "wire": "0.2",
-      "layer": 6,
-      "published": false,
-      "note": "Pillar package"
-    },
     "packages/attribution": {
       "npm": "@peac/attribution",
       "state": "supported",
@@ -410,39 +395,7 @@
       "layer": 6,
       "published": true
     },
-    "packages/compliance": {
-      "npm": null,
-      "state": "supported",
-      "wire": "0.2",
-      "layer": 6,
-      "published": false,
-      "note": "Pillar package"
-    },
-    "packages/consent": {
-      "npm": null,
-      "state": "supported",
-      "wire": "0.2",
-      "layer": 6,
-      "published": false,
-      "note": "Pillar package"
-    },
-    "packages/intelligence": {
-      "npm": null,
-      "state": "supported",
-      "wire": "0.2",
-      "layer": 6,
-      "published": false,
-      "note": "Pillar package"
-    },
     "packages/privacy": {
-      "npm": null,
-      "state": "supported",
-      "wire": "0.2",
-      "layer": 6,
-      "published": false,
-      "note": "Pillar package"
-    },
-    "packages/provenance": {
       "npm": null,
       "state": "supported",
       "wire": "0.2",
@@ -479,7 +432,7 @@
       "layer": "legacy",
       "published": true,
       "removal": "v0.13.0",
-      "note": "Monolithic pre-v0.10.0 package. Use @peac/kernel, @peac/schema, @peac/crypto, @peac/protocol instead."
+      "note": "DEPRECATED. Archival of packages/core/ is coupled with the legacy /verify handler rewire that eliminates the last active consumer in apps/api/src/verifier.ts. Historical 0.9-series receipt verify-only path; use @peac/protocol + @peac/schema + @peac/crypto + @peac/kernel for current wire."
     },
     "packages/sdk-js": {
       "npm": "@peac/sdk",
@@ -572,6 +525,55 @@
       "layer": 5,
       "published": false,
       "note": "One test quarantined due to @peac/contracts workspace linking issue"
+    },
+    "archive/pref": {
+      "npm": "@peac/pref",
+      "state": "archived",
+      "removal": "v0.13.0",
+      "wire": null,
+      "layer": null,
+      "published": false,
+      "note": "ARCHIVED in v0.13.0 (moved from packages/aipref/). Migration: @peac/mappings-content-signals (RFC 9651 Structured Fields, full RFC 8785 JCS + SHA-256 digest). Historical npm versions <=0.12.14 remain installable (deprecate-then-remove discipline)."
+    },
+    "archive/pillars/access": {
+      "npm": null,
+      "state": "archived",
+      "wire": null,
+      "layer": 6,
+      "published": false,
+      "note": "ARCHIVED in v0.13.0. Empty pillar stub never published. Pillar taxonomy label retained; concrete implementation targeted for v1.0+ watchlist."
+    },
+    "archive/pillars/compliance": {
+      "npm": null,
+      "state": "archived",
+      "wire": null,
+      "layer": 6,
+      "published": false,
+      "note": "ARCHIVED in v0.13.0. Empty pillar stub never published."
+    },
+    "archive/pillars/consent": {
+      "npm": null,
+      "state": "archived",
+      "wire": null,
+      "layer": 6,
+      "published": false,
+      "note": "ARCHIVED in v0.13.0. Empty pillar stub never published."
+    },
+    "archive/pillars/intelligence": {
+      "npm": null,
+      "state": "archived",
+      "wire": null,
+      "layer": 6,
+      "published": false,
+      "note": "ARCHIVED in v0.13.0. Empty pillar stub never published."
+    },
+    "archive/pillars/provenance": {
+      "npm": null,
+      "state": "archived",
+      "wire": null,
+      "layer": 6,
+      "published": false,
+      "note": "ARCHIVED in v0.13.0. Near-empty scaffold (version constant + doc comment) never published."
     }
   }
 }

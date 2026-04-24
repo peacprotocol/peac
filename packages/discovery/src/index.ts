@@ -1,5 +1,14 @@
 /**
- * @peac/disc - thin peac.txt policy-document loader/validator and remote fetcher.
+ * @peac/disc - DEPRECATED. Thin peac.txt policy-document loader/validator and
+ * remote fetcher. Retained as a published deprecated compatibility package
+ * so that existing workspace and external consumers continue to resolve.
+ *
+ * @deprecated Prefer {@link "@peac/policy-kit"} for policy-document parsing
+ * and validation (`parsePolicyDocument`, `loadPolicyDocument`,
+ * `validatePolicy`, `serializePolicyYaml`). Remote discovery behavior in
+ * `discover()` (SSRF-aware fetch with a byte cap, timeout policy, and
+ * redirect policy) has no direct equivalent in `@peac/policy-kit` and
+ * remains compatibility-only here until an equivalent replacement ships.
  *
  * peac.txt is a POLICY DOCUMENT surface per docs/specs/PEAC-TXT.md. Full
  * parsing is delegated to `@peac/policy-kit.parsePolicyDocument`; this
@@ -18,14 +27,36 @@
  * with code `PEAC_LEGACY_PEAC_TXT_KEY_FIELD` once per process.
  */
 
+// One-shot structured deprecation warning on module load. Use
+// process.emitWarning with a stable code plus DeprecationWarning type so
+// operators can filter on NODE_OPTIONS=--no-deprecation if needed. Single
+// shot per process to avoid log spam in hot paths.
+let __peacDiscDeprecationEmitted = false;
+function __emitPeacDiscDeprecation(): void {
+  if (__peacDiscDeprecationEmitted) return;
+  __peacDiscDeprecationEmitted = true;
+  if (typeof process !== 'undefined' && typeof process.emitWarning === 'function') {
+    process.emitWarning(
+      '@peac/disc is deprecated. Use loadPolicyDocument from @peac/policy-kit. ' +
+        'See https://peacprotocol.org/docs/migration for migration steps.',
+      { type: 'DeprecationWarning', code: 'PEAC_DISC_DEPRECATED' }
+    );
+  }
+}
+__emitPeacDiscDeprecation();
+
+/** @internal test-only hook to reset the one-shot deprecation flag. */
+export function __resetDiscDeprecationWarningForTests(): void {
+  __peacDiscDeprecationEmitted = false;
+}
+
 export { parse, emit, validate, __resetLegacyWarningForTests } from './parser.js';
 export type { ParseResult, ValidationOptions, PolicyDocument } from './types.js';
 
 /**
  * @deprecated Retained for one minor to keep existing import paths
  * compiling. peac.txt policy documents now resolve to a `PolicyDocument`
- * (re-exported from `@peac/policy-kit`). Removal target: next cleanup
- * release.
+ * (re-exported from `@peac/policy-kit`).
  */
 export type { PeacDiscovery, PublicKeyInfo } from './types.js';
 
