@@ -127,6 +127,7 @@
     "@peac/receipts",
     "@peac/pay402",
     "@peac/server",
+    "@peac/core",
     "@peac/net-node",
     "@peac/adapter-eat",
     "@peac/adapter-did",
