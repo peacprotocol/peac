@@ -70,7 +70,6 @@ export const AgentProofSchema = z
      * Transport-binding proof method. The four values below are the
      * canonical transport-layer bindings recognized by PEAC; they are
      * semantically distinct from trust-root models (see `ProofTypeSchema`).
-     * Inlined in v0.13.0 after the DD-185 deprecation horizon closed.
      */
     method: z.enum(['http-message-signature', 'dpop', 'mtls', 'jwk-thumbprint']),
 

@@ -171,16 +171,16 @@ if (!ProofTypeSchema) {
 
 // Verify AgentProofSchema accepts the inlined transport-binding method enum.
 const proof = AgentProofSchema.parse({
-  type: 'did:key',
   method: 'dpop',
-  value: 'eyJ...',
+  key_id: 'test-key-1',
+  dpop_proof: 'eyJ0eXAiOiJkcG9wK2p3dCJ9..',
 });
 if (proof.method !== 'dpop') {
   console.error('FAIL: AgentProofSchema did not preserve method value:', proof);
   process.exit(1);
 }
 try {
-  AgentProofSchema.parse({ type: 'did:key', method: 'not-a-method', value: 'x' });
+  AgentProofSchema.parse({ method: 'not-a-method', key_id: 'test-key-1' });
   console.error('FAIL: AgentProofSchema accepted unknown method value');
   process.exit(1);
 } catch {
