@@ -138,7 +138,7 @@ jobs:
           echo "Testing @peac/crypto sign/verify round-trip with Node.js..."
 
           node --input-type=module -e "
-            const m = await import('./packages/crypto/dist/index.js');
+            const m = await import('./packages/crypto/dist/index.mjs');
             const { sign, verify, generateKeypair } = m;
             console.log('Testing with Node.js...');
             const { privateKey, publicKey } = await generateKeypair();
