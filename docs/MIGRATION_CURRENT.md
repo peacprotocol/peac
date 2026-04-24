@@ -4,7 +4,7 @@ This guide covers migration paths for current PEAC Protocol surfaces.
 
 ## Package-surface cleanup (v0.13.0)
 
-v0.13.0 finishes the scheduled package-surface cleanup deferred from earlier releases. Rule 30 applies throughout: deprecate-then-remove; historical npm versions are never unpublished.
+v0.13.0 finishes the scheduled package-surface cleanup. Deprecate-then-remove discipline applies throughout: historical npm versions are never unpublished.
 
 ### `@peac/pref` — archived
 
@@ -22,11 +22,11 @@ import { resolveSignals, type SignalResolver } from '@peac/mappings-content-sign
 
 No runtime behavior change: `@peac/pref` v0.12.14 was already a facade over `@peac/mappings-content-signals`.
 
-### `@peac/disc` — Posture A published deprecated compatibility package
+### `@peac/disc` — published deprecated compatibility package
 
 **State at v0.13.0:** deprecated (but **published as a compatibility package**; not a thin alias). `@peac/disc@0.13.0` ships with its existing API surface intact: `parse`, `emit`, `validate`, `discover`, `WELL_KNOWN_PATH`, `MAX_BYTES`, `DEFAULT_TIMEOUT_MS`, and related types. The barrel emits a one-shot `PEAC_DISC_DEPRECATED` `DeprecationWarning` on import. Publishing continues through v0.13.0 because `@peac/cli` and the reference verifier (`apps/api`) depend on `@peac/disc` via `workspace:*`; removing the package while published consumers still declare the dependency would break publish closure (a `@peac/cli@0.13.0` tarball with an unsatisfiable `@peac/disc@0.13.0` dependency is release-breaking). Installability beats surface-count optics.
 
-**Removal:** v0.13.1, contingent on migration pre-conditions in [`docs/PACKAGE_STATUS_V0.13.0_PARITY.md`](./PACKAGE_STATUS_V0.13.0_PARITY.md). The parity audit identifies which exports have direct `@peac/policy-kit` equivalents and which (notably `discover()`) do not yet.
+**Removal target:** a later release, contingent on migration pre-conditions in [`docs/PACKAGE_STATUS_V0.13.0_PARITY.md`](./PACKAGE_STATUS_V0.13.0_PARITY.md). The parity audit identifies which exports have direct `@peac/policy-kit` equivalents and which (notably `discover()`) do not yet.
 
 **Migration guidance (by export):**
 
@@ -45,15 +45,15 @@ No runtime behavior change: `@peac/pref` v0.12.14 was already a facade over `@pe
   } from '@peac/policy-kit';
   ```
 
-- **Remote discovery (`discover()`) — has NO direct equivalent in `@peac/policy-kit` yet.** `@peac/policy-kit` is a pure parser package that operates on already-fetched bytes; it has no remote-fetch surface. `@peac/disc.discover()` performs SSRF-aware `fetch` injection, timeout management (`DEFAULT_TIMEOUT_MS = 5000`), a 256 KiB byte cap (`MAX_BYTES = 262144`), redirect policy, and well-known path resolution. Consumers that rely on this behavior should **stay on `@peac/disc@0.13.0`** through the v0.13.0 release window. The v0.13.1 PR A plan ports `discover()` (or a callable-fetch variant) to a canonical public surface — see `docs/PACKAGE_STATUS_V0.13.0_PARITY.md` for the three design options under consideration.
+- **Remote discovery (`discover()`) — has NO direct equivalent in `@peac/policy-kit` yet.** `@peac/policy-kit` is a pure parser package that operates on already-fetched bytes; it has no remote-fetch surface. `@peac/disc.discover()` performs SSRF-aware `fetch` injection, timeout management (`DEFAULT_TIMEOUT_MS = 5000`), a 256 KiB byte cap (`MAX_BYTES = 262144`), redirect policy, and well-known path resolution. Consumers that rely on this behavior should **stay on `@peac/disc@0.13.0`** through the v0.13.0 release window. A later release ports `discover()` (or a callable-fetch variant) to a canonical public surface; see [`docs/PACKAGE_STATUS_V0.13.0_PARITY.md`](./PACKAGE_STATUS_V0.13.0_PARITY.md) for the design options under consideration.
 
-- **Constants (`WELL_KNOWN_PATH`, `MAX_BYTES`, `DEFAULT_TIMEOUT_MS`):** port to `@peac/policy-kit` scheduled at v0.13.1 alongside the `discover()` migration.
+- **Constants (`WELL_KNOWN_PATH`, `MAX_BYTES`, `DEFAULT_TIMEOUT_MS`):** port to `@peac/policy-kit` scheduled alongside the `discover()` migration.
 
-Summary: migrate parse / validate / emit to `@peac/policy-kit` now if your code only touches policy documents. Keep `@peac/disc@0.13.0` installed if your code needs `discover()` or the associated constants; migrate at v0.13.1 once the remote-fetch surface ports.
+Summary: migrate parse / validate / emit to `@peac/policy-kit` now if your code only touches policy documents. Keep `@peac/disc@0.13.0` installed if your code needs `discover()` or the associated constants; migrate once the remote-fetch surface ports.
 
-### `@peac/core` — archive scheduled in v0.13.0 PR B
+### `@peac/core` — archive coupled with legacy `/verify` handler rewire
 
-**State at v0.13.0 (PR A):** unchanged (still marked deprecated). **State at v0.13.0 (PR B):** archived. `@peac/core` is the v0.9.x `peac.receipt/0.9` verify-only implementation. Archival is coupled with the legacy `POST /verify` HTTP handler rewire (the only remaining active consumer is `apps/api/src/verifier.ts`). When PR B merges, `packages/core/` moves to `archive/0.9.0-0.9.14/@peac-core/`, `apps/api/src/verifier.ts` is deleted, and the legacy `/verify` route delegates internally to the canonical `/v1/verify` handler while preserving its advertised `Sunset: Sat, 01 Nov 2026 00:00:00 GMT` (RFC 8594).
+**State:** `@peac/core` is the v0.9.x `peac.receipt/0.9` verify-only implementation and remains marked deprecated. Archival is coupled with the legacy `POST /verify` HTTP handler rewire (the only remaining active consumer is `apps/api/src/verifier.ts`). When that rewire lands, `packages/core/` moves to `archive/0.9.0-0.9.14/@peac-core/`, `apps/api/src/verifier.ts` is deleted, and the legacy `/verify` route delegates internally to the canonical `/v1/verify` handler while preserving its advertised `Sunset: Sat, 01 Nov 2026 00:00:00 GMT` (RFC 8594).
 
 **Migration:** use `@peac/protocol` (`issue`, `verifyLocal`, `verify`), `@peac/schema` (types), `@peac/crypto` (sign / verify primitives), and `@peac/kernel` (wire constants). Historical `@peac/core@<=0.9.14` versions on npm remain installable for verify-only use of historical `peac.receipt/0.9` records.
 
@@ -80,7 +80,7 @@ Kept in workspace as shipping packages:
 
 ### `npm deprecate` dispatch
 
-Staged at [`scripts/release/npm-deprecate-v0.13.0.sh`](../scripts/release/npm-deprecate-v0.13.0.sh). Executed manually post-promote. Covers `@peac/pref@<=0.12.14`, `@peac/sdk@<=0.10.2`, `@peac/disc@<=0.12.14`, and `@peac/disc@0.13.0` (explicitly marked as one-release bridge). `@peac/core` deprecate line is present but commented until PR B merges.
+Staged at [`scripts/release/npm-deprecate-v0.13.0.sh`](../scripts/release/npm-deprecate-v0.13.0.sh). Executed manually after promote. Covers `@peac/pref@<=0.12.14`, `@peac/sdk@<=0.10.2`, `@peac/disc@<=0.12.14`, and `@peac/disc@0.13.0` (explicitly marked as a one-release compatibility bridge). `@peac/core` deprecate line is present but commented until the legacy `/verify` handler rewire lands.
 
 ---
 

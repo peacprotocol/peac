@@ -1,21 +1,16 @@
 /**
- * v0.13.0 records-first doctrine audit (PR A).
+ * Records-first doctrine audit.
  *
- * Per CLAUDE.md (2026-04-18 wording rules) and plan §2 invariants, active
- * public-facing docs MUST lead with tier-(a) records-first framing (e.g.
- * "open standard for verifiable interaction records" / "portable signed
- * records"). Tier-(c) phrases like "evidence plane" / "evidence floor"
- * are quarantined to explicitly-deep sections (anti-absorption doctrine,
- * threat-model internals, compliance mapping prose) and MUST NOT appear
- * in the top 80 lines of any active front-door doc.
+ * Active public-facing docs MUST lead with records-first framing ("open
+ * standard for verifiable interaction records" / "portable signed
+ * records"). Deep-architecture phrases like "evidence plane" / "evidence
+ * floor" are quarantined to explicitly-deep sections (anti-absorption
+ * doctrine, threat-model internals, compliance mapping prose) and MUST
+ * NOT appear in the top 80 lines of any active front-door doc.
  *
  * This test scans the top 80 lines of each active front-door doc and
- * fails if any tier-(c) phrase appears without a legitimizing marker.
- *
- * Note: the canonical check for derivatives lives in
- * reference/scripts/verify-final-hygiene.mjs. This test covers the
- * public-repo subset so that the same invariant is enforced both from
- * the local planning side and from the public CI side.
+ * fails if any deep-architecture phrase appears without a legitimizing
+ * marker.
  */
 
 import { describe, it, expect } from 'vitest';
@@ -39,13 +34,13 @@ const FRONT_DOOR_DOCS = [
   'docs/README_LONG.md',
 ];
 
-// Tier-(c) phrases that are forbidden as leading framing.
+// Deep-architecture phrases that are forbidden as leading framing.
 const FORBIDDEN_PHRASES = ['evidence plane', 'evidence floor', 'portable signed evidence floor'];
 
-// Context markers that legitimize a tier-(c) phrase (anti-absorption
-// doctrine, threat-model internals, explicit historical marker).
-// Matches are case-insensitive substring checks; include both spaced and
-// hyphenated forms where applicable.
+// Context markers that legitimize a deep-architecture phrase
+// (anti-absorption doctrine, threat-model internals, explicit historical
+// marker). Matches are case-insensitive substring checks; include both
+// spaced and hyphenated forms where applicable.
 const LEGITIMIZING_MARKERS = [
   'anti-absorption',
   'deep architecture',
@@ -62,7 +57,7 @@ const LEGITIMIZING_MARKERS = [
 
 const TOP_N_LINES = 80;
 
-describe('v0.13.0 records-first doctrine (top 80 lines)', () => {
+describe('records-first doctrine (top 80 lines)', () => {
   for (const rel of FRONT_DOOR_DOCS) {
     const abs = join(ROOT, rel);
 
@@ -70,7 +65,7 @@ describe('v0.13.0 records-first doctrine (top 80 lines)', () => {
       expect(existsSync(abs), `${rel} missing`).toBe(true);
     });
 
-    it(`${rel} top ${TOP_N_LINES} lines contain no unlegitimized tier-(c) phrase`, () => {
+    it(`${rel} top ${TOP_N_LINES} lines contain no unlegitimized deep-architecture phrase`, () => {
       if (!existsSync(abs)) return;
       const content = readFileSync(abs, 'utf8');
       const top = content.split('\n').slice(0, TOP_N_LINES).join('\n');

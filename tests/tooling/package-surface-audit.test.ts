@@ -1,12 +1,10 @@
 /**
- * v0.13.0 package-surface audit (PR A).
+ * Package-surface audit.
  *
  * Enforces:
  *
  *   1. scripts/publish-manifest.json packages[] count is less than or equal to
- *      the v0.12.14 baseline of 37 (no regression; count reduction is staged
- *      across v0.13.0 PR A + PR B + v0.13.1 PR A per plan §4.3 / Revision 4
- *      §5.4 gate 10).
+ *      the v0.12.14 baseline of 37 (no regression).
  *
  *   2. Every package listed in packages[] has a corresponding
  *      packages/<dir>/package.json on disk (no ghost entries) and is
@@ -17,11 +15,9 @@
  *      dependency declared in its package.json (dependencies +
  *      peerDependencies, any resolution form) MUST also be present in
  *      packages[]. If a published package depends on @peac/disc, then
- *      @peac/disc MUST be in packages[]. This is the invariant that was
- *      violated in an earlier PR A draft (removing @peac/disc while
- *      @peac/cli and apps/api still declared it), which would have shipped
- *      a @peac/cli@0.13.0 tarball with an unsatisfiable @peac/disc@0.13.0
- *      dependency at install time.
+ *      @peac/disc MUST be in packages[]. Violating this would ship a
+ *      tarball whose @peac/* dependency cannot resolve on npm at the
+ *      published version.
  *
  *   4. No archived path is resolvable as a workspace package. Archive is
  *      historical-only; moved source MUST NOT be discoverable via
@@ -107,8 +103,8 @@ function packageJsonFor(npmName: string): any | null {
   return readJson(abs);
 }
 
-describe('v0.13.0 publish-manifest surface audit', () => {
-  // Count-gate doctrine (v0.13.0 corrected 2026-04-24):
+describe('publish-manifest surface audit', () => {
+  // Count-gate doctrine:
   //
   //   BLOCKING: packages.length <= 37 (the v0.12.14 active publish surface).
   //             No net increase; no regression that grows the published set.
@@ -118,24 +114,20 @@ describe('v0.13.0 publish-manifest surface audit', () => {
   //             retirement is identified (retirement requires publish-closure
   //             proof; see the publish-closure suite below).
   //
-  //   WHY NOT strict <37 in PR A: @peac/disc is retained at 0.13.0 as a
-  //             one-release Posture A deprecated alias because @peac/cli and
-  //             apps/api still depend on it via workspace:*. Removing
-  //             @peac/disc from packages[] while published consumers declare
-  //             it would break publish closure. @peac/core / @peac/pref /
-  //             @peac/sdk were already absent from packages[] at v0.12.14,
-  //             so archiving them has zero count-reduction impact. The real
-  //             count reduction to 36 happens at v0.13.1 tag after the
-  //             consumer migration pre-conditions in
-  //             docs/PACKAGE_STATUS_V0.13.0_PARITY.md are satisfied.
+  //   @peac/disc is retained in the manifest as a deprecated compatibility
+  //   alias because @peac/cli and apps/api still depend on it via
+  //   workspace:*. Removing @peac/disc from packages[] while published
+  //   consumers declare it would break publish closure. @peac/core /
+  //   @peac/pref / @peac/sdk were already absent from packages[] at
+  //   v0.12.14, so archiving them has zero count-reduction impact.
   it('packages[] count does not exceed the v0.12.14 baseline of 37 (blocking)', () => {
     expect(manifest.packages.length).toBeLessThanOrEqual(V0_12_14_BASELINE_COUNT);
   });
 
   it('manifest version is either current release (0.12.14) or target (0.13.0)', () => {
-    // Version stamping belongs to PR D release-prep. Accept either the
-    // current released value or the next-release target to keep the gate
-    // robust across the release lifecycle.
+    // Version stamping belongs to release prep. Accept either the current
+    // released value or the next-release target to keep the gate robust
+    // across the release lifecycle.
     expect(['0.12.14', '0.13.0']).toContain(manifest.version);
   });
 
@@ -193,7 +185,7 @@ describe('v0.13.0 publish-manifest surface audit', () => {
   });
 });
 
-describe('v0.13.0 publish-closure invariant', () => {
+describe('publish-closure invariant', () => {
   it('every @peac/* dependency declared by a published package is also in packages[]', () => {
     const publishSet = new Set(manifest.packages);
     const failures: string[] = [];
@@ -242,10 +234,10 @@ describe('v0.13.0 publish-closure invariant', () => {
     }
   });
 
-  it('specifically: @peac/disc is retained in packages[] as one-release deprecated alias (v0.13.0)', () => {
-    // Full retirement of @peac/disc defers to v0.13.1 PR A (see plan §4.2
-    // and reference/SCOPE_LEDGER_LOCAL.md). Retiring earlier would break
-    // publish closure with @peac/cli and apps/api.
+  it('specifically: @peac/disc is retained in packages[] as a deprecated compatibility alias', () => {
+    // Retiring @peac/disc while @peac/cli and apps/api still depend on it
+    // would break publish closure. Retirement is deferred until consumer
+    // migration pre-conditions are satisfied.
     expect(manifest.packages).toContain('@peac/disc');
   });
 });

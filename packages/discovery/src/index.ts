@@ -1,22 +1,14 @@
 /**
  * @peac/disc - DEPRECATED. Thin peac.txt policy-document loader/validator and
- * remote fetcher. Retained as a **published deprecated compatibility package**
- * at v0.13.0 (Posture A one-release bridge) so that existing workspace
- * consumers (apps/api, packages/cli) and external consumers who depend on
- * it via workspace:* / semver continue to work. Publish closure with
- * @peac/cli requires @peac/disc to stay in the publish manifest at 0.13.0.
+ * remote fetcher. Retained as a published deprecated compatibility package
+ * so that existing workspace and external consumers continue to resolve.
  *
  * @deprecated Prefer {@link "@peac/policy-kit"} for policy-document parsing
  * and validation (`parsePolicyDocument`, `loadPolicyDocument`,
  * `validatePolicy`, `serializePolicyYaml`). Remote discovery behavior in
- * `discover()` (which performs SSRF-aware fetch with a byte cap, timeout
- * policy, and redirect policy) has **no direct equivalent in
- * @peac/policy-kit**; it remains compatibility-only in `@peac/disc` until
- * an equivalent replacement is designed and tested. See
- * `docs/PACKAGE_STATUS_V0.13.0_PARITY.md` for the per-export parity audit
- * and the v0.13.1 retirement pre-conditions. Removal target: v0.13.1 after
- * consumer migration; until then, `@peac/disc@0.13.0` is the correct
- * published surface for callers that need `discover()`.
+ * `discover()` (SSRF-aware fetch with a byte cap, timeout policy, and
+ * redirect policy) has no direct equivalent in `@peac/policy-kit` and
+ * remains compatibility-only here until an equivalent replacement ships.
  *
  * peac.txt is a POLICY DOCUMENT surface per docs/specs/PEAC-TXT.md. Full
  * parsing is delegated to `@peac/policy-kit.parsePolicyDocument`; this
@@ -35,9 +27,8 @@
  * with code `PEAC_LEGACY_PEAC_TXT_KEY_FIELD` once per process.
  */
 
-// One-shot structured deprecation warning on module load. Follows the
-// v0.12.14 @peac/pref pattern: never raw console.warn in published code;
-// use process.emitWarning with a stable code + DeprecationWarning type so
+// One-shot structured deprecation warning on module load. Use
+// process.emitWarning with a stable code plus DeprecationWarning type so
 // operators can filter on NODE_OPTIONS=--no-deprecation if needed. Single
 // shot per process to avoid log spam in hot paths.
 let __peacDiscDeprecationEmitted = false;
@@ -65,8 +56,7 @@ export type { ParseResult, ValidationOptions, PolicyDocument } from './types.js'
 /**
  * @deprecated Retained for one minor to keep existing import paths
  * compiling. peac.txt policy documents now resolve to a `PolicyDocument`
- * (re-exported from `@peac/policy-kit`). Removal target: next cleanup
- * release.
+ * (re-exported from `@peac/policy-kit`).
  */
 export type { PeacDiscovery, PublicKeyInfo } from './types.js';
 

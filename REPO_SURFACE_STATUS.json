@@ -53,7 +53,7 @@
       "layer": 3,
       "published": true,
       "removal": "v0.13.1",
-      "note": "Posture A one-release deprecated alias. Re-exports tolerant peac.txt parse / emit / validate / discover + constants; barrel emits one-shot PEAC_DISC_DEPRECATED DeprecationWarning. Canonical loader is @peac/policy-kit loadPolicyDocument. Retained at v0.13.0 to preserve publish closure with @peac/cli and apps/api; full retirement at v0.13.1 PR A after workspace consumers migrate."
+      "note": "Published deprecated compatibility alias. Re-exports tolerant peac.txt parse / emit / validate / discover + constants; barrel emits one-shot PEAC_DISC_DEPRECATED DeprecationWarning. Canonical loader is @peac/policy-kit loadPolicyDocument. Retained at v0.13.0 to preserve publish closure with @peac/cli and apps/api; full retirement deferred until workspace consumers migrate."
     },
     "packages/audit": {
       "npm": "@peac/audit",
@@ -431,8 +431,8 @@
       "wire": "0.9",
       "layer": "legacy",
       "published": true,
-      "removal": "v0.13.0 (PR B)",
-      "note": "DEPRECATED. Archival of packages/core/ is scoped to v0.13.0 PR B (coupled with legacy /verify handler rewire that eliminates the last active consumer in apps/api/src/verifier.ts). Historical 0.9-series receipt verify-only path; use @peac/protocol + @peac/schema + @peac/crypto + @peac/kernel for current wire."
+      "removal": "v0.13.0",
+      "note": "DEPRECATED. Archival of packages/core/ is coupled with the legacy /verify handler rewire that eliminates the last active consumer in apps/api/src/verifier.ts. Historical 0.9-series receipt verify-only path; use @peac/protocol + @peac/schema + @peac/crypto + @peac/kernel for current wire."
     },
     "packages/sdk-js": {
       "npm": "@peac/sdk",
@@ -533,7 +533,7 @@
       "wire": null,
       "layer": null,
       "published": false,
-      "note": "ARCHIVED in v0.13.0 (moved from packages/aipref/). Migration: @peac/mappings-content-signals (RFC 9651 Structured Fields, full RFC 8785 JCS + SHA-256 digest). Historical npm versions <=0.12.14 remain installable (Rule 30: deprecate-then-remove)."
+      "note": "ARCHIVED in v0.13.0 (moved from packages/aipref/). Migration: @peac/mappings-content-signals (RFC 9651 Structured Fields, full RFC 8785 JCS + SHA-256 digest). Historical npm versions <=0.12.14 remain installable (deprecate-then-remove discipline)."
     },
     "archive/pillars/access": {
       "npm": null,

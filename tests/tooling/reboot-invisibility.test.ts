@@ -1,9 +1,8 @@
 /**
- * v0.13.0 reboot-package invisibility audit (PR A).
+ * Reboot-package invisibility audit.
  *
- * Per plan §2 invariants and Revision 4 §19, the reboot packages
- * @peac/record-core, @peac/resolver-http, @peac/compat, @peac/registries
- * are workspace-private throughout v0.13.1 and v0.13.2. They MUST NOT
+ * The internal reboot package names @peac/record-core, @peac/resolver-http,
+ * @peac/compat, and @peac/registries are workspace-private. They MUST NOT
  * appear on any tracked public surface until they are explicitly promoted
  * via a dedicated roadmap decision with its own gate review.
  *
@@ -27,8 +26,8 @@ const REBOOT_NAMES = [
 ];
 
 // Surfaces that are externally visible on the public repo. If a reboot
-// package name appears in any of these paths in a tracked file, v0.13.x
-// reboot invisibility is broken.
+// package name appears in any of these paths in a tracked file, the
+// invisibility invariant is broken.
 const FORBIDDEN_PATHS = [
   'docs',
   'examples',
@@ -101,7 +100,7 @@ function runGrep(pattern: string, paths: string[]): string[] {
   }
 }
 
-describe('v0.13.x reboot-package invisibility', () => {
+describe('reboot-package invisibility', () => {
   for (const name of REBOOT_NAMES) {
     it(`${name} does not appear on any tracked public surface`, () => {
       const hits = runGrep(name, FORBIDDEN_PATHS);
