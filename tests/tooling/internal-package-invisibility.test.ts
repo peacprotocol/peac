@@ -1,13 +1,13 @@
 /**
- * Reboot-package invisibility audit.
+ * Internal-package invisibility audit.
  *
- * The internal reboot package names @peac/record-core, @peac/resolver-http,
- * @peac/compat, and @peac/registries are workspace-private. They MUST NOT
- * appear on any tracked public surface until they are explicitly promoted
- * via a dedicated roadmap decision with its own gate review.
+ * The internal package names @peac/record-core, @peac/resolver-http,
+ * @peac/compat, and @peac/registries are workspace-private. They MUST
+ * NOT appear on any tracked public surface until they are explicitly
+ * promoted via a dedicated roadmap decision with its own gate review.
  *
- * This test greps tracked files under public surfaces for those four names
- * and fails if any appears outside allowed contexts.
+ * This test greps tracked files under public surfaces for those four
+ * names and fails if any appears outside allowed contexts.
  */
 
 import { describe, it, expect } from 'vitest';
@@ -18,16 +18,16 @@ import { fileURLToPath } from 'node:url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..', '..');
 
-const REBOOT_NAMES = [
+const INTERNAL_PACKAGE_NAMES = [
   '@peac/record-core',
   '@peac/resolver-http',
   '@peac/compat',
   '@peac/registries',
 ];
 
-// Surfaces that are externally visible on the public repo. If a reboot
-// package name appears in any of these paths in a tracked file, the
-// invisibility invariant is broken.
+// Surfaces that are externally visible on the public repo. If an
+// internal package name appears in any of these paths in a tracked
+// file, the invisibility invariant is broken.
 const FORBIDDEN_PATHS = [
   'docs',
   'examples',
@@ -42,7 +42,7 @@ const FORBIDDEN_PATHS = [
 // infrastructure that enforces the rule, or this test itself).
 const ALLOWED_SUBSTRINGS = [
   'reference/', // gitignored local planning (excluded from grep anyway)
-  'tests/tooling/reboot-invisibility.test.ts', // this test
+  'tests/tooling/internal-package-invisibility.test.ts', // this test
   'CLAUDE.md', // local operating manual
 ];
 
@@ -100,8 +100,8 @@ function runGrep(pattern: string, paths: string[]): string[] {
   }
 }
 
-describe('reboot-package invisibility', () => {
-  for (const name of REBOOT_NAMES) {
+describe('internal-package invisibility', () => {
+  for (const name of INTERNAL_PACKAGE_NAMES) {
     it(`${name} does not appear on any tracked public surface`, () => {
       const hits = runGrep(name, FORBIDDEN_PATHS);
       const leaked = hits.filter((line) => {
@@ -113,11 +113,11 @@ describe('reboot-package invisibility', () => {
     });
   }
 
-  it('scripts/publish-manifest.json does not list any reboot package', () => {
+  it('scripts/publish-manifest.json does not list any internal-only package', () => {
     const manifest = JSON.parse(
       execSync('cat scripts/publish-manifest.json', { cwd: ROOT, encoding: 'utf8' })
     ) as { packages: string[] };
-    const leaked = manifest.packages.filter((n) => REBOOT_NAMES.includes(n));
+    const leaked = manifest.packages.filter((n) => INTERNAL_PACKAGE_NAMES.includes(n));
     expect(leaked).toEqual([]);
   });
 });

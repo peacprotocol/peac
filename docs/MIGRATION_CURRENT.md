@@ -26,7 +26,7 @@ No runtime behavior change: `@peac/pref` v0.12.14 was already a facade over `@pe
 
 **State at v0.13.0:** deprecated (but **published as a compatibility package**; not a thin alias). `@peac/disc@0.13.0` ships with its existing API surface intact: `parse`, `emit`, `validate`, `discover`, `WELL_KNOWN_PATH`, `MAX_BYTES`, `DEFAULT_TIMEOUT_MS`, and related types. The barrel emits a one-shot `PEAC_DISC_DEPRECATED` `DeprecationWarning` on import. Publishing continues through v0.13.0 because `@peac/cli` and the reference verifier (`apps/api`) depend on `@peac/disc` via `workspace:*`; removing the package while published consumers still declare the dependency would break publish closure (a `@peac/cli@0.13.0` tarball with an unsatisfiable `@peac/disc@0.13.0` dependency is release-breaking). Installability beats surface-count optics.
 
-**Removal target:** a later release, contingent on migration pre-conditions in [`docs/PACKAGE_STATUS_V0.13.0_PARITY.md`](./PACKAGE_STATUS_V0.13.0_PARITY.md). The parity audit identifies which exports have direct `@peac/policy-kit` equivalents and which (notably `discover()`) do not yet.
+**Removal target:** a later release. See [`docs/PACKAGE_STATUS_V0.13.0_PARITY.md`](./PACKAGE_STATUS_V0.13.0_PARITY.md) for the per-export compatibility coverage: which exports have direct `@peac/policy-kit` equivalents today and which (notably `discover()`) do not.
 
 **Migration guidance (by export):**
 

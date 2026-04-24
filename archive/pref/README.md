@@ -3,8 +3,8 @@
 > **ARCHIVED (v0.13.0).** Source moved from `packages/aipref/` to
 > `archive/pref/` as part of the v0.13.0 package-surface reduction pass.
 > Historical npm versions `<=0.12.14` remain installable and emit a
-> one-shot `PEAC_DEPRECATED_PREF` `DeprecationWarning` on import (Rule 30:
-> deprecate-then-remove; historical tarballs are never unpublished).
+> one-shot `PEAC_DEPRECATED_PREF` `DeprecationWarning` on import
+> (deprecate-then-remove discipline; historical tarballs are never unpublished).
 >
 > `@peac/pref` is **not published at v0.13.0 or later**. No throwing-stub
 > replacement is published. This directory is preserved for historical

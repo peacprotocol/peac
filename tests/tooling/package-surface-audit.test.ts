@@ -236,8 +236,8 @@ describe('publish-closure invariant', () => {
 
   it('specifically: @peac/disc is retained in packages[] as a deprecated compatibility alias', () => {
     // Retiring @peac/disc while @peac/cli and apps/api still depend on it
-    // would break publish closure. Retirement is deferred until consumer
-    // migration pre-conditions are satisfied.
+    // would break publish closure. @peac/disc stays in packages[] so long
+    // as those consumers declare it.
     expect(manifest.packages).toContain('@peac/disc');
   });
 });

@@ -15,8 +15,8 @@
  *
  * Other mapping packages (for example `packages/mappings/ucp/`) that
  * legitimately fetch upstream profile documents are intentionally out of
- * scope. Broadening the rule to `packages/mappings/**` is tracked as a
- * follow-up in the roadmap when each mapping has been classified.
+ * scope. Broadening the rule to `packages/mappings/**` depends on each
+ * mapping being individually classified first.
  *
  * This script scans every tracked `.ts` / `.mjs` / `.js` file under the
  * watched globs for:

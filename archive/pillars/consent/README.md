@@ -3,9 +3,8 @@
 > **ARCHIVED (v0.13.0).** `@peac/consent` was an empty Layer-6 pillar
 > stub in v0.12.14 (workspace-internal, never published to npm `latest`).
 > As part of the v0.13.0 package-surface reduction pass (see
-> `docs/PACKAGE_STATUS.md` and plan §4.2 success criteria:
-> _"no empty Layer-6 pillar stub remains on the public surface"_), the
-> workspace entry was removed and the source was moved from
+> `docs/PACKAGE_STATUS.md`), the workspace entry was removed and the
+> source was moved from
 > `packages/consent/` to `archive/pillars/consent/`.
 >
 > **This package is NOT published** at v0.13.0 or later. It was never
@@ -13,10 +12,9 @@
 > migration is required for external consumers, because none existed.
 >
 > The consent pillar concept remains part of the PEAC 10-pillar taxonomy.
-> When a concrete implementation is designed for a future release (v1.0+
-> watchlist), a new `packages/consent/` directory will be created with
-> real content and an explicit rationale in `docs/PACKAGE_STATUS.md`.
-> Until then, the pillar is a taxonomy label, not a shipped package.
+> It is a taxonomy label, not a shipped package. Any concrete
+> implementation would be proposed in its own roadmap review and
+> committed under `packages/consent/` with real content.
 >
 > Below this banner is the historical README preserved verbatim for
 > archaeology. It described the (unshipped) intent; it is no longer
