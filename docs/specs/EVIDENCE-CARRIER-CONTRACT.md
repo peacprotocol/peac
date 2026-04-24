@@ -290,7 +290,7 @@ Carriers are placed in the `metadata` map of A2A messages using the PEAC extensi
 }
 ```
 
-The extension URI (`https://www.peacprotocol.org/ext/traceability/v1`) is registered in the A2A Agent Card's `capabilities.extensions[]` array per A2A spec v0.3.0.
+The extension URI (`https://www.peacprotocol.org/ext/traceability/v1`) is registered in the A2A Agent Card's `capabilities.extensions[]` array per the A2A v1.0.0 extension registration convention (originally defined in v0.3.0 and preserved on the v1.0.0 wire).
 
 ### 7.3 ACP (Agentic Commerce Protocol)
 

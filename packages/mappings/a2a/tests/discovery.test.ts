@@ -40,7 +40,13 @@ function createMockFetch(
 
 const VALID_AGENT_CARD: A2AAgentCard = {
   name: 'Test Agent',
-  url: 'https://agent.example.com',
+  supportedInterfaces: [
+    {
+      url: 'https://agent.example.com',
+      protocolBinding: 'http+json',
+      protocolVersion: '1.0.0',
+    },
+  ],
   capabilities: {
     extensions: [
       {
@@ -54,7 +60,13 @@ const VALID_AGENT_CARD: A2AAgentCard = {
 
 const AGENT_CARD_NO_PEAC: A2AAgentCard = {
   name: 'Other Agent',
-  url: 'https://other.example.com',
+  supportedInterfaces: [
+    {
+      url: 'https://other.example.com',
+      protocolBinding: 'http+json',
+      protocolVersion: '1.0.0',
+    },
+  ],
   capabilities: {
     extensions: [
       {
@@ -87,7 +99,11 @@ describe('discoverAgentCard', () => {
     expect(card!.name).toBe('Test Agent');
   });
 
-  it('falls back to /.well-known/agent.json', async () => {
+  it('does NOT fall back to the legacy v0.3.0 /.well-known/agent.json path', async () => {
+    // v0.3.0 discovery fallback was removed in v0.13.0 (DD-186). A deployer
+    // serving the card only at /.well-known/agent.json (the v0.3.0 path) is
+    // no longer discoverable; the canonical v1.0.0 path
+    // /.well-known/agent-card.json is the only path consulted.
     const mockFetch = createMockFetch(
       new Map([
         [
@@ -100,8 +116,7 @@ describe('discoverAgentCard', () => {
     const card = await discoverAgentCard('https://agent.example.com', {
       fetch: mockFetch,
     });
-    expect(card).not.toBeNull();
-    expect(card!.name).toBe('Test Agent');
+    expect(card).toBeNull();
   });
 
   it('returns null when no agent card found', async () => {
@@ -289,7 +304,13 @@ describe('getPeacExtension', () => {
 
 const AGENT_CARD_WITH_PARAMS: A2AAgentCard = {
   name: 'Full Agent',
-  url: 'https://agent.example.com',
+  supportedInterfaces: [
+    {
+      url: 'https://agent.example.com',
+      protocolBinding: 'http+json',
+      protocolVersion: '1.0.0',
+    },
+  ],
   capabilities: {
     extensions: [
       {

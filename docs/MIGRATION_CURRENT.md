@@ -2,6 +2,37 @@
 
 This guide covers migration paths for current PEAC Protocol surfaces.
 
+## A2A v0.3.0 compatibility removal (v0.13.0)
+
+A2A v0.3.0 compatibility was deprecated in v0.12.3 (DD-186) after the A2A v1.0.0 upstream stabilization and **removed in v0.13.0 PR B**. `@peac/mappings-a2a` now validates A2A v1.0.0 shapes only.
+
+Surfaces removed:
+
+- **Agent Card top-level `url`.** v0.3.0 cards carried the endpoint URL as `AgentCard.url`. v1.0.0 replaced this with `supportedInterfaces[]`. Cards without a valid `supportedInterfaces[0].url` are no longer accepted; `normalizeAgentCard(card)` returns `null` for them and `discoverAgentCard(...)` skips them.
+- **Kebab-case TaskState strings.** v0.3.0 used `"working"`, `"completed"`, `"input-required"`, etc. v1.0.0 uses SCREAMING_SNAKE_CASE with a type prefix (`"TASK_STATE_WORKING"`, `"TASK_STATE_COMPLETED"`, `"TASK_STATE_INPUT_REQUIRED"`). The `normalizeTaskState` function and the `TASK_STATE_V03_TO_V1` map are removed. Callers MUST supply v1.0.0 TaskState values directly.
+- **`/.well-known/agent.json` legacy discovery path.** `discoverAgentCard(baseUrl)` now fetches only the v1.0.0 canonical path `/.well-known/agent-card.json`. Deployers still serving the legacy path should publish the canonical path or upgrade to an A2A v1.0.0 implementation.
+- **Deprecation-warning plumbing.** `_resetDeprecationWarning` is gone; no v0.3.0 `DeprecationWarning` is emitted because v0.3.0 inputs are now rejected outright rather than normalized with a warning.
+
+**Migration:**
+
+```ts
+// Before (v0.3.0 shape; no longer accepted at v0.13.0)
+const card = { name: 'agent', url: 'https://agent.example' };
+
+// After (v1.0.0 shape)
+const card = {
+  name: 'agent',
+  supportedInterfaces: [
+    { url: 'https://agent.example', protocolBinding: 'http+json', protocolVersion: '1.0.0' },
+  ],
+};
+
+// TaskState values must already be v1.0.0
+const state = 'TASK_STATE_WORKING'; // previously 'working'
+```
+
+`A2A_MAX_CARRIER_SIZE` (`65_536` bytes) is unchanged. `PEAC_EXTENSION_URI`, the `capabilities.extensions[]` registration pattern, and the `metadata[extensionURI].carriers[]` placement convention are all unchanged. The v0.3.0 removal is scoped strictly to the dual-version acceptance surface; v1.0.0 behavior is byte-stable. See `docs/specs/A2A-RECEIPT-PROFILE.md` for the normative v1.0.0 profile.
+
 ## ProofMethodSchema removal (v0.13.0)
 
 `ProofMethodSchema`, `PROOF_METHODS`, and the `ProofMethod` type were deprecated in v0.12.2 (DD-185) and **removed in v0.13.0 PR B**. The deprecated standalone schema export retired because transport-binding methods are semantically distinct from trust-root proof models; the two concerns should not share a public surface.

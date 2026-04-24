@@ -3,7 +3,8 @@
  *
  * Agent-to-Agent Protocol (A2A) integration for PEAC.
  * Maps PEAC evidence carriers to A2A metadata (TaskStatus, Message, Artifact).
- * Supports both A2A v0.3.0 and v1.0.0 (DD-186 dual-version transition).
+ * A2A v1.0.0 only. The v0.3.0 compatibility path (DD-186) was deprecated
+ * in v0.12.3 and removed in v0.13.0; see `docs/MIGRATION_CURRENT.md`.
  */
 
 // Types
@@ -24,19 +25,12 @@ export {
   A2A_MAX_CARRIER_SIZE,
   A2A_V1_TASK_STATE,
   A2A_V1_MESSAGE_ROLE,
-  TASK_STATE_V03_TO_V1,
 } from './types';
 
-// Normalizers (DD-186: v0.3.0 + v1.0.0 dual-version)
+// Normalizers (A2A v1.0.0 only)
 export type { NormalizedAgentCard } from './normalizers';
 
-export {
-  isV1AgentCard,
-  normalizeAgentCard,
-  selectBestInterface,
-  normalizeTaskState,
-  _resetDeprecationWarning,
-} from './normalizers';
+export { isV1AgentCard, normalizeAgentCard, selectBestInterface } from './normalizers';
 
 // Attach
 export {

@@ -10,13 +10,13 @@ pnpm add @peac/mappings-a2a
 
 ## What It Does
 
-`@peac/mappings-a2a` bridges PEAC signed interaction receipts and the Agent-to-Agent Protocol (A2A). It normalizes A2A v0.3.0 and v1.0.0 structures into a consistent shape, attaches and extracts PEAC evidence carriers from A2A metadata, and discovers PEAC capabilities advertised by remote agents. All carrier operations enforce transport constraints (64 KB embed limit for A2A).
+`@peac/mappings-a2a` bridges PEAC signed interaction receipts and the Agent-to-Agent Protocol (A2A). It validates A2A v1.0.0 Agent Card structures, attaches and extracts PEAC evidence carriers from A2A metadata, and discovers PEAC capabilities advertised by remote agents. All carrier operations enforce transport constraints (64 KB embed limit for A2A).
+
+A2A v0.3.0 compatibility (dual-version Agent Cards, top-level `url`, kebab-case TaskState normalization, `/.well-known/agent.json` legacy discovery path) was deprecated in v0.12.3 and removed in v0.13.0 (DD-186). This package accepts A2A v1.0.0 shapes only; see [`docs/MIGRATION_CURRENT.md`](../../../docs/MIGRATION_CURRENT.md) for the migration guide.
 
 ## How Do I Use It?
 
-### Normalize an A2A Agent Card
-
-Accept either v0.3.0 or v1.0.0 Agent Cards and get a consistent interface:
+### Validate an A2A v1.0.0 Agent Card
 
 ```typescript
 import { normalizeAgentCard } from '@peac/mappings-a2a';
@@ -30,21 +30,10 @@ const card = {
 const normalized = normalizeAgentCard(card);
 
 if (normalized) {
-  console.log(normalized.version); // '1.0.0'
   console.log(normalized.url); // 'https://billing.example.com'
 }
-```
-
-### Normalize a task state across versions
-
-```typescript
-import { normalizeTaskState } from '@peac/mappings-a2a';
-
-// v0.3.0 value normalized to v1.0.0 canonical form
-console.log(normalizeTaskState('working')); // 'TASK_STATE_WORKING'
-
-// v1.0.0 values pass through unchanged
-console.log(normalizeTaskState('TASK_STATE_COMPLETED')); // 'TASK_STATE_COMPLETED'
+// Cards without a valid supportedInterfaces[0].url (including legacy
+// v0.3.0 cards that used top-level `url`) return null.
 ```
 
 ### Attach a receipt to A2A TaskStatus metadata
@@ -114,7 +103,7 @@ if (result) {
 
 If you are building an AI agent that communicates via A2A and needs signed interaction receipts:
 
-- Use `normalizeAgentCard()` and `normalizeTaskState()` to handle both A2A v0.3.0 and v1.0.0 inputs
+- Use `normalizeAgentCard()` to validate incoming A2A v1.0.0 Agent Cards (cards without a valid `supportedInterfaces[0].url` return `null`)
 - Use `attachReceiptToTaskStatus()` to embed evidence in outgoing A2A messages
 - Use `extractReceiptFromMetadata()` to retrieve evidence from incoming A2A messages
 - Use `A2ACarrierAdapter` for a transport-agnostic carrier interface
