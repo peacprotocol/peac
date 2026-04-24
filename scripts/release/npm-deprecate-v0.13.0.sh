@@ -54,10 +54,17 @@ $NPM deprecate '@peac/sdk@<=0.10.2' \
 #
 echo
 echo "-- @peac/disc (one-release Posture A bridge; deprecate historical AND 0.13.0) --"
+# Deprecation messages intentionally do NOT tell every caller to switch to
+# loadPolicyDocument. @peac/policy-kit is the canonical replacement for
+# policy-document parsing / validation, but @peac/disc.discover() — remote
+# SSRF-aware fetch with byte cap / timeout / redirect policy — has no direct
+# equivalent in @peac/policy-kit. Callers that need discover() should stay on
+# @peac/disc@0.13.0 through the v0.13.0 release window; migration is tracked
+# in docs/PACKAGE_STATUS_V0.13.0_PARITY.md.
 $NPM deprecate '@peac/disc@<=0.12.14' \
-  'Deprecated. Use @peac/policy-kit loadPolicyDocument. @peac/disc@0.13.0 ships as a one-release deprecated alias; full removal at v0.13.1. See https://peacprotocol.org/docs/migration.'
+  'Deprecated. Use @peac/policy-kit for policy-document parsing and validation (parsePolicyDocument, loadPolicyDocument, validatePolicy, serializePolicyYaml). Remote discovery remains compatibility-only in @peac/disc@0.13.0. See https://peacprotocol.org/docs/migration.'
 $NPM deprecate '@peac/disc@0.13.0' \
-  'One-release deprecated alias (bridge between v0.12.14 and v0.13.1). Use @peac/policy-kit loadPolicyDocument. @peac/disc will be removed at v0.13.1. See https://peacprotocol.org/docs/migration.'
+  'One-release deprecated compatibility package. Prefer @peac/policy-kit for policy-document parsing and validation. Remote discovery migration is deferred to v0.13.1 and documented in docs/PACKAGE_STATUS_V0.13.0_PARITY.md. See https://peacprotocol.org/docs/migration.'
 
 #
 # @peac/core — PR B scope (archive coupled with legacy /verify handler

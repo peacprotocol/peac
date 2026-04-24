@@ -1,14 +1,22 @@
 /**
  * @peac/disc - DEPRECATED. Thin peac.txt policy-document loader/validator and
- * remote fetcher. Retained in v0.13.0 as a deprecated workspace-internal alias
- * so that existing import paths continue to compile. Not published to npm at
- * v0.13.0; external consumers resolve to the last published historical
- * version (0.12.14) and see a deprecation notice on install.
+ * remote fetcher. Retained as a **published deprecated compatibility package**
+ * at v0.13.0 (Posture A one-release bridge) so that existing workspace
+ * consumers (apps/api, packages/cli) and external consumers who depend on
+ * it via workspace:* / semver continue to work. Publish closure with
+ * @peac/cli requires @peac/disc to stay in the publish manifest at 0.13.0.
  *
- * @deprecated Use {@link "@peac/policy-kit".loadPolicyDocument} instead.
- * Removal target: v0.14.x once internal consumers (apps/api, packages/cli)
- * migrate. See `docs/MIGRATION_CURRENT.md` for migration steps and
- * `docs/PACKAGE_STATUS.md` for the target-state rationale.
+ * @deprecated Prefer {@link "@peac/policy-kit"} for policy-document parsing
+ * and validation (`parsePolicyDocument`, `loadPolicyDocument`,
+ * `validatePolicy`, `serializePolicyYaml`). Remote discovery behavior in
+ * `discover()` — which performs SSRF-aware fetch with a byte cap, timeout
+ * policy, and redirect policy — has **no direct equivalent in
+ * @peac/policy-kit**; it remains compatibility-only in `@peac/disc` until
+ * an equivalent replacement is designed and tested. See
+ * `docs/PACKAGE_STATUS_V0.13.0_PARITY.md` for the per-export parity audit
+ * and the v0.13.1 retirement pre-conditions. Removal target: v0.13.1 after
+ * consumer migration; until then, `@peac/disc@0.13.0` is the correct
+ * published surface for callers that need `discover()`.
  *
  * peac.txt is a POLICY DOCUMENT surface per docs/specs/PEAC-TXT.md. Full
  * parsing is delegated to `@peac/policy-kit.parsePolicyDocument`; this

@@ -22,28 +22,34 @@ import { resolveSignals, type SignalResolver } from '@peac/mappings-content-sign
 
 No runtime behavior change: `@peac/pref` v0.12.14 was already a facade over `@peac/mappings-content-signals`.
 
-### `@peac/disc` — Posture A one-release deprecated alias
+### `@peac/disc` — Posture A published deprecated compatibility package
 
-**State at v0.13.0:** deprecated (published as a one-release alias). `@peac/disc@0.13.0` ships as a thin deprecated alias that emits a one-shot `PEAC_DISC_DEPRECATED` `DeprecationWarning` on import. Publishing continues through v0.13.0 because `@peac/cli` and the reference verifier (`apps/api`) depend on `@peac/disc` via `workspace:*`; removing the package while published consumers still declare the dependency would break publish closure.
+**State at v0.13.0:** deprecated (but **published as a compatibility package**; not a thin alias). `@peac/disc@0.13.0` ships with its existing API surface intact: `parse`, `emit`, `validate`, `discover`, `WELL_KNOWN_PATH`, `MAX_BYTES`, `DEFAULT_TIMEOUT_MS`, and related types. The barrel emits a one-shot `PEAC_DISC_DEPRECATED` `DeprecationWarning` on import. Publishing continues through v0.13.0 because `@peac/cli` and the reference verifier (`apps/api`) depend on `@peac/disc` via `workspace:*`; removing the package while published consumers still declare the dependency would break publish closure (a `@peac/cli@0.13.0` tarball with an unsatisfiable `@peac/disc@0.13.0` dependency is release-breaking). Installability beats surface-count optics.
 
-**Removal:** v0.13.1. Full retirement requires first porting the `discover()` remote-fetch behavior (with its `MAX_BYTES`, `WELL_KNOWN_PATH`, and `DEFAULT_TIMEOUT_MS` constants) to a canonical public surface, migrating workspace consumers (`packages/cli`, `apps/api`) to `@peac/policy-kit`, and confirming pack-install closure. See [`docs/PACKAGE_STATUS_V0.13.0_PARITY.md`](./PACKAGE_STATUS_V0.13.0_PARITY.md) for the per-export parity audit and migration checklist.
+**Removal:** v0.13.1, contingent on migration pre-conditions in [`docs/PACKAGE_STATUS_V0.13.0_PARITY.md`](./PACKAGE_STATUS_V0.13.0_PARITY.md). The parity audit identifies which exports have direct `@peac/policy-kit` equivalents and which (notably `discover()`) do not yet.
 
-**Migration (intended direction; complete at v0.13.1):**
+**Migration guidance (by export):**
 
-```ts
-// Before (v0.12.14 and v0.13.0 deprecated path)
-import { parse, validate, discover, WELL_KNOWN_PATH } from '@peac/disc';
+- **Policy-document parsing and validation:** prefer [`@peac/policy-kit`](../packages/policy-kit/) directly. Canonical replacements already exist and are shipping at v0.13.0:
 
-// After (v0.13.1 onward; @peac/disc retired)
-import {
-  loadPolicyDocument, // alias over parsePolicyDocument; shipped in v0.13.0
-  parsePolicyDocument, // canonical parser (pure; no network)
-  validatePolicy, // canonical validator
-  // loadPolicyDocumentRemote and PEAC_TXT_WELL_KNOWN_PATH ship in v0.13.1
-} from '@peac/policy-kit';
-```
+  ```ts
+  // Before (via @peac/disc)
+  import { parse, validate } from '@peac/disc';
 
-Consumers that only need parse / validate can migrate today (v0.13.0) because `loadPolicyDocument`, `parsePolicyDocument`, and `validatePolicy` are already canonical in `@peac/policy-kit`. Consumers that need remote `discover()` should stay on `@peac/disc` through v0.13.0 and migrate at v0.13.1 once the remote-fetch surface ports.
+  // After (direct @peac/policy-kit)
+  import {
+    parsePolicyDocument, // canonical parser (pure; no network)
+    loadPolicyDocument, // alias over parsePolicyDocument, shipped v0.13.0
+    validatePolicy, // canonical validator
+    serializePolicyYaml, // canonical YAML serializer (replaces emit())
+  } from '@peac/policy-kit';
+  ```
+
+- **Remote discovery (`discover()`) — has NO direct equivalent in `@peac/policy-kit` yet.** `@peac/policy-kit` is a pure parser package that operates on already-fetched bytes; it has no remote-fetch surface. `@peac/disc.discover()` performs SSRF-aware `fetch` injection, timeout management (`DEFAULT_TIMEOUT_MS = 5000`), a 256 KiB byte cap (`MAX_BYTES = 262144`), redirect policy, and well-known path resolution. Consumers that rely on this behavior should **stay on `@peac/disc@0.13.0`** through the v0.13.0 release window. The v0.13.1 PR A plan ports `discover()` (or a callable-fetch variant) to a canonical public surface — see `docs/PACKAGE_STATUS_V0.13.0_PARITY.md` for the three design options under consideration.
+
+- **Constants (`WELL_KNOWN_PATH`, `MAX_BYTES`, `DEFAULT_TIMEOUT_MS`):** port to `@peac/policy-kit` scheduled at v0.13.1 alongside the `discover()` migration.
+
+Summary: migrate parse / validate / emit to `@peac/policy-kit` now if your code only touches policy documents. Keep `@peac/disc@0.13.0` installed if your code needs `discover()` or the associated constants; migrate at v0.13.1 once the remote-fetch surface ports.
 
 ### `@peac/core` — archive scheduled in v0.13.0 PR B
 
