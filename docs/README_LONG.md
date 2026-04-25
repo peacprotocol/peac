@@ -31,7 +31,7 @@ peac/
 ├─ surfaces/              # Distribution artifacts (plugin-pack, workers)
 ├─ integrator-kits/       # Integration checklists for ecosystem transports
 ├─ examples/              # Canonical flow examples
-└─ archive/               # Historical and archived packages (verify-only on npm)
+└─ archive/               # Historical and archived packages; see docs/PACKAGE_STATUS.md for npm availability
 ```
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) for full design rationale.
@@ -402,7 +402,7 @@ peac policy generate peac-policy.yaml --out dist --well-known
 
 **Infrastructure:** `@peac/contracts`, `@peac/http-signatures`, `@peac/jwks-cache`, `@peac/net-node`, `@peac/adapter-core`, `@peac/privacy`, `@peac/telemetry`, `@peac/telemetry-otel`, `@peac/transport-grpc`, `@peac/capture-core`, `@peac/capture-node`, `@peac/attribution`, `@peac/audit`, `@peac/policy-kit`.
 
-**Publication status:** Core, runtime, and adapter packages are published to npm. See [npm](https://www.npmjs.com/search?q=%40peac) and [Releases](https://github.com/peacprotocol/peac/releases). Install via `pnpm add <package>`.
+**Publication status:** Package rows include both packages on npm `latest` and workspace-only surfaces. The active publish set is defined by [`scripts/publish-manifest.json`](../scripts/publish-manifest.json); per-package status is summarized in [`docs/PACKAGE_STATUS.md`](PACKAGE_STATUS.md). See [npm](https://www.npmjs.com/search?q=%40peac) and [Releases](https://github.com/peacprotocol/peac/releases). Install only packages present in the active publish manifest.
 
 ---
 
