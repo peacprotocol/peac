@@ -1,6 +1,6 @@
 {
   "name": "@peac/monorepo",
-  "version": "0.12.14",
+  "version": "0.13.0",
   "private": true,
   "description": "Portable signed records for agent, API, MCP, and cross-runtime interactions.",
   "repository": {
