@@ -1,8 +1,11 @@
-# Reboot artifacts
+# Release-line baselines
 
-This directory holds the v0.13.0 invariant artifacts that ground
-follow-on releases. The artifacts are descriptive snapshots of what
-v0.13.0 ships, not aspirational roadmap documents.
+This directory holds invariant baseline artifacts for the v0.13.0
+release line. The artifacts are descriptive snapshots of what
+v0.13.0 ships, not aspirational roadmap documents. Each artifact is
+file-suffixed by version (`<NAME>-v0.13.0.md`) so future release
+lines can land their own baselines alongside without renaming or
+overwriting the v0.13.0 set.
 
 ## Contents
 

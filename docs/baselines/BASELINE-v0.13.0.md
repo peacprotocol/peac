@@ -40,8 +40,11 @@ What v0.13.0 holds invariant:
   `Deprecation`, RFC 8594 `Sunset`, and RFC 8288 `Link` headers on
   every response. The alias is not part of the active public OpenAPI
   contract.
-- No new public package is introduced. v0.13.0 publishes the same set
-  of packages on npm `latest` as v0.12.14 minus archived surfaces.
+- No new public package is introduced. The active publish manifest
+  remains capped at 37 packages. Archived and retired surfaces are
+  not added back to `packages[]`; historical npm versions remain
+  installable and are handled through deprecation notices rather than
+  unpublishing.
 
 ## Released-package surface
 
@@ -123,7 +126,7 @@ short list pinned at v0.13.0:
 
 `specs/kernel/errors.json` defines the canonical error codes. At v0.13.0
 this registry holds **186** entries; see
-[`docs/reboot/ERROR-EMISSION-AUDIT-v0.13.0.md`](ERROR-EMISSION-AUDIT-v0.13.0.md)
+[`docs/baselines/ERROR-EMISSION-AUDIT-v0.13.0.md`](ERROR-EMISSION-AUDIT-v0.13.0.md)
 for the per-code emission audit. No public error code is renumbered or
 re-categorized in this release.
 

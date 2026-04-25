@@ -41,7 +41,7 @@ The following items are deferred to v0.13.0:
 - Naming and terminology cleanup; legacy quarantine of `peac.receipt/0.9` off active surfaces.
 - Scheduled removals: `ProofMethodSchema`, A2A v0.3.0 compatibility, legacy `/verify` endpoint, `sdk-js` workspace stub.
 - Full removal of `@peac/disc` and `@peac/pref` deprecated facades.
-- Reboot baseline capture, resource-limit spec, and `docs/STANDARDS_LEDGER.md`.
+- v0.13.0 baseline snapshot, resource-limit spec, and `docs/STANDARDS_LEDGER.md`.
 - Package-surface reduction program with measurable gate.
 - Hosted Issue GA decision.
 
@@ -87,7 +87,7 @@ The following items are deferred to v0.13.0:
 
 - Naming and terminology cleanup; legacy quarantine of `peac.receipt/0.9` off active surfaces.
 - Scheduled removals: `ProofMethodSchema`, A2A v0.3.0 compatibility, legacy `/verify` endpoint, `sdk-js` workspace stub.
-- Reboot baseline capture (`docs/reboot/BASELINE-v0.13.0.md`), resource-limit spec (`docs/specs/RESOURCE-LIMITS.md`), and `docs/STANDARDS_LEDGER.md`.
+- Reboot baseline capture (`docs/baselines/BASELINE-v0.13.0.md`), resource-limit spec (`docs/specs/RESOURCE-LIMITS.md`), and `docs/STANDARDS_LEDGER.md`.
 - Package-surface reduction program with measurable gate.
 - Hosted Issue GA decision.
 

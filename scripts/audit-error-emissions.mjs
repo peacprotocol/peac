@@ -18,15 +18,15 @@
  *                 specs/conformance/**, tests/**
  *
  * Outputs (when run with --write):
- *   - docs/reboot/ERROR-EMISSION-AUDIT-v0.13.0.json (machine-readable)
- *   - docs/reboot/ERROR-EMISSION-AUDIT-v0.13.0.md (prose companion)
+ *   - docs/baselines/ERROR-EMISSION-AUDIT-v0.13.0.json (machine-readable)
+ *   - docs/baselines/ERROR-EMISSION-AUDIT-v0.13.0.md (prose companion)
  *
  * Default: prints a short summary to stdout and exits 0. Failure is
  * limited to script errors; classifications never fail the run.
  *
  * Usage:
  *   node scripts/audit-error-emissions.mjs           # summary to stdout
- *   node scripts/audit-error-emissions.mjs --write   # also rewrite the docs/reboot/ artifacts
+ *   node scripts/audit-error-emissions.mjs --write   # also rewrite the docs/baselines/ artifacts
  *   node scripts/audit-error-emissions.mjs --json    # JSON to stdout (no docs write)
  */
 
@@ -175,7 +175,7 @@ if (JSON_OUT && !WRITE) {
 }
 
 if (WRITE) {
-  const jsonOut = join(REPO_ROOT, 'docs/reboot/ERROR-EMISSION-AUDIT-v0.13.0.json');
+  const jsonOut = join(REPO_ROOT, 'docs/baselines/ERROR-EMISSION-AUDIT-v0.13.0.json');
   writeFileSync(jsonOut, JSON.stringify(report, null, 2) + '\n');
 
   const lines = [];
@@ -326,10 +326,10 @@ if (WRITE) {
   lines.push(
     '_For the full per-code data including production-file counts, see_'
   );
-  lines.push('_`docs/reboot/ERROR-EMISSION-AUDIT-v0.13.0.json`._');
+  lines.push('_`docs/baselines/ERROR-EMISSION-AUDIT-v0.13.0.json`._');
   lines.push('');
 
-  const mdOut = join(REPO_ROOT, 'docs/reboot/ERROR-EMISSION-AUDIT-v0.13.0.md');
+  const mdOut = join(REPO_ROOT, 'docs/baselines/ERROR-EMISSION-AUDIT-v0.13.0.md');
   writeFileSync(mdOut, lines.join('\n'));
   console.log(`audit-error-emissions: wrote ${jsonOut}`);
   console.log(`audit-error-emissions: wrote ${mdOut}`);

@@ -41,7 +41,7 @@ full document.
 | RFC 8032 (Ed25519 / Ed448)       | IRTF Informational | Canonical signature algorithm. Note: RFC 8032 is an IRTF CFRG Informational document, not IETF Standards Track. Its parameters are referenced normatively here. | [`packages/crypto/src/jws.ts`](../packages/crypto/src/jws.ts)                                         |
 | RFC 8259 (JSON)                  | Standards Track    | Payload format                                                                                                                                                  | wire format                                                                                           |
 | RFC 8725 (JWS / JWT BCP)         | BCP                | Hardening guidance applied at JWS verify                                                                                                                        | [`packages/crypto/src/jws.ts`](../packages/crypto/src/jws.ts)                                         |
-| FIPS 186-5                       | FIPS               | Standards Track NIST reference for Ed25519 cryptographic parameters                                                                                             | reference                                                                                             |
+| FIPS 186-5                       | FIPS               | NIST FIPS reference for EdDSA parameters                                                                                                                        | reference                                                                                             |
 
 ## B. HTTP and API surfaces
 
@@ -63,14 +63,14 @@ widely deployed and their semantics are stable.
 
 ## C. Discovery and metadata
 
-| Standard                                         | Status            | Role in PEAC                                                                                   | Citation site                                                                                      |
-| ------------------------------------------------ | ----------------- | ---------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| RFC 8615 (Well-Known URIs)                       | Standards Track   | `/.well-known/peac-issuer.json`, `/.well-known/peac.txt`, `/.well-known/agent-card.json` paths | [`docs/specs/PEAC-ISSUER.md`](specs/PEAC-ISSUER.md), [`docs/specs/PEAC-TXT.md`](specs/PEAC-TXT.md) |
-| RFC 9728 (OAuth 2.0 Protected Resource Metadata) | Standards Track   | Issuer-discovery alignment for protected-resource metadata                                     | [`docs/specs/PEAC-ISSUER.md`](specs/PEAC-ISSUER.md)                                                |
-| RFC 3986 (URI Generic Syntax)                    | Standards Track   | Issuer URL canonical form                                                                      | [`packages/protocol/src/`](../packages/protocol/src/)                                              |
-| RFC 4648 (base64url)                             | Standards Track   | JWS encoding                                                                                   | [`packages/crypto/src/base64url.ts`](../packages/crypto/src/base64url.ts)                          |
-| RFC 4122 / RFC 9562 (UUIDs)                      | Standards Track   | `jti` generation                                                                               | [`packages/kernel/src/ids/`](../packages/kernel/src/ids/)                                          |
-| RFC 3339 (timestamps)                            | Internet Standard | `iat` / `nbf` / `exp` formatting in records                                                    | wire format                                                                                        |
+| Standard                                         | Status                              | Role in PEAC                                                                                   | Citation site                                                                                      |
+| ------------------------------------------------ | ----------------------------------- | ---------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| RFC 8615 (Well-Known URIs)                       | Standards Track                     | `/.well-known/peac-issuer.json`, `/.well-known/peac.txt`, `/.well-known/agent-card.json` paths | [`docs/specs/PEAC-ISSUER.md`](specs/PEAC-ISSUER.md), [`docs/specs/PEAC-TXT.md`](specs/PEAC-TXT.md) |
+| RFC 9728 (OAuth 2.0 Protected Resource Metadata) | Standards Track                     | Issuer-discovery alignment for protected-resource metadata                                     | [`docs/specs/PEAC-ISSUER.md`](specs/PEAC-ISSUER.md)                                                |
+| RFC 3986 (URI Generic Syntax)                    | Standards Track                     | Issuer URL canonical form                                                                      | [`packages/protocol/src/`](../packages/protocol/src/)                                              |
+| RFC 4648 (base64url)                             | Standards Track                     | JWS encoding                                                                                   | [`packages/crypto/src/base64url.ts`](../packages/crypto/src/base64url.ts)                          |
+| RFC 4122 / RFC 9562 (UUIDs)                      | Standards Track                     | `jti` generation                                                                               | [`packages/kernel/src/ids/`](../packages/kernel/src/ids/)                                          |
+| RFC 3339 (timestamps)                            | Standards Track / Proposed Standard | `iat` / `nbf` / `exp` formatting in records                                                    | wire format                                                                                        |
 
 ## D. Canonicalization and Informational dependencies
 

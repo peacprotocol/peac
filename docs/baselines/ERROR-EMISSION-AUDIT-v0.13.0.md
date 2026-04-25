@@ -119,4 +119,4 @@ fixtures synthesize the failure shape. They are usually correct as-is.
 | `E_REVOKED_KEY_USED`        | verification  | 1          |
 
 _For the full per-code data including production-file counts, see_
-_`docs/reboot/ERROR-EMISSION-AUDIT-v0.13.0.json`._
+_`docs/baselines/ERROR-EMISSION-AUDIT-v0.13.0.json`._

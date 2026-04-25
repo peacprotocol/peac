@@ -1,6 +1,6 @@
 {
   "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
-  "_comment": "Mutation-testing baseline. Advisory only at v0.13.0; not wired into CI. Run locally with `pnpm mutation:baseline` against the high-leverage layer-0/1/2/3 packages and review survivors in docs/reboot/MUTATION-BASELINE-v0.13.0.md. Promotion to a CI gate requires a recorded roadmap decision.",
+  "_comment": "Mutation-testing posture. Advisory at v0.13.0; not wired into CI. Run locally with `pnpm mutation:baseline` against the high-leverage layer-0/1/2/3 packages and review survivors in docs/baselines/MUTATION-BASELINE-v0.13.0.md. Promotion to a CI gate requires a recorded roadmap decision.",
   "packageManager": "pnpm",
   "testRunner": "vitest",
   "reporters": ["html", "clear-text", "json"],
@@ -19,7 +19,7 @@
   "thresholds": {
     "high": 80,
     "low": 60,
-    "break": null
+    "break": 0
   },
   "timeoutMS": 60000,
   "concurrency": 4,
