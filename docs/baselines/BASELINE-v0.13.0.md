@@ -20,7 +20,7 @@ What v0.13.0 holds invariant:
   contract. `peac-receipt/0.1` (Wire 0.1) remains a frozen verify-only
   path with no new-feature extensions. `peac.receipt/0.9` is archived
   under [`archive/0.9.0-0.9.14/packages-core/`](../../archive/0.9.0-0.9.14/packages-core/);
-  `@peac/core` is not published at v0.13.0 or later.
+  `@peac/core` is not in the v0.13.0 active publish manifest.
 - The signing envelope. JWS Compact Serialization (RFC 7515) with
   Ed25519 (RFC 8032) is the only accepted shape. There is no algorithm
   negotiation surface and no COSE/CBOR pivot.
@@ -48,36 +48,36 @@ What v0.13.0 holds invariant:
 
 ## Released-package surface
 
-| Layer    | Package                                                                                              | Status at v0.13.0                                                                                 |
-| -------- | ---------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| 0        | `@peac/kernel`                                                                                       | stable                                                                                            |
-| 1        | `@peac/schema`                                                                                       | stable                                                                                            |
-| 2        | `@peac/crypto`                                                                                       | stable                                                                                            |
-| 2.5      | `@peac/telemetry`, `@peac/telemetry-otel`                                                            | stable                                                                                            |
-| 2.5      | `@peac/capture-core`, `@peac/capture-node`                                                           | stable                                                                                            |
-| 3        | `@peac/protocol`, `@peac/control`                                                                    | stable                                                                                            |
-| 3        | `@peac/audit`                                                                                        | stable                                                                                            |
-| 3        | `@peac/policy-kit`                                                                                   | stable                                                                                            |
-| 3.5      | `@peac/middleware-core`                                                                              | stable                                                                                            |
-| 3.5      | `@peac/middleware-express`                                                                           | stable                                                                                            |
-| 4        | `@peac/contracts`                                                                                    | stable                                                                                            |
-| 4        | `@peac/http-signatures`                                                                              | stable                                                                                            |
-| 4        | `@peac/jwks-cache`                                                                                   | stable                                                                                            |
-| 4        | `@peac/adapter-core`                                                                                 | stable                                                                                            |
-| 4        | `@peac/adapter-x402` (+ daydreams / fluora / pinata)                                                 | stable                                                                                            |
-| 4        | `@peac/adapter-did`                                                                                  | stable                                                                                            |
-| 4        | `@peac/adapter-eat`                                                                                  | stable                                                                                            |
-| 4        | `@peac/adapter-managed-agents`                                                                       | stable                                                                                            |
-| 4        | `@peac/adapter-runtime-governance`                                                                   | stable                                                                                            |
-| 4        | `@peac/adapter-openai-compatible`                                                                    | stable                                                                                            |
-| 4        | `@peac/adapter-openclaw`                                                                             | stable                                                                                            |
-| 4        | `@peac/mappings-mcp`, `-a2a`, `-acp`, `-ucp`, `-paymentauth`, `-content-signals`, `-intoto`, `-slsa` | stable                                                                                            |
-| 4        | `@peac/rails-x402`                                                                                   | stable                                                                                            |
-| 4        | `@peac/transport-grpc`                                                                               | stable                                                                                            |
-| 4        | `@peac/net-node`                                                                                     | stable                                                                                            |
-| 5        | `@peac/mcp-server`, `@peac/cli`                                                                      | stable                                                                                            |
-| compat   | `@peac/disc`                                                                                         | deprecated; published as a one-release compatibility alias                                        |
-| archived | `@peac/core`, `@peac/pref`, `@peac/sdk`                                                              | not published at v0.13.0 or later; historical npm versions remain installable for verify-only use |
+| Layer    | Package                                                                                              | Status at v0.13.0                                                                                          |
+| -------- | ---------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| 0        | `@peac/kernel`                                                                                       | stable                                                                                                     |
+| 1        | `@peac/schema`                                                                                       | stable                                                                                                     |
+| 2        | `@peac/crypto`                                                                                       | stable                                                                                                     |
+| 2.5      | `@peac/telemetry`, `@peac/telemetry-otel`                                                            | stable                                                                                                     |
+| 2.5      | `@peac/capture-core`, `@peac/capture-node`                                                           | stable                                                                                                     |
+| 3        | `@peac/protocol`, `@peac/control`                                                                    | stable                                                                                                     |
+| 3        | `@peac/audit`                                                                                        | stable                                                                                                     |
+| 3        | `@peac/policy-kit`                                                                                   | stable                                                                                                     |
+| 3.5      | `@peac/middleware-core`                                                                              | stable                                                                                                     |
+| 3.5      | `@peac/middleware-express`                                                                           | stable                                                                                                     |
+| 4        | `@peac/contracts`                                                                                    | stable                                                                                                     |
+| 4        | `@peac/http-signatures`                                                                              | stable                                                                                                     |
+| 4        | `@peac/jwks-cache`                                                                                   | stable                                                                                                     |
+| 4        | `@peac/adapter-core`                                                                                 | stable                                                                                                     |
+| 4        | `@peac/adapter-x402` (+ daydreams / fluora / pinata)                                                 | stable                                                                                                     |
+| 4        | `@peac/adapter-did`                                                                                  | stable                                                                                                     |
+| 4        | `@peac/adapter-eat`                                                                                  | stable                                                                                                     |
+| 4        | `@peac/adapter-managed-agents`                                                                       | stable                                                                                                     |
+| 4        | `@peac/adapter-runtime-governance`                                                                   | stable                                                                                                     |
+| 4        | `@peac/adapter-openai-compatible`                                                                    | stable                                                                                                     |
+| 4        | `@peac/adapter-openclaw`                                                                             | stable                                                                                                     |
+| 4        | `@peac/mappings-mcp`, `-a2a`, `-acp`, `-ucp`, `-paymentauth`, `-content-signals`, `-intoto`, `-slsa` | stable                                                                                                     |
+| 4        | `@peac/rails-x402`                                                                                   | stable                                                                                                     |
+| 4        | `@peac/transport-grpc`                                                                               | stable                                                                                                     |
+| 4        | `@peac/net-node`                                                                                     | stable                                                                                                     |
+| 5        | `@peac/mcp-server`, `@peac/cli`                                                                      | stable                                                                                                     |
+| compat   | `@peac/disc`                                                                                         | deprecated; published as a one-release compatibility alias                                                 |
+| archived | `@peac/core`, `@peac/pref`, `@peac/sdk`                                                              | not in the v0.13.0 active publish manifest; historical npm versions remain installable for verify-only use |
 
 The full machine-readable inventory lives in
 [`REPO_SURFACE_STATUS.json`](../../REPO_SURFACE_STATUS.json) and is

@@ -51,8 +51,8 @@ Doctrine cleanup, scheduled deprecation removals, and v0.13.0 baseline artifacts
 
 ### Archived
 
-- `@peac/core` is not published at v0.13.0 or later. Historical npm versions `<=0.9.14` remain installable for verify-only use of historical `peac.receipt/0.9` records.
-- `@peac/pref` is not published at v0.13.0 or later. Historical npm versions `<=0.12.14` remain installable. Migration target: `@peac/mappings-content-signals`.
+- `@peac/core` is not in the v0.13.0 active publish manifest. Historical npm versions `<=0.9.14` remain installable for verify-only use of historical `peac.receipt/0.9` records.
+- `@peac/pref` is not in the v0.13.0 active publish manifest. Historical npm versions `<=0.12.14` remain installable. Migration target: `@peac/mappings-content-signals`.
 
 ## [0.12.14] - 2026-04-22
 
