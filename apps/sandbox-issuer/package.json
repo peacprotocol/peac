@@ -1,6 +1,6 @@
 {
   "name": "@peac/app-sandbox-issuer",
-  "version": "0.12.14",
+  "version": "0.13.0",
   "description": "PEAC Protocol Sandbox Issuer - Test receipt issuance for development",
   "type": "module",
   "main": "dist/node.js",

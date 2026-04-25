@@ -1,7 +1,7 @@
 openapi: 3.1.1
 info:
   title: PEAC Hosted Verify API
-  version: 0.12.14
+  version: 0.13.0
   description: >
     Hosted verification service for signed interaction records.
     Request body is `application/json` carrying a compact JWS in the

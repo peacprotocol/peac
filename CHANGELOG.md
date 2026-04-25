@@ -5,7 +5,56 @@ All notable changes to PEAC Protocol will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.12.14] - Unreleased
+## [0.13.0] - Unreleased
+
+Doctrine cleanup, scheduled deprecation removals, and v0.13.0 baseline artifacts. Records-first wording across active surfaces; legacy `peac.receipt/0.9` quarantined to historical-marker contexts; `ProofMethodSchema` and A2A v0.3.0 compatibility removed; `@peac/core` and `@peac/pref` archived; legacy `POST /verify` removed from the active OpenAPI contract while the runtime alias continues to serve `/v1/verify`-shape responses with `Deprecation`, `Sunset`, and `Link` headers through the advertised Sunset; published normative resource-limits spec, standards ledger, v0.13.0 baseline snapshot, error-emission audit, and mutation-testing posture. No wire format change. No new signing envelope. No new public package.
+
+### Added
+
+- `docs/baselines/BASELINE-v0.13.0.md`: descriptive snapshot of the v0.13.0 tagged tree (released-package surface, wire-format invariants, resource-limit invariants, error-taxonomy inventory, public TypeScript / CLI / verifier surface).
+- `docs/specs/RESOURCE-LIMITS.md`: normative invariant table for size, time, cache, SSRF, redirect, and timeout ceilings; each row cites the constant in source and a test.
+- `docs/STANDARDS_LEDGER.md`: catalogue of every external standard PEAC cites or implements, organized by category and labeled by status (Standards Track / Informational / IRTF Informational / BCP / FIPS / W3C Recommendation / International Standard / Regulatory / Draft / Watchlist).
+- `docs/baselines/ERROR-EMISSION-AUDIT-v0.13.0.{md,json}`: per-code classification of `specs/kernel/errors.json` (186 codes) by production-emission status. Informational; no code is renumbered or removed.
+- `docs/baselines/MUTATION-BASELINE-v0.13.0.md` + `stryker.conf.json` + `pnpm mutation:baseline` script: mutation-testing posture across `@peac/kernel`, `@peac/schema`, `@peac/crypto`, `@peac/protocol`, `@peac/policy-kit`. Advisory only; not CI-wired; no score recorded in this release.
+- `docs/PACKAGE_STATUS_V0.13.0_PARITY.md`: per-export parity audit for `@peac/disc`, `@peac/core`, and `@peac/pref` against canonical replacements.
+- `apps/api/src/index.ts` exports `LEGACY_VERIFY_DEPRECATION_HEADERS` and `createLegacyVerifyAliasHandler` so production routing and tests share the same alias wiring.
+- `apps/api/tests/legacy-verify-alias-headers.test.ts` and `apps/api/tests/legacy-verify-alias-pre-sunset.test.ts`: regression coverage for the deprecated `/verify` and `/api/v1/verify` aliases.
+- `tests/tooling/package-surface-audit.test.ts`: enforces publish-closure (every `@peac/*` workspace dependency declared by a published package resolves to another package in `packages[]`) and `packages.length <= 37`.
+- `tests/tooling/internal-package-invisibility.test.ts`: enforces that workspace-private package names do not appear on tracked public surfaces.
+- `tests/tooling/records-first-doctrine.test.ts`: enforces records-first framing in the top 80 lines of active front-door docs.
+- `scripts/audit-error-emissions.mjs` + `pnpm audit:errors` / `pnpm audit:errors:write`: token-aware error-code emission audit.
+- `scripts/release/npm-deprecate-v0.13.0.sh`: deprecate commands for historical npm versions of `@peac/pref`, `@peac/sdk`, `@peac/disc`, and `@peac/core`. Executed manually after the package release is complete.
+
+### Changed
+
+- Records-first wording across active front-door docs (README, `docs/START_HERE.md`, every `packages/*/README.md` first 80 lines). "Receipt" preserved as the per-artifact noun and as the `PEAC-Receipt` HTTP header.
+- `@peac/schema`: `ProofMethodSchema` and the `PROOF_METHODS` constant removed; the four transport-binding values (`http-message-signature`, `dpop`, `mtls`, `jwk-thumbprint`) inlined on `AgentProofSchema.method`. Runtime validation surface for `AgentProof` is unchanged. `ProofTypeSchema` is unchanged.
+- `@peac/mappings-a2a`: A2A v0.3.0 compatibility surface removed. v1.0.0 `supportedInterfaces[]` is required; cards with only a top-level `url`, kebab-case `TaskState` values, and the `/.well-known/agent.json` legacy discovery path are no longer accepted. `@peac/mappings-a2a` is now tracked under `bash scripts/release/api-surface-lock.sh`.
+- `@peac/disc`: published as a deprecated compatibility alias. The barrel emits a one-shot `PEAC_DISC_DEPRECATED` structured `DeprecationWarning` on import. Existing `parse` / `emit` / `validate` / `discover` / `WELL_KNOWN_PATH` / `MAX_BYTES` / `DEFAULT_TIMEOUT_MS` exports preserved. Canonical replacement: `@peac/policy-kit`.
+- `apps/api`: legacy `POST /verify` and `POST /api/v1/verify` routes delegate in-process to `POST /v1/verify` and stamp `Deprecation: true` (RFC 9745), `Sunset: Sat, 01 Nov 2026 00:00:00 GMT` (RFC 8594), and `Link: <https://www.peacprotocol.org/docs/migration>; rel="deprecation"` (RFC 8288) on every response. The active public OpenAPI contract (`packages/schema/openapi/verify.yaml`, `apps/api/openapi.yaml`) documents `POST /v1/verify` as the canonical operation; the alias is not part of the machine-readable contract.
+- `docs/STABILITY-CONTRACT.md`, `docs/MIGRATION_CURRENT.md`, `docs/PACKAGE_STATUS.md`, `docs/COMPATIBILITY_MATRIX.md`, `docs/DEPRECATION_POLICY.md`, `docs/HOSTED_VERIFY_CONTRACT.md`, `SECURITY.md`: present-state classifications updated to reflect archived `@peac/core`, archived `@peac/pref`, deprecated `@peac/disc`, and the `/verify` alias contract.
+- `.github/workflows/nightly.yml`: nightly crypto smoke migrated from `@peac/core` to `@peac/crypto` (`generateKeypair` / `sign` / `verify` round-trip).
+- OpenAPI `verify.yaml` and `apps/api/openapi.yaml` refreshed to `info.version: 0.13.0`.
+
+### Deprecated
+
+- `@peac/disc`: published as a one-release compatibility alias; `npm deprecate` notice attached on release.
+
+### Removed
+
+- `@peac/schema`: `ProofMethodSchema` schema export, `ProofMethod` type, and `PROOF_METHODS` constant.
+- `@peac/mappings-a2a`: `TASK_STATE_V03_TO_V1` map, `normalizeTaskState` function, `_resetDeprecationWarning` test hook, and `NormalizedAgentCard.version` discriminant.
+- `apps/api`: `apps/api/src/verifier.ts`, `apps/api/src/routes.ts`, `apps/api/src/peac-core.d.ts`, and the `@peac/core` runtime dependency from `apps/api/package.json`.
+- Legacy `POST /verify` from the active public OpenAPI contract. The runtime alias is preserved through the advertised Sunset.
+- `packages/sdk-js/` workspace stub.
+- `packages/core/` (moved to `archive/0.9.0-0.9.14/packages-core/`); `packages/aipref/` (moved to `archive/pref/`); five empty Layer-6 pillar stubs (`packages/{access,compliance,consent,intelligence,provenance}/`) moved under `archive/pillars/`.
+
+### Archived
+
+- `@peac/core` is not in the v0.13.0 active publish manifest. Historical npm versions `<=0.9.14` remain installable for verify-only use of historical `peac.receipt/0.9` records.
+- `@peac/pref` is not in the v0.13.0 active publish manifest. Historical npm versions `<=0.12.14` remain installable. Migration target: `@peac/mappings-content-signals`.
+
+## [0.12.14] - 2026-04-22
 
 Policy binding and privacy-aware verification. Typed document binding for terms and policy, publisher-supplied canonical digest support, privacy-aware deployment guidance, and verifier privacy defaults including JWKS cache retention caps and a no-raw-personal-data minimization mode. Documentation, tests, and tooling only. No wire, schema, kernel, crypto, or protocol public-API change.
 

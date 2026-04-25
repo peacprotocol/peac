@@ -1,6 +1,6 @@
 {
   "name": "@peac/disc",
-  "version": "0.12.14",
+  "version": "0.13.0",
   "description": "Thin loader / validator and remote fetcher for peac.txt policy documents (peac-policy/0.1; docs/specs/PEAC-TXT.md)",
   "type": "module",
   "main": "dist/index.cjs",
