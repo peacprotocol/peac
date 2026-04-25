@@ -23,9 +23,9 @@ on:
         type: boolean
         default: true
       skip_release_finalize:
-        description: 'Skip Stage 2 GitHub Release finalization (leave stage 1 state intact)'
+        description: 'Skip Stage 2 GitHub Release finalization (default: true; release finalization is a manual maintainer step)'
         type: boolean
-        default: false
+        default: true
       skip_closeout_verify:
         description: 'Skip the post-promote truth reconciler (verify-release-closeout)'
         type: boolean

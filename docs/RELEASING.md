@@ -71,9 +71,45 @@ Flow:
 
 ### GitHub Release creation
 
-The GitHub Release is created by the tag/publish workflow from the
-`CHANGELOG.md` entry for the released version. Do not create it as a
-separate manual step.
+npm publish and dist-tag promotion run in GitHub Actions via OIDC Trusted
+Publishing. GitHub Release creation and finalization are a separate, manual
+maintainer step performed from the maintainer's GitHub account.
+
+This separation is deliberate. When `publish.yml` or `promote-latest.yml`
+create or edit a Release using the workflow's `GITHUB_TOKEN`, the Release
+appears under the `github-actions[bot]` author, which makes the public
+provenance of the Release ambiguous. Keeping Release publication manual
+keeps the maintainer-account author chain intact.
+
+Workflow defaults:
+
+- `publish.yml`: `skip_release` defaults to `true`. Tag-push and manual
+  dispatches do not create a GitHub Release. Set `skip_release: false` only
+  in scripted recovery flows where bot authorship is explicitly acceptable.
+- `promote-latest.yml`: `skip_release_finalize` defaults to `true`. The
+  promote step does not edit the Release; the maintainer finalizes it after
+  promote succeeds.
+
+Maintainer steps after `publish.yml` succeeds:
+
+1. From the local clone, draft a release body from the `CHANGELOG.md` entry
+   (or use `node scripts/extract-changelog-entry.mjs --version X.Y.Z`).
+2. Create the Release manually from the maintainer GitHub account:
+   `gh release create vX.Y.Z --title "<title>" --notes-file <file>`
+   (add `--draft` or `--prerelease` for Mode 2 soak; flip to non-draft /
+   non-prerelease after promote-latest succeeds).
+3. Confirm the Release author on GitHub matches the maintainer account, not
+   `github-actions[bot]`, before announcing.
+
+If a Release was created by the bot in error: delete it from the GitHub UI
+and re-create it manually under the maintainer account, then re-run
+`promote-latest.yml` with the default `skip_release_finalize: true` so the
+workflow does not edit the maintainer-authored Release.
+
+Skipping GitHub Release automation does not skip npm publish or npm
+dist-tag promotion. It only disables GitHub Release create/edit operations.
+The npm side of `publish.yml` and `promote-latest.yml` runs unchanged
+through OIDC Trusted Publishing and `npm dist-tag add`.
 
 ### Post-stamp sync
 
@@ -173,7 +209,24 @@ git push origin vX.Y.Z
 1. Go to GitHub Actions
 2. Run the "Publish to npm" workflow
 3. Select the `npm-production` environment
-4. Verify: `npm view @peac/kernel@X.Y.Z`
+4. `skip_release` is `true` by default; leave it as-is so the workflow does
+   not create a `github-actions[bot]`-authored Release
+5. Verify: `npm view @peac/kernel@X.Y.Z`
+
+After publish succeeds, create the GitHub Release manually from the
+maintainer account (see "GitHub Release creation" above for full guidance):
+
+```bash
+node scripts/extract-changelog-entry.mjs --version X.Y.Z > /tmp/release-notes.md
+TITLE=$(node scripts/extract-changelog-entry.mjs --version X.Y.Z --title-only)
+# Mode 1 (single-step): finalized immediately
+gh release create vX.Y.Z --title "$TITLE" --notes-file /tmp/release-notes.md
+# Mode 2 (two-step soak): create as draft or prerelease, finalize after promote
+gh release create vX.Y.Z --title "$TITLE" --notes-file /tmp/release-notes.md --prerelease
+```
+
+Confirm the Release author on GitHub matches the maintainer account before
+announcing.
 
 See `docs/maintainers/RELEASING.md` for manual publishing details and `docs/maintainers/NPM_PUBLISH_POLICY.md` for dist-tag policy.
 
@@ -217,8 +270,13 @@ only after soak / verification. Single-step releases publish directly to
 1. Go to GitHub Actions
 2. Run the "Promote to latest" workflow with `version: X.Y.Z`, `dry_run: true`
 3. Review dry-run output
-4. Re-run with `dry_run: false`
+4. Re-run with `dry_run: false`. `skip_release_finalize` is `true` by
+   default; leave it as-is so the workflow does not edit the
+   maintainer-authored Release
 5. Verify: `npm dist-tag ls @peac/protocol`
+6. Finalize the GitHub Release manually from the maintainer account if it
+   was created as draft or prerelease in step 7:
+   `gh release edit vX.Y.Z --draft=false --prerelease=false`
 
 ### 10. Stamp `dist_tag: latest` (post-promotion)
 

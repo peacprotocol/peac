@@ -53,9 +53,9 @@ on:
           - latest
         default: auto
       skip_release:
-        description: 'Skip GitHub Release creation'
+        description: 'Skip GitHub Release creation (default: true; release publication is a manual maintainer step)'
         type: boolean
-        default: false
+        default: true
       release_stage_1_mode:
         description: 'Mode 2 stage 1 GitHub Release state (draft or prerelease) before promote to latest'
         type: choice
