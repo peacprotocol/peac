@@ -39,7 +39,7 @@ Policy binding and privacy-aware verification. Typed document binding for terms 
 The following items are deferred to v0.13.0:
 
 - Naming and terminology cleanup; legacy quarantine of `peac.receipt/0.9` off active surfaces.
-- Scheduled removals: `ProofMethodSchema`, A2A v0.3.0 compatibility, legacy `/verify` endpoint, `sdk-js` workspace stub.
+- Scheduled removals: `ProofMethodSchema`, A2A v0.3.0 compatibility, legacy `/verify` teaching/OpenAPI surface (runtime alias preserved through Sunset), `sdk-js` workspace stub.
 - Full removal of `@peac/disc` and `@peac/pref` deprecated facades.
 - v0.13.0 baseline snapshot, resource-limit spec, and `docs/STANDARDS_LEDGER.md`.
 - Package-surface reduction program with measurable gate.
@@ -86,8 +86,8 @@ Compliance mappings, verifier contract alignment, portable proof workflows, and 
 The following items are deferred to v0.13.0:
 
 - Naming and terminology cleanup; legacy quarantine of `peac.receipt/0.9` off active surfaces.
-- Scheduled removals: `ProofMethodSchema`, A2A v0.3.0 compatibility, legacy `/verify` endpoint, `sdk-js` workspace stub.
-- Reboot baseline capture (`docs/baselines/BASELINE-v0.13.0.md`), resource-limit spec (`docs/specs/RESOURCE-LIMITS.md`), and `docs/STANDARDS_LEDGER.md`.
+- Scheduled removals: `ProofMethodSchema`, A2A v0.3.0 compatibility, legacy `/verify` teaching/OpenAPI surface (runtime alias preserved through Sunset), `sdk-js` workspace stub.
+- v0.13.0 baseline snapshot (`docs/baselines/BASELINE-v0.13.0.md`), resource-limit spec (`docs/specs/RESOURCE-LIMITS.md`), and `docs/STANDARDS_LEDGER.md`.
 - Package-surface reduction program with measurable gate.
 - Hosted Issue GA decision.
 
