@@ -142,7 +142,9 @@ Full doctrine: [`docs/specs/VERSIONING.md`](docs/specs/VERSIONING.md).
 - [Start Here](docs/START_HERE.md) — path by role.
 - [How it works](docs/HOW-IT-WORKS.md), [Artifacts](docs/ARTIFACTS.md), [Where it fits](docs/WHERE-IT-FITS.md), [What PEAC standardizes](docs/WHAT-PEAC-STANDARDIZES.md).
 - [Solutions](docs/SOLUTIONS/) — five outcome-led recipes.
-- [Spec Index](docs/SPEC_INDEX.md) — normative specifications.
+- [Spec Index](docs/SPEC_INDEX.md) — normative specifications, including [Resource limits](docs/specs/RESOURCE-LIMITS.md).
+- [Standards ledger](docs/STANDARDS_LEDGER.md) — every external standard PEAC cites or implements, by status.
+- [Release-line baselines](docs/baselines/) — invariant snapshot for the current release line.
 - [Developer Guide](docs/README_LONG.md) — package catalog and extended examples.
 
 ## Contributing and license
