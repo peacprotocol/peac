@@ -1,0 +1,15 @@
+{
+  "fixture": "legacy-verify-line",
+  "description": "top-level legacy verify: line stripped + warning",
+  "capturedFrom": "@peac/disc.parse (v0.13.0)",
+  "valid": true,
+  "data": {
+    "version": "peac-policy/0.1",
+    "defaults": {
+      "decision": "deny"
+    },
+    "rules": []
+  },
+  "errorsCount": 0,
+  "legacyWarningCount": 1
+}

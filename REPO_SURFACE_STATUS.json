@@ -46,14 +46,13 @@
       "layer": 3,
       "published": true
     },
-    "packages/discovery": {
+    "archive/discovery": {
       "npm": "@peac/disc",
-      "state": "deprecated",
+      "state": "archived",
       "wire": "0.2",
       "layer": 3,
-      "published": true,
-      "removal": "v0.13.1",
-      "note": "Published deprecated compatibility alias. Re-exports tolerant peac.txt parse / emit / validate / discover + constants; barrel emits one-shot PEAC_DISC_DEPRECATED DeprecationWarning. Canonical loader is @peac/policy-kit loadPolicyDocument. Retained at v0.13.0 to preserve publish closure with @peac/cli and apps/api; full retirement deferred until workspace consumers migrate."
+      "published": false,
+      "note": "Archived at v0.13.1. Source moved out of the packages/* workspace glob. Active publish-manifest count drops 37 -> 36. CLI peac discover continues via internal helper at packages/cli/src/lib/policy-document-discovery.ts. Historical npm versions <= 0.13.0 remain installable with their existing deprecation messages."
     },
     "packages/audit": {
       "npm": "@peac/audit",

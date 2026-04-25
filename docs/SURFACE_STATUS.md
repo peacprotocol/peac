@@ -27,13 +27,13 @@ Do not edit manually. Source: `REPO_SURFACE_STATUS.json`. Rebuild via `node scri
 
 ## Layer 3
 
-| Surface               | npm                | State      | Wire |
-| --------------------- | ------------------ | ---------- | ---- |
-| `packages/audit`      | `@peac/audit`      | default    | 0.2  |
-| `packages/control`    | `@peac/control`    | default    | 0.2  |
-| `packages/discovery`  | `@peac/disc`       | deprecated | 0.2  |
-| `packages/policy-kit` | `@peac/policy-kit` | default    | 0.2  |
-| `packages/protocol`   | `@peac/protocol`   | default    | 0.2  |
+| Surface               | npm                | State    | Wire |
+| --------------------- | ------------------ | -------- | ---- |
+| `archive/discovery`   | `@peac/disc`       | archived | 0.2  |
+| `packages/audit`      | `@peac/audit`      | default  | 0.2  |
+| `packages/control`    | `@peac/control`    | default  | 0.2  |
+| `packages/policy-kit` | `@peac/policy-kit` | default  | 0.2  |
+| `packages/protocol`   | `@peac/protocol`   | default  | 0.2  |
 
 ## Layer 3.5
 

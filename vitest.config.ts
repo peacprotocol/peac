@@ -12,6 +12,10 @@ export default defineConfig({
       },
       // Workspace package aliases for root-level tests
       { find: '@peac/kernel', replacement: resolve(__dirname, 'packages/kernel/src/index.ts') },
+      {
+        find: '@peac/registries',
+        replacement: resolve(__dirname, 'packages/registries/src/index.ts'),
+      },
       { find: '@peac/schema', replacement: resolve(__dirname, 'packages/schema/src/index.ts') },
       { find: '@peac/crypto', replacement: resolve(__dirname, 'packages/crypto/src/index.ts') },
       { find: '@peac/protocol', replacement: resolve(__dirname, 'packages/protocol/src/index.ts') },

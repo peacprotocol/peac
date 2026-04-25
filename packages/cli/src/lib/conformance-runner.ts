@@ -3,7 +3,8 @@
  *
  * Category-aware validation using the same validators as tests/conformance/*.spec.ts:
  * - Receipt validation via @peac/schema (ReceiptClaimsSchema)
- * - Discovery validation via @peac/disc (parse, validate)
+ * - Discovery validation via @peac/policy-kit (parsePolicyDocument), wrapped in a
+ *   CLI-internal compat helper that preserves v0.13.0 legacy-line tolerance
  * - Bundle verification via @peac/audit (verifyBundleIntegrity)
  * - Attestation validation via @peac/schema validators
  * - Interaction/Workflow validation via ordered validators

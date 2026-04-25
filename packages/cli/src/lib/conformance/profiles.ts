@@ -50,7 +50,7 @@ export const PROFILE_CAPABILITIES: Record<string, ProfileDetail> = {
   discovery: {
     profile: 'discovery.config',
     level: 'semantic',
-    validator: '@peac/disc:parse',
+    validator: '@peac/policy-kit:parsePolicyDocument (via cli compat helper)',
   },
   dispute: {
     profile: 'receipt.verify.dispute',

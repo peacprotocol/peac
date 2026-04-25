@@ -15,6 +15,8 @@ import { conformance } from './commands/conformance.js';
 import { samples } from './commands/samples.js';
 import { reconcileCommand } from './commands/reconcile.js';
 import { doctor } from './commands/doctor.js';
+import { DiscoverCommand } from './commands/discover.js';
+import { formatOutput } from './utils.js';
 import { getVersion } from './lib/version.js';
 
 const program = new Command();
@@ -223,6 +225,25 @@ program.addCommand(reconcileCommand());
 
 // Installability diagnostics (v0.12.11+)
 doctor(program);
+
+/**
+ * peac discover <url>
+ *
+ * Fetches /.well-known/peac.txt with SSRF-aware HTTP and parses it as a
+ * peac-policy/0.1 document. Implementation lives in
+ * packages/cli/src/lib/policy-document-discovery.ts (CLI-internal helper).
+ */
+program
+  .command('discover')
+  .description('Discover and parse a remote /.well-known/peac.txt policy document')
+  .argument('<url>', 'Origin URL (http/https) whose /.well-known/peac.txt to fetch')
+  .option('-j, --json', 'output in JSON format')
+  .action(async (url: string, opts: { json?: boolean }) => {
+    const cmd = new DiscoverCommand();
+    const result = await cmd.execute(url, { json: opts.json });
+    console.log(formatOutput(result, opts.json));
+    process.exitCode = result.success ? 0 : 1;
+  });
 
 // Parse and handle Commander errors (exitOverride causes CommanderError on --help, --version, etc.)
 try {
