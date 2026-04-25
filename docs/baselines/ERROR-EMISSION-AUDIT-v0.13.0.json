@@ -1,0 +1,1691 @@
+{
+  "generated_at": "2026-04-25T03:25:48.499Z",
+  "registry_path": "specs/kernel/errors.json",
+  "registry_version": "0.12.14",
+  "scopes": {
+    "production_files_scanned": 512,
+    "test_files_scanned": 375
+  },
+  "summary": {
+    "total_codes": 186,
+    "emitted_in_production": 141,
+    "tests_only": 9,
+    "unemitted": 36
+  },
+  "details": [
+    {
+      "code": "E_INVALID_SIGNATURE",
+      "category": "emitted-in-production",
+      "production_files": 10,
+      "test_files": 8,
+      "spec_category": "verification",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_INVALID_FORMAT",
+      "category": "emitted-in-production",
+      "production_files": 14,
+      "test_files": 10,
+      "spec_category": "validation",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_EXPIRED",
+      "category": "emitted-in-production",
+      "production_files": 7,
+      "test_files": 3,
+      "spec_category": "validation",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_NOT_YET_VALID",
+      "category": "emitted-in-production",
+      "production_files": 5,
+      "test_files": 2,
+      "spec_category": "validation",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_INVALID_ISSUER",
+      "category": "emitted-in-production",
+      "production_files": 7,
+      "test_files": 6,
+      "spec_category": "validation",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_INVALID_AUDIENCE",
+      "category": "emitted-in-production",
+      "production_files": 5,
+      "test_files": 1,
+      "spec_category": "validation",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_JWKS_FETCH_FAILED",
+      "category": "emitted-in-production",
+      "production_files": 6,
+      "test_files": 1,
+      "spec_category": "infrastructure",
+      "spec_severity": null,
+      "spec_http_status": 503
+    },
+    {
+      "code": "E_KEY_NOT_FOUND",
+      "category": "emitted-in-production",
+      "production_files": 9,
+      "test_files": 2,
+      "spec_category": "verification",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_KID_REUSE_DETECTED",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 2,
+      "spec_category": "verification",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_REVOKED_KEY_USED",
+      "category": "tests-only",
+      "production_files": 0,
+      "test_files": 1,
+      "spec_category": "verification",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_INVALID_AMOUNT",
+      "category": "unemitted",
+      "production_files": 0,
+      "test_files": 0,
+      "spec_category": "validation",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_INVALID_CURRENCY",
+      "category": "unemitted",
+      "production_files": 0,
+      "test_files": 0,
+      "spec_category": "validation",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_INVALID_RAIL",
+      "category": "unemitted",
+      "production_files": 0,
+      "test_files": 0,
+      "spec_category": "validation",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_MISSING_REQUIRED_CLAIM",
+      "category": "tests-only",
+      "production_files": 0,
+      "test_files": 1,
+      "spec_category": "validation",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_RATE_LIMITED",
+      "category": "emitted-in-production",
+      "production_files": 6,
+      "test_files": 0,
+      "spec_category": "infrastructure",
+      "spec_severity": null,
+      "spec_http_status": 429
+    },
+    {
+      "code": "E_PAYLOAD_TOO_LARGE",
+      "category": "emitted-in-production",
+      "production_files": 3,
+      "test_files": 0,
+      "spec_category": "validation",
+      "spec_severity": null,
+      "spec_http_status": 413
+    },
+    {
+      "code": "E_CIRCUIT_BREAKER_OPEN",
+      "category": "unemitted",
+      "production_files": 0,
+      "test_files": 0,
+      "spec_category": "infrastructure",
+      "spec_severity": null,
+      "spec_http_status": 503
+    },
+    {
+      "code": "E_CONTROL_DENIED",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 0,
+      "spec_category": "control",
+      "spec_severity": null,
+      "spec_http_status": 403
+    },
+    {
+      "code": "E_CONTROL_REVIEW_REQUIRED",
+      "category": "unemitted",
+      "production_files": 0,
+      "test_files": 0,
+      "spec_category": "control",
+      "spec_severity": null,
+      "spec_http_status": 202
+    },
+    {
+      "code": "E_EVIDENCE_NOT_JSON",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 3,
+      "spec_category": "validation",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_INVALID_SUBJECT",
+      "category": "emitted-in-production",
+      "production_files": 2,
+      "test_files": 2,
+      "spec_category": "validation",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_INVALID_RECEIPT_ID",
+      "category": "emitted-in-production",
+      "production_files": 2,
+      "test_files": 1,
+      "spec_category": "validation",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_MISSING_EXP",
+      "category": "emitted-in-production",
+      "production_files": 2,
+      "test_files": 1,
+      "spec_category": "validation",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_INTERNAL",
+      "category": "emitted-in-production",
+      "production_files": 2,
+      "test_files": 0,
+      "spec_category": "infrastructure",
+      "spec_severity": null,
+      "spec_http_status": 500
+    },
+    {
+      "code": "E_IDENTITY_MISSING",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 0,
+      "spec_category": "identity",
+      "spec_severity": null,
+      "spec_http_status": 401
+    },
+    {
+      "code": "E_IDENTITY_INVALID_FORMAT",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 0,
+      "spec_category": "identity",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_IDENTITY_EXPIRED",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 0,
+      "spec_category": "identity",
+      "spec_severity": null,
+      "spec_http_status": 401
+    },
+    {
+      "code": "E_IDENTITY_NOT_YET_VALID",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 0,
+      "spec_category": "identity",
+      "spec_severity": null,
+      "spec_http_status": 401
+    },
+    {
+      "code": "E_IDENTITY_SIG_INVALID",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 0,
+      "spec_category": "identity",
+      "spec_severity": null,
+      "spec_http_status": 401
+    },
+    {
+      "code": "E_IDENTITY_KEY_UNKNOWN",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 0,
+      "spec_category": "identity",
+      "spec_severity": null,
+      "spec_http_status": 401
+    },
+    {
+      "code": "E_IDENTITY_KEY_EXPIRED",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 0,
+      "spec_category": "identity",
+      "spec_severity": null,
+      "spec_http_status": 401
+    },
+    {
+      "code": "E_IDENTITY_KEY_REVOKED",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 0,
+      "spec_category": "identity",
+      "spec_severity": null,
+      "spec_http_status": 401
+    },
+    {
+      "code": "E_IDENTITY_BINDING_MISMATCH",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 0,
+      "spec_category": "identity",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_IDENTITY_BINDING_STALE",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 0,
+      "spec_category": "identity",
+      "spec_severity": null,
+      "spec_http_status": 401
+    },
+    {
+      "code": "E_IDENTITY_BINDING_FUTURE",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 0,
+      "spec_category": "identity",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_IDENTITY_PROOF_UNSUPPORTED",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 0,
+      "spec_category": "identity",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_IDENTITY_DIRECTORY_UNAVAILABLE",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 0,
+      "spec_category": "identity",
+      "spec_severity": null,
+      "spec_http_status": 503
+    },
+    {
+      "code": "E_MVIS_INCOMPLETE",
+      "category": "tests-only",
+      "production_files": 0,
+      "test_files": 1,
+      "spec_category": "identity",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_ATTRIBUTION_MISSING_SOURCES",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 1,
+      "spec_category": "attribution",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_ATTRIBUTION_INVALID_FORMAT",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 1,
+      "spec_category": "attribution",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_ATTRIBUTION_INVALID_REF",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 1,
+      "spec_category": "attribution",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_ATTRIBUTION_HASH_INVALID",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 1,
+      "spec_category": "attribution",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_ATTRIBUTION_UNKNOWN_USAGE",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 1,
+      "spec_category": "attribution",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_ATTRIBUTION_INVALID_WEIGHT",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 1,
+      "spec_category": "attribution",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_ATTRIBUTION_CIRCULAR_CHAIN",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 1,
+      "spec_category": "attribution",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_ATTRIBUTION_CHAIN_TOO_DEEP",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 1,
+      "spec_category": "attribution",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_ATTRIBUTION_TOO_MANY_SOURCES",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 1,
+      "spec_category": "attribution",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_ATTRIBUTION_SIZE_EXCEEDED",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 1,
+      "spec_category": "attribution",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_ATTRIBUTION_RESOLUTION_FAILED",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 1,
+      "spec_category": "attribution",
+      "spec_severity": null,
+      "spec_http_status": 502
+    },
+    {
+      "code": "E_ATTRIBUTION_RESOLUTION_TIMEOUT",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 1,
+      "spec_category": "attribution",
+      "spec_severity": null,
+      "spec_http_status": 504
+    },
+    {
+      "code": "E_ATTRIBUTION_NOT_YET_VALID",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 2,
+      "spec_category": "attribution",
+      "spec_severity": null,
+      "spec_http_status": 401
+    },
+    {
+      "code": "E_ATTRIBUTION_EXPIRED",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 2,
+      "spec_category": "attribution",
+      "spec_severity": null,
+      "spec_http_status": 401
+    },
+    {
+      "code": "E_DISPUTE_INVALID_FORMAT",
+      "category": "tests-only",
+      "production_files": 0,
+      "test_files": 1,
+      "spec_category": "dispute",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_DISPUTE_INVALID_ID",
+      "category": "unemitted",
+      "production_files": 0,
+      "test_files": 0,
+      "spec_category": "dispute",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_DISPUTE_INVALID_TYPE",
+      "category": "unemitted",
+      "production_files": 0,
+      "test_files": 0,
+      "spec_category": "dispute",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_DISPUTE_INVALID_TARGET_TYPE",
+      "category": "unemitted",
+      "production_files": 0,
+      "test_files": 0,
+      "spec_category": "dispute",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_DISPUTE_INVALID_GROUNDS",
+      "category": "unemitted",
+      "production_files": 0,
+      "test_files": 0,
+      "spec_category": "dispute",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_DISPUTE_INVALID_STATE",
+      "category": "unemitted",
+      "production_files": 0,
+      "test_files": 0,
+      "spec_category": "dispute",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_DISPUTE_INVALID_TRANSITION",
+      "category": "unemitted",
+      "production_files": 0,
+      "test_files": 0,
+      "spec_category": "dispute",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_DISPUTE_MISSING_RESOLUTION",
+      "category": "unemitted",
+      "production_files": 0,
+      "test_files": 0,
+      "spec_category": "dispute",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_DISPUTE_RESOLUTION_NOT_ALLOWED",
+      "category": "unemitted",
+      "production_files": 0,
+      "test_files": 0,
+      "spec_category": "dispute",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_DISPUTE_NOT_YET_VALID",
+      "category": "unemitted",
+      "production_files": 0,
+      "test_files": 0,
+      "spec_category": "dispute",
+      "spec_severity": null,
+      "spec_http_status": 401
+    },
+    {
+      "code": "E_DISPUTE_EXPIRED",
+      "category": "unemitted",
+      "production_files": 0,
+      "test_files": 0,
+      "spec_category": "dispute",
+      "spec_severity": null,
+      "spec_http_status": 401
+    },
+    {
+      "code": "E_DISPUTE_OTHER_REQUIRES_DESCRIPTION",
+      "category": "unemitted",
+      "production_files": 0,
+      "test_files": 0,
+      "spec_category": "dispute",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_DISPUTE_DUPLICATE",
+      "category": "unemitted",
+      "production_files": 0,
+      "test_files": 0,
+      "spec_category": "dispute",
+      "spec_severity": null,
+      "spec_http_status": 409
+    },
+    {
+      "code": "E_DISPUTE_TARGET_NOT_FOUND",
+      "category": "unemitted",
+      "production_files": 0,
+      "test_files": 0,
+      "spec_category": "dispute",
+      "spec_severity": null,
+      "spec_http_status": 404
+    },
+    {
+      "code": "E_BUNDLE_INVALID_FORMAT",
+      "category": "tests-only",
+      "production_files": 0,
+      "test_files": 1,
+      "spec_category": "bundle",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_BUNDLE_MANIFEST_MISSING",
+      "category": "unemitted",
+      "production_files": 0,
+      "test_files": 0,
+      "spec_category": "bundle",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_BUNDLE_MANIFEST_INVALID",
+      "category": "unemitted",
+      "production_files": 0,
+      "test_files": 0,
+      "spec_category": "bundle",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_BUNDLE_HASH_MISMATCH",
+      "category": "unemitted",
+      "production_files": 0,
+      "test_files": 0,
+      "spec_category": "bundle",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_BUNDLE_SIGNATURE_INVALID",
+      "category": "unemitted",
+      "production_files": 0,
+      "test_files": 0,
+      "spec_category": "bundle",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_BUNDLE_RECEIPTS_UNORDERED",
+      "category": "unemitted",
+      "production_files": 0,
+      "test_files": 0,
+      "spec_category": "bundle",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_BUNDLE_POLICY_HASH_MISMATCH",
+      "category": "unemitted",
+      "production_files": 0,
+      "test_files": 0,
+      "spec_category": "bundle",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_BUNDLE_KEY_MISSING",
+      "category": "tests-only",
+      "production_files": 0,
+      "test_files": 1,
+      "spec_category": "bundle",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_BUNDLE_TIME_RANGE_INVALID",
+      "category": "unemitted",
+      "production_files": 0,
+      "test_files": 0,
+      "spec_category": "bundle",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_BUNDLE_MISSING_RECEIPTS",
+      "category": "tests-only",
+      "production_files": 0,
+      "test_files": 1,
+      "spec_category": "bundle",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_BUNDLE_MISSING_KEYS",
+      "category": "tests-only",
+      "production_files": 0,
+      "test_files": 1,
+      "spec_category": "bundle",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_BUNDLE_RECEIPT_INVALID",
+      "category": "tests-only",
+      "production_files": 0,
+      "test_files": 1,
+      "spec_category": "bundle",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_BUNDLE_DUPLICATE_RECEIPT",
+      "category": "unemitted",
+      "production_files": 0,
+      "test_files": 0,
+      "spec_category": "bundle",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_BUNDLE_PATH_TRAVERSAL",
+      "category": "unemitted",
+      "production_files": 0,
+      "test_files": 0,
+      "spec_category": "bundle",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_BUNDLE_SIZE_EXCEEDED",
+      "category": "unemitted",
+      "production_files": 0,
+      "test_files": 0,
+      "spec_category": "bundle",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_UCP_SIGNATURE_MISSING",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 0,
+      "spec_category": "ucp",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_UCP_SIGNATURE_MALFORMED",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 0,
+      "spec_category": "ucp",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_UCP_SIGNATURE_ALGORITHM_UNSUPPORTED",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 0,
+      "spec_category": "ucp",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_UCP_SIGNATURE_B64_INVALID",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 0,
+      "spec_category": "ucp",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_UCP_KEY_NOT_FOUND",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 0,
+      "spec_category": "ucp",
+      "spec_severity": null,
+      "spec_http_status": 401
+    },
+    {
+      "code": "E_UCP_KEY_ALGORITHM_MISMATCH",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 0,
+      "spec_category": "ucp",
+      "spec_severity": null,
+      "spec_http_status": 401
+    },
+    {
+      "code": "E_UCP_KEY_CURVE_MISMATCH",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 0,
+      "spec_category": "ucp",
+      "spec_severity": null,
+      "spec_http_status": 401
+    },
+    {
+      "code": "E_UCP_SIGNATURE_INVALID",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 1,
+      "spec_category": "ucp",
+      "spec_severity": null,
+      "spec_http_status": 401
+    },
+    {
+      "code": "E_UCP_VERIFICATION_FAILED",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 0,
+      "spec_category": "ucp",
+      "spec_severity": null,
+      "spec_http_status": 401
+    },
+    {
+      "code": "E_UCP_PROFILE_FETCH_FAILED",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 0,
+      "spec_category": "ucp",
+      "spec_severity": null,
+      "spec_http_status": 502
+    },
+    {
+      "code": "E_UCP_PROFILE_INVALID",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 0,
+      "spec_category": "ucp",
+      "spec_severity": null,
+      "spec_http_status": 502
+    },
+    {
+      "code": "E_UCP_PROFILE_NO_SIGNING_KEYS",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 0,
+      "spec_category": "ucp",
+      "spec_severity": null,
+      "spec_http_status": 502
+    },
+    {
+      "code": "E_UCP_PAYLOAD_EMPTY",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 0,
+      "spec_category": "ucp",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_UCP_PAYLOAD_NOT_JSON",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 0,
+      "spec_category": "ucp",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_UCP_PAYLOAD_TOO_LARGE",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 0,
+      "spec_category": "ucp",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_UCP_ORDER_INVALID",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 0,
+      "spec_category": "ucp",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_UCP_ORDER_MISSING_ID",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 0,
+      "spec_category": "ucp",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_UCP_ORDER_MISSING_LINE_ITEMS",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 0,
+      "spec_category": "ucp",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_UCP_ORDER_MISSING_TOTALS",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 0,
+      "spec_category": "ucp",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_UCP_EVIDENCE_SERIALIZATION_FAILED",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 0,
+      "spec_category": "ucp",
+      "spec_severity": null,
+      "spec_http_status": 500
+    },
+    {
+      "code": "E_WORKFLOW_CONTEXT_INVALID",
+      "category": "emitted-in-production",
+      "production_files": 2,
+      "test_files": 1,
+      "spec_category": "workflow",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_WORKFLOW_DAG_INVALID",
+      "category": "emitted-in-production",
+      "production_files": 2,
+      "test_files": 1,
+      "spec_category": "workflow",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_WORKFLOW_LIMIT_EXCEEDED",
+      "category": "emitted-in-production",
+      "production_files": 2,
+      "test_files": 1,
+      "spec_category": "workflow",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_WORKFLOW_ID_INVALID",
+      "category": "emitted-in-production",
+      "production_files": 2,
+      "test_files": 1,
+      "spec_category": "workflow",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_WORKFLOW_STEP_ID_INVALID",
+      "category": "emitted-in-production",
+      "production_files": 2,
+      "test_files": 1,
+      "spec_category": "workflow",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_WORKFLOW_PARENT_NOT_FOUND",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 1,
+      "spec_category": "workflow",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_WORKFLOW_SUMMARY_INVALID",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 1,
+      "spec_category": "workflow",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_WORKFLOW_CYCLE_DETECTED",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 1,
+      "spec_category": "workflow",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_INTERACTION_INVALID_FORMAT",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 1,
+      "spec_category": "interaction",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_INTERACTION_MISSING_ID",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 1,
+      "spec_category": "interaction",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_INTERACTION_MISSING_KIND",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 1,
+      "spec_category": "interaction",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_INTERACTION_INVALID_KIND_FORMAT",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 1,
+      "spec_category": "interaction",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_INTERACTION_KIND_RESERVED",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 1,
+      "spec_category": "interaction",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_INTERACTION_MISSING_STARTED_AT",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 0,
+      "spec_category": "interaction",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_INTERACTION_MISSING_EXECUTOR",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 1,
+      "spec_category": "interaction",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_INTERACTION_INVALID_DIGEST",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 0,
+      "spec_category": "interaction",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_INTERACTION_INVALID_DIGEST_ALG",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 1,
+      "spec_category": "interaction",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_INTERACTION_INVALID_TIMING",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 1,
+      "spec_category": "interaction",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_INTERACTION_MISSING_RESULT",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 1,
+      "spec_category": "interaction",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_INTERACTION_MISSING_ERROR_DETAIL",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 1,
+      "spec_category": "interaction",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_INTERACTION_MISSING_TARGET",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 1,
+      "spec_category": "interaction",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_INTERACTION_INVALID_EXTENSION_KEY",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 1,
+      "spec_category": "interaction",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_VERIFY_ISSUER_CONFIG_MISSING",
+      "category": "emitted-in-production",
+      "production_files": 4,
+      "test_files": 1,
+      "spec_category": "verifier",
+      "spec_severity": null,
+      "spec_http_status": 502
+    },
+    {
+      "code": "E_VERIFY_ISSUER_CONFIG_INVALID",
+      "category": "emitted-in-production",
+      "production_files": 2,
+      "test_files": 1,
+      "spec_category": "verifier",
+      "spec_severity": null,
+      "spec_http_status": 502
+    },
+    {
+      "code": "E_VERIFY_ISSUER_MISMATCH",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 1,
+      "spec_category": "verifier",
+      "spec_severity": null,
+      "spec_http_status": 403
+    },
+    {
+      "code": "E_VERIFY_JWKS_URI_INVALID",
+      "category": "emitted-in-production",
+      "production_files": 2,
+      "test_files": 2,
+      "spec_category": "verifier",
+      "spec_severity": null,
+      "spec_http_status": 502
+    },
+    {
+      "code": "E_VERIFY_INSECURE_SCHEME_BLOCKED",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 1,
+      "spec_category": "verifier",
+      "spec_severity": null,
+      "spec_http_status": 403
+    },
+    {
+      "code": "E_VERIFY_JWKS_INVALID",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 1,
+      "spec_category": "verifier",
+      "spec_severity": null,
+      "spec_http_status": 502
+    },
+    {
+      "code": "E_VERIFY_RECEIPT_TOO_LARGE",
+      "category": "emitted-in-production",
+      "production_files": 2,
+      "test_files": 0,
+      "spec_category": "verifier",
+      "spec_severity": null,
+      "spec_http_status": 413
+    },
+    {
+      "code": "E_VERIFY_MALFORMED_RECEIPT",
+      "category": "emitted-in-production",
+      "production_files": 4,
+      "test_files": 1,
+      "spec_category": "verifier",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_VERIFY_ISSUER_NOT_ALLOWED",
+      "category": "emitted-in-production",
+      "production_files": 2,
+      "test_files": 0,
+      "spec_category": "verifier",
+      "spec_severity": null,
+      "spec_http_status": 403
+    },
+    {
+      "code": "E_VERIFY_KEY_FETCH_BLOCKED",
+      "category": "emitted-in-production",
+      "production_files": 2,
+      "test_files": 1,
+      "spec_category": "verifier",
+      "spec_severity": null,
+      "spec_http_status": 403
+    },
+    {
+      "code": "E_VERIFY_KEY_FETCH_FAILED",
+      "category": "emitted-in-production",
+      "production_files": 2,
+      "test_files": 1,
+      "spec_category": "verifier",
+      "spec_severity": null,
+      "spec_http_status": 502
+    },
+    {
+      "code": "E_VERIFY_KEY_FETCH_TIMEOUT",
+      "category": "emitted-in-production",
+      "production_files": 2,
+      "test_files": 1,
+      "spec_category": "verifier",
+      "spec_severity": null,
+      "spec_http_status": 504
+    },
+    {
+      "code": "E_VERIFY_POINTER_FETCH_BLOCKED",
+      "category": "emitted-in-production",
+      "production_files": 3,
+      "test_files": 0,
+      "spec_category": "verifier",
+      "spec_severity": null,
+      "spec_http_status": 403
+    },
+    {
+      "code": "E_VERIFY_POINTER_FETCH_FAILED",
+      "category": "emitted-in-production",
+      "production_files": 2,
+      "test_files": 0,
+      "spec_category": "verifier",
+      "spec_severity": null,
+      "spec_http_status": 502
+    },
+    {
+      "code": "E_VERIFY_POINTER_FETCH_TIMEOUT",
+      "category": "emitted-in-production",
+      "production_files": 2,
+      "test_files": 0,
+      "spec_category": "verifier",
+      "spec_severity": null,
+      "spec_http_status": 504
+    },
+    {
+      "code": "E_VERIFY_POINTER_FETCH_TOO_LARGE",
+      "category": "emitted-in-production",
+      "production_files": 2,
+      "test_files": 0,
+      "spec_category": "verifier",
+      "spec_severity": null,
+      "spec_http_status": 413
+    },
+    {
+      "code": "E_VERIFY_POINTER_DIGEST_MISMATCH",
+      "category": "emitted-in-production",
+      "production_files": 2,
+      "test_files": 0,
+      "spec_category": "verifier",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_VERIFY_JWKS_TOO_LARGE",
+      "category": "emitted-in-production",
+      "production_files": 2,
+      "test_files": 0,
+      "spec_category": "verifier",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_VERIFY_JWKS_TOO_MANY_KEYS",
+      "category": "emitted-in-production",
+      "production_files": 2,
+      "test_files": 1,
+      "spec_category": "verifier",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_VERIFY_SCHEMA_INVALID",
+      "category": "emitted-in-production",
+      "production_files": 2,
+      "test_files": 0,
+      "spec_category": "verifier",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_VERIFY_POLICY_VIOLATION",
+      "category": "emitted-in-production",
+      "production_files": 2,
+      "test_files": 0,
+      "spec_category": "verifier",
+      "spec_severity": null,
+      "spec_http_status": 403
+    },
+    {
+      "code": "E_VERIFY_INVALID_TRANSPORT",
+      "category": "emitted-in-production",
+      "production_files": 2,
+      "test_files": 0,
+      "spec_category": "verifier",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_VERIFY_EXTENSION_TOO_LARGE",
+      "category": "emitted-in-production",
+      "production_files": 2,
+      "test_files": 0,
+      "spec_category": "verifier",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_PARSE_INVALID_INPUT",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 2,
+      "spec_category": "validation",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_PARSE_COMMERCE_INVALID",
+      "category": "emitted-in-production",
+      "production_files": 3,
+      "test_files": 3,
+      "spec_category": "validation",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_PARSE_ATTESTATION_INVALID",
+      "category": "emitted-in-production",
+      "production_files": 2,
+      "test_files": 2,
+      "spec_category": "validation",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_CONSTRAINT_VIOLATION",
+      "category": "emitted-in-production",
+      "production_files": 8,
+      "test_files": 4,
+      "spec_category": "validation",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_INVALID_KIND",
+      "category": "unemitted",
+      "production_files": 0,
+      "test_files": 0,
+      "spec_category": "validation",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_INVALID_TYPE",
+      "category": "unemitted",
+      "production_files": 0,
+      "test_files": 0,
+      "spec_category": "validation",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_INVALID_PILLAR_VALUE",
+      "category": "unemitted",
+      "production_files": 0,
+      "test_files": 0,
+      "spec_category": "validation",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_PILLARS_NOT_SORTED",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 0,
+      "spec_category": "validation",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_ISS_NOT_CANONICAL",
+      "category": "emitted-in-production",
+      "production_files": 5,
+      "test_files": 0,
+      "spec_category": "validation",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_OCCURRED_AT_ON_CHALLENGE",
+      "category": "emitted-in-production",
+      "production_files": 2,
+      "test_files": 3,
+      "spec_category": "validation",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_OCCURRED_AT_FUTURE",
+      "category": "emitted-in-production",
+      "production_files": 3,
+      "test_files": 1,
+      "spec_category": "validation",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_JWS_EMBEDDED_KEY",
+      "category": "emitted-in-production",
+      "production_files": 2,
+      "test_files": 4,
+      "spec_category": "cryptography",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_JWS_CRIT_REJECTED",
+      "category": "emitted-in-production",
+      "production_files": 2,
+      "test_files": 2,
+      "spec_category": "cryptography",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_JWS_MISSING_KID",
+      "category": "emitted-in-production",
+      "production_files": 4,
+      "test_files": 0,
+      "spec_category": "cryptography",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_JWS_B64_REJECTED",
+      "category": "emitted-in-production",
+      "production_files": 2,
+      "test_files": 1,
+      "spec_category": "cryptography",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_JWS_ZIP_REJECTED",
+      "category": "emitted-in-production",
+      "production_files": 2,
+      "test_files": 1,
+      "spec_category": "cryptography",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_UNSUPPORTED_WIRE_VERSION",
+      "category": "emitted-in-production",
+      "production_files": 5,
+      "test_files": 3,
+      "spec_category": "validation",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_WIRE_VERSION_MISMATCH",
+      "category": "emitted-in-production",
+      "production_files": 2,
+      "test_files": 0,
+      "spec_category": "validation",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_POLICY_BINDING_FAILED",
+      "category": "emitted-in-production",
+      "production_files": 5,
+      "test_files": 1,
+      "spec_category": "validation",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_EAT_SIZE_EXCEEDED",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 1,
+      "spec_category": "validation",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_EAT_INVALID_CBOR",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 1,
+      "spec_category": "validation",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_EAT_INVALID_COSE",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 1,
+      "spec_category": "validation",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_EAT_SIGNATURE_FAILED",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 1,
+      "spec_category": "verification",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_EAT_UNSUPPORTED_ALG",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 1,
+      "spec_category": "validation",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_EXTENSION_SIZE_EXCEEDED",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 1,
+      "spec_category": "validation",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_EXTENSION_NON_JSON_VALUE",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 2,
+      "spec_category": "validation",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_EXTENSION_GROUP_REQUIRED",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 1,
+      "spec_category": "verification",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_EXTENSION_GROUP_MISMATCH",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 1,
+      "spec_category": "verification",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_DID_RESOLUTION_FAILED",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 0,
+      "spec_category": "infrastructure",
+      "spec_severity": null,
+      "spec_http_status": 502
+    },
+    {
+      "code": "E_DID_DOCUMENT_INVALID",
+      "category": "emitted-in-production",
+      "production_files": 2,
+      "test_files": 0,
+      "spec_category": "validation",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_DID_KEY_NOT_FOUND",
+      "category": "emitted-in-production",
+      "production_files": 2,
+      "test_files": 1,
+      "spec_category": "verification",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_DID_UNSUPPORTED_METHOD",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 0,
+      "spec_category": "validation",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_DID_DEACTIVATED",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 0,
+      "spec_category": "verification",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_DID_KEY_AMBIGUOUS",
+      "category": "emitted-in-production",
+      "production_files": 2,
+      "test_files": 1,
+      "spec_category": "verification",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_PKCE_INVALID_VERIFIER",
+      "category": "emitted-in-production",
+      "production_files": 1,
+      "test_files": 1,
+      "spec_category": "validation",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_PKCE_CHALLENGE_MISMATCH",
+      "category": "unemitted",
+      "production_files": 0,
+      "test_files": 0,
+      "spec_category": "verification",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_X402_V2_INVALID_FORMAT",
+      "category": "unemitted",
+      "production_files": 0,
+      "test_files": 0,
+      "spec_category": "validation",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_X402_VERSION_UNSUPPORTED",
+      "category": "unemitted",
+      "production_files": 0,
+      "test_files": 0,
+      "spec_category": "validation",
+      "spec_severity": null,
+      "spec_http_status": 400
+    },
+    {
+      "code": "E_RECEIPT_URL_RESOLUTION_FAILED",
+      "category": "unemitted",
+      "production_files": 0,
+      "test_files": 0,
+      "spec_category": "infrastructure",
+      "spec_severity": null,
+      "spec_http_status": 502
+    },
+    {
+      "code": "E_GRPC_METADATA_TOO_LARGE",
+      "category": "unemitted",
+      "production_files": 0,
+      "test_files": 0,
+      "spec_category": "validation",
+      "spec_severity": null,
+      "spec_http_status": 400
+    }
+  ]
+}

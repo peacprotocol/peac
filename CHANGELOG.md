@@ -39,9 +39,9 @@ Policy binding and privacy-aware verification. Typed document binding for terms 
 The following items are deferred to v0.13.0:
 
 - Naming and terminology cleanup; legacy quarantine of `peac.receipt/0.9` off active surfaces.
-- Scheduled removals: `ProofMethodSchema`, A2A v0.3.0 compatibility, legacy `/verify` endpoint, `sdk-js` workspace stub.
+- Scheduled removals: `ProofMethodSchema`, A2A v0.3.0 compatibility, legacy `/verify` teaching/OpenAPI surface (runtime alias preserved through Sunset), `sdk-js` workspace stub.
 - Full removal of `@peac/disc` and `@peac/pref` deprecated facades.
-- Reboot baseline capture, resource-limit spec, and `docs/STANDARDS_LEDGER.md`.
+- v0.13.0 baseline snapshot, resource-limit spec, and `docs/STANDARDS_LEDGER.md`.
 - Package-surface reduction program with measurable gate.
 - Hosted Issue GA decision.
 
@@ -86,8 +86,8 @@ Compliance mappings, verifier contract alignment, portable proof workflows, and 
 The following items are deferred to v0.13.0:
 
 - Naming and terminology cleanup; legacy quarantine of `peac.receipt/0.9` off active surfaces.
-- Scheduled removals: `ProofMethodSchema`, A2A v0.3.0 compatibility, legacy `/verify` endpoint, `sdk-js` workspace stub.
-- Reboot baseline capture (`docs/reboot/BASELINE-v0.13.0.md`), resource-limit spec (`docs/specs/RESOURCE-LIMITS.md`), and `docs/STANDARDS_LEDGER.md`.
+- Scheduled removals: `ProofMethodSchema`, A2A v0.3.0 compatibility, legacy `/verify` teaching/OpenAPI surface (runtime alias preserved through Sunset), `sdk-js` workspace stub.
+- v0.13.0 baseline snapshot (`docs/baselines/BASELINE-v0.13.0.md`), resource-limit spec (`docs/specs/RESOURCE-LIMITS.md`), and `docs/STANDARDS_LEDGER.md`.
 - Package-surface reduction program with measurable gate.
 - Hosted Issue GA decision.
 
@@ -308,7 +308,7 @@ Coherence, trust, and installability release. No new protocol surface.
 
 - Legacy Wire 0.1 defaults quarantined across 12 spec and guide files
 - `@peac/sdk` (`sdk-js`) and `apps/bridge` archived
-- Legacy `/verify` endpoint: RFC 8594 Sunset and Deprecation headers added
+- Legacy `/verify` compatibility path: RFC 8594 Sunset and Deprecation headers added
 - `examples/wire-02-minimal` renamed to `examples/minimal`
 - x402 upstream references migrated to `x402-foundation/x402`
 - GitHub Actions: all tracked workflows pinned to immutable commit SHAs

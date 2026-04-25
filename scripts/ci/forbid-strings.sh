@@ -49,6 +49,7 @@ if [ -n "$ietf_files" ]; then
       | grep -iv 'IETF AIPREF' \
       | grep -iv 'IETF-aligned\|IETF aligned' \
       | grep -iv 'IETF draft\|IETF protocol\|RFC/IETF\|RFC\/IETF\|IETF [Nn]ormative' \
+      | grep -iv 'IETF Standards Track\|IETF (Proposed\|IETF Best Current Practice\|IETF stream\|IETF SCITT\|at IETF' \
       | grep -v 'draft-ietf-' \
       || true)
     if [ -n "$non_url_ietf" ]; then
