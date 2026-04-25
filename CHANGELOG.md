@@ -308,7 +308,7 @@ Coherence, trust, and installability release. No new protocol surface.
 
 - Legacy Wire 0.1 defaults quarantined across 12 spec and guide files
 - `@peac/sdk` (`sdk-js`) and `apps/bridge` archived
-- Legacy `/verify` endpoint: RFC 8594 Sunset and Deprecation headers added
+- Legacy `/verify` compatibility path: RFC 8594 Sunset and Deprecation headers added
 - `examples/wire-02-minimal` renamed to `examples/minimal`
 - x402 upstream references migrated to `x402-foundation/x402`
 - GitHub Actions: all tracked workflows pinned to immutable commit SHAs
