@@ -18,6 +18,6 @@ For local verification without a reference verifier, Python callers use a standa
 
 The compatibility classification is `examples_only` in [`docs/COMPATIBILITY_MATRIX.md`](../COMPATIBILITY_MATRIX.md) and in `docs/releases/facts.json` (`sdks.python: "examples_only"`). This is descriptive and does not commit a publication path.
 
-## Review
+## Change procedure
 
-A first-party Python SDK is reviewed when there is a concrete consumer integration that cannot be served by the API-first shape and the cross-language parity corpus.
+A change to this classification requires updates to [`docs/COMPATIBILITY_MATRIX.md`](../COMPATIBILITY_MATRIX.md), [`docs/releases/facts.json`](../releases/facts.json), and the release notes for the release in which the change ships.

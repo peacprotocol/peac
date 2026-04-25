@@ -14,6 +14,6 @@ OpenAPI 3.1.x is widely supported by current OpenAPI tooling (validators, codege
 
 `pnpm verify:openapi:drift` ([`scripts/verify-openapi-drift.mjs`](../../scripts/verify-openapi-drift.mjs)) enforces that the canonical and app-level OpenAPI documents agree on the shared `POST /v1/verify` contract and that downstream surfaces (integrator kits, deployment recipes) restate the contract consistently.
 
-## Review
+## Change procedure
 
-This decision is reviewed when a concrete consumer-side feature, downstream tooling change, or PEAC contract requirement makes the current minor revision insufficient. Until then the contract stays on OpenAPI 3.1.x.
+Any OpenAPI minor-version change requires a dedicated contract update and a passing OpenAPI drift gate (`pnpm verify:openapi:drift`) across the canonical contract, the app-level contract, and every downstream surface that restates the contract.
