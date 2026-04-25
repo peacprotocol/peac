@@ -31,7 +31,7 @@ peac/
 ├─ surfaces/              # Distribution artifacts (plugin-pack, workers)
 ├─ integrator-kits/       # Integration checklists for ecosystem transports
 ├─ examples/              # Canonical flow examples
-└─ archive/               # Legacy pre-v0.9.15 materials (historical)
+└─ archive/               # Historical and archived packages; see docs/PACKAGE_STATUS.md for npm availability
 ```
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) for full design rationale.
@@ -360,13 +360,13 @@ peac policy generate peac-policy.yaml --out dist --well-known
 
 **Runtime:**
 
-| Package                    | Description                                                  |
-| -------------------------- | ------------------------------------------------------------ |
-| `@peac/server`             | HTTP verification server with 402 support                    |
-| `@peac/cli`                | Command-line tools for receipts and policy                   |
-| `@peac/mcp-server`         | MCP server (5 tools: verify, inspect, decode, issue, bundle) |
-| `@peac/middleware-core`    | Transport-neutral middleware logic                           |
-| `@peac/middleware-express` | Express middleware for auto-issuance                         |
+| Package                    | Description                                                                                                                             |
+| -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `@peac/server`             | HTTP verification server with 402 support                                                                                               |
+| `@peac/cli`                | Command-line tools for receipts and policy                                                                                              |
+| `@peac/mcp-server`         | MCP server. Default tools: `peac_verify`, `peac_inspect`, `peac_decode`. Privileged tools (opt-in): `peac_issue`, `peac_create_bundle`. |
+| `@peac/middleware-core`    | Transport-neutral middleware logic                                                                                                      |
+| `@peac/middleware-express` | Express middleware for auto-issuance                                                                                                    |
 
 **Rails:**
 
@@ -402,7 +402,19 @@ peac policy generate peac-policy.yaml --out dist --well-known
 
 **Infrastructure:** `@peac/contracts`, `@peac/http-signatures`, `@peac/jwks-cache`, `@peac/net-node`, `@peac/adapter-core`, `@peac/privacy`, `@peac/telemetry`, `@peac/telemetry-otel`, `@peac/transport-grpc`, `@peac/capture-core`, `@peac/capture-node`, `@peac/attribution`, `@peac/audit`, `@peac/policy-kit`.
 
-**Publication status:** Core, runtime, and adapter packages are published to npm. See [npm](https://www.npmjs.com/search?q=%40peac) and [Releases](https://github.com/peacprotocol/peac/releases). Install via `pnpm add <package>`.
+**Publication status:** Package rows include both packages on npm `latest` and workspace-only surfaces. The active publish set is defined by [`scripts/publish-manifest.json`](../scripts/publish-manifest.json); per-package status is summarized in [`docs/PACKAGE_STATUS.md`](PACKAGE_STATUS.md). See [npm](https://www.npmjs.com/search?q=%40peac) and [Releases](https://github.com/peacprotocol/peac/releases). Install only packages present in the active publish manifest.
+
+---
+
+## Specifications and baselines
+
+- [Spec Index](SPEC_INDEX.md): full normative spec set.
+- [Resource limits](specs/RESOURCE-LIMITS.md): normative invariant table for size, time, cache, SSRF, redirect, and timeout ceilings; each row cites the constant in source and a test.
+- [Standards ledger](STANDARDS_LEDGER.md): every external standard PEAC cites or implements, by category and status (Standards Track / Informational / IRTF Informational / BCP / FIPS / W3C Recommendation / International Standard / Regulatory / Draft / Watchlist).
+- [Release-line baselines](baselines/): invariant snapshot for the v0.13.0 release line (released-package surface, wire-format invariants, error-taxonomy inventory, mutation-testing posture).
+- [Stability contract](STABILITY-CONTRACT.md): classification of every public surface PEAC publishes.
+- [Threat model](THREAT_MODEL.md): per-threat mitigation table with test coverage.
+- [Trust artifacts](TRUST-ARTIFACTS.md): index of security and stability artifacts.
 
 ---
 
