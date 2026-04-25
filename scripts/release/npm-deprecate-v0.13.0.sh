@@ -58,6 +58,7 @@ fi
 
 ATTEMPTED=0
 SUCCEEDED=0
+ALREADY_DEPRECATED=0
 SKIPPED_MISSING=0
 FAILED=0
 FAILED_LINES=()
@@ -120,12 +121,32 @@ deprecate_one() {
   if [ $rc -eq 0 ]; then
     echo "  ok        ${spec}"
     SUCCEEDED=$((SUCCEEDED + 1))
-  else
-    echo "  FAILED    ${spec}"
-    echo "$out" | sed 's/^/      /'
-    FAILED=$((FAILED + 1))
-    FAILED_LINES+=("${spec}")
+    return 0
   fi
+
+  # E422 ("Unprocessable Entity") is what npm returns when the deprecation
+  # field on the version is already set to a non-empty string. Re-running
+  # the script over a version that was deprecated by an earlier run, or by
+  # a per-version smoke test, lands here. Confirm with `npm view` and count
+  # the entry as already_deprecated rather than a real failure.
+  if echo "$out" | grep -q '"code"\s*:\s*"E422"\|code E422\|code: '\''E422'\''\|422 Unprocessable Entity'; then
+    local existing
+    existing="$(npm view "$spec" deprecated --json 2>/dev/null || true)"
+    # `npm view ... deprecated --json` prints "" for non-deprecated and a
+    # JSON-quoted string for deprecated. Trim the surrounding quotes / nulls.
+    existing="${existing#\"}"
+    existing="${existing%\"}"
+    if [ -n "$existing" ] && [ "$existing" != "null" ]; then
+      echo "  already   ${spec} (registry already carries a deprecation message)"
+      ALREADY_DEPRECATED=$((ALREADY_DEPRECATED + 1))
+      return 0
+    fi
+  fi
+
+  echo "  FAILED    ${spec}"
+  echo "$out" | sed 's/^/      /'
+  FAILED=$((FAILED + 1))
+  FAILED_LINES+=("${spec}")
   return 0
 }
 
@@ -207,10 +228,11 @@ deprecate_range '@peac/core' '<0.13.0' \
 
 echo
 echo "=== summary ==="
-printf "  attempted:        %d\n" "$ATTEMPTED"
-printf "  succeeded:        %d\n" "$SUCCEEDED"
-printf "  skipped (missing):%d\n" "$SKIPPED_MISSING"
-printf "  failed:           %d\n" "$FAILED"
+printf "  attempted:           %d\n" "$ATTEMPTED"
+printf "  succeeded:           %d\n" "$SUCCEEDED"
+printf "  already_deprecated:  %d\n" "$ALREADY_DEPRECATED"
+printf "  skipped_missing:     %d\n" "$SKIPPED_MISSING"
+printf "  failed:              %d\n" "$FAILED"
 
 if [ $FAILED -gt 0 ]; then
   echo
