@@ -133,7 +133,7 @@ jobs:
       - name: Build all packages
         run: pnpm -w build
 
-      - name: Test core crypto functions
+      - name: Test @peac/crypto sign/verify runtime smoke
         run: |
           echo "Testing @peac/crypto sign/verify round-trip with Node.js..."
 
