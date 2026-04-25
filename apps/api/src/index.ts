@@ -5,7 +5,6 @@
 
 import { Hono } from 'hono';
 import { serve } from '@hono/node-server';
-import { createV13HonoHandler } from './routes.js';
 import { createVerifyV1Handler } from './verify-v1.js';
 import { createIssueV1Handler } from './hosted-issue.js';
 import { createIssuerHealthHandler } from './issuer-health.js';
@@ -33,11 +32,6 @@ export type {
   ErrorContext,
   HttpStatus,
 } from './types.js';
-
-// Legacy enhanced verifier (deprecated -- kept for backwards compat, will be removed)
-export { VerifierV13 } from './verifier.js';
-export { createV13ExpressHandler, createV13HonoHandler } from './routes.js';
-export type { V13VerifyRequest, V13VerifyResponse, VerifierOptions } from './verifier.js';
 
 // v1 verify endpoint
 export { createVerifyV1Handler, resetVerifyV1RateLimit } from './verify-v1.js';
@@ -68,6 +62,35 @@ export const PROBLEM_TYPES = {
   MISCONFIGURED_VERIFIER: 'https://www.peacprotocol.org/problems/misconfigured-verifier',
 } as const;
 
+/**
+ * Deprecation headers for the legacy `POST /verify` alias and any other
+ * route that predates `POST /v1/verify`. The alias keeps serving valid
+ * `/v1/verify`-shaped responses, but every response carries an RFC 9745
+ * `Deprecation` marker, an RFC 8594 `Sunset` date, and an RFC 8288
+ * `Link` relation pointing at the migration guide.
+ */
+export const LEGACY_VERIFY_DEPRECATION_HEADERS = {
+  Deprecation: 'true',
+  Sunset: 'Sat, 01 Nov 2026 00:00:00 GMT',
+  Link: '<https://www.peacprotocol.org/docs/migration>; rel="deprecation"',
+} as const;
+
+/**
+ * Build a Hono handler that stamps `LEGACY_VERIFY_DEPRECATION_HEADERS` on
+ * the response and then delegates to the canonical `/v1/verify` handler.
+ * Used by both the legacy `POST /verify` route and the `POST /api/v1/verify`
+ * alias. Production routing and tests both go through this helper so the
+ * two cannot drift on header set, header values, or delegation target.
+ */
+export function createLegacyVerifyAliasHandler(verifyV1: ReturnType<typeof createVerifyV1Handler>) {
+  return (c: Parameters<typeof verifyV1>[0]) => {
+    for (const [key, value] of Object.entries(LEGACY_VERIFY_DEPRECATION_HEADERS)) {
+      c.header(key, value);
+    }
+    return verifyV1(c);
+  };
+}
+
 // HTTP Server (when run as application)
 if (import.meta.url === `file://${process.argv[1]}`) {
   const app = new Hono();
@@ -96,20 +119,16 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   // Health check endpoint
   app.get('/health', (c) => c.json({ ok: true }));
 
-  // Legacy verify endpoint (deprecated: removal target v0.13.0; see Sunset header)
-  app.post('/verify', createV13HonoHandler());
-
   // Canonical v1 verify endpoint
   const verifyV1 = createVerifyV1Handler();
   app.post('/v1/verify', verifyV1);
 
-  // Deprecated alias (Sunset: Nov 1 2026)
-  app.post('/api/v1/verify', (c) => {
-    c.header('Sunset', 'Sat, 01 Nov 2026 00:00:00 GMT');
-    c.header('Deprecation', 'true');
-    c.header('Link', '<https://www.peacprotocol.org/docs/migration>; rel="deprecation"');
-    return verifyV1(c);
-  });
+  // Legacy verify endpoint. Kept runtime-reachable through the advertised
+  // Sunset date. The alias delegates in-process to the canonical v1
+  // handler and stamps deprecation headers on every response.
+  const legacyVerifyAlias = createLegacyVerifyAliasHandler(verifyV1);
+  app.post('/verify', legacyVerifyAlias);
+  app.post('/api/v1/verify', legacyVerifyAlias);
 
   // Provisional v1 issue endpoint (BYO-key, disable via PEAC_HOSTED_ISSUE=false)
   app.post('/v1/issue', createIssueV1Handler());

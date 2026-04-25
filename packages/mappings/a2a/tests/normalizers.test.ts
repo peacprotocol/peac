@@ -1,17 +1,14 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import {
   isV1AgentCard,
   normalizeAgentCard,
   selectBestInterface,
-  normalizeTaskState,
-  _resetDeprecationWarning,
-  A2A_V1_TASK_STATE,
   type A2AAgentCard,
   type A2ASupportedInterface,
 } from '../src/index';
 
 describe('isV1AgentCard', () => {
-  it('returns true for v1.0.0 card with supportedInterfaces', () => {
+  it('returns true for v1.0.0 card with supportedInterfaces[0].url', () => {
     const card: A2AAgentCard = {
       name: 'Test Agent',
       supportedInterfaces: [
@@ -21,28 +18,35 @@ describe('isV1AgentCard', () => {
     expect(isV1AgentCard(card)).toBe(true);
   });
 
-  it('returns false for v0.3.0 card with top-level url', () => {
-    const card: A2AAgentCard = {
-      name: 'Test Agent',
-      url: 'https://agent.example.com',
-    };
-    expect(isV1AgentCard(card)).toBe(false);
-  });
-
-  it('returns false for card with empty supportedInterfaces', () => {
+  it('returns false for a card with empty supportedInterfaces', () => {
     const card: A2AAgentCard = {
       name: 'Test Agent',
       supportedInterfaces: [],
     };
     expect(isV1AgentCard(card)).toBe(false);
   });
+
+  it('returns false for a card without supportedInterfaces (legacy v0.3.0 shape, no longer accepted)', () => {
+    // A card with only a top-level `url` (the v0.3.0 shape) is not a
+    // valid v1.0.0 Agent Card. v0.3.0 compatibility was removed in
+    // v0.13.0 (DD-186); isV1AgentCard MUST NOT claim this shape is v1.
+    const card = {
+      name: 'Legacy Agent',
+      url: 'https://legacy.example.com',
+    } as unknown as A2AAgentCard;
+    expect(isV1AgentCard(card)).toBe(false);
+  });
+
+  it('returns false when supportedInterfaces[0].url is empty', () => {
+    const card: A2AAgentCard = {
+      name: 'Broken Agent',
+      supportedInterfaces: [{ url: '', protocolBinding: 'http+json', protocolVersion: '1.0' }],
+    };
+    expect(isV1AgentCard(card)).toBe(false);
+  });
 });
 
 describe('normalizeAgentCard', () => {
-  beforeEach(() => {
-    _resetDeprecationWarning();
-  });
-
   it('normalizes v1.0.0 card with supportedInterfaces', () => {
     const card: A2AAgentCard = {
       name: 'V1 Agent',
@@ -52,23 +56,20 @@ describe('normalizeAgentCard', () => {
     };
     const result = normalizeAgentCard(card);
     expect(result).not.toBeNull();
-    expect(result!.version).toBe('1.0.0');
     expect(result!.url).toBe('https://v1.example.com');
     expect(result!.name).toBe('V1 Agent');
     expect(result!.original).toBe(card);
   });
 
-  it('normalizes v0.3.0 card with top-level url', () => {
-    const card: A2AAgentCard = {
+  it('rejects v0.3.0 card with only top-level url (DD-186 removal at v0.13.0)', () => {
+    // v0.3.0 cards carried `url` at the top level. v0.13.0 removes this
+    // compatibility path: normalizeAgentCard returns null instead of
+    // synthesizing a supportedInterfaces entry from the legacy url.
+    const card = {
       name: 'Legacy Agent',
       url: 'https://legacy.example.com',
-    };
-    const result = normalizeAgentCard(card);
-    expect(result).not.toBeNull();
-    expect(result!.version).toBe('0.3.0');
-    expect(result!.url).toBe('https://legacy.example.com');
-    expect(result!.supportedInterfaces).toHaveLength(1);
-    expect(result!.supportedInterfaces[0]!.protocolVersion).toBe('0.3.0');
+    } as unknown as A2AAgentCard;
+    expect(normalizeAgentCard(card)).toBeNull();
   });
 
   it('returns null for card with neither url nor supportedInterfaces', () => {
@@ -76,16 +77,18 @@ describe('normalizeAgentCard', () => {
     expect(normalizeAgentCard(card)).toBeNull();
   });
 
-  it('prefers supportedInterfaces over url when both present', () => {
-    const card: A2AAgentCard = {
-      name: 'Both Agent',
+  it('ignores a legacy top-level url when supportedInterfaces is present', () => {
+    // A hybrid card (v0.3.0 url plus v1.0.0 supportedInterfaces) is
+    // treated as v1.0.0 by the normalizer. The top-level url is no
+    // longer consulted.
+    const card = {
+      name: 'Hybrid Agent',
       url: 'https://old.example.com',
       supportedInterfaces: [
         { url: 'https://new.example.com', protocolBinding: 'http+json', protocolVersion: '1.0' },
       ],
-    };
+    } as A2AAgentCard;
     const result = normalizeAgentCard(card);
-    expect(result!.version).toBe('1.0.0');
     expect(result!.url).toBe('https://new.example.com');
   });
 
@@ -137,31 +140,5 @@ describe('selectBestInterface', () => {
       { url: 'https://only.example.com', protocolBinding: 'http+json', protocolVersion: '1.0' },
     ];
     expect(selectBestInterface(interfaces)!.url).toBe('https://only.example.com');
-  });
-});
-
-describe('normalizeTaskState', () => {
-  beforeEach(() => {
-    _resetDeprecationWarning();
-  });
-
-  it('converts v0.3.0 kebab-case to v1.0.0 prefixed form', () => {
-    expect(normalizeTaskState('submitted')).toBe(A2A_V1_TASK_STATE.SUBMITTED);
-    expect(normalizeTaskState('working')).toBe(A2A_V1_TASK_STATE.WORKING);
-    expect(normalizeTaskState('completed')).toBe(A2A_V1_TASK_STATE.COMPLETED);
-    expect(normalizeTaskState('failed')).toBe(A2A_V1_TASK_STATE.FAILED);
-    expect(normalizeTaskState('canceled')).toBe(A2A_V1_TASK_STATE.CANCELED);
-    expect(normalizeTaskState('rejected')).toBe(A2A_V1_TASK_STATE.REJECTED);
-    expect(normalizeTaskState('input-required')).toBe(A2A_V1_TASK_STATE.INPUT_REQUIRED);
-    expect(normalizeTaskState('auth-required')).toBe(A2A_V1_TASK_STATE.AUTH_REQUIRED);
-  });
-
-  it('passes through v1.0.0 values unchanged', () => {
-    expect(normalizeTaskState('TASK_STATE_WORKING')).toBe('TASK_STATE_WORKING');
-    expect(normalizeTaskState('TASK_STATE_COMPLETED')).toBe('TASK_STATE_COMPLETED');
-  });
-
-  it('passes through unknown values unchanged', () => {
-    expect(normalizeTaskState('custom-state')).toBe('custom-state');
   });
 });

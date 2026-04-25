@@ -425,15 +425,6 @@
       "layer": 5,
       "published": false
     },
-    "packages/core": {
-      "npm": "@peac/core",
-      "state": "deprecated",
-      "wire": "0.9",
-      "layer": "legacy",
-      "published": true,
-      "removal": "v0.13.0",
-      "note": "DEPRECATED. Archival of packages/core/ is coupled with the legacy /verify handler rewire that eliminates the last active consumer in apps/api/src/verifier.ts. Historical 0.9-series receipt verify-only path; use @peac/protocol + @peac/schema + @peac/crypto + @peac/kernel for current wire."
-    },
     "packages/sdk-js": {
       "npm": "@peac/sdk",
       "state": "archived",
@@ -574,6 +565,11 @@
       "layer": 6,
       "published": false,
       "note": "ARCHIVED in v0.13.0. Near-empty scaffold (version constant + doc comment) never published."
+    },
+    "archive/0.9.0-0.9.14/packages-core": {
+      "state": "archived",
+      "wire": "0.1",
+      "note": "ARCHIVED in v0.13.0. Source moved from packages/core/ to archive/0.9.0-0.9.14/packages-core/. Historical 0.9-series peac.receipt/0.9 verify-only path. Not published at v0.13.0 or later. Historical npm versions <=0.9.14 remain installable (deprecate-then-remove discipline)."
     }
   }
 }

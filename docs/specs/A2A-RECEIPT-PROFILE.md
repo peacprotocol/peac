@@ -3,11 +3,11 @@
 **Version:** 0.2
 **Status:** Normative
 **Package:** `@peac/mappings-a2a`
-**A2A Spec Version:** v1.0.0 (stable); v0.3.0 (deprecated, supported via normalizer)
+**A2A Spec Version:** v1.0.0 (stable). v0.3.0 compatibility was deprecated in v0.12.3 and removed in v0.13.0 (DD-186).
 **Extension URI:** `https://www.peacprotocol.org/ext/traceability/v1`
-**Depends on:** Evidence Carrier Contract (DD-124), A2A v1.0 transition normalizer (DD-186)
+**Depends on:** Evidence Carrier Contract (DD-124)
 
-This document specifies how PEAC evidence carriers are placed within A2A (Agent-to-Agent Protocol) messages and metadata. It covers Agent Card declaration, metadata layout, header conventions, and security considerations. Both A2A v1.0.0 and v0.3.0 (deprecated) wire formats are supported via the dual-version normalizer (DD-186).
+This document specifies how PEAC evidence carriers are placed within A2A (Agent-to-Agent Protocol) messages and metadata. It covers Agent Card declaration, metadata layout, header conventions, and security considerations. A2A v1.0.0 is the only accepted wire format; the v0.3.0 compatibility path (top-level `url`, kebab-case TaskState normalization, `/.well-known/agent.json` legacy discovery) was removed in v0.13.0.
 
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in BCP 14 (RFC 2119, RFC 8174) when, and only when, they appear in all capitals, as shown here.
 

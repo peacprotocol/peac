@@ -122,7 +122,7 @@ Agent A (Requester)         A2A Gateway          Agent B (Provider)
 - Receipt is carried in A2A task `metadata[extensionURI].carriers[]` (max 64 KB)
 - Agent B is the issuer; Agent A is the verifier
 - The A2A gateway routes but does not modify the evidence payload
-- Supports A2A v1.0 (Linux Foundation); v0.3.0 backward compatibility via normalizer
+- Supports A2A v1.0 (Linux Foundation); v0.3.0 compatibility was deprecated in v0.12.3 and removed in v0.13.0 (DD-186)
 - OAuth PKCE (S256) for agent authentication; Device Code flow for non-browser agents
 
 ### Packages involved

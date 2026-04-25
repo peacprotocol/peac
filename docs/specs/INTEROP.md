@@ -148,7 +148,7 @@ const result = rslToControlPurposes(['ai-all', 'search']);
 
 ### 5.3 Package
 
-`@peac/mappings-a2a` provides A2A v1.0.0 artifact embedding, Agent Card discovery, and carrier extraction. A2A v0.3.0 compat shim retained through v0.12.x; removal in v0.13.0.
+`@peac/mappings-a2a` provides A2A v1.0.0 artifact embedding, Agent Card discovery, and carrier extraction. The A2A v0.3.0 compatibility shim was deprecated in v0.12.3 and removed in v0.13.0 (DD-186).
 
 ---
 

@@ -1,9 +1,10 @@
 /**
  * Attach PEAC evidence carriers to A2A metadata.
  *
- * Places carrier data under metadata[PEAC_EXTENSION_URI] per A2A v0.3.0
- * metadata convention. Uses computeReceiptRef() from @peac/schema
- * for receipt reference computation (correction item 4).
+ * Places carrier data under metadata[PEAC_EXTENSION_URI] per the A2A
+ * extension-URI metadata convention (inherited from v0.3.0 and carried
+ * forward in v1.0.0). Uses computeReceiptRef() from @peac/schema for
+ * receipt reference computation.
  */
 
 import type { PeacEvidenceCarrier, CarrierMeta } from '@peac/kernel';

@@ -5,8 +5,13 @@
  * and (MVIS) for the Agent Identity Profile.
  *
  * ActorBinding lives in ext["org.peacprotocol/actor_binding"] in Wire 0.1.
- * ProofTypeSchema is SEPARATE from ProofMethodSchema (agent-identity.ts)
- * to avoid breaking the v0.9.25+ API. Unification deferred to v0.12.0.
+ * ProofTypeSchema (trust-root taxonomy) is SEPARATE from the transport-binding
+ * method enum on AgentProofSchema.method (agent-identity.ts). Unifying them
+ * into a single taxonomy was considered and rejected in v0.13.0 (DD-185):
+ * transport-binding and trust-root concerns are semantically distinct and
+ * remain separate surfaces. The ProofMethodSchema / PROOF_METHODS / ProofMethod
+ * standalone exports were removed in v0.13.0; the four transport-binding
+ * values are now inlined directly on AgentProofSchema.method.
  *
  * @see docs/specs/AGENT-IDENTITY-PROFILE.md for normative specification
  */
@@ -22,9 +27,12 @@ import { z } from 'zod';
  * 8 methods covering attestation chains, RATS, keyless signing,
  * decentralized identity, workload identity, PKI, and vendor-defined.
  *
- * SEPARATE from ProofMethodSchema (4 transport-level methods in agent-identity.ts).
- * ProofMethodSchema covers how proof is transported (HTTP sig, DPoP, mTLS, JWK thumbprint).
- * ProofTypeSchema covers the trust root model used to establish identity.
+ * SEPARATE from the transport-binding method enum inlined on
+ * AgentProofSchema.method (agent-identity.ts). That enum covers how proof
+ * is transported (HTTP signatures, DPoP, mTLS, JWK thumbprint).
+ * ProofTypeSchema covers the trust-root model used to establish identity.
+ * The two concerns compose rather than conflict; see
+ * docs/specs/AGENT-IDENTITY-PROFILE.md §3.4 for the mapping table.
  *
  * The 'custom' type: implementers MUST document their proof semantics externally.
  * proof_ref SHOULD use a reverse-DNS namespace (e.g., 'com.example.vendor/proof-type-v1').

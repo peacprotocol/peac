@@ -145,9 +145,12 @@ describe('API contract: @peac/schema', () => {
     expect(schemas).toHaveLength(13);
   });
 
-  it('ProofMethodSchema remains exported (deprecated, compat through v0.12.x)', () => {
-    expect(exports).toContain('ProofMethodSchema');
-    expect(exports).toContain('PROOF_METHODS');
+  it('ProofMethodSchema is removed (DD-185; removed in v0.13.0 PR B)', () => {
+    // Transport-binding method values (http-message-signature, dpop, mtls,
+    // jwk-thumbprint) are now inlined on AgentProofSchema.method. See
+    // docs/MIGRATION_CURRENT.md and docs/STABILITY-CONTRACT.md.
+    expect(exports).not.toContain('ProofMethodSchema');
+    expect(exports).not.toContain('PROOF_METHODS');
   });
 
   it('ProofTypeSchema remains exported (canonical trust-root model)', () => {

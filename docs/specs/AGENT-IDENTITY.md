@@ -112,7 +112,9 @@ interface AgentIdentityEvidence {
 
 ```typescript
 interface AgentProof {
-  method: ProofMethod; // REQUIRED: Proof method
+  // REQUIRED: transport-binding method. Enum inlined on the field
+  // (previously exported as ProofMethodSchema; removed in v0.13.0).
+  method: 'http-message-signature' | 'dpop' | 'mtls' | 'jwk-thumbprint';
   key_id: string; // REQUIRED: Key identifier (1-256 chars)
   alg?: string; // OPTIONAL: Algorithm (default: 'EdDSA')
   signature?: string; // OPTIONAL: Base64url signature

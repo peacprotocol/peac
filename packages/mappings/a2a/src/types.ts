@@ -1,12 +1,16 @@
 /**
- * A2A types supporting both v0.3.0 and v1.0.0.
+ * A2A v1.0.0 types.
  *
  * These types are defined locally rather than importing @a2a-js/sdk,
  * which brings protobuf + gRPC + express peer dependencies that are
  * not needed for evidence placement.
  *
- * v1.0.0 transition (DD-186): dual-version acceptance with v0.3.0
- * deprecated via process.emitWarning(). v0.3.0 removal at v0.13.0.
+ * A2A v0.3.0 compatibility (DD-186) was deprecated in v0.12.3 and
+ * removed in v0.13.0 (DD-186 removal target honored). Agent Cards
+ * carrying only a top-level `url` (the v0.3.0 shape) are no longer
+ * accepted; every card must expose `supportedInterfaces[0].url`.
+ * TaskState values must use the v1.0.0 prefixed SCREAMING_SNAKE_CASE
+ * form; v0.3.0 kebab-case values are no longer mapped.
  */
 
 import type { CarrierFormat, PeacEvidenceCarrier, CarrierMeta } from '@peac/kernel';
@@ -22,7 +26,7 @@ export const PEAC_EXTENSION_URI = 'https://www.peacprotocol.org/ext/traceability
 export const A2A_MAX_CARRIER_SIZE = 65_536;
 
 // ---------------------------------------------------------------------------
-// A2A Agent Card types (v0.3.0 + v1.0.0)
+// A2A Agent Card types (v1.0.0)
 // ---------------------------------------------------------------------------
 
 /** A2A extension entry in capabilities.extensions[] */
@@ -53,16 +57,22 @@ export interface A2ASupportedInterface {
 }
 
 /**
- * Minimal A2A Agent Card shape (v0.3.0 + v1.0.0).
+ * Minimal A2A Agent Card shape (v1.0.0).
  *
- * v0.3.0 cards have top-level `url`. v1.0.0 cards replace it with
- * `supportedInterfaces[]`. Both shapes are accepted; v0.3.0 emits
- * a deprecation warning. v0.3.0 support removal at v0.13.0.
+ * v1.0.0 cards expose endpoint bindings via `supportedInterfaces[]`.
+ * Every accepted card MUST carry a non-empty `supportedInterfaces[0].url`.
+ *
+ * The legacy v0.3.0 top-level `url` field is no longer a declared field
+ * on this interface. Rejection is **runtime** (`normalizeAgentCard` returns
+ * null and `discoverAgentCard` skips the card), not type-level. The
+ * interface intentionally keeps a `[key: string]: unknown` index
+ * signature so consumers may pass incoming JSON with unknown extra
+ * fields without TypeScript errors, so a literal with a stray `url`
+ * string property still typechecks. The v0.3.0 removal is enforced by
+ * the normalization layer, not by the type system.
  */
 export interface A2AAgentCard {
   name: string;
-  /** @deprecated v0.3.0 field. Use supportedInterfaces[0].url in v1.0.0. */
-  url?: string;
   supportedInterfaces?: A2ASupportedInterface[];
   capabilities?: {
     extensions?: AgentCardExtension[];
@@ -124,17 +134,9 @@ export const A2A_V1_MESSAGE_ROLE = {
   AGENT: 'ROLE_AGENT',
 } as const;
 
-/** Map from v0.3.0 kebab-case task states to v1.0.0 prefixed form */
-export const TASK_STATE_V03_TO_V1: Record<string, string> = {
-  submitted: A2A_V1_TASK_STATE.SUBMITTED,
-  working: A2A_V1_TASK_STATE.WORKING,
-  completed: A2A_V1_TASK_STATE.COMPLETED,
-  failed: A2A_V1_TASK_STATE.FAILED,
-  canceled: A2A_V1_TASK_STATE.CANCELED,
-  rejected: A2A_V1_TASK_STATE.REJECTED,
-  'input-required': A2A_V1_TASK_STATE.INPUT_REQUIRED,
-  'auth-required': A2A_V1_TASK_STATE.AUTH_REQUIRED,
-};
+// The v0.3.0 → v1.0.0 TaskState mapping (previously TASK_STATE_V03_TO_V1)
+// was removed in v0.13.0 alongside the v0.3.0 compat path (DD-186).
+// Callers MUST supply v1.0.0 TaskState values directly.
 
 // ---------------------------------------------------------------------------
 // Carrier payload type

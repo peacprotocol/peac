@@ -40,7 +40,7 @@ kept in the loop and the disclosure calendar is coordinated.
 | `v0.12.x`                        | Active                            | Wire 0.2 (`interaction-record+jwt`) | Through the `v0.13.x` line     |
 | `v0.11.x`                        | Maintenance (security fixes only) | Wire 0.1 (`peac-receipt/0.1`)       | 6 months after `v0.13.0` ships |
 | `v0.10.x` and earlier            | End of life                       | Wire 0.1 and earlier                | No further updates             |
-| `peac.receipt/0.9` archival path | Verify-only through `@peac/core`  | `peac.receipt/0.9`                  | Frozen; removal at `v0.13.0`   |
+| `peac.receipt/0.9` archival path | Historical verify-only            | `peac.receipt/0.9`                  | Archived at `v0.13.0`          |
 
 See [Compatibility matrix](docs/COMPATIBILITY_MATRIX.md) for full runtime
 and wire-format compatibility, and [Security operations](docs/SECURITY-OPERATIONS.md)

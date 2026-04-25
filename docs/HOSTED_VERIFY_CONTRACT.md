@@ -45,6 +45,16 @@ Verify a signed interaction record.
 
 **Error responses:** RFC 9457 Problem Details.
 
+### Legacy `POST /verify` (deprecated compatibility alias)
+
+The reference verifier keeps `POST /verify` runtime-reachable for callers that have not yet migrated. The alias is **not** documented in the machine-readable OpenAPI contract (the canonical verify operation is `POST /v1/verify`). At runtime the alias:
+
+- Delegates in-process to the canonical `POST /v1/verify` handler and returns the same response shape and status codes.
+- Stamps the same security and rate-limit headers as `POST /v1/verify`.
+- Additionally stamps RFC 9745 `Deprecation: true`, RFC 8594 `Sunset: Sat, 01 Nov 2026 00:00:00 GMT`, and RFC 8288 `Link: <https://www.peacprotocol.org/docs/migration>; rel="deprecation"` on every response.
+
+Runtime removal is scheduled no earlier than the advertised Sunset date (2026-11-01). New integrations MUST target `POST /v1/verify`; the `POST /api/v1/verify` path is covered by the same alias behavior.
+
 ### POST /v1/issue (provisional)
 
 Issue a signed interaction record. This endpoint is provisional and uses a BYO-key model (caller provides an Ed25519 private key seed). The contract is defined in [`HOSTED_ISSUE_CONTRACT.md`](HOSTED_ISSUE_CONTRACT.md). The legacy request model shown below is retained for archival purposes only.

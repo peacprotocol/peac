@@ -129,8 +129,11 @@ async function validateUrlForDiscovery(url: string, options: DiscoveryOptions): 
 /**
  * Discover A2A Agent Card from a base URL.
  *
- * Tries `/.well-known/agent-card.json` first, then `/.well-known/agent.json`
- * as a legacy fallback per A2A v0.3.0.
+ * Fetches the A2A v1.0.0 canonical path `/.well-known/agent-card.json`.
+ * The v0.3.0 legacy fallback `/.well-known/agent.json` was removed in
+ * v0.13.0 (DD-186) alongside the rest of the v0.3.0 compatibility
+ * surface; deployers still serving the legacy path should publish the
+ * canonical path or upgrade to an A2A v1.0.0 implementation.
  *
  * SSRF protection per Polish C:
  * 1. Private IP blocking (literal check; DNS resolution when resolveHostname provided)
@@ -146,7 +149,7 @@ export async function discoverAgentCard(
   options: DiscoveryOptions = {}
 ): Promise<A2AAgentCard | null> {
   const fetchFn = options.fetch ?? globalThis.fetch;
-  const paths = ['/.well-known/agent-card.json', '/.well-known/agent.json'];
+  const paths = ['/.well-known/agent-card.json'];
 
   for (const path of paths) {
     const url = new URL(path, baseUrl).toString();
@@ -186,7 +189,10 @@ export async function discoverAgentCard(
 
       const card = JSON.parse(text) as A2AAgentCard;
 
-      // Dual-version validation (DD-186): accept v0.3.0 (url) or v1.0.0 (supportedInterfaces)
+      // v1.0.0 validation (DD-186; v0.3.0 rejected). Cards MUST expose a
+      // valid `supportedInterfaces[0].url`. Cards carrying only a legacy
+      // top-level `url` (the v0.3.0 shape) return null from
+      // normalizeAgentCard and are skipped here.
       if (typeof card.name !== 'string') {
         continue;
       }

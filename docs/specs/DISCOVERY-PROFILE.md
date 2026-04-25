@@ -21,11 +21,12 @@ The algorithm tries three steps in sequence, returning the first successful resu
 
 Check if the endpoint publishes an A2A Agent Card with a PEAC extension declared.
 
-1. Fetch `{baseUrl}/.well-known/agent-card.json` (A2A v0.3.0 canonical path)
-2. If 404, try `{baseUrl}/.well-known/agent.json` (legacy fallback)
-3. Parse the Agent Card JSON
-4. Look for PEAC extension in `capabilities.extensions[]` with URI `https://www.peacprotocol.org/ext/traceability/v1`
-5. If found, return capabilities from the extension's `params` field
+1. Fetch `{baseUrl}/.well-known/agent-card.json` (A2A v1.0.0 canonical path)
+2. Parse the Agent Card JSON
+3. Look for PEAC extension in `capabilities.extensions[]` with URI `https://www.peacprotocol.org/ext/traceability/v1`
+4. If found, return capabilities from the extension's `params` field
+
+The v0.3.0 legacy fallback `{baseUrl}/.well-known/agent.json` was removed in v0.13.0 alongside the rest of the A2A v0.3.0 compatibility surface (DD-186); deployers still serving only the legacy path should publish the canonical path.
 
 **Result source:** `agent_card`
 

@@ -58,12 +58,18 @@ The `PEAC-Receipt` header carries a compact JWS (never a bare `receipt_ref`).
 
 For A2A (Agent-to-Agent Protocol, Linux Foundation) discovery via `/.well-known/agent-card.json`:
 
-**Agent Card (`capabilities.extensions[]` array, A2A v0.3.0 and v1.0.0):**
+**Agent Card (`capabilities.extensions[]` array, A2A v1.0.0):**
 
 ```json
 {
   "name": "Example Agent",
-  "url": "https://agent.example",
+  "supportedInterfaces": [
+    {
+      "url": "https://agent.example",
+      "protocolBinding": "http+json",
+      "protocolVersion": "1.0.0"
+    }
+  ],
   "capabilities": {
     "extensions": [
       {
@@ -93,7 +99,7 @@ For A2A (Agent-to-Agent Protocol, Linux Foundation) discovery via `/.well-known/
 }
 ```
 
-The extension URI key maps to a nested object containing the carrier array. This follows the A2A metadata convention. Both v0.3.0 and v1.0.0 Agent Card shapes are accepted.
+The extension URI key maps to a nested object containing the carrier array. This follows the A2A metadata convention. A2A v1.0.0 Agent Card shape is required; v0.3.0 compatibility was removed in v0.13.0 (DD-186). Cards without a valid `supportedInterfaces[0].url` are rejected.
 
 ## Discovery
 

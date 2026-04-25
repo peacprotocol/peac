@@ -133,26 +133,29 @@ jobs:
       - name: Build all packages
         run: pnpm -w build
 
-      - name: Test core crypto functions
+      - name: Test @peac/crypto sign/verify runtime smoke
         run: |
-          echo "Testing @peac/core crypto functions with Node.js..."
+          echo "Testing @peac/crypto sign/verify round-trip with Node.js..."
 
           node --input-type=module -e "
-            const m = await import('./packages/core/dist/index.js');
-            const { signDetached, verifyDetached, generateEdDSAKeyPair, validateKidFormat } = m;
+            const m = await import('./packages/crypto/dist/index.mjs');
+            const { sign, verify, generateKeypair } = m;
             console.log('Testing with Node.js...');
-            const { privateKey, publicKey, kid } = await generateEdDSAKeyPair();
+            const { privateKey, publicKey } = await generateKeypair();
             console.log('[OK] Key generation works');
 
-            if (!validateKidFormat(kid)) throw new Error('Generated kid invalid format');
-            console.log('[OK] Kid validation works');
-
-            const payload = 'test payload';
-            const jws = await signDetached(payload, privateKey, kid);
+            const kid = 'nightly-test-key';
+            const payload = { msg: 'test payload' };
+            const jws = await sign(payload, privateKey, kid);
+            if (typeof jws !== 'string' || jws.split('.').length !== 3) {
+              throw new Error('sign() did not produce a compact JWS');
+            }
             console.log('[OK] Signing works');
 
-            const verified = await verifyDetached(payload, jws, publicKey);
-            if (!verified) throw new Error('Verification failed');
+            const result = await verify(jws, publicKey);
+            if (!result || !result.payload || result.payload.msg !== payload.msg) {
+              throw new Error('Verification did not return the original payload');
+            }
             console.log('[OK] Verification works');
             console.log('[OK] Node.js runtime validation complete');
           "
