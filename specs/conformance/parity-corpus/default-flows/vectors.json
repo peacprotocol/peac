@@ -1,0 +1,255 @@
+{
+  "family": "default-flows",
+  "description": "Wire 0.2 happy-path parity vectors. Every vector is accepted by the canonical validator chain (kernel constraints + Wire 0.2 envelope schema). Used to assert that the bounded shadow-mode validator foundation reaches zero divergence with the existing path on accepted records. All extension shapes follow the canonical typed extension-group schemas in @peac/schema/wire-02-extensions/.",
+  "version": "0.13.1",
+  "generator": "manual; v0.13.1 PR C floor",
+  "vectors": [
+    {
+      "id": "df-001-evidence-payment",
+      "description": "Minimal valid evidence record with registered payment type and canonical commerce extension (payment_rail / amount_minor / currency).",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1735689600,
+          "jti": "df-001-jti-fixed-value",
+          "extensions": {
+            "org.peacprotocol/commerce": {
+              "payment_rail": "stripe",
+              "amount_minor": "100",
+              "currency": "USD"
+            }
+          }
+        }
+      },
+      "expected": { "accepted": true }
+    },
+    {
+      "id": "df-002-evidence-attribution",
+      "description": "Evidence record with attribution-event type and canonical attribution extension (creator_ref).",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/attribution-event",
+          "iss": "https://api.example.com",
+          "iat": 1735689600,
+          "jti": "df-002-jti-fixed-value",
+          "extensions": {
+            "org.peacprotocol/attribution": {
+              "creator_ref": "did:example:creator-001"
+            }
+          }
+        }
+      },
+      "expected": { "accepted": true }
+    },
+    {
+      "id": "df-003-evidence-consent-record",
+      "description": "Evidence record with consent-record type and canonical consent extension (consent_basis + consent_status).",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/consent-record",
+          "iss": "https://api.example.com",
+          "iat": 1735689600,
+          "jti": "df-003-jti-fixed-value",
+          "extensions": {
+            "org.peacprotocol/consent": {
+              "consent_basis": "explicit",
+              "consent_status": "granted"
+            }
+          }
+        }
+      },
+      "expected": { "accepted": true }
+    },
+    {
+      "id": "df-004-evidence-purpose-declaration",
+      "description": "Evidence record with purpose-declaration type and canonical purpose extension (external_purposes).",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/purpose-declaration",
+          "iss": "https://api.example.com",
+          "iat": 1735689600,
+          "jti": "df-004-jti-fixed-value",
+          "extensions": {
+            "org.peacprotocol/purpose": {
+              "external_purposes": ["fraud_detection"]
+            }
+          }
+        }
+      },
+      "expected": { "accepted": true }
+    },
+    {
+      "id": "df-005-evidence-safety-review",
+      "description": "Evidence record with safety-review type and canonical safety extension (review_status).",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/safety-review",
+          "iss": "https://api.example.com",
+          "iat": 1735689600,
+          "jti": "df-005-jti-fixed-value",
+          "extensions": {
+            "org.peacprotocol/safety": {
+              "review_status": "reviewed"
+            }
+          }
+        }
+      },
+      "expected": { "accepted": true }
+    },
+    {
+      "id": "df-006-evidence-identity-attestation",
+      "description": "Evidence record with identity-attestation type and canonical identity extension (proof_ref).",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/identity-attestation",
+          "iss": "https://api.example.com",
+          "iat": 1735689600,
+          "jti": "df-006-jti-fixed-value",
+          "extensions": {
+            "org.peacprotocol/identity": {
+              "proof_ref": "did-proof-stub-001"
+            }
+          }
+        }
+      },
+      "expected": { "accepted": true }
+    },
+    {
+      "id": "df-007-challenge-payment",
+      "description": "Minimal valid challenge-kind record with registered payment type. Wire 0.2 has only two structural kinds: evidence and challenge.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "challenge",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1735689600,
+          "jti": "df-007-jti-fixed-value"
+        }
+      },
+      "expected": { "accepted": true }
+    },
+    {
+      "id": "df-008-evidence-with-pillars",
+      "description": "Evidence record with single pillar value (commerce). Pillars must be from the closed 10-value taxonomy and sorted ascending.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1735689600,
+          "jti": "df-008-jti-fixed-value",
+          "pillars": ["commerce"],
+          "extensions": {
+            "org.peacprotocol/commerce": {
+              "payment_rail": "stripe",
+              "amount_minor": "10",
+              "currency": "USD"
+            }
+          }
+        }
+      },
+      "expected": { "accepted": true }
+    },
+    {
+      "id": "df-009-evidence-multi-extension",
+      "description": "Evidence record with two registered extension groups (commerce + purpose).",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1735689600,
+          "jti": "df-009-jti-fixed-value",
+          "extensions": {
+            "org.peacprotocol/commerce": {
+              "payment_rail": "stripe",
+              "amount_minor": "250",
+              "currency": "USD"
+            },
+            "org.peacprotocol/purpose": {
+              "external_purposes": ["subscription_renewal"]
+            }
+          }
+        }
+      },
+      "expected": { "accepted": true }
+    },
+    {
+      "id": "df-010-evidence-with-occurred-at",
+      "description": "Evidence record with explicit occurred_at (RFC 3339 with offset) earlier than iat.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1735689600,
+          "occurred_at": "2024-12-31T23:50:00Z",
+          "jti": "df-010-jti-fixed-value",
+          "extensions": {
+            "org.peacprotocol/commerce": {
+              "payment_rail": "stripe",
+              "amount_minor": "99",
+              "currency": "USD"
+            }
+          }
+        }
+      },
+      "expected": { "accepted": true }
+    },
+    {
+      "id": "df-011-evidence-unregistered-type-allowed",
+      "description": "Evidence record with non-registered reverse-DNS type. Acceptance allowed; type-extension mapping does not gate non-registered types.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "com.example.custom/event",
+          "iss": "https://api.example.com",
+          "iat": 1735689600,
+          "jti": "df-011-jti-fixed-value"
+        }
+      },
+      "expected": { "accepted": true }
+    },
+    {
+      "id": "df-012-evidence-multi-pillar",
+      "description": "Evidence record with multiple distinct pillar values (commerce + purpose), sorted ascending.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1735689600,
+          "jti": "df-012-jti-fixed-value",
+          "pillars": ["commerce", "purpose"],
+          "extensions": {
+            "org.peacprotocol/commerce": {
+              "payment_rail": "stripe",
+              "amount_minor": "1000",
+              "currency": "USD"
+            }
+          }
+        }
+      },
+      "expected": { "accepted": true }
+    }
+  ]
+}

@@ -1767,6 +1767,12 @@ importers:
       '@types/node':
         specifier: ^22.19.11
         version: 22.19.11
+      ajv:
+        specifier: ^8.18.0
+        version: 8.18.0
+      ajv-formats:
+        specifier: ^3.0.1
+        version: 3.0.1(ajv@8.18.0)
       tsup:
         specifier: ^8.0.0
         version: 8.5.1(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.3)

@@ -25,6 +25,7 @@ import {
 } from '@peac/schema';
 import { TYPE_TO_EXTENSION_MAP } from '@peac/kernel';
 import { checkTypeExtensionMapping } from './type-extension-check';
+import { maybeRunShadowValidation } from './_internal/record-core/shadow-hook';
 import type { PolicyBindingStatus } from './verifier-types';
 
 /**
@@ -431,6 +432,13 @@ export async function verifyLocal(
     // Wire 0.2 path
     if (pr.wireVersion === '0.2') {
       const claims = pr.claims as Wire02Claims;
+
+      // Inert shadow-call boundary (default disabled in v0.13.1; PR D
+      // wires the actual flag plumbing). The hook returns undefined
+      // and never affects control flow or result; this call is a
+      // structural placeholder so PR D can extend the boundary
+      // without touching this file again.
+      maybeRunShadowValidation({ mode: 'disabled', claims });
 
       // Issuer check
       if (issuer !== undefined && claims.iss !== issuer) {

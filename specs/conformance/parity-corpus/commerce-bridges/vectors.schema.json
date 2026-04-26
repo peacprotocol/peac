@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://peacprotocol.org/specs/conformance/parity-corpus/commerce-bridges/vectors.schema.json",
+  "title": "Commerce-bridges parity corpus vectors",
+  "description": "Schema for one-per-family commerce evidence parity vectors covering x402 settlement, ACP delegated-payment, MPP/paymentauth attempt+settlement, and Stripe SPT mappings. Each vector exercises the canonical validator chain on records that carry commerce extension metadata.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["family", "description", "version", "vectors"],
+  "properties": {
+    "family": { "const": "commerce-bridges" },
+    "description": { "type": "string", "minLength": 1 },
+    "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "generator": { "type": "string" },
+    "vectors": {
+      "type": "array",
+      "minItems": 4,
+      "items": { "$ref": "#/$defs/vector" }
+    }
+  },
+  "$defs": {
+    "vector": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "description", "input", "expected"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9-]+$", "minLength": 1, "maxLength": 64 },
+        "description": { "type": "string", "minLength": 1, "maxLength": 512 },
+        "input": { "$ref": "#/$defs/input" },
+        "expected": { "$ref": "#/$defs/expected" }
+      }
+    },
+    "input": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["payload"],
+      "properties": {
+        "payload": { "type": "object" },
+        "header": { "type": "object" }
+      }
+    },
+    "expected": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["accepted"],
+      "properties": {
+        "accepted": { "type": "boolean" },
+        "errors": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/diagnostic" }
+        },
+        "warnings": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/diagnostic" }
+        }
+      }
+    },
+    "diagnostic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code"],
+      "properties": {
+        "code": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "path": { "type": "string", "maxLength": 256 }
+      }
+    }
+  }
+}

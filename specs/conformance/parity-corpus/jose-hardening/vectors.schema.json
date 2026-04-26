@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://peacprotocol.org/specs/conformance/parity-corpus/jose-hardening/vectors.schema.json",
+  "title": "JOSE-hardening parity corpus vectors",
+  "description": "Schema for Wire 0.2 JOSE rejection vectors. Each vector supplies a malformed JOSE protected header that the validator MUST reject. Header is required for this family.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["family", "description", "version", "vectors"],
+  "properties": {
+    "family": { "const": "jose-hardening" },
+    "description": { "type": "string", "minLength": 1 },
+    "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "generator": { "type": "string" },
+    "vectors": {
+      "type": "array",
+      "minItems": 8,
+      "items": { "$ref": "#/$defs/vector" }
+    }
+  },
+  "$defs": {
+    "vector": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "description", "input", "expected"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9-]+$", "minLength": 1, "maxLength": 64 },
+        "description": { "type": "string", "minLength": 1, "maxLength": 512 },
+        "input": { "$ref": "#/$defs/input" },
+        "expected": { "$ref": "#/$defs/expected" }
+      }
+    },
+    "input": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["payload", "header"],
+      "properties": {
+        "payload": { "type": "object" },
+        "header": { "type": "object" }
+      }
+    },
+    "expected": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["accepted", "errors"],
+      "properties": {
+        "accepted": { "const": false },
+        "errors": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/diagnostic" }
+        },
+        "warnings": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/diagnostic" }
+        }
+      }
+    },
+    "diagnostic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code"],
+      "properties": {
+        "code": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "path": { "type": "string", "maxLength": 256 }
+      }
+    }
+  }
+}

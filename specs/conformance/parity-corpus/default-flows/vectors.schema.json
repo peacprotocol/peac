@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://peacprotocol.org/specs/conformance/parity-corpus/default-flows/vectors.schema.json",
+  "title": "Default-flows parity corpus vectors",
+  "description": "Schema for Wire 0.2 happy-path parity vectors. Each vector exercises the full canonical validator chain (kernel constraints, type-extension mapping, JOSE hardening, temporal, issuer-form, extension-budget) and is expected to be accepted.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["family", "description", "version", "vectors"],
+  "properties": {
+    "family": { "const": "default-flows" },
+    "description": { "type": "string", "minLength": 1 },
+    "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "generator": { "type": "string" },
+    "vectors": {
+      "type": "array",
+      "minItems": 12,
+      "items": { "$ref": "#/$defs/vector" }
+    }
+  },
+  "$defs": {
+    "vector": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "description", "input", "expected"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9-]+$", "minLength": 1, "maxLength": 64 },
+        "description": { "type": "string", "minLength": 1, "maxLength": 512 },
+        "input": { "$ref": "#/$defs/input" },
+        "expected": { "$ref": "#/$defs/expected" }
+      }
+    },
+    "input": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["payload"],
+      "properties": {
+        "payload": { "type": "object" },
+        "header": { "type": "object" }
+      }
+    },
+    "expected": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["accepted"],
+      "properties": {
+        "accepted": { "const": true },
+        "errors": {
+          "type": "array",
+          "maxItems": 0,
+          "description": "Default-flows are accepted; errors must be empty."
+        },
+        "warnings": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/diagnostic" }
+        }
+      }
+    },
+    "diagnostic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code"],
+      "properties": {
+        "code": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "path": { "type": "string", "maxLength": 256 }
+      }
+    }
+  }
+}

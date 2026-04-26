@@ -1,0 +1,100 @@
+{
+  "family": "commerce-bridges",
+  "description": "Commerce evidence parity vectors covering one envelope shape per upstream family (x402, ACP, paymentauth, Stripe SPT). Each vector uses the canonical commerce extension schema (payment_rail / amount_minor / currency / event), where event values are restricted to the canonical lifecycle enum (authorization|capture|settlement|refund|void|chargeback). Bridge-specific upstream artifact preservation lives in adapter packages, not the canonical envelope; this corpus tests envelope validation only.",
+  "version": "0.13.1",
+  "generator": "manual; v0.13.1 PR C floor",
+  "vectors": [
+    {
+      "id": "cb-001-x402-settlement",
+      "description": "Commerce evidence record with payment_rail x402 and event settlement.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1735689600,
+          "jti": "cb-001-jti-fixed-value",
+          "extensions": {
+            "org.peacprotocol/commerce": {
+              "payment_rail": "x402",
+              "amount_minor": "10",
+              "currency": "USD",
+              "event": "settlement"
+            }
+          }
+        }
+      },
+      "expected": { "accepted": true }
+    },
+    {
+      "id": "cb-002-acp-authorization",
+      "description": "Commerce evidence record with payment_rail acp and event authorization. ACP delegated-payment lifecycle is observational; canonical envelope event is restricted to standard payment lifecycle vocabulary.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1735689600,
+          "jti": "cb-002-jti-fixed-value",
+          "extensions": {
+            "org.peacprotocol/commerce": {
+              "payment_rail": "acp",
+              "amount_minor": "500",
+              "currency": "USD",
+              "event": "authorization"
+            }
+          }
+        }
+      },
+      "expected": { "accepted": true }
+    },
+    {
+      "id": "cb-003-paymentauth-settlement",
+      "description": "Commerce evidence record with payment_rail paymentauth and event settlement.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1735689600,
+          "jti": "cb-003-jti-fixed-value",
+          "extensions": {
+            "org.peacprotocol/commerce": {
+              "payment_rail": "paymentauth",
+              "amount_minor": "1234",
+              "currency": "USD",
+              "event": "settlement"
+            }
+          }
+        }
+      },
+      "expected": { "accepted": true }
+    },
+    {
+      "id": "cb-004-stripe-authorization",
+      "description": "Commerce evidence record with payment_rail stripe and event authorization. Stripe Shared Payment Token is an authorization-grant artifact; canonical envelope event is restricted to standard payment lifecycle vocabulary.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1735689600,
+          "jti": "cb-004-jti-fixed-value",
+          "extensions": {
+            "org.peacprotocol/commerce": {
+              "payment_rail": "stripe",
+              "amount_minor": "999",
+              "currency": "USD",
+              "event": "authorization"
+            }
+          }
+        }
+      },
+      "expected": { "accepted": true }
+    }
+  ]
+}
