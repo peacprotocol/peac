@@ -47,7 +47,8 @@
   "dependencies": {
     "@peac/audit": "workspace:*",
     "@peac/crypto": "workspace:*",
-    "@peac/disc": "workspace:*",
+    "@peac/kernel": "workspace:*",
+    "@peac/net-node": "workspace:*",
     "@peac/policy-kit": "workspace:*",
     "@peac/protocol": "workspace:*",
     "@peac/schema": "workspace:*",

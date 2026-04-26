@@ -74,34 +74,28 @@ import { resolveSignals, type SignalResolver } from '@peac/mappings-content-sign
 
 No runtime behavior change: `@peac/pref` v0.12.14 was already a facade over `@peac/mappings-content-signals`.
 
-### `@peac/disc` — published deprecated compatibility package
+### `@peac/disc`: archived (v0.13.1)
 
-**State at v0.13.0:** deprecated (but **published as a compatibility package**; not a thin alias). `@peac/disc@0.13.0` ships with its existing API surface intact: `parse`, `emit`, `validate`, `discover`, `WELL_KNOWN_PATH`, `MAX_BYTES`, `DEFAULT_TIMEOUT_MS`, and related types. The barrel emits a one-shot `PEAC_DISC_DEPRECATED` `DeprecationWarning` on import. Publishing continues through v0.13.0 because `@peac/cli` and the reference verifier (`apps/api`) depend on `@peac/disc` via `workspace:*`; removing the package while published consumers still declare the dependency would break publish closure (a `@peac/cli@0.13.0` tarball with an unsatisfiable `@peac/disc@0.13.0` dependency is release-breaking). Installability beats surface-count optics.
+**State at v0.13.1:** archived. The package is removed from the workspace (its source moved to `archive/discovery/`) and from `scripts/publish-manifest.json`. Active publish-manifest count drops 37 → 36. Historical npm versions (≤ 0.13.0) remain installable from the npm registry but are deprecated; the deprecation messages were dispatched at v0.13.0.
 
-**Removal target:** a later release. See [`docs/PACKAGE_STATUS_V0.13.0_PARITY.md`](./PACKAGE_STATUS_V0.13.0_PARITY.md) for the per-export compatibility coverage: which exports have direct `@peac/policy-kit` equivalents today and which (notably `discover()`) do not.
+The CLI `peac discover <url>` command continues to work via an internal helper at `packages/cli/src/lib/policy-document-discovery.ts` that uses public `@peac/net-node.safeFetchRaw` and `@peac/policy-kit.parsePolicyDocument`, plus a tolerant two-pass parse step that preserves the legacy-line behavior the retired package used to provide. The helper is not exported from `@peac/cli`'s public surface; external consumers needing the same compatibility behavior can copy the pattern from `archive/discovery/src/parser.ts`.
 
 **Migration guidance (by export):**
 
-- **Policy-document parsing and validation:** prefer [`@peac/policy-kit`](../packages/policy-kit/) directly. Canonical replacements already exist and are shipping at v0.13.0:
+- **`import { parse } from '@peac/disc'`** → `import { parsePolicyDocument } from '@peac/policy-kit'` for **strict** parsing of `peac-policy/0.1` documents. **Note:** `parsePolicyDocument` throws `PolicyValidationError` / `PolicyLoadError` on failure, where the retired `@peac/disc.parse` returned a structured `ParseResult { valid, data?, errors?, warnings? }` and was tolerant of legacy key-discovery lines (`verify:`, `public_keys:`, `jwks:`) via a two-pass strip-and-retry. If you need the tolerant behavior, copy the `parsePolicyDocumentCompat` helper pattern from `archive/discovery/src/parser.ts` into your own code.
 
-  ```ts
-  // Before (via @peac/disc)
-  import { parse, validate } from '@peac/disc';
+- **`import { loadPolicyDocument } from '@peac/disc'`** → `import { loadPolicyDocument } from '@peac/policy-kit'` (already supported since v0.12.14).
 
-  // After (direct @peac/policy-kit)
-  import {
-    parsePolicyDocument, // canonical parser (pure; no network)
-    loadPolicyDocument, // alias over parsePolicyDocument, shipped v0.13.0
-    validatePolicy, // canonical validator
-    serializePolicyYaml, // canonical YAML serializer (replaces emit())
-  } from '@peac/policy-kit';
-  ```
+- **`import { discover } from '@peac/disc'`** → combine an SSRF-safe HTTP client with the parse step above. Recommended primitive: `@peac/net-node.safeFetchRaw` (SSRF-safe, byte-capped, timeout-bounded, redirect-policy-aware). Path comes from `@peac/kernel.POLICY.manifestPath` (`/.well-known/peac.txt`); body cap from `@peac/kernel.POLICY.maxBytes` (262144). Set the `safeFetchRaw` option `maxResponseBytes` to that value. The retired `@peac/disc.discover()` used a 5 000 ms timeout; `@peac/kernel` does not currently expose a discovery timeout constant, so set `timeoutMs: 5_000` directly on the fetch options if you want the pre-retirement default. **Always call `await raw.close()` in a `finally` block after reading the response body to avoid socket leaks** (this was implicit in `@peac/disc`; it is explicit in `safeFetchRaw`).
 
-- **Remote discovery (`discover()`) — has NO direct equivalent in `@peac/policy-kit` yet.** `@peac/policy-kit` is a pure parser package that operates on already-fetched bytes; it has no remote-fetch surface. `@peac/disc.discover()` performs SSRF-aware `fetch` injection, timeout management (`DEFAULT_TIMEOUT_MS = 5000`), a 256 KiB byte cap (`MAX_BYTES = 262144`), redirect policy, and well-known path resolution. Consumers that rely on this behavior should **stay on `@peac/disc@0.13.0`** through the v0.13.0 release window. A later release ports `discover()` (or a callable-fetch variant) to a canonical public surface; see [`docs/PACKAGE_STATUS_V0.13.0_PARITY.md`](./PACKAGE_STATUS_V0.13.0_PARITY.md) for the design options under consideration.
+  The CLI source at `packages/cli/src/commands/discover.ts` and the helper at `packages/cli/src/lib/policy-document-discovery.ts` are reference implementations of the retired API surface; they are CLI-internal and not part of `@peac/cli`'s public TypeScript surface.
 
-- **Constants (`WELL_KNOWN_PATH`, `MAX_BYTES`, `DEFAULT_TIMEOUT_MS`):** port to `@peac/policy-kit` scheduled alongside the `discover()` migration.
+- **Constants (`WELL_KNOWN_PATH`, `MAX_BYTES`, `DEFAULT_TIMEOUT_MS`):**
+  - `WELL_KNOWN_PATH` → `@peac/kernel.POLICY.manifestPath`.
+  - `MAX_BYTES` → `@peac/kernel.POLICY.maxBytes`.
+  - `DEFAULT_TIMEOUT_MS` → no kernel equivalent; pin a CLI-local constant to `5_000` if you need the pre-retirement default.
 
-Summary: migrate parse / validate / emit to `@peac/policy-kit` now if your code only touches policy documents. Keep `@peac/disc@0.13.0` installed if your code needs `discover()` or the associated constants; migrate once the remote-fetch surface ports.
+No new published version of `@peac/disc` ships from v0.13.1 onward.
 
 ### `@peac/core` — archived
 

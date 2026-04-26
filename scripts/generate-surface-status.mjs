@@ -19,7 +19,13 @@ const root = resolve(__dirname, '..');
 const checkMode = process.argv.includes('--check');
 
 const status = JSON.parse(readFileSync(resolve(root, 'REPO_SURFACE_STATUS.json'), 'utf8'));
-const surfaces = status.surfaces;
+// Workspace-internal entries (state === 'internal') are tracked in the
+// JSON source so the spec-drift gate sees them as classified, but they
+// MUST NOT appear on the public-facing Markdown derivatives. The
+// internal-package invisibility test enforces this rule.
+const surfaces = Object.fromEntries(
+  Object.entries(status.surfaces).filter(([, info]) => info.state !== 'internal')
+);
 
 // --- Generate docs/PACKAGE_STATUS.md ---
 

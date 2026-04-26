@@ -13,11 +13,9 @@
     "packages/protocol/src/**/*.ts",
     "packages/control/src/**/*.ts",
     "packages/receipts/src/**/*.ts",
-    "packages/discovery/src/**/*.ts",
     "packages/server/src/**/*.ts",
     "packages/cli/src/**/*.ts",
     "packages/policy-kit/src/**/*.ts",
-    "packages/core/src/**/*.ts",
     "packages/audit/src/**/*.ts",
     "packages/rails/**/src/**/*.ts",
     "packages/mappings/**/src/**/*.ts",
@@ -32,7 +30,9 @@
     "packages/http-signatures/src/**/*.ts",
     "packages/jwks-cache/src/**/*.ts",
     "packages/pay402/src/**/*.ts",
-    "packages/mcp-server/src/**/*.ts"
+    "packages/mcp-server/src/**/*.ts",
+    "packages/net/node/src/**/*.ts",
+    "packages/registries/src/**/*.ts"
   ],
   "exclude": [
     "node_modules",

@@ -1,0 +1,15 @@
+{
+  "fixture": "legacy-inside-comment",
+  "description": "verify-looking string inside a YAML comment is NOT a legacy line",
+  "capturedFrom": "@peac/disc.parse (v0.13.0)",
+  "valid": true,
+  "data": {
+    "version": "peac-policy/0.1",
+    "defaults": {
+      "decision": "deny"
+    },
+    "rules": []
+  },
+  "errorsCount": 0,
+  "legacyWarningCount": 0
+}

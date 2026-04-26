@@ -1,0 +1,8 @@
+{
+  "fixture": "invalid-malformed",
+  "description": "fails YAML/JSON parse entirely",
+  "capturedFrom": "@peac/disc.parse (v0.13.0)",
+  "valid": false,
+  "errorsCount": 1,
+  "legacyWarningCount": 0
+}

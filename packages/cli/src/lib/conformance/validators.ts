@@ -18,7 +18,7 @@ import {
   type InteractionValidationResult,
   type WorkflowValidationResult,
 } from '@peac/schema';
-import { parse as parseDiscovery } from '@peac/disc';
+import { parsePolicyDocumentCompat } from '../policy-document-discovery.js';
 import type { ValidationResult, ValidationResultWithPath, CategoryValidator } from './types.js';
 import { zodPathToJsonPointer } from './digest.js';
 
@@ -101,8 +101,9 @@ export function validateParseReceiptClaims(payload: unknown): ValidationResultWi
  */
 function validateDiscoveryInput(input: unknown): ValidationResult {
   if (typeof input === 'string') {
-    // Parse as peac.txt format
-    const result = parseDiscovery(input);
+    // Parse as peac.txt format via the CLI-internal compat helper that
+    // preserves v0.13.0 @peac/disc.parse legacy-line tolerance.
+    const result = parsePolicyDocumentCompat(input);
     if (result.valid) {
       return { valid: true };
     }

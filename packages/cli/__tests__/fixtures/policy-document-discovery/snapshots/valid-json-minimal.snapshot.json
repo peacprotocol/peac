@@ -1,0 +1,20 @@
+{
+  "fixture": "valid-json-minimal",
+  "description": "valid JSON peac-policy/0.1 (auto-detect)",
+  "capturedFrom": "@peac/disc.parse (v0.13.0)",
+  "valid": true,
+  "data": {
+    "version": "peac-policy/0.1",
+    "defaults": {
+      "decision": "allow"
+    },
+    "rules": [
+      {
+        "name": "allow-everyone",
+        "decision": "allow"
+      }
+    ]
+  },
+  "errorsCount": 0,
+  "legacyWarningCount": 0
+}

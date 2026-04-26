@@ -31,7 +31,6 @@
   "dependencies": {
     "@hono/node-server": "^1.19.13",
     "@peac/crypto": "workspace:*",
-    "@peac/disc": "workspace:*",
     "@peac/jwks-cache": "workspace:*",
     "@peac/middleware-core": "workspace:*",
     "@peac/pay402": "workspace:*",

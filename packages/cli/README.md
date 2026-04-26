@@ -100,8 +100,8 @@ peac samples generate --output ./out    # Generate sample files
 - `@peac/crypto` (Layer 2): JWS decoding and signature operations
 - `@peac/schema` (Layer 1): Receipt schema validation
 - `@peac/audit`: Evidence bundle reading for reconciliation
-- `@peac/disc`: Issuer discovery
 - `@peac/policy-kit`: Policy loading, validation, and compilation
+- `@peac/net-node`: SSRF-aware HTTP client used by `peac discover`
 
 ## For Agent Developers
 

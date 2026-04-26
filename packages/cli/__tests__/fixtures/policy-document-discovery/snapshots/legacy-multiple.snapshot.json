@@ -1,0 +1,15 @@
+{
+  "fixture": "legacy-multiple",
+  "description": "multiple legacy lines stripped; one warning per line",
+  "capturedFrom": "@peac/disc.parse (v0.13.0)",
+  "valid": true,
+  "data": {
+    "version": "peac-policy/0.1",
+    "defaults": {
+      "decision": "deny"
+    },
+    "rules": []
+  },
+  "errorsCount": 0,
+  "legacyWarningCount": 3
+}

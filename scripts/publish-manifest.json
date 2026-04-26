@@ -3,7 +3,7 @@
   "description": "Single source of truth for PEAC Protocol npm publish order",
   "version": "0.13.0",
   "lastUpdated": "2026-04-25",
-  "totalPackages": 37,
+  "totalPackages": 36,
   "packages": [
     "@peac/kernel",
     "@peac/schema",
@@ -20,7 +20,6 @@
     "@peac/http-signatures",
     "@peac/jwks-cache",
     "@peac/policy-kit",
-    "@peac/disc",
     "@peac/adapter-core",
     "@peac/mappings-mcp",
     "@peac/mappings-acp",
@@ -57,7 +56,6 @@
       "@peac/http-signatures",
       "@peac/jwks-cache",
       "@peac/policy-kit",
-      "@peac/disc",
       "@peac/adapter-core"
     ],
     "5-adapters": [
@@ -91,7 +89,6 @@
     "@peac/capture-node",
     "@peac/protocol",
     "@peac/control",
-    "@peac/disc",
     "@peac/audit",
     "@peac/middleware-core",
     "@peac/middleware-express",

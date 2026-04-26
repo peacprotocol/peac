@@ -28,6 +28,9 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync, existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+// Single source of truth for the publish-manifest -> workspace-path mapping.
+// @ts-expect-error -- pure-data .mjs module
+import { WORKSPACE_PACKAGE_MAP } from '../../scripts/lib/workspace-package-map.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..', '..');
@@ -42,54 +45,20 @@ const manifest = readJson(join(ROOT, 'scripts', 'publish-manifest.json')) as {
   version?: string;
 };
 
-// v0.12.14 active publish surface (canonical baseline).
+// v0.12.14 active publish surface (canonical baseline; retained for the
+// "no regression" gate).
 const V0_12_14_BASELINE_COUNT = 37;
 
-// Map of npm name -> workspace directory.
-// Workspace globs from pnpm-workspace.yaml: packages/*, packages/net/*,
-// packages/rails/*, packages/mappings/*, packages/transport/*,
-// packages/capture/*, packages/adapters/*, packages/adapters/*/*, apps/*.
-// scripts/lib/resolve-package-path.ts is the authority for short-name -> path
-// mapping; we mirror the minimum needed here.
-const WORKSPACE_PATH_MAP: Record<string, string> = {
-  '@peac/kernel': 'packages/kernel',
-  '@peac/schema': 'packages/schema',
-  '@peac/crypto': 'packages/crypto',
-  '@peac/telemetry': 'packages/telemetry',
-  '@peac/capture-core': 'packages/capture/core',
-  '@peac/capture-node': 'packages/capture/node',
-  '@peac/protocol': 'packages/protocol',
-  '@peac/control': 'packages/control',
-  '@peac/audit': 'packages/audit',
-  '@peac/middleware-core': 'packages/middleware-core',
-  '@peac/middleware-express': 'packages/middleware-express',
-  '@peac/contracts': 'packages/contracts',
-  '@peac/http-signatures': 'packages/http-signatures',
-  '@peac/jwks-cache': 'packages/jwks-cache',
-  '@peac/policy-kit': 'packages/policy-kit',
-  '@peac/disc': 'packages/discovery',
-  '@peac/adapter-core': 'packages/adapters/core',
-  '@peac/mappings-mcp': 'packages/mappings/mcp',
-  '@peac/mappings-acp': 'packages/mappings/acp',
-  '@peac/mappings-paymentauth': 'packages/mappings/paymentauth',
-  '@peac/mappings-ucp': 'packages/mappings/ucp',
-  '@peac/mappings-a2a': 'packages/mappings/a2a',
-  '@peac/rails-x402': 'packages/rails/x402',
-  '@peac/adapter-x402': 'packages/adapters/x402',
-  '@peac/adapter-openclaw': 'packages/adapters/openclaw',
-  '@peac/adapter-managed-agents': 'packages/adapters/managed-agents',
-  '@peac/adapter-runtime-governance': 'packages/adapters/runtime-governance',
-  '@peac/mappings-content-signals': 'packages/mappings/content-signals',
-  '@peac/adapter-openai-compatible': 'packages/adapters/openai-compatible',
-  '@peac/mcp-server': 'packages/mcp-server',
-  '@peac/cli': 'packages/cli',
-  '@peac/net-node': 'packages/net/node',
-  '@peac/adapter-eat': 'packages/adapters/eat',
-  '@peac/adapter-did': 'packages/adapters/did',
-  '@peac/transport-grpc': 'packages/transport/grpc',
-  '@peac/mappings-intoto': 'packages/mappings/intoto',
-  '@peac/mappings-slsa': 'packages/mappings/slsa',
-};
+// v0.13.1 active publish surface (post @peac/disc retirement).
+// Enforced at exactly this value so accidental re-additions are caught.
+const V0_13_1_TARGET_COUNT = 36;
+
+// Single source of truth for npm-name -> workspace directory; imported
+// from scripts/lib/workspace-package-map.mjs (also used by the verify-*
+// scripts). scripts/lib/resolve-package-path.ts is the broader authority
+// for short-name -> path mapping; this map covers only entries listed in
+// publish-manifest.json packages[].
+const WORKSPACE_PATH_MAP: Record<string, string> = WORKSPACE_PACKAGE_MAP as Record<string, string>;
 
 function packagePath(npmName: string): string | null {
   return WORKSPACE_PATH_MAP[npmName] ?? null;
@@ -114,14 +83,19 @@ describe('publish-manifest surface audit', () => {
   //             retirement is identified (retirement requires publish-closure
   //             proof; see the publish-closure suite below).
   //
-  //   @peac/disc is retained in the manifest as a deprecated compatibility
-  //   alias because @peac/cli and apps/api still depend on it via
-  //   workspace:*. Removing @peac/disc from packages[] while published
-  //   consumers declare it would break publish closure. @peac/core /
-  //   @peac/pref / @peac/sdk were already absent from packages[] at
-  //   v0.12.14, so archiving them has zero count-reduction impact.
+  //   @peac/disc was retired at v0.13.1: archived under archive/discovery/
+  //   (out of the packages/* glob), removed from publish-manifest.packages[],
+  //   and dropped as a workspace:* dependency from @peac/cli and apps/api.
+  //   The CLI peac-discover command path now flows through an internal
+  //   helper (packages/cli/src/lib/policy-document-discovery.ts) that uses
+  //   public @peac/net-node and @peac/policy-kit primitives.
   it('packages[] count does not exceed the v0.12.14 baseline of 37 (blocking)', () => {
     expect(manifest.packages.length).toBeLessThanOrEqual(V0_12_14_BASELINE_COUNT);
+  });
+
+  it('packages[] count is exactly the v0.13.1 target of 36 (enforced)', () => {
+    expect(manifest.packages.length).toBe(V0_13_1_TARGET_COUNT);
+    expect(manifest.totalPackages).toBe(V0_13_1_TARGET_COUNT);
   });
 
   it('manifest version is either current release (0.12.14) or target (0.13.0)', () => {
@@ -155,6 +129,7 @@ describe('publish-manifest surface audit', () => {
       '@peac/consent',
       '@peac/intelligence',
       '@peac/provenance',
+      '@peac/disc',
     ];
     const leaked = archivedNames.filter((n) => manifest.packages.includes(n));
     expect(leaked).toEqual([]);
@@ -173,6 +148,7 @@ describe('publish-manifest surface audit', () => {
       'archive/pillars/consent/package.json',
       'archive/pillars/intelligence/package.json',
       'archive/pillars/provenance/package.json',
+      'archive/discovery/package.json',
     ];
     for (const p of archivePaths) {
       const abs = join(ROOT, p);
@@ -182,6 +158,17 @@ describe('publish-manifest surface audit', () => {
         expect(p.startsWith('archive/')).toBe(true);
       }
     }
+  });
+
+  it('@peac/disc retired: not in workspace glob, not in publish manifest', () => {
+    // The archive/discovery/package.json file exists but archive/ is not in
+    // any workspace glob, so the package is not a workspace member. The
+    // publish manifest must not list it.
+    expect(manifest.packages).not.toContain('@peac/disc');
+    // No workspace path mapping must remain for @peac/disc; if a contributor
+    // re-adds it to WORKSPACE_PATH_MAP without re-listing the source, this
+    // assertion catches it.
+    expect(WORKSPACE_PATH_MAP['@peac/disc']).toBeUndefined();
   });
 });
 
@@ -223,21 +210,17 @@ describe('publish-closure invariant', () => {
     expect(failures, failures.join('\n')).toEqual([]);
   });
 
-  it('specifically: @peac/cli does not depend on unpublished @peac/disc', () => {
-    const cliPkg = packageJsonFor('@peac/cli');
-    expect(cliPkg).not.toBeNull();
-    const declaresDisc =
-      cliPkg!.dependencies?.['@peac/disc'] !== undefined ||
-      cliPkg!.peerDependencies?.['@peac/disc'] !== undefined;
-    if (declaresDisc) {
-      expect(manifest.packages).toContain('@peac/disc');
+  it('specifically: no published package declares @peac/disc as a dependency', () => {
+    const offenders: string[] = [];
+    for (const npmName of manifest.packages) {
+      const pkg = packageJsonFor(npmName);
+      if (!pkg) continue;
+      const declaresDisc =
+        pkg.dependencies?.['@peac/disc'] !== undefined ||
+        pkg.peerDependencies?.['@peac/disc'] !== undefined ||
+        pkg.optionalDependencies?.['@peac/disc'] !== undefined;
+      if (declaresDisc) offenders.push(npmName);
     }
-  });
-
-  it('specifically: @peac/disc is retained in packages[] as a deprecated compatibility alias', () => {
-    // Retiring @peac/disc while @peac/cli and apps/api still depend on it
-    // would break publish closure. @peac/disc stays in packages[] so long
-    // as those consumers declare it.
-    expect(manifest.packages).toContain('@peac/disc');
+    expect(offenders, offenders.join(', ')).toEqual([]);
   });
 });
