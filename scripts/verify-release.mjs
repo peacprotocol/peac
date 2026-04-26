@@ -22,6 +22,7 @@
  * 12. Provenance fields present (npm_provenance, oidc_trusted_publishing)
  * 13. Gate report presence for current version (advisory)
  * 14. SDK status completeness (typescript, go, python)
+ * 15. Shadow-redaction self-test (scripts/verify-shadow-redaction.test.mjs)
  *
  * Exit codes:
  * - 0: All release checks passed
@@ -458,6 +459,27 @@ function checkSdkStatus(facts) {
   }
 }
 
+function checkShadowRedactionSelfTest() {
+  console.log(colors.bold('\n--- Shadow-redaction Self-test ---\n'));
+  const script = join(ROOT, 'scripts/verify-shadow-redaction.test.mjs');
+  if (!existsSync(script)) {
+    skip('shadow-redaction self-test', 'scripts/verify-shadow-redaction.test.mjs not present');
+    return;
+  }
+  try {
+    execFileSync(process.execPath, [script], { stdio: 'pipe' });
+    pass('shadow-redaction self-test: 15 / 15 cases pass');
+  } catch (err) {
+    const stdout = err.stdout?.toString() ?? '';
+    const stderr = err.stderr?.toString() ?? '';
+    fail(
+      `shadow-redaction self-test failed (exit ${err.status}); last stderr line: ${
+        stderr.trim().split('\n').slice(-1)[0] ?? stdout.trim().split('\n').slice(-1)[0] ?? '(no output)'
+      }`
+    );
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Main
 // ---------------------------------------------------------------------------
@@ -478,6 +500,7 @@ function main() {
   checkProvenance(facts);
   checkGateReport(facts);
   checkSdkStatus(facts);
+  checkShadowRedactionSelfTest();
 
   // Summary
   console.log(colors.bold('\n--- Summary ---\n'));

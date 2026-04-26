@@ -6,6 +6,13 @@
 import { uuidv7 } from 'uuidv7';
 import { sign } from '@peac/crypto';
 import { defaultCodec } from './_internal/record-core/codec/jws-jwt.js';
+import { runBoundedValidatorShadow } from './_internal/record-core/bounded-validator.js';
+import { isShadowEnabled, scheduleShadow, type ShadowEnableOptions } from './_internal/shadow.js';
+import {
+  realObservationForIssue,
+  shadowObservationFromBoundedAcceptedOnly,
+  type ShadowObservation,
+} from './_internal/shadow-observe.js';
 import type { JsonValue, EvidencePillar, PolicyBlock } from '@peac/kernel';
 import { ZodError } from 'zod';
 import {
@@ -526,6 +533,29 @@ export async function issueWire02(options: IssueWire02Options): Promise<IssueRes
   // to @peac/crypto.signWire02; serialized output is byte-identical to
   // the prior release.
   const jws = await defaultCodec.encode(claims, options.privateKey, options.kid);
+
+  if (isShadowEnabled(options as unknown as ShadowEnableOptions)) {
+    scheduleShadow<ShadowObservation>({
+      call: 'issue',
+      realResult: realObservationForIssue(),
+      realError: undefined,
+      shadowFn: async () =>
+        shadowObservationFromBoundedAcceptedOnly(
+          runBoundedValidatorShadow({
+            claims: {
+              kind: claims.kind,
+              type: claims.type,
+              iss: claims.iss,
+              iat: claims.iat,
+              occurred_at: claims.occurred_at,
+              extensions: claims.extensions,
+            },
+            now: iat,
+          })
+        ),
+      recordRef: jws,
+    });
+  }
 
   return { jws };
 }

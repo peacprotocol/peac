@@ -26,6 +26,13 @@ import {
 import { TYPE_TO_EXTENSION_MAP } from '@peac/kernel';
 import { checkTypeExtensionMapping } from './type-extension-check';
 import { maybeRunShadowValidation } from './_internal/record-core/shadow-hook';
+import { runBoundedValidatorShadow } from './_internal/record-core/bounded-validator.js';
+import { isShadowEnabled, scheduleShadow, type ShadowEnableOptions } from './_internal/shadow.js';
+import {
+  realObservationForVerifyLocalSuccess,
+  shadowObservationFromBounded,
+  type ShadowObservation,
+} from './_internal/shadow-observe.js';
 import type { PolicyBindingStatus } from './verifier-types';
 
 /**
@@ -589,13 +596,40 @@ export async function verifyLocal(
           callerBindings.documents.length > 0 && { documents: callerBindings.documents }),
       };
 
+      const sortedWarnings = sortWarnings(accumulatedWarnings);
+
+      if (isShadowEnabled(options as unknown as ShadowEnableOptions)) {
+        const headerSnapshot = { ...result.header } as Record<string, unknown>;
+        scheduleShadow<ShadowObservation>({
+          call: 'verifyLocal',
+          realResult: realObservationForVerifyLocalSuccess(sortedWarnings),
+          realError: undefined,
+          shadowFn: async () =>
+            shadowObservationFromBounded(
+              runBoundedValidatorShadow({
+                claims: {
+                  kind: claims.kind,
+                  type: claims.type,
+                  iss: claims.iss,
+                  iat: claims.iat,
+                  occurred_at: claims.occurred_at,
+                  extensions: claims.extensions,
+                },
+                header: headerSnapshot,
+                now,
+              })
+            ),
+          recordRef: jws,
+        });
+      }
+
       return {
         valid: true,
         variant: 'wire-02',
         claims,
         kid: result.header.kid,
         wireVersion: '0.2',
-        warnings: sortWarnings(accumulatedWarnings),
+        warnings: sortedWarnings,
         policy_binding: bindingStatus,
         bindings,
       };

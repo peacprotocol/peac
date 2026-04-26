@@ -8,3 +8,10 @@
 *.sh text eol=lf
 *.yaml text eol=lf
 *.yml text eol=lf
+
+# Linguist treatment
+# archive/ holds preserved historical material (legacy SDK, bridge, pre-v0.10
+# packages, sample servers). Per repository policy it is do-not-touch and
+# do-not-import. Mark it linguist-vendored so the language bar reflects active
+# protocol implementation rather than archived history.
+archive/** linguist-vendored
