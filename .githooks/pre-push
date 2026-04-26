@@ -68,12 +68,19 @@ run_phase "Guard (safety invariants)" env PEAC_FAST=1 bash scripts/guard.sh
 # 2. Format check
 run_phase "Format (Prettier)" pnpm format:check
 
-# 3. Planning leak check (conditional: local-only script)
+# 3. Strict CI-parity gate (forbid-strings + Go gofmt + go vet)
+#    Mirrors the CI checks that were previously only surfaced after a CI
+#    round-trip. See scripts/pre-push-strict.sh for what runs.
+if [ -f scripts/pre-push-strict.sh ]; then
+  run_phase "Strict CI-parity gate" bash scripts/pre-push-strict.sh
+fi
+
+# 4. Planning leak check (conditional: local-only script)
 if [ -f scripts/check-planning-leak.sh ]; then
   run_phase "Planning leak" bash scripts/check-planning-leak.sh
 fi
 
-# 4. Changed-package build + test
+# 5. Changed-package build + test
 #    Detects which packages have changes vs the upstream branch,
 #    then runs build and test for only those packages via turbo.
 UPSTREAM=$(git rev-parse --abbrev-ref "@{u}" 2>/dev/null || echo "origin/main")
