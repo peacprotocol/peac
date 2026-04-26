@@ -1207,6 +1207,18 @@ importers:
         specifier: ^4.0.0
         version: 4.0.18(@opentelemetry/api@1.9.0)(@types/node@22.19.11)(tsx@4.21.0)(yaml@2.8.3)
 
+  packages/compat:
+    devDependencies:
+      tsup:
+        specifier: ^8.0.0
+        version: 8.5.1(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.3)
+      typescript:
+        specifier: ^5.0.0
+        version: 5.9.3
+      vitest:
+        specifier: ^4.0.0
+        version: 4.1.0(@types/node@22.19.11)(vite@6.4.1)
+
   packages/conformance-harness:
     dependencies:
       '@peac/schema':
@@ -1874,6 +1886,15 @@ importers:
       ts-jest:
         specifier: ^29.0.0
         version: 29.4.5(@babel/core@7.29.0)(esbuild@0.27.0)(jest@30.2.0)(typescript@5.9.3)
+      tsup:
+        specifier: ^8.0.0
+        version: 8.5.1(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.3)
+      typescript:
+        specifier: ^5.0.0
+        version: 5.9.3
+
+  packages/record-core:
+    devDependencies:
       tsup:
         specifier: ^8.0.0
         version: 8.5.1(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.3)

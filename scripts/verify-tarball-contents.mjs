@@ -51,6 +51,20 @@ const FORBIDDEN_PATTERNS = [
   /\bCLAUDE\.md$/,
 ];
 
+// Forbidden subpaths in package.json `exports`. Per §6P-B #2: dist/_internal/**
+// files MAY exist in the published tarball (the runtime relative-import path
+// from src/issue.ts -> src/_internal/record-core/codec/jws-jwt.ts resolves to
+// dist/_internal/record-core/codec/jws-jwt.{mjs,cjs} at runtime), but they
+// MUST NOT be exposed as public subpaths via the `exports` map.
+const FORBIDDEN_EXPORT_KEY_PATTERNS = [
+  /^\.\/_internal(?:\/.*)?$/,
+  /^\.\/record-core(?:\/.*)?$/,
+  /^\.\/codec(?:\/.*)?$/,
+  /^\.\/compat(?:\/.*)?$/,
+  /^\.\/migration(?:\/.*)?$/,
+  /^\.\/shadow(?:\/.*)?$/,
+];
+
 const WORKSPACE_PATH_MAP = WORKSPACE_PACKAGE_MAP;
 
 function parseArgs() {
@@ -58,13 +72,22 @@ function parseArgs() {
   return {
     json: args.includes('--json'),
     pkg: args.includes('--package') ? args[args.indexOf('--package') + 1] : null,
+    // --package-dir <abs-path> runs against a single fixture package at the
+    // given directory. Used by self-tests so the gate operates on temporary
+    // fixture packages without touching real workspace files.
+    pkgDir: args.includes('--package-dir') ? args[args.indexOf('--package-dir') + 1] : null,
   };
 }
 
-function packAndList(npmName) {
-  const rel = WORKSPACE_PATH_MAP[npmName];
-  if (!rel) return { npmName, status: 'unmapped', files: [], violations: [] };
-  const packageDir = join(ROOT, rel);
+function packAndList(npmName, pkgRootOverride = null) {
+  let packageDir;
+  if (pkgRootOverride) {
+    packageDir = pkgRootOverride;
+  } else {
+    const rel = WORKSPACE_PATH_MAP[npmName];
+    if (!rel) return { npmName, status: 'unmapped', files: [], violations: [] };
+    packageDir = join(ROOT, rel);
+  }
 
   let packOut;
   try {
@@ -124,26 +147,121 @@ function packAndList(npmName) {
   return { npmName, status: violations.length ? 'violation' : 'clean', files, violations };
 }
 
+// -----------------------------------------------------------------------------
+// Export-map check (per §6P-B #2).
+// -----------------------------------------------------------------------------
+//
+// Walks package.json `exports` for every published package. Fails if any
+// subpath key matches FORBIDDEN_EXPORT_KEY_PATTERNS (./_internal, ./codec,
+// ./record-core, ./compat, ./migration, ./shadow and any nested form).
+//
+// dist/_internal/** files are allowed in the tarball (necessary for the
+// relative-import runtime path); the export-map check distinguishes
+// implementation files in tarball (allowed) from public API surface in
+// exports (forbidden).
+
+function collectExportKeys(node, prefix = '') {
+  const keys = [];
+  if (node === null || node === undefined) return keys;
+  if (typeof node === 'string') return keys;
+  if (Array.isArray(node)) {
+    for (const item of node) keys.push(...collectExportKeys(item, prefix));
+    return keys;
+  }
+  if (typeof node === 'object') {
+    for (const [k, v] of Object.entries(node)) {
+      // Only top-level subpath keys are public surface paths. Nested
+      // objects are condition keys (types/import/require/default) and
+      // their values are the actual file targets, not subpaths.
+      if (k.startsWith('./') || k === '.') {
+        keys.push(k);
+      }
+      keys.push(...collectExportKeys(v, prefix));
+    }
+  }
+  return keys;
+}
+
+function checkExportMap(npmName, pkgRootOverride = null) {
+  let pkgRoot;
+  if (pkgRootOverride) {
+    pkgRoot = pkgRootOverride;
+  } else {
+    const rel = WORKSPACE_PATH_MAP[npmName];
+    if (!rel) return { npmName, status: 'unmapped', violations: [] };
+    pkgRoot = join(ROOT, rel);
+  }
+  let pkgJson;
+  try {
+    pkgJson = JSON.parse(readFileSync(join(pkgRoot, 'package.json'), 'utf8'));
+  } catch {
+    return { npmName, status: 'no-package-json', violations: [] };
+  }
+
+  const exportsField = pkgJson.exports;
+  if (!exportsField || typeof exportsField !== 'object') {
+    return { npmName, status: 'clean', violations: [] };
+  }
+
+  const subpathKeys = [...new Set(collectExportKeys(exportsField))];
+  const violations = [];
+  for (const key of subpathKeys) {
+    for (const pattern of FORBIDDEN_EXPORT_KEY_PATTERNS) {
+      if (pattern.test(key)) {
+        violations.push({ key, pattern: pattern.toString() });
+      }
+    }
+  }
+  return { npmName, status: violations.length ? 'violation' : 'clean', violations };
+}
+
 async function main() {
   const args = parseArgs();
-  const manifest = JSON.parse(
-    readFileSync(join(ROOT, 'scripts', 'publish-manifest.json'), 'utf8'),
-  );
-  const targets = args.pkg ? [args.pkg] : manifest.packages;
+
+  let targets;
+  let pkgRootOverride = null;
+  if (args.pkgDir) {
+    let fixturePkgJson;
+    try {
+      fixturePkgJson = JSON.parse(readFileSync(join(args.pkgDir, 'package.json'), 'utf8'));
+    } catch (err) {
+      console.error(`Script error: failed to read package.json at ${args.pkgDir}: ${err.message}`);
+      process.exit(2);
+    }
+    targets = [fixturePkgJson.name ?? '@fixture/unknown'];
+    pkgRootOverride = args.pkgDir;
+  } else {
+    const manifest = JSON.parse(
+      readFileSync(join(ROOT, 'scripts', 'publish-manifest.json'), 'utf8'),
+    );
+    targets = args.pkg ? [args.pkg] : manifest.packages;
+  }
 
   const results = [];
+  const exportMapResults = [];
   for (const name of targets) {
-    results.push(packAndList(name));
+    results.push(packAndList(name, pkgRootOverride));
+    exportMapResults.push(checkExportMap(name, pkgRootOverride));
   }
 
   const violations = results.filter((r) => r.status === 'violation');
+  const exportMapViolations = exportMapResults.filter((r) => r.status === 'violation');
   const failures = results.filter((r) => r.status === 'pack-failed' || r.status === 'unmapped');
+  const totalProblemCount = violations.length + exportMapViolations.length + failures.length;
 
   if (args.json) {
-    console.log(JSON.stringify({ violations, failures, scanned: results.length }, null, 2));
+    console.log(
+      JSON.stringify(
+        { violations, exportMapViolations, failures, scanned: results.length },
+        null,
+        2,
+      ),
+    );
   } else {
-    if (violations.length === 0 && failures.length === 0) {
-      console.log(`OK: scanned ${results.length} package tarball(s); no forbidden content.`);
+    if (totalProblemCount === 0) {
+      console.log(
+        `OK: scanned ${results.length} package tarball(s) and export map(s); no forbidden content or subpaths.`,
+      );
     } else {
       if (failures.length > 0) {
         console.error('Pack/skip failures:');
@@ -160,10 +278,19 @@ async function main() {
           }
         }
       }
+      if (exportMapViolations.length > 0) {
+        console.error('Export-map subpath violations (forbidden public subpath in package.json exports):');
+        for (const r of exportMapViolations) {
+          console.error(`\n  ${r.npmName}:`);
+          for (const v of r.violations) {
+            console.error(`    "${v.key}"  (matched ${v.pattern})`);
+          }
+        }
+      }
     }
   }
 
-  process.exit(violations.length === 0 && failures.length === 0 ? 0 : 1);
+  process.exit(totalProblemCount === 0 ? 0 : 1);
 }
 
 main().catch((err) => {

@@ -1,0 +1,41 @@
+{
+  "name": "@peac/compat",
+  "version": "0.13.0",
+  "private": true,
+  "description": "PEAC Protocol - workspace-private migration-class taxonomy and archival-export scaffolding. Not published. Internal scaffold only; not imported by any published package. Version tracks the workspace-wide value enforced by scripts/check-version-coherence.sh; the workspace-wide bump to 0.13.1 happens in the v0.13.1 release-prep PR.",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    },
+    "./taxonomy": {
+      "types": "./dist/taxonomy.d.ts",
+      "import": "./dist/taxonomy.mjs",
+      "require": "./dist/taxonomy.cjs"
+    },
+    "./archival-export": {
+      "types": "./dist/archival-export.d.ts",
+      "import": "./dist/archival-export.mjs",
+      "require": "./dist/archival-export.cjs"
+    }
+  },
+  "scripts": {
+    "prebuild": "rm -rf dist",
+    "build": "pnpm run build:js && pnpm run build:types",
+    "build:js": "tsup",
+    "build:types": "rm -f dist/.tsbuildinfo && tsc && rm -f dist/.tsbuildinfo",
+    "clean": "rm -rf dist",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "tsup": "^8.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^4.0.0"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "name": "@peac/record-core",
+  "version": "0.13.0",
+  "private": true,
+  "description": "PEAC Protocol - workspace-private metadata package. Not published. The canonical codec / record-core implementation lives at packages/protocol/src/_internal/record-core/ and is imported via relative paths from inside @peac/protocol; this package does NOT duplicate that source. Version tracks the workspace-wide value enforced by scripts/check-version-coherence.sh; the workspace-wide bump to 0.13.1 happens in the v0.13.1 release-prep PR.",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "scripts": {
+    "prebuild": "rm -rf dist",
+    "build": "pnpm run build:js && pnpm run build:types",
+    "build:js": "tsup",
+    "build:types": "rm -f dist/.tsbuildinfo && tsc && rm -f dist/.tsbuildinfo",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "tsup": "^8.0.0",
+    "typescript": "^5.0.0"
+  }
+}

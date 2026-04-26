@@ -62,6 +62,22 @@
       "published": false,
       "note": "Workspace-private internal facade re-grouping public @peac/kernel constants for internal-consumer ergonomics. Not published to npm. Direction-of-dependency: imports FROM public @peac/kernel; never the reverse (private-package dependency invariant)."
     },
+    "packages/compat": {
+      "npm": "@peac/compat",
+      "state": "internal",
+      "wire": "0.2",
+      "layer": 0,
+      "published": false,
+      "note": "Workspace-private migration-class taxonomy and archival-export scaffold. Not published to npm. Internal-only; no published package depends on it at runtime (asserted by source-import guard test for @peac/protocol and by dist-leak gate for all 36 publish-manifest packages)."
+    },
+    "packages/record-core": {
+      "npm": "@peac/record-core",
+      "state": "internal",
+      "wire": "0.2",
+      "layer": 0,
+      "published": false,
+      "note": "Workspace-private metadata package. Not published to npm. The canonical codec / record-core implementation lives at packages/protocol/src/_internal/record-core/ and is imported via relative paths from inside @peac/protocol; this package does NOT duplicate that source. Exists for plan-compliance, invisibility-test denylist coverage, and npm-name-reservation drift prevention."
+    },
     "packages/audit": {
       "npm": "@peac/audit",
       "state": "default",
