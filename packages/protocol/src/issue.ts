@@ -4,7 +4,8 @@
  */
 
 import { uuidv7 } from 'uuidv7';
-import { sign, signWire02 } from '@peac/crypto';
+import { sign } from '@peac/crypto';
+import { defaultCodec } from './_internal/record-core/codec/jws-jwt.js';
 import type { JsonValue, EvidencePillar, PolicyBlock } from '@peac/kernel';
 import { ZodError } from 'zod';
 import {
@@ -520,8 +521,11 @@ export async function issueWire02(options: IssueWire02Options): Promise<IssueRes
     } as PEACError);
   }
 
-  // Sign with Wire 0.2 (always sets typ: 'interaction-record+jwt')
-  const jws = await signWire02(claims, options.privateKey, options.kid);
+  // Sign with Wire 0.2 via the internal codec boundary (always sets
+  // typ: 'interaction-record+jwt'). Default codec is a pure pass-through
+  // to @peac/crypto.signWire02; serialized output is byte-identical to
+  // the prior release.
+  const jws = await defaultCodec.encode(claims, options.privateKey, options.kid);
 
   return { jws };
 }
