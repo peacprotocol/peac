@@ -92,6 +92,17 @@ const TIER_2_FORBIDDEN_IDENTIFIERS = [
   'validateExtensionBudgetInternal',
   'ExtensionBudgetResult',
   'ExtensionBudgetViolation',
+  'maybeRunShadowValidation',
+  'ShadowValidationInput',
+  'ShadowValidationMode',
+  'runBoundedValidatorShadow',
+  'BoundedValidationInput',
+  'BoundedValidationResult',
+  'BoundedClaimsInput',
+  'BoundedHeaderInput',
+  'BoundedLayer',
+  'BoundedViolation',
+  'BoundedWarning',
 ];
 
 const WORKSPACE_PATH_MAP = WORKSPACE_PACKAGE_MAP;
