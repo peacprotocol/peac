@@ -6,7 +6,7 @@
   "dist_tag": "next",
   "release_date": "2026-04-26",
   "metrics": {
-    "tests": 8560,
+    "tests": 8561,
     "test_files": 346,
     "published_packages": 36,
     "build_targets": 101,
