@@ -4,12 +4,11 @@
  *
  * Direction-of-dependency rule: private packages may import from public
  * packages (e.g., @peac/registries imports from @peac/kernel). Public packages
- * MUST NOT import from private packages. A consumer running
- *   npm install @peac/kernel@0.13.1
- * receives only the npm-published packages; if @peac/kernel were to declare or
- * emit a runtime import of @peac/registries, the install would 404 or the
- * import would fail at module-resolution time. This is a release-breaking
- * class of bug.
+ * MUST NOT import from private packages. An external consumer installing
+ * @peac/kernel@0.13.1 from the registry receives only published packages;
+ * if @peac/kernel were to declare or emit a runtime import of @peac/registries,
+ * the install would 404 or the import would fail at module-resolution time.
+ * This is a release-breaking class of bug.
  *
  * This test enforces:
  *   1. For every package listed in scripts/publish-manifest.json packages[],

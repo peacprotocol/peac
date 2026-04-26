@@ -1,11 +1,12 @@
 /**
- * peac discover <url> command — round-trip tests covering 6 scenarios:
+ * peac discover <url> command: round-trip tests covering 7 scenarios:
  *   1. happy-path well-formed peac.txt
  *   2. malformed peac.txt (mock returns invalid YAML/JSON)
  *   3. HTTP 5xx response
  *   4. fetch timeout
  *   5. byte cap exceeded
  *   6. happy-path with legacy key-discovery lines (warnings populated)
+ *   7. redirect cap exceeded (E_NET_SSRF_TOO_MANY_REDIRECTS)
  *
  * The CLI helper at packages/cli/src/lib/policy-document-discovery.ts is
  * exercised end-to-end via the public DiscoverCommand class. Network is
@@ -177,6 +178,18 @@ describe('peac discover <url>: 6 scenarios', () => {
     );
     expect((data.hints ?? []).some((h) => /peac-issuer\.json/.test(h))).toBe(true);
     expect(closeSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('7. redirect cap exceeded: success=false with too-many-redirects code; no close call', async () => {
+    mockSafeFetchRaw.mockResolvedValueOnce(
+      failure('E_NET_SSRF_TOO_MANY_REDIRECTS', 'too many redirects')
+    );
+    const cmd = new DiscoverCommand();
+    const result = await cmd.execute('https://example.com');
+
+    expect(result.success).toBe(false);
+    expect(result.error).toMatch(/E_NET_SSRF_TOO_MANY_REDIRECTS/);
+    expect(closeSpy).not.toHaveBeenCalled();
   });
 
   it('rejects non-HTTP(S) URL schemes without invoking safeFetchRaw', async () => {

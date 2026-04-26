@@ -24,27 +24,34 @@ this package used to provide.
 
 ## How to migrate
 
-For canonical migration patterns and code samples, see
-[`packages/cli/src/lib/policy-document-discovery.ts`](../../packages/cli/src/lib/policy-document-discovery.ts).
-That file is the CLI-internal reference implementation that preserves the
-v0.13.0 `@peac/disc` behavior contract using public primitives. It is not a
-public API and should not be imported across packages, but its structure
-documents the recommended pattern for external consumers.
+For canonical migration guidance, see
+[`docs/MIGRATION_CURRENT.md`](../../docs/MIGRATION_CURRENT.md).
 
-- `import { parse } from '@peac/disc'` → `import { parsePolicyDocument } from '@peac/policy-kit'`
-  for **strict** parsing of `peac-policy/0.1` documents. **Note:**
-  `parsePolicyDocument` throws `PolicyValidationError` / `PolicyLoadError` on
-  failure, where the retired `@peac/disc.parse` returned a structured
-  `ParseResult { valid, data?, errors?, warnings? }` and was tolerant of
-  legacy key-discovery lines (`verify:`, `public_keys:`, `jwks:`) via a
-  two-pass strip-and-retry. If you need the tolerant behavior, copy the
-  `parsePolicyDocumentCompat` pattern from
-  [`packages/cli/src/lib/policy-document-discovery.ts`](../../packages/cli/src/lib/policy-document-discovery.ts)
-  (not from this archived directory). When legacy-line tolerance is not
-  needed, prefer using `parsePolicyDocument` directly.
+The CLI contains an internal compatibility helper that preserves the old
+tolerant parsing behavior for the `peac discover` command and conformance
+checks. It is an implementation detail, not a public API or supported
+import path.
+
+For external code:
+
+- use `parsePolicyDocument` from `@peac/policy-kit` for strict parsing of
+  `peac-policy/0.1` documents;
+- if tolerant legacy-line handling is required, copy the behavior
+  intentionally into your own code rather than importing CLI internals.
+
+Reference of the previous public-API mapping:
+
+- `import { parse } from '@peac/disc'` → `import { parsePolicyDocument } from '@peac/policy-kit'`.
+  Note: `parsePolicyDocument` throws `PolicyValidationError` /
+  `PolicyLoadError` on failure, where the retired `@peac/disc.parse`
+  returned a structured `ParseResult { valid, data?, errors?, warnings? }`
+  and was tolerant of legacy key-discovery lines (`verify:`,
+  `public_keys:`, `jwks:`) via a two-pass strip-and-retry. If you need the
+  tolerant behavior, implement it intentionally in your own code; do not
+  import the CLI helper.
 - `import { loadPolicyDocument } from '@peac/disc'` →
-  `import { loadPolicyDocument } from '@peac/policy-kit'` (already supported
-  since v0.12.14).
+  `import { loadPolicyDocument } from '@peac/policy-kit'` (already
+  supported since v0.12.14).
 - `import { discover } from '@peac/disc'` → combine
   `@peac/net-node.safeFetchRaw` (SSRF-safe, byte-capped, timeout-bounded,
   redirect-policy-aware) with the parse step above. Path comes from
@@ -55,8 +62,7 @@ documents the recommended pattern for external consumers.
 
 ## What is preserved here
 
-- `package.json`, `src/`, `tests/`, `tsconfig.json`, `tsup.config.ts` — the
-  full v0.13.0 source, kept for archaeology and so the `parsePolicyDocumentCompat`
-  pattern can be referenced by external consumers.
-- `dist/`, `node_modules/` — historical build outputs (subject to local
+- `package.json`, `src/`, `tests/`, `tsconfig.json`, `tsup.config.ts`: the
+  full v0.13.0 source, kept for archaeology only.
+- `dist/`, `node_modules/`: historical build outputs (subject to local
   cleanup; not normative).

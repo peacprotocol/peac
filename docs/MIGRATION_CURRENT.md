@@ -74,7 +74,7 @@ import { resolveSignals, type SignalResolver } from '@peac/mappings-content-sign
 
 No runtime behavior change: `@peac/pref` v0.12.14 was already a facade over `@peac/mappings-content-signals`.
 
-### `@peac/disc` — archived (v0.13.1)
+### `@peac/disc`: archived (v0.13.1)
 
 **State at v0.13.1:** archived. The package is removed from the workspace (its source moved to `archive/discovery/`) and from `scripts/publish-manifest.json`. Active publish-manifest count drops 37 → 36. Historical npm versions (≤ 0.13.0) remain installable from the npm registry but are deprecated; the deprecation messages were dispatched at v0.13.0.
 
@@ -86,7 +86,7 @@ The CLI `peac discover <url>` command continues to work via an internal helper a
 
 - **`import { loadPolicyDocument } from '@peac/disc'`** → `import { loadPolicyDocument } from '@peac/policy-kit'` (already supported since v0.12.14).
 
-- **`import { discover } from '@peac/disc'`** → combine an SSRF-safe HTTP client with the parse step above. Recommended primitive: `@peac/net-node.safeFetchRaw` (SSRF-safe, byte-capped, timeout-bounded, redirect-policy-aware). Path comes from `@peac/kernel.POLICY.manifestPath` (`/.well-known/peac.txt`); body cap from `@peac/kernel.POLICY.maxBytes` (262144). Set the `safeFetchRaw` option `maxResponseBytes` to that value. The retired `@peac/disc.discover()` used a 5 000 ms timeout — `@peac/kernel` does not currently expose a discovery timeout constant, so set `timeoutMs: 5_000` directly on the fetch options if you want the pre-retirement default. **Always call `await raw.close()` in a `finally` block after reading the response body to avoid socket leaks** (this was implicit in `@peac/disc`; it is explicit in `safeFetchRaw`).
+- **`import { discover } from '@peac/disc'`** → combine an SSRF-safe HTTP client with the parse step above. Recommended primitive: `@peac/net-node.safeFetchRaw` (SSRF-safe, byte-capped, timeout-bounded, redirect-policy-aware). Path comes from `@peac/kernel.POLICY.manifestPath` (`/.well-known/peac.txt`); body cap from `@peac/kernel.POLICY.maxBytes` (262144). Set the `safeFetchRaw` option `maxResponseBytes` to that value. The retired `@peac/disc.discover()` used a 5 000 ms timeout; `@peac/kernel` does not currently expose a discovery timeout constant, so set `timeoutMs: 5_000` directly on the fetch options if you want the pre-retirement default. **Always call `await raw.close()` in a `finally` block after reading the response body to avoid socket leaks** (this was implicit in `@peac/disc`; it is explicit in `safeFetchRaw`).
 
   The CLI source at `packages/cli/src/commands/discover.ts` and the helper at `packages/cli/src/lib/policy-document-discovery.ts` are reference implementations of the retired API surface; they are CLI-internal and not part of `@peac/cli`'s public TypeScript surface.
 

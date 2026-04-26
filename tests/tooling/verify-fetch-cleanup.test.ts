@@ -3,9 +3,9 @@
  *
  * Proves the gate catches:
  *   1. an untracked source file containing an UNSAFE safeFetchRaw call site
- *      (no close()-in-finally) — must FAIL with a non-zero exit.
+ *      (no close()-in-finally): must FAIL with a non-zero exit.
  *   2. an untracked source file containing a SAFE safeFetchRaw call site
- *      (close() in finally) — must PASS.
+ *      (close() in finally): must PASS.
  *
  * The temp file is created under packages/cli/__tests__/ (which is not
  * gitignored) but with a name that matches no test glob, so vitest does

@@ -5,14 +5,14 @@
  * For the load-bearing published packages (@peac/kernel, @peac/protocol,
  * @peac/cli):
  *   1. Run `pnpm pack` to produce a tarball.
- *   2. Create a clean temp project (mkdir + npm init -y + npm install
- *      <tarball> + every workspace dep declared by the package, fetched
+ *   2. Create a clean temp project (mkdir, init, install the tarball plus
+ *      every workspace dep declared by the package via npm, fetched
  *      from npm or workspace tarballs).
  *   3. Run a smoke script that imports the package's public surface and
  *      exercises a representative function.
  *   4. Assert no `Cannot find module '@peac/<private>'` error: this catches
  *      regressions where a published package picks up a runtime dependency
- *      on a workspace-private package (which would 404 on `npm install`).
+ *      on a workspace-private package (which would 404 on external install).
  *
  * v0.13.1 scope: this is the foundation gate for the private-package
  * dependency invariant. It runs in CI on PRs that touch package.json deps,
@@ -36,7 +36,7 @@
  *   node scripts/release/pack-install-smoke.mjs --package @peac/kernel
  */
 
-import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
+import { mkdtempSync, writeFileSync, readFileSync, rmSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
@@ -110,14 +110,14 @@ function packPackage(npmName) {
 }
 
 function readJson(path) {
-  return JSON.parse(execFileSync('cat', [path], { encoding: 'utf8' }));
+  return JSON.parse(readFileSync(path, 'utf8'));
 }
 
 function smokeTarget(npmName) {
   const rel = WORKSPACE_PATH_MAP[npmName];
   const pkgJson = readJson(join(ROOT, rel, 'package.json'));
   const workspaceDeps = Object.keys(pkgJson.dependencies ?? {}).filter(
-    (d) => WORKSPACE_PATH_MAP[d] !== undefined,
+    (d) => WORKSPACE_PATH_MAP[d] !== undefined
   );
 
   const tmpDir = mkdtempSync(join(tmpdir(), 'peac-pack-smoke-'));
@@ -159,7 +159,7 @@ function smokeTarget(npmName) {
       version: '0.0.0',
       private: true,
       dependencies: Object.fromEntries(
-        Object.entries(tarballs).map(([name, path]) => [name, `file:${path}`]),
+        Object.entries(tarballs).map(([name, path]) => [name, `file:${path}`])
       ),
     };
     writeFileSync(join(tmpDir, 'package.json'), JSON.stringify(tempPkg, null, 2));

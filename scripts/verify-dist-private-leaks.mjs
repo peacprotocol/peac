@@ -12,7 +12,7 @@
  *
  * Any match is a release blocker: it means an internal symbol or workspace-
  * private package leaked into a published surface, which would break
- * `npm install <pkg>` for external consumers (404 on the unpublished package
+ * external install for consumers (404 on the unpublished package
  * name) or expose internal-only flags as part of the public TypeScript types.
  *
  * Excludes source maps (.map files) and test fixture directories.

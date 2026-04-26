@@ -1,4 +1,4 @@
-# Security policy — `@peac/registries`
+# Security policy: `@peac/registries`
 
 Internal workspace package. Not published to npm. Not a public attack surface.
 
