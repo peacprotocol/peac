@@ -19,7 +19,8 @@ export type IncludedCategory =
   | 'included_invalid_wire_record'
   | 'included_jose_header_hardening'
   | 'included_warning_vector'
-  | 'included_type_extension_mapping_warning';
+  | 'included_type_extension_mapping_warning'
+  | 'included_issuer_form';
 
 export type ExcludedCategory =
   | 'excluded_legacy_or_bundle_only'
@@ -219,11 +220,22 @@ function categorizeWire02(
       };
     }
     const isPositive = status === 'positive' || fx.expected?.valid === true;
+    // Family-based precise categorization: issuer-form fixtures live
+    // exclusively under wire-02/issuers/ (confirmed by E_ISS_NOT_CANONICAL
+    // grep across wire-02/). They remain envelope-payload fixtures so
+    // the differential and kernel-constraints harnesses still consume
+    // them; the issuer-form parity test filters by category.
+    const category: IncludedCategory =
+      family === 'issuers'
+        ? 'included_issuer_form'
+        : isPositive
+          ? 'included_valid_wire_record'
+          : 'included_invalid_wire_record';
     return {
       source: 'wire-02-conformance',
       family,
       id,
-      category: isPositive ? 'included_valid_wire_record' : 'included_invalid_wire_record',
+      category,
       runnerKind: 'envelope',
       input: claims as Record<string, unknown>,
     };

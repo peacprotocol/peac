@@ -84,6 +84,8 @@ const TIER_2_FORBIDDEN_IDENTIFIERS = [
   'validateJoseHardeningInternal',
   'JoseHardeningInput',
   'JoseHardeningResult',
+  'validateIssuerFormInternal',
+  'IssuerFormResult',
 ];
 
 const WORKSPACE_PATH_MAP = WORKSPACE_PACKAGE_MAP;

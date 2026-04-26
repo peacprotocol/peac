@@ -15,3 +15,4 @@ export {
   type JoseHardeningInput,
   type JoseHardeningResult,
 } from './jose-hardening.js';
+export { validateIssuerFormInternal, type IssuerFormResult } from './issuer-form.js';
