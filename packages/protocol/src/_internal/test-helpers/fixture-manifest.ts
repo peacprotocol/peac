@@ -18,7 +18,8 @@ export type IncludedCategory =
   | 'included_valid_wire_record'
   | 'included_invalid_wire_record'
   | 'included_jose_negative'
-  | 'included_warning_vector';
+  | 'included_warning_vector'
+  | 'included_type_extension_mapping_warning';
 
 export type ExcludedCategory =
   | 'excluded_legacy_or_bundle_only'
@@ -27,7 +28,9 @@ export type ExcludedCategory =
   | 'excluded_requires_signature_or_external_artifact'
   | 'excluded_requires_verify_local_warning_layer'
   | 'excluded_requires_full_jws_verification_runner'
-  | 'excluded_requires_policy_binding_runner';
+  | 'excluded_requires_policy_binding_runner'
+  | 'excluded_requires_temporal_warning_runner'
+  | 'excluded_requires_verify_local_strictness_runner';
 
 export type ManifestCategory = IncludedCategory | ExcludedCategory;
 
@@ -85,8 +88,24 @@ interface RawFixture {
     jws_size_exceeds_bytes?: unknown;
     verify_options?: unknown;
   };
-  readonly expected?: { valid?: unknown };
+  readonly expected?: {
+    valid?: unknown;
+    warnings?: ReadonlyArray<{ code?: string }>;
+  };
 }
+
+/**
+ * Warning codes emitted by the type/extension mapping warning surface
+ * (verify-local.ts:477-540). Step 3b re-includes warning fixtures whose
+ * expected warnings are entirely drawn from this set; mixed fixtures
+ * (e.g., temporal + type warnings together) stay excluded.
+ */
+const TYPE_EXTENSION_MAPPING_WARNING_CODES: ReadonlySet<string> = new Set([
+  'type_unregistered',
+  'unknown_extension_preserved',
+  'extension_group_missing',
+  'extension_group_mismatch',
+]);
 
 /**
  * JOSE rejection vectors that map directly to validateWire02Header
@@ -208,12 +227,67 @@ function categorizeWire02(
   }
 
   if (fxType === 'warning') {
+    const claims = fx.input?.claims;
+    if (!claims || typeof claims !== 'object') {
+      return {
+        source: 'wire-02-conformance',
+        family,
+        id,
+        category: 'excluded_non_record_fixture',
+        reason: `wire-02/${family}/${sourceFile}: warning fixture missing input.claims`,
+      };
+    }
+    const codes = (fx.expected?.warnings ?? [])
+      .map((w) => w.code)
+      .filter((c): c is string => typeof c === 'string');
+
+    if (codes.length === 0) {
+      return {
+        source: 'wire-02-conformance',
+        family,
+        id,
+        category: 'excluded_non_record_fixture',
+        reason: `wire-02/${family}/${sourceFile}: warning fixture without an expected warning code`,
+      };
+    }
+
+    if (codes.includes('occurred_at_skew')) {
+      return {
+        source: 'wire-02-conformance',
+        family,
+        id,
+        category: 'excluded_requires_temporal_warning_runner',
+        reason: `wire-02/${family}/${sourceFile}: occurred_at_skew warning belongs to the temporal layer (verifyLocal occurred_at vs iat skew); no temporal runner in the parity foundation yet`,
+      };
+    }
+
+    if (codes.includes('typ_missing')) {
+      return {
+        source: 'wire-02-conformance',
+        family,
+        id,
+        category: 'excluded_requires_verify_local_strictness_runner',
+        reason: `wire-02/${family}/${sourceFile}: typ_missing warning belongs to the verifyLocal strictness/typ-handling layer; no strictness runner in the parity foundation yet`,
+      };
+    }
+
+    if (codes.every((c) => TYPE_EXTENSION_MAPPING_WARNING_CODES.has(c))) {
+      return {
+        source: 'wire-02-conformance',
+        family,
+        id,
+        category: 'included_type_extension_mapping_warning',
+        runnerKind: 'envelope',
+        input: claims as Record<string, unknown>,
+      };
+    }
+
     return {
       source: 'wire-02-conformance',
       family,
       id,
       category: 'excluded_requires_verify_local_warning_layer',
-      reason: `wire-02/${family}/${sourceFile}: warning fixture (e.g., type_unregistered, unknown_extension_preserved, occurred_at_skew, typ_missing) emitted by Layer 3 verifyLocal; the envelope canonical runner only reaches Layer 1 (validateKernelConstraints + parseReceiptClaims)`,
+      reason: `wire-02/${family}/${sourceFile}: warning fixture mixes codes outside the type/extension mapping surface (codes: ${codes.join(', ')})`,
     };
   }
 

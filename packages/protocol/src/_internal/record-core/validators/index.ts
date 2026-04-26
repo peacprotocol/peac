@@ -5,3 +5,8 @@
  */
 export type { ParityVerdict, ParityError, ParityWarning } from './types.js';
 export { validateKernelConstraintsInternal } from './kernel-constraints.js';
+export {
+  validateTypeExtensionMappingInternal,
+  type TypeExtensionMappingInput,
+  type TypeExtensionMappingWarning,
+} from './type-extension-mapping.js';

@@ -78,6 +78,9 @@ const TIER_2_FORBIDDEN_IDENTIFIERS = [
   'ParityWarning',
   'validateWire02Record',
   'validateKernelConstraintsInternal',
+  'validateTypeExtensionMappingInternal',
+  'TypeExtensionMappingInput',
+  'TypeExtensionMappingWarning',
 ];
 
 const WORKSPACE_PATH_MAP = WORKSPACE_PACKAGE_MAP;
