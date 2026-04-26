@@ -31,7 +31,7 @@ import {
 import { loadFixtureManifest } from '../../src/_internal/test-helpers/fixture-manifest';
 
 // ---------------------------------------------------------------------------
-// LEFT (canonical) helper — projects checkOccurredAtSkew's raw return
+// LEFT (canonical) helper: projects checkOccurredAtSkew's raw return
 // (null | warning object | 'future_error') to the normalized
 // TemporalResult shape used by the bounded validator
 // ---------------------------------------------------------------------------

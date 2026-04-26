@@ -26,7 +26,7 @@ import {
 import { loadFixtureManifest } from '../../src/_internal/test-helpers/fixture-manifest';
 
 // ---------------------------------------------------------------------------
-// LEFT (canonical) helper — projects isCanonicalIss to the normalized
+// LEFT (canonical) helper: projects isCanonicalIss to the normalized
 // {accepted, errorCode?} shape
 // ---------------------------------------------------------------------------
 

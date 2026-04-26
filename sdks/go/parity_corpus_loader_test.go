@@ -37,9 +37,9 @@ type parityVectorInput struct {
 }
 
 type parityVectorOutput struct {
-	Accepted bool                 `json:"accepted"`
-	Errors   []parityVectorIssue  `json:"errors,omitempty"`
-	Warnings []parityVectorIssue  `json:"warnings,omitempty"`
+	Accepted bool                `json:"accepted"`
+	Errors   []parityVectorIssue `json:"errors,omitempty"`
+	Warnings []parityVectorIssue `json:"warnings,omitempty"`
 }
 
 type parityVectorIssue struct {
@@ -48,10 +48,10 @@ type parityVectorIssue struct {
 }
 
 var parityFloorCounts = map[string]int{
-	"default-flows":       12,
-	"jose-hardening":      8,
-	"runtime-governance":  7,
-	"commerce-bridges":    4,
+	"default-flows":      12,
+	"jose-hardening":     8,
+	"runtime-governance": 7,
+	"commerce-bridges":   4,
 }
 
 func parityCorpusRoot(t *testing.T) string {

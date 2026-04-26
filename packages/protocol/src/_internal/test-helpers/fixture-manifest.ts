@@ -123,7 +123,7 @@ const TEMPORAL_WARNING_CODES: ReadonlySet<string> = new Set(['occurred_at_skew']
  * JOSE header hardening function (validateWire02Header in
  * @peac/crypto). Confirmed by inspection of jws.ts: the function
  * checks kid presence/length, embedded key material (jwk/x5c/x5u/jku),
- * crit, b64:false, and zip — in that order. Fixtures matching these
+ * crit, b64:false, and zip, in that order. Fixtures matching these
  * checks are included under category included_jose_header_hardening.
  *
  * Out of scope (excluded under more specific categories):

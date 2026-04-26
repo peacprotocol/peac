@@ -193,7 +193,7 @@ describe('kernel-constraints edge cases (LEFT vs RIGHT)', () => {
       // re-checked because the depth-violating frame is skipped.
       const s = 'short';
       const v = nestObject(KERNEL_CONSTRAINTS.MAX_NESTED_DEPTH + 1);
-      // Replace the deepest leaf with `s` — but nestObject already uses 'leaf'.
+      // Replace the deepest leaf with `s`; nestObject already uses 'leaf'.
       // Build: depth = 33 nested wrappers around a short string.
       let inner: unknown = s;
       for (let i = 0; i < KERNEL_CONSTRAINTS.MAX_NESTED_DEPTH + 1; i++) {

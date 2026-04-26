@@ -33,7 +33,7 @@ import {
 import { loadFixtureManifest } from '../../src/_internal/test-helpers/fixture-manifest';
 
 // ---------------------------------------------------------------------------
-// LEFT (canonical) helper — catches CryptoError and projects to the
+// LEFT (canonical) helper: catches CryptoError and projects to the
 // normalized {accepted, errorCode?} shape
 // ---------------------------------------------------------------------------
 

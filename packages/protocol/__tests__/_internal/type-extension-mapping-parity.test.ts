@@ -48,7 +48,7 @@ import {
 import { loadFixtureManifest } from '../../src/_internal/test-helpers/fixture-manifest';
 
 // ---------------------------------------------------------------------------
-// LEFT (canonical) helper — calls existing exported pieces in the same
+// LEFT (canonical) helper: calls existing exported pieces in the same
 // order as verify-local.ts:477-540 interop branch
 // ---------------------------------------------------------------------------
 

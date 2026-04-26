@@ -1,5 +1,5 @@
 /**
- * Bounded observation subset — composition aggregator.
+ * Bounded observation subset: composition aggregator.
  *
  * INTERNAL ONLY. Composes the six proven layer validators introduced
  * across this PR (kernel constraints; type-extension mapping; JOSE

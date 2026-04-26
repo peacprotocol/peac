@@ -39,7 +39,7 @@ import {
 } from '../../src/_internal/record-core/validators';
 
 // ---------------------------------------------------------------------------
-// LEFT (canonical) helper — wraps validateKnownExtensions in a Zod
+// LEFT (canonical) helper: wraps validateKnownExtensions in a Zod
 // superRefine, filters issues to budget-only, projects to the
 // normalized ExtensionBudgetResult shape
 // ---------------------------------------------------------------------------
@@ -97,7 +97,7 @@ function makeGroupOfSize(bytes: number): { v: string } {
 }
 
 // ---------------------------------------------------------------------------
-// Edge cases — synthetic only
+// Edge cases (synthetic only)
 // ---------------------------------------------------------------------------
 
 describe('extension-budget parity (LEFT canonical-budget vs RIGHT internal)', () => {
