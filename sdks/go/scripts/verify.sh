@@ -65,9 +65,9 @@ if [ -d "$SDK_DIR/middleware/gin" ]; then
 fi
 
 # Fuzz test (quick)
-echo "Running fuzz test (10s)..."
+echo "Running fuzz test (30s)..."
 cd "$SDK_DIR"
-go test ./evidence -run=^$ -fuzz=^FuzzValidate$ -fuzztime=10s
+go test ./evidence -run=^$ -fuzz=^FuzzValidate$ -fuzztime=30s
 echo "OK: Fuzz test passed"
 echo ""
 

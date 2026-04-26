@@ -119,6 +119,6 @@ jobs:
           go-version-file: sdks/go/go.mod
           cache-dependency-path: sdks/go/go.sum
 
-      - name: Fuzz evidence validator (10s)
+      - name: Fuzz evidence validator (30s)
         working-directory: sdks/go
-        run: go test ./evidence -run=^$ -fuzz=^FuzzValidate$ -fuzztime=10s
+        run: go test ./evidence -run=^$ -fuzz=^FuzzValidate$ -fuzztime=30s
