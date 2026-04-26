@@ -31,7 +31,7 @@
  * Web Crypto API with a dynamic Node fallback.
  */
 
-import { sha256Hex } from '@peac/crypto';
+import { base64urlEncode, sha256Hex } from '@peac/crypto';
 
 /**
  * Known secret-class patterns. Order matters only for performance
@@ -185,7 +185,7 @@ function canonicalStringify(value: unknown): string {
     return '[' + value.map(canonicalStringify).join(',') + ']';
   }
   if (value instanceof Uint8Array) {
-    return JSON.stringify(uint8ToBase64(value));
+    return JSON.stringify(base64urlEncode(value));
   }
   if (typeof value === 'object') {
     const obj = value as Record<string, unknown>;
@@ -195,22 +195,6 @@ function canonicalStringify(value: unknown): string {
     );
   }
   return 'null';
-}
-
-/**
- * Encode a Uint8Array as standard base64. Platform-neutral helper used
- * by `canonicalStringify` so the canonical hash distinguishes byte
- * arrays from strings. Internal; not exported.
- */
-function uint8ToBase64(bytes: Uint8Array): string {
-  let binary = '';
-  const chunkSize = 0x8000;
-  for (let i = 0; i < bytes.length; i += chunkSize) {
-    const chunk = bytes.subarray(i, i + chunkSize);
-    binary += String.fromCharCode(...chunk);
-  }
-  // btoa is available in browsers, edge runtimes, and Node 16+.
-  return typeof btoa === 'function' ? btoa(binary) : globalThis.btoa(binary);
 }
 
 /**

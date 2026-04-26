@@ -136,10 +136,16 @@ export function scheduleShadow<T>(args: ScheduleShadowArgs<T>): void {
     pendingScheduleCount -= 1;
     const task = runShadowTask(args);
     PENDING_SHADOW_TASKS.add(task);
-    void task.finally(() => PENDING_SHADOW_TASKS.delete(task));
-    void task.catch(() => {
-      /* already converted to a shadow divergence inside runShadowTask */
-    });
+    // Cleanup runs on both fulfillment and rejection. Using
+    // `task.then(remove, remove)` instead of `task.finally(remove)`
+    // avoids creating a derived rejected promise that would surface
+    // as an unhandled-rejection event when the inner task rejects.
+    // The two-arg `then` form swallows any rejection and runs the
+    // cleanup on either branch.
+    const removeFromPending = (): void => {
+      PENDING_SHADOW_TASKS.delete(task);
+    };
+    void task.then(removeFromPending, removeFromPending);
   }, 0);
 }
 

@@ -65,6 +65,8 @@
     "verify:surface-status": "node scripts/generate-surface-status.mjs --check",
     "verify:openapi:drift": "node scripts/verify-openapi-drift.mjs",
     "verify:openapi:drift:test": "node scripts/verify-openapi-drift.test.mjs",
+    "verify:shadow-redaction": "node scripts/verify-shadow-redaction.mjs",
+    "verify:shadow-redaction:test": "node scripts/verify-shadow-redaction.test.mjs",
     "verify:trust-artifacts": "node scripts/verify-trust-artifacts.mjs",
     "verify:public-surface-names": "node scripts/verify-public-surface-names.mjs",
     "verify:compliance-mappings": "node scripts/verify-compliance-mappings.mjs",

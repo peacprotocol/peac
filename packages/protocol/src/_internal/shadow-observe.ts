@@ -7,21 +7,36 @@
  *
  * The shadow scheduler compares real-path and shadow-path results via
  * canonical hashes. To make that comparison meaningful (not just an
- * accept/reject boolean), both sides project onto a stable normalized
- * `ShadowObservation` shape:
+ * accept/reject boolean) and free of false positives, both sides
+ * project onto the SAME stable normalized `ShadowObservation` shape
+ * before the hash:
  *
  *   - `accepted`: did the validator accept the input?
  *   - `violationCodes`: sorted, deduplicated registered error codes.
  *   - `warningCodes`: sorted, deduplicated registered warning codes.
- *   - `layerTags`: sorted layer identifiers, present on the shadow
- *     side (the bounded validator emits per-layer tags); empty on the
- *     real side because the canonical path does not surface that
- *     dimension.
  *
- * Comparison happens via `canonicalHashOf(observation)` so two
- * observations are equal iff their JCS-canonical JSON forms are
- * byte-equal. Object key order, undefined fields, raw exception
- * messages, and stack traces are all eliminated by construction.
+ * Layer-tag metadata is intentionally NOT part of the comparable
+ * shape. The bounded validator emits per-layer tags; the canonical
+ * Zod path does not. Including them would cause a hash divergence
+ * even on full functional agreement, masking true divergence as
+ * noise.
+ *
+ * Issue path projection:
+ *
+ *   `IssueResult` does not expose warning codes; canonical issuance
+ *   either succeeds (and surfaces no warnings to the caller) or
+ *   throws. To prevent the bounded validator's warnings from
+ *   producing false `output-byte-diff` records on a successful
+ *   issuance, the issue-side comparison runs in ACCEPTED-ONLY mode:
+ *   `warningCodes` is projected to `[]` on BOTH sides.
+ *
+ * VerifyLocal success path projection:
+ *
+ *   `VerifyLocalSuccess` exposes a `warnings` array of registered
+ *   warning codes. The verifyLocal-side comparison includes
+ *   `warningCodes` from both sides (canonical surfaces them
+ *   directly; the bounded validator's warningCodes are mapped from
+ *   `BoundedWarning.code`).
  */
 
 import type { BoundedValidationResult } from './record-core/bounded-validator.js';
@@ -38,23 +53,12 @@ export interface ShadowObservation {
   readonly violationCodes: readonly string[];
   /** Registered warning codes, sorted, deduplicated. */
   readonly warningCodes: readonly string[];
-  /**
-   * Sorted layer identifiers contributing to violations or warnings.
-   * Present on the shadow projection (per-layer tagging is the
-   * bounded validator's design); empty on the real projection so the
-   * comparator does not flag asymmetric layer-tag presence.
-   */
-  readonly layerTags: readonly string[];
 }
 
 /**
- * Real-path observation for a successful `issue()` call.
- *
- * The canonical issuance path validates kernel constraints + Zod
- * schema before signing; if the function returns a JWS, the canonical
- * verdict is unconditionally accepted with no surfaced warnings or
- * codes. Surfaced warnings on the issuance path would need a future
- * shape change to `IssueResult`.
+ * Real-path observation for a successful `issue()` call. Always
+ * projects to the empty accepted-only shape; canonical issuance
+ * surfaces no warning codes through `IssueResult`.
  *
  * @internal
  */
@@ -65,8 +69,7 @@ export function realObservationForIssue(): ShadowObservation {
 /**
  * Real-path observation for a successful `verifyLocal()` call. Maps
  * the canonical `warnings: VerificationWarning[]` array onto the
- * normalized warningCodes set; canonical violations are absent on a
- * successful verification.
+ * normalized warningCodes set.
  *
  * @internal
  */
@@ -78,13 +81,14 @@ export function realObservationForVerifyLocalSuccess(
     accepted: true,
     violationCodes: [],
     warningCodes: sortedDedupedCodes(warnings.map((w) => w.code)),
-    layerTags: [],
   };
 }
 
 /**
- * Project a `BoundedValidationResult` (PR-C-shipped composition over
- * the six layer validators) into the shared observation shape.
+ * Project a `BoundedValidationResult` into the shared observation
+ * shape with full warning-code parity. Use on the verifyLocal path
+ * where canonical exposes warning codes through
+ * `VerifyLocalSuccess.warnings`.
  *
  * @internal
  */
@@ -93,9 +97,26 @@ export function shadowObservationFromBounded(bounded: BoundedValidationResult): 
     accepted: bounded.accepted,
     violationCodes: sortedDedupedCodes(bounded.violations.map((v) => v.code)),
     warningCodes: sortedDedupedCodes(bounded.warnings.map((w) => w.code)),
-    layerTags: sortedDedupedCodes(
-      bounded.violations.map((v) => v.layer).concat(bounded.warnings.map((w) => w.layer))
-    ),
+  };
+}
+
+/**
+ * Project a `BoundedValidationResult` into the shared observation
+ * shape with `warningCodes` flattened to `[]`. Use on the issue path
+ * where canonical issuance does not surface warning codes through
+ * `IssueResult`. Without this projection the bounded validator's
+ * type-extension or temporal warnings would create false
+ * `output-byte-diff` records on every otherwise-successful issuance.
+ *
+ * @internal
+ */
+export function shadowObservationFromBoundedAcceptedOnly(
+  bounded: BoundedValidationResult
+): ShadowObservation {
+  return {
+    accepted: bounded.accepted,
+    violationCodes: sortedDedupedCodes(bounded.violations.map((v) => v.code)),
+    warningCodes: [],
   };
 }
 
@@ -103,7 +124,6 @@ const EMPTY_ACCEPTED: ShadowObservation = Object.freeze({
   accepted: true,
   violationCodes: Object.freeze([]) as readonly string[],
   warningCodes: Object.freeze([]) as readonly string[],
-  layerTags: Object.freeze([]) as readonly string[],
 });
 
 function sortedDedupedCodes(codes: readonly string[]): readonly string[] {

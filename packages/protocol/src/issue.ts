@@ -10,7 +10,7 @@ import { runBoundedValidatorShadow } from './_internal/record-core/bounded-valid
 import { isShadowEnabled, scheduleShadow, type ShadowEnableOptions } from './_internal/shadow.js';
 import {
   realObservationForIssue,
-  shadowObservationFromBounded,
+  shadowObservationFromBoundedAcceptedOnly,
   type ShadowObservation,
 } from './_internal/shadow-observe.js';
 import type { JsonValue, EvidencePillar, PolicyBlock } from '@peac/kernel';
@@ -540,7 +540,7 @@ export async function issueWire02(options: IssueWire02Options): Promise<IssueRes
       realResult: realObservationForIssue(),
       realError: undefined,
       shadowFn: async () =>
-        shadowObservationFromBounded(
+        shadowObservationFromBoundedAcceptedOnly(
           runBoundedValidatorShadow({
             claims: {
               kind: claims.kind,

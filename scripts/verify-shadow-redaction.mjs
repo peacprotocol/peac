@@ -4,9 +4,7 @@
  *
  * Scan any shadow-log JSON artifacts emitted during the nightly shadow
  * lane and assert that every entry is redaction-clean. Acts as a
- * second line of defense behind the in-process `redactNote` patterns:
- * even if a future change accidentally widens what gets logged, this
- * script catches it before the artifact leaves CI.
+ * second line of defense behind the in-process `redactNote` patterns.
  *
  * Usage:
  *
@@ -14,30 +12,42 @@
  *
  * Default scan directory: `shadow-log-artifacts/` at the repo root.
  * If the directory is missing OR contains no `*.json` files, the
- * script exits 0 with a notice. v0.13.1 does not require the in-process
- * shadow log to be persisted; the script exists so that ANY future
- * persisted log is automatically gated. When the nightly lane wires up
- * a persistence path, drop the artifacts under `shadow-log-artifacts/`
- * and this script will gate them.
+ * script exits 0 with a notice. v0.13.1 does not require the
+ * in-process shadow log to be persisted; this script exists so any
+ * future persistence path is automatically gated.
  *
- * Per-entry assertions (every entry MUST satisfy):
+ * Per-entry validation falls into three classes:
  *
- *   - `recordRefHash` is a 64-character lowercase hex string.
- *   - `notes` is a string and its UTF-8 byte length is <= 128.
- *   - `realErrorCode` / `shadowErrorCode`, when present, match the
- *     registered grammar `/^[A-Z_][A-Z0-9_]*$/`.
- *   - `realResult` / `shadowResult` raw fields are ABSENT (only
- *     hashes and byte lengths may appear).
- *   - The serialized entry MUST NOT contain any of the secret patterns
- *     covered by `packages/protocol/src/_internal/shadow-redact.ts`
- *     (JWS / PEM / Bearer / Cookie / Set-Cookie / Authorization /
- *     X-Auth-Token / URL query token / API key / email / phone /
- *     long base64).
+ *   STRUCTURAL (validated by shape; no pattern scan):
+ *     - recordRefHash, realResultHash, shadowResultHash:
+ *       must be 64 lowercase-hex strings.
+ *     - realErrorCode, shadowErrorCode (if present):
+ *       must match /^[A-Z_][A-Z0-9_]*$/.
+ *     - realByteLen, shadowByteLen (if present): non-negative integers.
+ *     - timestamp: ISO 8601 string.
+ *     - kind, call: enums (loose checks).
+ *
+ *   SCANNED (run secret-pattern detection):
+ *     - notes: must be a string with UTF-8 byte length <= 128 AND
+ *       must not match any registered secret pattern.
+ *     - any UNEXPECTED top-level field whose name is not in the known
+ *       schema gets the same scan; unknown nested objects are
+ *       stringified and scanned wholesale.
+ *
+ *   FORBIDDEN (presence alone fails):
+ *     - realResult, shadowResult: raw payload fields MUST be absent
+ *       regardless of content.
+ *
+ * The 64-hex hash fields would match the long-base64 secret pattern
+ * if scanned naively, so they MUST be excluded from the scan-copy.
+ * That exclusion is what makes the gate trustworthy: a valid log full
+ * of canonical hashes passes; a notes field carrying a Bearer token
+ * still fails.
  *
  * Exit codes:
  *
  *   0  every scanned entry passed (or no entries to scan).
- *   1  at least one entry failed; the per-entry failure reasons are
+ *   1  at least one entry failed; per-entry failure reasons are
  *      printed to stderr.
  */
 
@@ -50,6 +60,15 @@ const SCAN_DIR = dirIdx >= 0 ? args[dirIdx + 1] : 'shadow-log-artifacts';
 
 const HEX64 = /^[0-9a-f]{64}$/;
 const ERROR_CODE = /^[A-Z_][A-Z0-9_]*$/;
+const TIMESTAMP_LOOSE = /^\d{4}-\d{2}-\d{2}T/;
+const KIND_VALUES = new Set([
+  'output-byte-diff',
+  'error-code-diff',
+  'timing-diff',
+  'resource-limit-diff',
+  'shadow-error',
+]);
+const CALL_VALUES = new Set(['issue', 'verifyLocal', 'verify']);
 const MAX_NOTES_BYTES = 128;
 
 const SECRET_PATTERNS = [
@@ -69,52 +88,137 @@ const SECRET_PATTERNS = [
   /\b\d{3}[\s.-]\d{3}[\s.-]\d{4}\b/,
 ];
 
+// Fields that SHIP recognized hashes / counts / timestamps / enums.
+// Excluded from the secret-pattern scan because their content is
+// structurally validated above and would otherwise collateral-match
+// the long-base64 / phone patterns.
+const STRUCTURAL_FIELDS = new Set([
+  'kind',
+  'call',
+  'recordRefHash',
+  'realResultHash',
+  'shadowResultHash',
+  'realErrorCode',
+  'shadowErrorCode',
+  'realByteLen',
+  'shadowByteLen',
+  'timestamp',
+]);
+
+// Fields that MUST NOT appear regardless of content.
+const FORBIDDEN_FIELDS = new Set(['realResult', 'shadowResult']);
+
+// Fields that are scanned for secret patterns. `notes` is always
+// scanned; any unknown top-level field also gets scanned (unknown
+// fields might carry structured leakage from a future-broken code
+// path that this gate exists to catch).
+const SCANNED_KNOWN_FIELDS = new Set(['notes']);
+
 function utf8ByteLength(s) {
   return new TextEncoder().encode(s).length;
 }
 
-function checkEntry(entry, source) {
+function checkStructuralFields(entry, source) {
   const errors = [];
 
-  if (typeof entry !== 'object' || entry === null) {
-    return [`${source}: entry is not an object`];
+  if (!KIND_VALUES.has(entry.kind)) {
+    errors.push(`${source}: kind not in registered set: ${JSON.stringify(entry.kind)}`);
+  }
+  if (!CALL_VALUES.has(entry.call)) {
+    errors.push(`${source}: call not in registered set: ${JSON.stringify(entry.call)}`);
   }
 
-  const recordRefHash = entry.recordRefHash;
-  if (typeof recordRefHash !== 'string' || !HEX64.test(recordRefHash)) {
-    errors.push(`${source}: recordRefHash is not a 64-character lowercase hex string`);
+  for (const hashField of ['recordRefHash', 'realResultHash', 'shadowResultHash']) {
+    const v = entry[hashField];
+    if (v === undefined) {
+      // recordRefHash is required; the others are conditional.
+      if (hashField === 'recordRefHash') {
+        errors.push(`${source}: recordRefHash is missing`);
+      }
+      continue;
+    }
+    if (typeof v !== 'string' || !HEX64.test(v)) {
+      errors.push(`${source}: ${hashField} is not a 64-character lowercase hex string`);
+    }
   }
 
-  const notes = entry.notes;
-  if (typeof notes !== 'string') {
-    errors.push(`${source}: notes is missing or not a string`);
-  } else if (utf8ByteLength(notes) > MAX_NOTES_BYTES) {
-    errors.push(`${source}: notes exceeds ${MAX_NOTES_BYTES} UTF-8 bytes`);
-  }
-
-  for (const codeKey of ['realErrorCode', 'shadowErrorCode']) {
-    const v = entry[codeKey];
+  for (const codeField of ['realErrorCode', 'shadowErrorCode']) {
+    const v = entry[codeField];
     if (v === undefined) continue;
     if (typeof v !== 'string' || !ERROR_CODE.test(v)) {
-      errors.push(`${source}: ${codeKey} does not match registered error-code grammar`);
+      errors.push(`${source}: ${codeField} does not match registered error-code grammar`);
     }
   }
 
-  for (const rawKey of ['realResult', 'shadowResult']) {
-    if (Object.prototype.hasOwnProperty.call(entry, rawKey)) {
-      errors.push(`${source}: forbidden raw field present: ${rawKey}`);
+  for (const lenField of ['realByteLen', 'shadowByteLen']) {
+    const v = entry[lenField];
+    if (v === undefined) continue;
+    if (typeof v !== 'number' || !Number.isInteger(v) || v < 0) {
+      errors.push(`${source}: ${lenField} is not a non-negative integer`);
     }
   }
 
-  // Pattern scan over the serialized entry.
-  const serialized = JSON.stringify(entry);
-  for (const pattern of SECRET_PATTERNS) {
-    if (pattern.test(serialized)) {
-      errors.push(`${source}: serialized entry matches secret pattern ${pattern}`);
+  if (typeof entry.timestamp !== 'string' || !TIMESTAMP_LOOSE.test(entry.timestamp)) {
+    errors.push(`${source}: timestamp is not an ISO 8601 string`);
+  }
+
+  return errors;
+}
+
+function checkScannedFields(entry, source) {
+  const errors = [];
+
+  // notes is required; bounded byte length AND no secret matches.
+  if (typeof entry.notes !== 'string') {
+    errors.push(`${source}: notes is missing or not a string`);
+  } else {
+    if (utf8ByteLength(entry.notes) > MAX_NOTES_BYTES) {
+      errors.push(`${source}: notes exceeds ${MAX_NOTES_BYTES} UTF-8 bytes`);
+    }
+    for (const pattern of SECRET_PATTERNS) {
+      if (pattern.test(entry.notes)) {
+        errors.push(`${source}: notes matches secret pattern ${pattern}`);
+      }
+    }
+  }
+
+  // Unknown top-level fields: scan their stringified form too, since
+  // a future-broken code path might add an unexpected field carrying
+  // raw content.
+  for (const [key, value] of Object.entries(entry)) {
+    if (STRUCTURAL_FIELDS.has(key)) continue;
+    if (FORBIDDEN_FIELDS.has(key)) continue;
+    if (SCANNED_KNOWN_FIELDS.has(key)) continue;
+    const serialized = typeof value === 'string' ? value : JSON.stringify(value);
+    for (const pattern of SECRET_PATTERNS) {
+      if (pattern.test(serialized)) {
+        errors.push(`${source}: unexpected field ${key} matches secret pattern ${pattern}`);
+      }
     }
   }
 
   return errors;
+}
+
+function checkForbiddenFields(entry, source) {
+  const errors = [];
+  for (const k of FORBIDDEN_FIELDS) {
+    if (Object.prototype.hasOwnProperty.call(entry, k)) {
+      errors.push(`${source}: forbidden raw field present: ${k}`);
+    }
+  }
+  return errors;
+}
+
+function checkEntry(entry, source) {
+  if (typeof entry !== 'object' || entry === null) {
+    return [`${source}: entry is not an object`];
+  }
+  return [
+    ...checkStructuralFields(entry, source),
+    ...checkForbiddenFields(entry, source),
+    ...checkScannedFields(entry, source),
+  ];
 }
 
 function loadFile(path) {
@@ -169,7 +273,9 @@ function main() {
   if (errors.length > 0) {
     console.error('[verify-shadow-redaction] FAIL');
     for (const e of errors) console.error(`  - ${e}`);
-    console.error(`[verify-shadow-redaction] ${errors.length} failure(s) across ${scanned} entries`);
+    console.error(
+      `[verify-shadow-redaction] ${errors.length} failure(s) across ${scanned} entries`
+    );
     process.exit(1);
   }
 

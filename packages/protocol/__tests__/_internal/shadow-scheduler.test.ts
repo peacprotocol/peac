@@ -233,4 +233,34 @@ describe('scheduleShadow: cooperative timeout', () => {
       process.removeListener('unhandledRejection', handler);
     }
   });
+
+  it('cleanup-path rejection (non-Error throw inside shadowFn) is swallowed without unhandled-rejection', async () => {
+    // Models a code path where the shadow function throws a value that
+    // is not a typical Error instance. The `task.then(remove, remove)`
+    // cleanup pattern in scheduleShadow must still settle without
+    // surfacing an unhandled rejection.
+    const unhandled: unknown[] = [];
+    const handler = (reason: unknown) => unhandled.push(reason);
+    process.on('unhandledRejection', handler);
+    try {
+      scheduleShadow({
+        call: 'verifyLocal',
+        realResult: { value: 1 },
+        realError: undefined,
+        shadowFn: () => Promise.reject('NON_ERROR_REJECTION_VALUE'),
+        recordRef: 'non-error-reject',
+      });
+      await _drainShadowQueueForTests();
+      await new Promise<void>((resolve) => setTimeout(resolve, 10));
+      expect(unhandled).toHaveLength(0);
+      const log = _peekShadowLog();
+      expect(log).toHaveLength(1);
+      expect(log[0].kind).toBe('shadow-error');
+      // Plain string rejection has no `code`; the extractor falls back
+      // to the registered SHADOW_UNKNOWN_ERROR placeholder.
+      expect(log[0].shadowErrorCode).toBe('SHADOW_UNKNOWN_ERROR');
+    } finally {
+      process.removeListener('unhandledRejection', handler);
+    }
+  });
 });
