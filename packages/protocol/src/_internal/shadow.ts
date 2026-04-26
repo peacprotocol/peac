@@ -9,26 +9,47 @@
  * has returned its real-path result to the caller. The shadow run:
  *
  *   - is gated by `isShadowEnabled(options)` (env or programmatic);
- *   - starts on a microtask boundary (NOT the real-path stack frame);
- *   - has a bounded wall-clock timeout (250ms by default);
+ *   - starts on a MACROTASK boundary (`setTimeout(..., 0)`), NOT on a
+ *     microtask, because microtasks can run before promise
+ *     continuations attached to the public async call and would still
+ *     add observable latency for CPU-heavy shadow work;
+ *   - has a bounded wall-clock REPORTING timeout (250ms by default;
+ *     see "Timeout guarantee class" below);
  *   - reports comparison results into a bounded in-memory log;
  *   - SWALLOWS every error, never propagating to the real-path return
  *     value or surfacing as an unhandled-rejection event.
  *
  * The public function:
  *
- *   - returns the real-path value FIRST (synchronously or by resolving
- *     before scheduleShadow runs the comparison);
+ *   - returns the real-path value FIRST (the macrotask boundary is
+ *     past every async continuation already attached to the call
+ *     site);
  *   - never awaits shadow work;
  *   - is byte-identical in its return value with shadow ON vs OFF.
+ *
+ * Timeout guarantee class. The 250ms timeout is a REPORTING bound,
+ * not a hard preemption guarantee. Where the shadow function consults
+ * the supplied `AbortSignal`, the runner aborts and bounds CPU; where
+ * the shadow function is pure-CPU and ignores the signal (the v0.13.1
+ * record-core validators are this shape), JavaScript cannot preempt
+ * it. The runner stops awaiting and records `timing-diff`; the work
+ * may continue to completion off the runner's await chain. Either
+ * way, the public-call boundary returns its real-path value
+ * immediately.
  *
  * Test-only helpers (`_peekShadowLog`, `_resetShadowLog`,
  * `_drainShadowQueueForTests`) are exposed for deterministic
  * assertions in vitest. Production code MUST NOT call them.
+ *
+ * Platform neutrality: this module avoids Node-only globals
+ * (`Buffer`, `node:crypto`, unguarded `process`). Hashing delegates
+ * to @peac/crypto; environment reads guard for the absence of
+ * `process` so the module loads cleanly under browser / edge
+ * runtimes.
  */
 
 import type { ShadowCall, ShadowDivergence } from './shadow-types.js';
-import { canonicalHashOf, hashJws, redactNote } from './shadow-redact.js';
+import { canonicalHashOf, hashJws, redactNote, utf8ByteLength } from './shadow-redact.js';
 
 const MAX_LOG_ENTRIES = 1000;
 const MAX_NOTE_BYTES = 128;
@@ -37,6 +58,7 @@ const SHADOW_TIMEOUT_MS = 250;
 
 const SHADOW_LOG: ShadowDivergence[] = [];
 const PENDING_SHADOW_TASKS: Set<Promise<void>> = new Set();
+let pendingScheduleCount = 0;
 
 /**
  * Programmatic-flag shape. Internal-only; never appears in any
@@ -53,13 +75,20 @@ export interface ShadowEnableOptions {
 /**
  * Read the shadow-enable flag from environment or programmatic
  * options. Read once per call, NOT cached at module scope, so tests
- * can toggle the env var dynamically.
+ * can toggle the env var dynamically. Environment access is guarded
+ * for browser / edge runtimes that do not expose `process`.
  *
  * @internal
  */
 export function isShadowEnabled(options?: ShadowEnableOptions): boolean {
   if (options?._internal?.shadowCore === true) return true;
-  return process.env.PEAC_INTERNAL_SHADOW_CORE === '1';
+  return readEnvFlag();
+}
+
+function readEnvFlag(): boolean {
+  if (typeof process === 'undefined' || process === null) return false;
+  const env = (process as { env?: Record<string, string | undefined> }).env;
+  return env?.PEAC_INTERNAL_SHADOW_CORE === '1';
 }
 
 /**
@@ -81,11 +110,16 @@ export interface ScheduleShadowArgs<T> {
 /**
  * Schedule shadow work AFTER the real-path return.
  *
- * The shadow run starts on the next microtask boundary. The public
- * function returns its real-path value before this scheduler runs the
- * shadow comparison. Tasks are tracked internally so test helpers can
- * drain them for deterministic assertions; production callers ignore
- * the (void) return.
+ * The shadow run starts on the next MACROTASK boundary (via
+ * `setTimeout(..., 0)`). The public function returns its real-path
+ * value before the macrotask fires, including for async callers
+ * whose `.then` / `await` continuations execute on microtasks.
+ * `queueMicrotask` would interleave with those continuations and is
+ * intentionally avoided.
+ *
+ * Tasks are tracked internally so test helpers can drain them for
+ * deterministic assertions; production callers ignore the (void)
+ * return.
  *
  * Failures inside the shadow path are converted to divergence records
  * inside the task body. The outer `task.catch(() => {})` is defense
@@ -97,18 +131,20 @@ export interface ScheduleShadowArgs<T> {
  * @internal
  */
 export function scheduleShadow<T>(args: ScheduleShadowArgs<T>): void {
-  queueMicrotask(() => {
+  pendingScheduleCount += 1;
+  setTimeout(() => {
+    pendingScheduleCount -= 1;
     const task = runShadowTask(args);
     PENDING_SHADOW_TASKS.add(task);
     void task.finally(() => PENDING_SHADOW_TASKS.delete(task));
     void task.catch(() => {
       /* already converted to a shadow divergence inside runShadowTask */
     });
-  });
+  }, 0);
 }
 
 async function runShadowTask<T>(args: ScheduleShadowArgs<T>): Promise<void> {
-  const recordRefHash = hashJws(args.recordRef);
+  const recordRefHash = await hashJws(args.recordRef);
   let shadowResult: T | undefined;
   let shadowErrorCode: string | undefined;
 
@@ -128,24 +164,13 @@ async function runShadowTask<T>(args: ScheduleShadowArgs<T>): Promise<void> {
     return;
   }
 
-  const divergence = compareResults(args, shadowResult, recordRefHash);
+  const divergence = await compareResults(args, shadowResult, recordRefHash);
   if (divergence) appendDivergence(divergence);
 }
 
 /**
- * Bounded-timeout runner for shadow work.
- *
- * Cancellation contract:
- *
- *   - Where the shadow function consults the AbortSignal, the runner
- *     signals abort on timeout and bounds CPU/memory.
- *   - Where the shadow function does NOT consult the signal (pure-CPU
- *     validators), the timeout is a REPORTING bound only: the runner
- *     records `timing-diff` and stops awaiting; the shadow work may
- *     continue to completion in the background.
- *
- * Either way, the public-call boundary returns the real-path value
- * immediately; the shadow timeout never delays the real-path return.
+ * Bounded REPORTING timeout for shadow work. NOT a hard preemption
+ * guarantee. See the module-level "Timeout guarantee class" comment.
  */
 function runWithTimeout<T>(fn: (signal?: AbortSignal) => Promise<T>, ms: number): Promise<T> {
   const controller = new AbortController();
@@ -167,17 +192,17 @@ function runWithTimeout<T>(fn: (signal?: AbortSignal) => Promise<T>, ms: number)
   });
 }
 
-function compareResults<T>(
+async function compareResults<T>(
   args: ScheduleShadowArgs<T>,
   shadowResult: T | undefined,
   recordRefHash: string
-): ShadowDivergence | null {
+): Promise<ShadowDivergence | null> {
   const ts = new Date().toISOString();
 
   // Both succeeded: compare canonical hashes.
   if (!args.realError && shadowResult !== undefined && args.realResult !== undefined) {
-    const realHash = canonicalHashOf(args.realResult);
-    const shadowHash = canonicalHashOf(shadowResult);
+    const realHash = await canonicalHashOf(args.realResult);
+    const shadowHash = await canonicalHashOf(shadowResult);
     if (realHash !== shadowHash) {
       return {
         kind: 'output-byte-diff',
@@ -211,9 +236,9 @@ function compareResults<T>(
 }
 
 function byteLenOf(value: unknown): number {
-  if (typeof value === 'string') return Buffer.byteLength(value, 'utf8');
+  if (typeof value === 'string') return utf8ByteLength(value);
   if (value instanceof Uint8Array) return value.byteLength;
-  return Buffer.byteLength(JSON.stringify(value) ?? '', 'utf8');
+  return utf8ByteLength(JSON.stringify(value) ?? '');
 }
 
 function extractErrorCode(err: unknown): string {
@@ -257,14 +282,21 @@ export function _resetShadowLog(): void {
 
 /**
  * Drain the pending-shadow-tasks set so deterministic assertions can
- * run after a sequence of shadow-enabled calls. TEST USE ONLY.
- * Production code MUST NOT call this.
+ * run after a sequence of shadow-enabled calls. Yields to the event
+ * loop until every scheduled `setTimeout` has fired AND every
+ * resulting task has settled. TEST USE ONLY. Production code MUST
+ * NOT call this.
  *
  * @internal
  */
 export async function _drainShadowQueueForTests(): Promise<void> {
-  // Loop because new tasks may be enqueued by tasks already in flight.
-  while (PENDING_SHADOW_TASKS.size > 0) {
-    await Promise.allSettled(Array.from(PENDING_SHADOW_TASKS));
+  while (pendingScheduleCount > 0 || PENDING_SHADOW_TASKS.size > 0) {
+    if (pendingScheduleCount > 0) {
+      // Yield so any pending setTimeout(..., 0) fires.
+      await new Promise<void>((resolve) => setTimeout(resolve, 0));
+    }
+    if (PENDING_SHADOW_TASKS.size > 0) {
+      await Promise.allSettled(Array.from(PENDING_SHADOW_TASKS));
+    }
   }
 }

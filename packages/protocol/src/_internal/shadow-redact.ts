@@ -23,9 +23,15 @@
  * adversarial test vector in shadow-redact-adversarial.test.ts (one
  * matching vector + one adjacent benign-not-matched vector). Removing
  * a regex here REQUIRES the same justification.
+ *
+ * Platform neutrality: this module avoids Node-only globals (`Buffer`,
+ * `node:crypto`) so it can ship inside the platform-neutral
+ * @peac/protocol bundle. UTF-8 byte work uses TextEncoder/TextDecoder;
+ * SHA-256 hashing delegates to @peac/crypto.sha256Hex which uses the
+ * Web Crypto API with a dynamic Node fallback.
  */
 
-import { createHash } from 'node:crypto';
+import { sha256Hex } from '@peac/crypto';
 
 /**
  * Known secret-class patterns. Order matters only for performance
@@ -89,7 +95,20 @@ const SECRET_PATTERNS: readonly RegExp[] = [
  */
 const REDACTION_MARKER = '[REDACTED]';
 
-const REDACTION_MARKER_BYTES = Buffer.byteLength(REDACTION_MARKER, 'utf8');
+const TEXT_ENCODER = /* @__PURE__ */ new TextEncoder();
+const TEXT_DECODER = /* @__PURE__ */ new TextDecoder('utf-8', { fatal: false });
+
+const REDACTION_MARKER_BYTES = TEXT_ENCODER.encode(REDACTION_MARKER).length;
+
+/**
+ * UTF-8 byte length of a string. Platform-neutral replacement for
+ * `Buffer.byteLength(s, 'utf8')`.
+ *
+ * @internal
+ */
+export function utf8ByteLength(value: string): number {
+  return TEXT_ENCODER.encode(value).length;
+}
 
 /**
  * Redact known secret classes from `input` and bound the result to
@@ -111,15 +130,15 @@ export function redactNote(input: string, maxBytes: number): string {
     redacted = redacted.replace(pattern, REDACTION_MARKER);
   }
 
-  const buf = Buffer.from(redacted, 'utf8');
-  if (buf.length <= maxBytes) return redacted;
+  const bytes = TEXT_ENCODER.encode(redacted);
+  if (bytes.length <= maxBytes) return redacted;
 
   if (maxBytes <= REDACTION_MARKER_BYTES) {
     return REDACTION_MARKER.slice(0, maxBytes);
   }
 
   const headBytes = maxBytes - REDACTION_MARKER_BYTES;
-  return safeUtf8Slice(buf, headBytes) + REDACTION_MARKER;
+  return safeUtf8Slice(bytes, headBytes) + REDACTION_MARKER;
 }
 
 /**
@@ -128,10 +147,15 @@ export function redactNote(input: string, maxBytes: number): string {
  * content. Object keys are sorted recursively so equivalent objects
  * with different key orders produce identical digests.
  *
+ * Async because SHA-256 hashing in this codebase is platform-neutral
+ * via @peac/crypto.sha256Hex (Web Crypto API with dynamic Node
+ * fallback). Callers run inside the shadow scheduler's microtask /
+ * macrotask boundary, so an additional await is free.
+ *
  * @internal
  */
-export function canonicalHashOf(value: unknown): string {
-  return createHash('sha256').update(canonicalStringify(value)).digest('hex');
+export async function canonicalHashOf(value: unknown): Promise<string> {
+  return sha256Hex(canonicalStringify(value));
 }
 
 /**
@@ -140,8 +164,8 @@ export function canonicalHashOf(value: unknown): string {
  *
  * @internal
  */
-export function hashJws(jws: string): string {
-  return createHash('sha256').update(jws).digest('hex');
+export async function hashJws(jws: string): Promise<string> {
+  return sha256Hex(jws);
 }
 
 /**
@@ -161,7 +185,7 @@ function canonicalStringify(value: unknown): string {
     return '[' + value.map(canonicalStringify).join(',') + ']';
   }
   if (value instanceof Uint8Array) {
-    return JSON.stringify(Buffer.from(value).toString('base64'));
+    return JSON.stringify(uint8ToBase64(value));
   }
   if (typeof value === 'object') {
     const obj = value as Record<string, unknown>;
@@ -174,19 +198,35 @@ function canonicalStringify(value: unknown): string {
 }
 
 /**
+ * Encode a Uint8Array as standard base64. Platform-neutral helper used
+ * by `canonicalStringify` so the canonical hash distinguishes byte
+ * arrays from strings. Internal; not exported.
+ */
+function uint8ToBase64(bytes: Uint8Array): string {
+  let binary = '';
+  const chunkSize = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    const chunk = bytes.subarray(i, i + chunkSize);
+    binary += String.fromCharCode(...chunk);
+  }
+  // btoa is available in browsers, edge runtimes, and Node 16+.
+  return typeof btoa === 'function' ? btoa(binary) : globalThis.btoa(binary);
+}
+
+/**
  * Slice a UTF-8 byte buffer to at most `byteLen` bytes without
  * splitting a multi-byte sequence mid-character. Returns a decoded
  * string. Internal helper for `redactNote`. Not exported.
  */
-function safeUtf8Slice(buf: Buffer, byteLen: number): string {
+function safeUtf8Slice(bytes: Uint8Array, byteLen: number): string {
   if (byteLen <= 0) return '';
-  if (buf.length <= byteLen) return buf.toString('utf8');
+  if (bytes.length <= byteLen) return TEXT_DECODER.decode(bytes);
 
   let end = byteLen;
   // Walk back over UTF-8 continuation bytes (0b10xxxxxx) so the slice
   // ends on a complete code-point boundary.
-  while (end > 0 && (buf[end] & 0xc0) === 0x80) {
+  while (end > 0 && (bytes[end] & 0xc0) === 0x80) {
     end -= 1;
   }
-  return buf.subarray(0, end).toString('utf8');
+  return TEXT_DECODER.decode(bytes.subarray(0, end));
 }
