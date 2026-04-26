@@ -23,7 +23,7 @@
  * with a reproducible seed for re-runs.
  */
 
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, beforeAll } from 'vitest';
 import * as fc from 'fast-check';
 import { generateKeypair } from '@peac/crypto';
 import { verifyLocal } from '../src/index';
