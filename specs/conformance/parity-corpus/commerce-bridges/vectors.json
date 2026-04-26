@@ -1,12 +1,12 @@
 {
   "family": "commerce-bridges",
-  "description": "Commerce evidence parity vectors covering one observation per family: x402 settlement, ACP delegated-payment, MPP/paymentauth attempt+settlement, and Stripe SPT. The bounded validator foundation must reach zero divergence with the existing path on every vector. The validator does NOT synthesize payment finality from non-payment artifacts; it only asserts envelope validity.",
+  "description": "Commerce evidence parity vectors covering one envelope shape per upstream family (x402, ACP, paymentauth, Stripe SPT). Each vector uses the canonical commerce extension schema (payment_rail / amount_minor / currency / event), where event values are restricted to the canonical lifecycle enum (authorization|capture|settlement|refund|void|chargeback). Bridge-specific upstream artifact preservation lives in adapter packages, not the canonical envelope; this corpus tests envelope validation only.",
   "version": "0.13.1",
   "generator": "manual; v0.13.1 PR C floor",
   "vectors": [
     {
       "id": "cb-001-x402-settlement",
-      "description": "Commerce evidence record carrying x402 settlement observation in the commerce extension.",
+      "description": "Commerce evidence record with payment_rail x402 and event settlement.",
       "input": {
         "payload": {
           "peac_version": "0.2",
@@ -17,14 +17,10 @@
           "jti": "cb-001-jti-fixed-value",
           "extensions": {
             "org.peacprotocol/commerce": {
-              "rail": "x402",
-              "amount": "0.10",
+              "payment_rail": "x402",
+              "amount_minor": "10",
               "currency": "USD",
-              "event": "settlement",
-              "upstream_artifact": {
-                "type": "x402-settlement-proof",
-                "value": "stub-base64url-payload"
-              }
+              "event": "settlement"
             }
           }
         }
@@ -32,8 +28,8 @@
       "expected": { "accepted": true }
     },
     {
-      "id": "cb-002-acp-delegated-payment",
-      "description": "Commerce evidence record carrying ACP delegated-payment observation. Lifecycle metadata is preserved verbatim from the upstream session; no payment finality is synthesized.",
+      "id": "cb-002-acp-authorization",
+      "description": "Commerce evidence record with payment_rail acp and event authorization. ACP delegated-payment lifecycle is observational; canonical envelope event is restricted to standard payment lifecycle vocabulary.",
       "input": {
         "payload": {
           "peac_version": "0.2",
@@ -44,14 +40,10 @@
           "jti": "cb-002-jti-fixed-value",
           "extensions": {
             "org.peacprotocol/commerce": {
-              "rail": "acp",
-              "amount": "5.00",
+              "payment_rail": "acp",
+              "amount_minor": "500",
               "currency": "USD",
-              "event": "delegated-payment-initiated",
-              "upstream_artifact": {
-                "type": "acp-session-snapshot",
-                "session_state": "completed"
-              }
+              "event": "authorization"
             }
           }
         }
@@ -59,8 +51,8 @@
       "expected": { "accepted": true }
     },
     {
-      "id": "cb-003-paymentauth-attempt-settlement",
-      "description": "Commerce evidence record carrying MPP/paymentauth attempt and upstream-attested settlement.",
+      "id": "cb-003-paymentauth-settlement",
+      "description": "Commerce evidence record with payment_rail paymentauth and event settlement.",
       "input": {
         "payload": {
           "peac_version": "0.2",
@@ -71,14 +63,10 @@
           "jti": "cb-003-jti-fixed-value",
           "extensions": {
             "org.peacprotocol/commerce": {
-              "rail": "paymentauth",
-              "amount": "12.34",
+              "payment_rail": "paymentauth",
+              "amount_minor": "1234",
               "currency": "USD",
-              "event": "settlement-attested",
-              "upstream_artifact": {
-                "type": "mpp-receipt",
-                "value": "stub-base64url-payload"
-              }
+              "event": "settlement"
             }
           }
         }
@@ -86,8 +74,8 @@
       "expected": { "accepted": true }
     },
     {
-      "id": "cb-004-stripe-spt",
-      "description": "Commerce evidence record carrying Stripe Shared Payment Token observation. SPT is a grant artifact, not a payment finality artifact.",
+      "id": "cb-004-stripe-authorization",
+      "description": "Commerce evidence record with payment_rail stripe and event authorization. Stripe Shared Payment Token is an authorization-grant artifact; canonical envelope event is restricted to standard payment lifecycle vocabulary.",
       "input": {
         "payload": {
           "peac_version": "0.2",
@@ -98,12 +86,10 @@
           "jti": "cb-004-jti-fixed-value",
           "extensions": {
             "org.peacprotocol/commerce": {
-              "rail": "stripe",
-              "event": "shared-payment-token-issued",
-              "upstream_artifact": {
-                "type": "stripe-spt",
-                "spt_ref": "spt_stub_reference"
-              }
+              "payment_rail": "stripe",
+              "amount_minor": "999",
+              "currency": "USD",
+              "event": "authorization"
             }
           }
         }

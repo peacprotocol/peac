@@ -1,6 +1,6 @@
 {
   "family": "jose-hardening",
-  "description": "Wire 0.2 JOSE rejection parity vectors. Each vector supplies a malformed JOSE protected header that the canonical hardening check MUST reject. The bounded validator foundation must reach zero divergence with the existing JOSE hardening path on every vector.",
+  "description": "Wire 0.2 JOSE rejection parity vectors. Each vector supplies a malformed JOSE protected header that the canonical hardening function (validateWire02Header in @peac/crypto) MUST reject. The bounded shadow-mode validator foundation must reach zero divergence with the existing JOSE hardening path on every vector. Error codes are the actual CryptoError codes thrown by the canonical path; they do NOT carry a structured path field.",
   "version": "0.13.1",
   "generator": "manual; v0.13.1 PR C floor",
   "vectors": [
@@ -29,7 +29,7 @@
       },
       "expected": {
         "accepted": false,
-        "errors": [{ "code": "E_JOSE_EMBEDDED_KEY", "path": "/header/jwk" }]
+        "errors": [{ "code": "CRYPTO_JWS_EMBEDDED_KEY" }]
       }
     },
     {
@@ -53,7 +53,7 @@
       },
       "expected": {
         "accepted": false,
-        "errors": [{ "code": "E_JOSE_EMBEDDED_KEY", "path": "/header/x5c" }]
+        "errors": [{ "code": "CRYPTO_JWS_EMBEDDED_KEY" }]
       }
     },
     {
@@ -77,7 +77,7 @@
       },
       "expected": {
         "accepted": false,
-        "errors": [{ "code": "E_JOSE_EMBEDDED_KEY", "path": "/header/x5u" }]
+        "errors": [{ "code": "CRYPTO_JWS_EMBEDDED_KEY" }]
       }
     },
     {
@@ -101,7 +101,7 @@
       },
       "expected": {
         "accepted": false,
-        "errors": [{ "code": "E_JOSE_EMBEDDED_KEY", "path": "/header/jku" }]
+        "errors": [{ "code": "CRYPTO_JWS_EMBEDDED_KEY" }]
       }
     },
     {
@@ -125,7 +125,7 @@
       },
       "expected": {
         "accepted": false,
-        "errors": [{ "code": "E_JOSE_CRIT_PRESENT", "path": "/header/crit" }]
+        "errors": [{ "code": "CRYPTO_JWS_CRIT_REJECTED" }]
       }
     },
     {
@@ -149,7 +149,7 @@
       },
       "expected": {
         "accepted": false,
-        "errors": [{ "code": "E_JOSE_B64_FALSE", "path": "/header/b64" }]
+        "errors": [{ "code": "CRYPTO_JWS_B64_REJECTED" }]
       }
     },
     {
@@ -173,12 +173,12 @@
       },
       "expected": {
         "accepted": false,
-        "errors": [{ "code": "E_JOSE_ZIP_PRESENT", "path": "/header/zip" }]
+        "errors": [{ "code": "CRYPTO_JWS_ZIP_REJECTED" }]
       }
     },
     {
-      "id": "jh-008-unsupported-alg",
-      "description": "Header declares an unsupported alg (none); rejected because Wire 0.2 mandates EdDSA.",
+      "id": "jh-008-missing-kid",
+      "description": "Header omits kid; rejected because validateWire02Header requires non-empty kid (DoS-safe, max 256 chars). Replaces an earlier alg-rejection vector since alg validation lives in buildHeader, not validateWire02Header.",
       "input": {
         "payload": {
           "peac_version": "0.2",
@@ -189,14 +189,13 @@
           "jti": "jh-008-jti-fixed-value"
         },
         "header": {
-          "alg": "none",
-          "typ": "interaction-record+jwt",
-          "kid": "test-kid"
+          "alg": "EdDSA",
+          "typ": "interaction-record+jwt"
         }
       },
       "expected": {
         "accepted": false,
-        "errors": [{ "code": "E_JOSE_UNSUPPORTED_ALG", "path": "/header/alg" }]
+        "errors": [{ "code": "CRYPTO_JWS_MISSING_KID" }]
       }
     }
   ]

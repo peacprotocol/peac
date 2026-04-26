@@ -6,20 +6,20 @@ The bounded shadow-mode validator foundation introduced in v0.13.1 must reach **
 
 ## Coverage (12 vectors at floor)
 
-| Vector id                                   | What it covers                                                                     |
-| ------------------------------------------- | ---------------------------------------------------------------------------------- |
-| `df-001-evidence-payment`                   | Minimal valid evidence record with registered payment type and commerce extension. |
-| `df-002-evidence-attribution`               | Evidence record with attribution-event type and matching extension group.          |
-| `df-003-evidence-consent-record`            | Evidence record with consent-record type and matching extension group.             |
-| `df-004-evidence-purpose-declaration`       | Evidence record with purpose-declaration type and matching extension group.        |
-| `df-005-evidence-safety-review`             | Evidence record with safety-review type and matching extension group.              |
-| `df-006-evidence-identity-attestation`      | Evidence record with identity-attestation type and matching extension group.       |
-| `df-007-agreement-payment`                  | Minimal valid agreement-kind record with registered payment type.                  |
-| `df-008-evidence-with-pillars`              | Evidence record with single pillar value.                                          |
-| `df-009-evidence-multi-extension`           | Evidence record with two registered extension groups.                              |
-| `df-010-evidence-with-occurred-at`          | Evidence record with explicit `occurred_at` distinct from `iat`.                   |
-| `df-011-evidence-unregistered-type-allowed` | Evidence record with non-registered reverse-DNS type; mapping does not gate.       |
-| `df-012-agreement-multi-pillar`             | Agreement record with multiple distinct pillar values.                             |
+| Vector id                                   | What it covers                                                                                                          |
+| ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `df-001-evidence-payment`                   | Evidence with registered `payment` type and canonical commerce extension (`payment_rail`/`amount_minor`/`currency`).    |
+| `df-002-evidence-attribution`               | Evidence with `attribution-event` type and canonical attribution extension (`creator_ref`).                             |
+| `df-003-evidence-consent-record`            | Evidence with `consent-record` type and canonical consent extension (`consent_basis`/`consent_status`).                 |
+| `df-004-evidence-purpose-declaration`       | Evidence with `purpose-declaration` type and canonical purpose extension (`external_purposes`).                         |
+| `df-005-evidence-safety-review`             | Evidence with `safety-review` type and canonical safety extension (`review_status`).                                    |
+| `df-006-evidence-identity-attestation`      | Evidence with `identity-attestation` type and canonical identity extension (`proof_ref`).                               |
+| `df-007-challenge-payment`                  | Minimal valid challenge-kind record with registered payment type. (Wire 0.2 has only `evidence` and `challenge` kinds.) |
+| `df-008-evidence-with-pillars`              | Evidence with single pillar value (`["commerce"]`).                                                                     |
+| `df-009-evidence-multi-extension`           | Evidence with two registered extension groups (commerce + purpose).                                                     |
+| `df-010-evidence-with-occurred-at`          | Evidence with explicit `occurred_at` (RFC 3339 with offset) earlier than `iat`.                                         |
+| `df-011-evidence-unregistered-type-allowed` | Evidence with non-registered reverse-DNS type; type-extension mapping does not gate.                                    |
+| `df-012-evidence-multi-pillar`              | Evidence with multiple distinct pillar values (sorted ascending).                                                       |
 
 ## Format
 

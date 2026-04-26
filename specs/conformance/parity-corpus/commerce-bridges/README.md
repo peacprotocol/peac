@@ -4,20 +4,20 @@ One-per-family commerce evidence parity vectors covering x402 settlement, ACP de
 
 ## Coverage (4 vectors at floor)
 
-| Vector id                               | Family                                                                                          |
-| --------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| `cb-001-x402-settlement`                | x402 settlement observation; upstream artifact preserved.                                       |
-| `cb-002-acp-delegated-payment`          | ACP delegated-payment observation; lifecycle metadata preserved verbatim from upstream session. |
-| `cb-003-paymentauth-attempt-settlement` | MPP/paymentauth attempt and upstream-attested settlement.                                       |
-| `cb-004-stripe-spt`                     | Stripe Shared Payment Token; SPT is a grant artifact, not payment finality.                     |
+| Vector id                       | `payment_rail` | canonical `event` |
+| ------------------------------- | -------------- | ----------------- |
+| `cb-001-x402-settlement`        | `x402`         | `settlement`      |
+| `cb-002-acp-authorization`      | `acp`          | `authorization`   |
+| `cb-003-paymentauth-settlement` | `paymentauth`  | `settlement`      |
+| `cb-004-stripe-authorization`   | `stripe`       | `authorization`   |
 
-## Mapper-boundary discipline
+## Canonical envelope vs upstream-specific bridge metadata
 
-Per the v0.12.11 mapper-boundary finality guard (DD-226..DD-237) and the canonical Layer 4 mapping rule, commerce extension `event` fields preserve the upstream artifact verbatim and **do not synthesize payment finality** (authorization, capture, settlement, void, refund) from non-payment artifacts or lifecycle states alone. The validator's job in this corpus is structural envelope validation: it does not interpret upstream commerce semantics, and it does not assert a payment was settled unless the upstream artifact explicitly says so.
+Per the v0.12.11 mapper-boundary finality guard (DD-226..DD-237), commerce extension `event` is restricted to the canonical lifecycle enum (`authorization` / `capture` / `settlement` / `refund` / `void` / `chargeback`) and does not synthesize payment finality from non-payment artifacts or lifecycle states alone. Upstream-specific lifecycle vocabulary (e.g., ACP "delegated-payment-initiated", Stripe SPT "shared-payment-token-issued") and verbatim upstream artifacts live in adapter packages (`@peac/adapter-*`), not in the canonical envelope. **This corpus tests envelope validation only.** The bounded shadow-mode validator foundation must reach the same accept/reject verdict as the existing canonical path on every vector here; mapper-layer semantic preservation is tested separately in adapter-specific test suites.
 
 ## Format
 
-Validated against `vectors.schema.json` (JSON Schema 2020-12) at corpus-loader time. The vectors carry commerce metadata in the `org.peacprotocol/commerce` extension namespace, including a `rail` discriminator and an `upstream_artifact` block preserving the source data.
+Validated against `vectors.schema.json` (JSON Schema 2020-12) at corpus-loader time. The vectors carry commerce metadata in the `org.peacprotocol/commerce` extension namespace using the canonical typed schema (`payment_rail`, `amount_minor`, `currency`, optional `event` from the canonical lifecycle enum).
 
 ## Floor count
 
