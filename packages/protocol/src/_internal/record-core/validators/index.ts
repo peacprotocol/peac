@@ -17,3 +17,8 @@ export {
 } from './jose-hardening.js';
 export { validateIssuerFormInternal, type IssuerFormResult } from './issuer-form.js';
 export { validateTemporalInternal, type TemporalResult, type TemporalWarning } from './temporal.js';
+export {
+  validateExtensionBudgetInternal,
+  type ExtensionBudgetResult,
+  type ExtensionBudgetViolation,
+} from './extension-budget.js';
