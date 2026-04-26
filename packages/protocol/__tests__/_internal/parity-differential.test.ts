@@ -31,7 +31,10 @@ import { loadFixtureManifest } from '../../src/_internal/test-helpers/fixture-ma
 const manifest = loadFixtureManifest();
 
 describe('parity differential (same-path vs same-path)', () => {
-  it('manifest accounts for every scanned fixture (no silent skips)', () => {
+  it('manifest accounts for every scanned parity-corpus and wire-02 manifest fixture (no silent skips at fixture level)', () => {
+    // Non-wire-02 fixture directories are excluded at directory level
+    // (one excluded entry per directory) with explicit reasons; this
+    // assertion proves no in-scope fixture was dropped on the floor.
     expect(manifest.totals.total).toBe(manifest.totals.included + manifest.totals.excluded);
     expect(manifest.totals.included).toBeGreaterThan(0);
     expect(manifest.totals.excluded).toBeGreaterThan(0);
@@ -56,9 +59,9 @@ describe('parity differential (same-path vs same-path)', () => {
 
   describe('zero divergence: canonical path is deterministic on every included fixture', () => {
     for (const entry of manifest.included) {
-      it(`${entry.source}/${entry.family}/${entry.id}: LEFT === RIGHT`, () => {
-        const left = runCanonicalForKind(entry.runnerKind, entry.input);
-        const right = runCanonicalForKind(entry.runnerKind, entry.input);
+      it(`${entry.source}/${entry.family}/${entry.id}: LEFT === RIGHT`, async () => {
+        const left = await runCanonicalForKind(entry.runnerKind, entry.input);
+        const right = await runCanonicalForKind(entry.runnerKind, entry.input);
         expect(verdictKey(left)).toBe(verdictKey(right));
       });
     }

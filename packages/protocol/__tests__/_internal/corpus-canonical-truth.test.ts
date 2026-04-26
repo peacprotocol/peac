@@ -22,7 +22,7 @@ import {
   runCanonicalForKind,
   type CanonicalRunnerKind,
 } from '../../src/_internal/test-helpers/canonical-runner';
-import { makeVerdict, verdictKey } from '../../src/_internal/test-helpers/parity-verdict';
+import { makeVerdict, verdictKeyShape } from '../../src/_internal/test-helpers/parity-verdict';
 
 function expectedAsVerdict(vector: ParityVector) {
   return makeVerdict(
@@ -38,14 +38,17 @@ describe('parity-corpus expectations vs canonical truth', () => {
     const kind: CanonicalRunnerKind = family === 'jose-hardening' ? 'jose' : 'envelope';
     describe(family, () => {
       for (const vector of loaded.vectors) {
-        it(`${vector.id}: expected matches canonical`, () => {
+        it(`${vector.id}: expected matches canonical`, async () => {
           const input =
             kind === 'jose'
               ? ((vector.input.header ?? {}) as Record<string, unknown>)
               : (vector.input.payload as Record<string, unknown>);
-          const canonical = runCanonicalForKind(kind, input);
+          const canonical = await runCanonicalForKind(kind, input);
           const expected = expectedAsVerdict(vector);
-          expect(verdictKey(canonical)).toBe(verdictKey(expected));
+          // verdictKeyShape ignores canonicalClaimsDigest because the
+          // corpus expectation only encodes accept/reject + error/warning
+          // codes; digest verification is the differential harness's job.
+          expect(verdictKeyShape(canonical)).toBe(verdictKeyShape(expected));
         });
       }
     });

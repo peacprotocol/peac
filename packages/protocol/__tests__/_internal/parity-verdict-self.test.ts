@@ -51,7 +51,7 @@ describe('parity verdict comparator: negative harness tests', () => {
     expect(verdictKey(dupLeft)).toBe(verdictKey(dupRight));
   });
 
-  it('object key-order difference in payload: no divergence on canonical envelope path', () => {
+  it('object key-order difference in payload: no divergence on canonical envelope path', async () => {
     const payloadA = {
       peac_version: '0.2',
       kind: 'evidence',
@@ -82,9 +82,83 @@ describe('parity verdict comparator: negative harness tests', () => {
         },
       },
     };
-    const left = runEnvelopeCanonical(payloadA);
-    const right = runEnvelopeCanonical(payloadB);
+    const left = await runEnvelopeCanonical(payloadA);
+    const right = await runEnvelopeCanonical(payloadB);
     expect(verdictKey(left)).toBe(verdictKey(right));
+  });
+
+  it('canonicalClaimsDigest is byte-stable across object key-order differences', async () => {
+    // Same semantic claims, two different physical key orderings; the
+    // canonical claims digest MUST be byte-identical because canonicalize()
+    // sorts keys per RFC 8785 before hashing.
+    const payloadA = {
+      peac_version: '0.2',
+      kind: 'evidence',
+      type: 'org.peacprotocol/payment',
+      iss: 'https://api.example.com',
+      iat: 1735689600,
+      jti: 'digest-001',
+      extensions: {
+        'org.peacprotocol/commerce': {
+          payment_rail: 'stripe',
+          amount_minor: '100',
+          currency: 'USD',
+        },
+      },
+    };
+    const payloadB = {
+      jti: 'digest-001',
+      iat: 1735689600,
+      iss: 'https://api.example.com',
+      type: 'org.peacprotocol/payment',
+      kind: 'evidence',
+      peac_version: '0.2',
+      extensions: {
+        'org.peacprotocol/commerce': {
+          currency: 'USD',
+          amount_minor: '100',
+          payment_rail: 'stripe',
+        },
+      },
+    };
+    const left = await runEnvelopeCanonical(payloadA);
+    const right = await runEnvelopeCanonical(payloadB);
+    expect(left.canonicalClaimsDigest).toBeDefined();
+    expect(right.canonicalClaimsDigest).toBeDefined();
+    expect(left.canonicalClaimsDigest).toBe(right.canonicalClaimsDigest);
+    expect(left.canonicalClaimsDigest).toMatch(/^sha256:[0-9a-f]{64}$/);
+  });
+
+  it('canonicalClaimsDigest is sensitive to claim changes (jti, iat, type)', async () => {
+    const base = {
+      peac_version: '0.2',
+      kind: 'evidence',
+      type: 'org.peacprotocol/payment',
+      iss: 'https://api.example.com',
+      iat: 1735689600,
+      jti: 'claim-sensitivity-001',
+      extensions: {
+        'org.peacprotocol/commerce': {
+          payment_rail: 'stripe',
+          amount_minor: '100',
+          currency: 'USD',
+        },
+      },
+    };
+    const baseV = await runEnvelopeCanonical(base);
+
+    const jtiChanged = await runEnvelopeCanonical({ ...base, jti: 'different-jti' });
+    expect(jtiChanged.canonicalClaimsDigest).not.toBe(baseV.canonicalClaimsDigest);
+
+    const iatChanged = await runEnvelopeCanonical({ ...base, iat: 1735689601 });
+    expect(iatChanged.canonicalClaimsDigest).not.toBe(baseV.canonicalClaimsDigest);
+
+    const typeChanged = await runEnvelopeCanonical({
+      ...base,
+      type: 'org.peacprotocol/attribution-event',
+      extensions: { 'org.peacprotocol/attribution': { creator_ref: 'did:example:c' } },
+    });
+    expect(typeChanged.canonicalClaimsDigest).not.toBe(baseV.canonicalClaimsDigest);
   });
 
   it('canonicalClaimsDigest mismatch on accepted records: divergence', () => {

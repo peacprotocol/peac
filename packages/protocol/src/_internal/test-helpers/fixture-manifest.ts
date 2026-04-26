@@ -24,7 +24,10 @@ export type ExcludedCategory =
   | 'excluded_legacy_or_bundle_only'
   | 'excluded_non_record_fixture'
   | 'excluded_non_current_wire'
-  | 'excluded_requires_signature_or_external_artifact';
+  | 'excluded_requires_signature_or_external_artifact'
+  | 'excluded_requires_verify_local_warning_layer'
+  | 'excluded_requires_full_jws_verification_runner'
+  | 'excluded_requires_policy_binding_runner';
 
 export type ManifestCategory = IncludedCategory | ExcludedCategory;
 
@@ -80,9 +83,36 @@ interface RawFixture {
     claims?: unknown;
     header_overrides?: unknown;
     jws_size_exceeds_bytes?: unknown;
+    verify_options?: unknown;
   };
   readonly expected?: { valid?: unknown };
 }
+
+/**
+ * JOSE rejection vectors that map directly to validateWire02Header
+ * checks for embedded key material / crit / b64:false / zip. Other
+ * jws-security fixtures (kid presence/length checks, oversized JWS,
+ * full-token format checks) require a full JWS verification runner
+ * that the parity foundation does not yet provide; they are excluded
+ * with category excluded_requires_full_jws_verification_runner.
+ */
+const JOSE_HEADER_HARDENING_FIXTURE_NAMES: ReadonlySet<string> = new Set([
+  // wire-02/jose/conformance.json
+  'reject-embedded-jwk',
+  'reject-x5c-chain',
+  'reject-x5u-url',
+  'reject-jku-url',
+  'reject-crit-header',
+  'reject-b64-false',
+  'reject-zip-header',
+  // wire-02/invalid.json
+  'reject-jwk',
+  'reject-x5c',
+  'reject-x5u',
+  'reject-jku',
+  'reject-crit',
+  'reject-zip',
+]);
 
 function loadJsonManifest(path: string): RawFixture[] {
   try {
@@ -102,6 +132,19 @@ function categorizeWire02(
   const id = fx.name ?? '<unnamed>';
   const fxType = fx.type ?? '';
   const status = fx.status ?? '';
+
+  // Policy-binding fixtures with verify_options exercise behavior beyond
+  // the Layer 1 envelope canonical path; defer until a policy-binding
+  // runner exists.
+  if (fx.input?.verify_options !== undefined) {
+    return {
+      source: 'wire-02-conformance',
+      family,
+      id,
+      category: 'excluded_requires_policy_binding_runner',
+      reason: `wire-02/${family}/${sourceFile}: input.verify_options exercises verifyLocal-layer policy binding; no policy-binding runner in the parity foundation yet`,
+    };
+  }
 
   if (fxType === 'full-pipeline') {
     const claims = fx.input?.claims;
@@ -131,8 +174,8 @@ function categorizeWire02(
         source: 'wire-02-conformance',
         family,
         id,
-        category: 'excluded_requires_signature_or_external_artifact',
-        reason: `wire-02/${family}/${sourceFile}: jws_size_exceeds_bytes requires a real signed JWS string; not testable via header-only canonical runner`,
+        category: 'excluded_requires_full_jws_verification_runner',
+        reason: `wire-02/${family}/${sourceFile}: jws_size_exceeds_bytes requires a real signed compact JWS; not testable via header-only canonical runner`,
       };
     }
     const header = fx.input?.header_overrides;
@@ -141,8 +184,17 @@ function categorizeWire02(
         source: 'wire-02-conformance',
         family,
         id,
-        category: 'excluded_requires_signature_or_external_artifact',
-        reason: `wire-02/${family}/${sourceFile}: jws-security fixture without header_overrides`,
+        category: 'excluded_requires_full_jws_verification_runner',
+        reason: `wire-02/${family}/${sourceFile}: jws-security fixture without header_overrides; requires full JWS verification runner`,
+      };
+    }
+    if (!JOSE_HEADER_HARDENING_FIXTURE_NAMES.has(id)) {
+      return {
+        source: 'wire-02-conformance',
+        family,
+        id,
+        category: 'excluded_requires_full_jws_verification_runner',
+        reason: `wire-02/${family}/${sourceFile}: jws-security fixture "${id}" exercises kid-presence / kid-length / size / token-format checks beyond validateWire02Header header-hardening scope; defer to full JWS verification runner`,
       };
     }
     return {
@@ -156,23 +208,12 @@ function categorizeWire02(
   }
 
   if (fxType === 'warning') {
-    const claims = fx.input?.claims;
-    if (!claims || typeof claims !== 'object') {
-      return {
-        source: 'wire-02-conformance',
-        family,
-        id,
-        category: 'excluded_non_record_fixture',
-        reason: `wire-02/${family}/${sourceFile}: warning fixture missing input.claims`,
-      };
-    }
     return {
       source: 'wire-02-conformance',
       family,
       id,
-      category: 'included_warning_vector',
-      runnerKind: 'envelope',
-      input: claims as Record<string, unknown>,
+      category: 'excluded_requires_verify_local_warning_layer',
+      reason: `wire-02/${family}/${sourceFile}: warning fixture (e.g., type_unregistered, unknown_extension_preserved, occurred_at_skew, typ_missing) emitted by Layer 3 verifyLocal; the envelope canonical runner only reaches Layer 1 (validateKernelConstraints + parseReceiptClaims)`,
     };
   }
 

@@ -10,8 +10,25 @@
  */
 
 import { validateKernelConstraints, parseReceiptClaims } from '@peac/schema';
-import { validateWire02Header } from '@peac/crypto';
+import { canonicalize, sha256Hex, validateWire02Header } from '@peac/crypto';
 import { makeVerdict, type ParityError, type ParityVerdict } from './parity-verdict.js';
+
+/**
+ * Compute the canonical claims digest used by accepted ParityVerdicts.
+ *
+ * Uses RFC 8785 (JCS) canonicalization from @peac/crypto so the digest
+ * is byte-stable across object key-order differences, then SHA-256 +
+ * "sha256:" prefix to match the canonical PEAC digest format used by
+ * Wire 0.2 representation.fingerprint and policy.digest.
+ *
+ * Local helper for the parity test harness only; not exported beyond
+ * this module.
+ */
+async function computeCanonicalClaimsDigest(claims: unknown): Promise<string> {
+  const canonical = canonicalize(claims);
+  const hex = await sha256Hex(canonical);
+  return `sha256:${hex}`;
+}
 
 /** Kind of canonical runner to dispatch to. */
 export type CanonicalRunnerKind = 'envelope' | 'jose';
@@ -40,8 +57,16 @@ export function runJoseCanonical(header: Record<string, unknown> | undefined): P
  * kernel constraints (depth / total nodes / key counts) followed by Zod
  * schema parse. Type-extension warnings live at Layer 3 (verifyLocal)
  * and are intentionally out of scope for the parity foundation.
+ *
+ * Accepted records carry canonicalClaimsDigest computed from the parsed
+ * claims via JCS + SHA-256 + "sha256:" prefix. This anchors the verdict
+ * to the canonical normalized claims, not just the accept/reject bit:
+ * two validators that both accept but disagree on parsed/normalized
+ * claims will produce different digests and the harness will catch it.
  */
-export function runEnvelopeCanonical(payload: Record<string, unknown>): ParityVerdict {
+export async function runEnvelopeCanonical(
+  payload: Record<string, unknown>
+): Promise<ParityVerdict> {
   const errors: ParityError[] = [];
 
   const constraintRes = validateKernelConstraints(payload);
@@ -58,19 +83,23 @@ export function runEnvelopeCanonical(payload: Record<string, unknown>): ParityVe
     return makeVerdict(false, errors);
   }
 
-  return makeVerdict(true);
+  const digest = await computeCanonicalClaimsDigest(parseRes.claims);
+  return makeVerdict(true, [], [], digest);
 }
 
 /**
  * Dispatch to the appropriate canonical runner by kind.
  *
- *   kind === 'jose'     → runJoseCanonical(input as header)
- *   kind === 'envelope' → runEnvelopeCanonical(input as payload)
+ *   kind === 'jose'     → runJoseCanonical(input as header)   (sync)
+ *   kind === 'envelope' → runEnvelopeCanonical(input as payload) (async)
+ *
+ * The dispatcher always returns a Promise so callers can uniformly
+ * await regardless of kind.
  */
-export function runCanonicalForKind(
+export async function runCanonicalForKind(
   kind: CanonicalRunnerKind,
   input: Record<string, unknown>
-): ParityVerdict {
+): Promise<ParityVerdict> {
   if (kind === 'jose') return runJoseCanonical(input);
   return runEnvelopeCanonical(input);
 }

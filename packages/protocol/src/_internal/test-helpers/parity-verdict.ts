@@ -54,26 +54,41 @@ export function makeVerdict(
   return verdict;
 }
 
-/**
- * Stringify a ParityVerdict for byte-equality comparison. Stable key
- * order: accepted, errors, warnings, canonicalClaimsDigest. Omits
- * undefined path / digest fields so absence and explicit-undefined are
- * equivalent.
- */
-export function verdictKey(v: ParityVerdict): string {
+function verdictBase(v: ParityVerdict): Record<string, unknown> {
   const errs = v.errors.map((e) =>
     e.path === undefined ? { code: e.code } : { code: e.code, path: e.path }
   );
   const warns = v.warnings.map((w) =>
     w.path === undefined ? { code: w.code } : { code: w.code, path: w.path }
   );
-  const obj: Record<string, unknown> = {
+  return {
     accepted: v.accepted,
     errors: errs,
     warnings: warns,
   };
+}
+
+/**
+ * Stringify a ParityVerdict for byte-equality comparison. Stable key
+ * order: accepted, errors, warnings, canonicalClaimsDigest. Omits
+ * undefined path / digest fields so absence and explicit-undefined are
+ * equivalent. Use this when both sides under comparison are expected
+ * to carry the same digest (e.g., the same-path differential proof).
+ */
+export function verdictKey(v: ParityVerdict): string {
+  const obj = verdictBase(v);
   if (v.canonicalClaimsDigest !== undefined) {
     obj.canonicalClaimsDigest = v.canonicalClaimsDigest;
   }
   return JSON.stringify(obj);
+}
+
+/**
+ * Stringify a ParityVerdict OMITTING canonicalClaimsDigest. Use this
+ * when comparing a runtime verdict (which carries a digest for accepted
+ * records) against a fixture-supplied expectation (which does not
+ * encode digests). Example caller: corpus-canonical-truth sanity test.
+ */
+export function verdictKeyShape(v: ParityVerdict): string {
+  return JSON.stringify(verdictBase(v));
 }
