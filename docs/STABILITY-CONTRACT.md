@@ -188,6 +188,64 @@ current behavior.
 Security and semantic constraints pre-declared for these surfaces live in
 the [Threat model](THREAT_MODEL.md) forward-looking subsection.
 
+## Internal-only flags
+
+The following flags are **internal-only**: subject to change without
+notice; not part of the public surface; not documented on front-door
+surfaces; not supported in production deployments. They are documented
+here for transparency to maintainers and security researchers, NOT as
+a public-API commitment.
+
+| Flag                                                                         | Surface                                       | Purpose                                                                                                                                                                                                             |
+| ---------------------------------------------------------------------------- | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `PEAC_INTERNAL_SHADOW_CORE=1` (env) or `_internal.shadowCore: true` (option) | `@peac/protocol.{issue, verifyLocal}`         | Activates an observational shadow path that runs the bounded internal validator alongside the canonical Zod validator. Mismatches accumulate in a bounded in-memory log. Used for reboot-window parity observation. |
+| `PEAC_EXPERIMENTAL_CODEC=<name>` (env, future)                               | `@peac/protocol.{issue, verifyLocal, verify}` | Selects a non-default record codec. v0.13.x ships `jws-jwt` only. Future codecs (e.g., `cose-sign1`) are experimental per the Forthcoming surfaces table.                                                           |
+
+Allowed locations for these identifiers in tracked source:
+
+- `docs/STABILITY-CONTRACT.md` (this section).
+- `packages/protocol/src/_internal/` (the wiring itself).
+- `packages/protocol/__tests__/_internal/` (tests).
+- `reference/` (local-only planning files).
+
+These identifiers MUST NOT appear in:
+
+- the public TypeScript surface (`dist/index.d.ts`,
+  `dist/verify-local.d.ts`),
+- `README.md`, `docs/START_HERE.md`, `docs/PACKAGE_STATUS.md`,
+- `examples/`, `integrator-kits/`, `surfaces/`,
+- `llms.txt`, `CHANGELOG.md`,
+- any release notes.
+
+## Shadow-mode timeout guarantee class
+
+The 250 ms wall-clock timeout enforced by the shadow-mode scheduler in
+`@peac/protocol` is a **reporting** bound, not a hard preemption
+guarantee. Specifically:
+
+- Where the shadow function consults the supplied `AbortSignal` (the
+  preferred shape for new shadow code; the runner always passes one),
+  the timeout aborts the work and bounds CPU and memory.
+- Where the shadow function is purely CPU-bound and does not consult
+  the signal (the v0.13.1 record-core validators are this shape),
+  JavaScript cannot preempt synchronous work. The runner stops
+  awaiting and records a `timing-diff` divergence; the shadow
+  function may continue to completion off the runner's await chain.
+  The runner enforces no resource bound on non-cancellable shadow
+  paths beyond the natural completion of the work.
+
+Either way, the public-call boundary returns the real-path value
+immediately. Shadow scheduling uses a macrotask boundary
+(`setTimeout(..., 0)`) so the shadow function does not run before the
+caller's awaited promise continuation. Pure-CPU validators are
+themselves bounded by the receipt-content invariants in
+[Resource limits](specs/RESOURCE-LIMITS.md), so the practical
+resource bound holds even without runtime cancellation.
+
+A future internal release may wire `AbortSignal` plumbing into
+specific validator entry points if a hard cancellation guarantee
+becomes desirable.
+
 ## Related documents
 
 - [SECURITY.md](../SECURITY.md)
@@ -200,3 +258,4 @@ the [Threat model](THREAT_MODEL.md) forward-looking subsection.
 - [SLO](SLO.md)
 - [Trust artifacts](TRUST-ARTIFACTS.md)
 - [Compliance mappings](compliance/README.md)
+- [Resource limits](specs/RESOURCE-LIMITS.md)
