@@ -41,10 +41,13 @@ const SECRET_PATTERNS: readonly RegExp[] = [
   // header variants in a single pattern.
   /-----BEGIN [A-Z0-9 ]+-----[\s\S]+?-----END [A-Z0-9 ]+-----/g,
 
-  // Long base64 / base64url runs (>=40 chars). Matches API keys, tokens,
-  // hashes, and the second segment of a compact JWS when the JWS pattern
-  // above does not match.
-  /\b[A-Za-z0-9+/_-]{40,}={0,2}\b/g,
+  // Long base64 runs (>=40 chars). The character class is the standard
+  // base64 alphabet only (no `_` or `-`) so that kebab-case and
+  // snake_case identifier strings do not collateral-match. base64url
+  // payloads carrying credentials are reached via more specific patterns
+  // (compact JWS, Bearer, URL query token) and via the wrapper headers
+  // they appear in.
+  /\b[A-Za-z0-9+/]{40,}={0,2}\b/g,
 
   // Bearer token (Authorization header value with Bearer scheme).
   /Bearer\s+[A-Za-z0-9._\-/+=]+/gi,
@@ -71,9 +74,12 @@ const SECRET_PATTERNS: readonly RegExp[] = [
   // Email address (PII).
   /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g,
 
-  // Phone numbers (E.164 with + and 7+ digits, plus common North-American
-  // and dotted / hyphenated / parenthesized variants).
-  /\+?\d[\d\s\-().]{7,}\d/g,
+  // Phone numbers. Three explicit forms (E.164 + parenthesized NA + dashed
+  // NA / international) so plain consecutive-digit runs (sequence
+  // numbers, hashes, identifiers) do not collateral-match.
+  /\+\d[\d\s().-]{6,}\d/g,
+  /\(\d{3}\)\s*\d{3}[\s.-]?\d{4}/g,
+  /\b\d{3}[\s.-]\d{3}[\s.-]\d{4}\b/g,
 ];
 
 /**
