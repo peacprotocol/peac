@@ -1,0 +1,29 @@
+{
+  "bindings": {
+    "policy": "unavailable",
+  },
+  "claims": {
+    "iss": "https://issuer.example",
+    "jti": "01940000-0000-7000-8000-000000000001",
+    "kind": "evidence",
+    "occurred_at": "2026-04-01T00:00:00Z",
+    "peac_version": "0.2",
+    "pillars": [
+      "safety",
+    ],
+    "purpose_declared": "baseline-fixture",
+    "type": "org.example/baseline-test",
+  },
+  "kid": "baseline-key-1",
+  "policy_binding": "unavailable",
+  "valid": true,
+  "variant": "wire-02",
+  "warnings": [
+    {
+      "code": "type_unregistered",
+      "message": "Receipt type is not in the recommended type registry",
+      "pointer": "/type",
+    },
+  ],
+  "wireVersion": "0.2",
+}

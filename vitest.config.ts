@@ -10,6 +10,10 @@ export default defineConfig({
         find: '@peac/capture-core/testkit',
         replacement: resolve(__dirname, 'packages/capture/core/src/testkit.ts'),
       },
+      {
+        find: '@peac/crypto/testkit',
+        replacement: resolve(__dirname, 'packages/crypto/src/testkit.ts'),
+      },
       // Workspace package aliases for root-level tests
       { find: '@peac/kernel', replacement: resolve(__dirname, 'packages/kernel/src/index.ts') },
       {

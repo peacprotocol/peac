@@ -5,8 +5,8 @@
  * without JWKS discovery.
  */
 
-import { verify as jwsVerify } from '@peac/crypto';
 import { type VerificationStrictness, type VerificationWarning, HASH } from '@peac/kernel';
+import { defaultCodec } from './_internal/record-core/codec/jws-jwt.js';
 import {
   parseReceiptClaims,
   validateKernelConstraints,
@@ -367,8 +367,11 @@ export async function verifyLocal(
   const now = options.now ?? Math.floor(Date.now() / 1000);
 
   try {
-    // 1. Verify signature and header (typ, alg validated by @peac/crypto)
-    const result = await jwsVerify<unknown>(jws, publicKey);
+    // 1. Verify signature and header via the internal codec boundary
+    // (typ, alg validated by @peac/crypto). Default codec is a pure
+    // pass-through to @peac/crypto.verify; the returned VerifyResult is
+    // byte-identical to the prior release for every fixture.
+    const result = await defaultCodec.decode<unknown>(jws, publicKey);
 
     if (!result.valid) {
       return {
