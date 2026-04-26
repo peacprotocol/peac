@@ -1,0 +1,257 @@
+{
+  "family": "default-flows",
+  "description": "Wire 0.2 happy-path parity vectors. Every vector is accepted by the canonical validator chain. Used to assert that the bounded shadow-mode validator foundation reaches zero divergence with the existing path on accepted records.",
+  "version": "0.13.1",
+  "generator": "manual; v0.13.1 PR C floor",
+  "vectors": [
+    {
+      "id": "df-001-evidence-payment",
+      "description": "Minimal valid evidence record with registered payment type.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1735689600,
+          "jti": "df-001-jti-fixed-value",
+          "extensions": {
+            "org.peacprotocol/commerce": {
+              "amount": "1.00",
+              "currency": "USD"
+            }
+          }
+        }
+      },
+      "expected": { "accepted": true }
+    },
+    {
+      "id": "df-002-evidence-attribution",
+      "description": "Evidence record with attribution-event type and matching extension group.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/attribution-event",
+          "iss": "https://api.example.com",
+          "iat": 1735689600,
+          "jti": "df-002-jti-fixed-value",
+          "extensions": {
+            "org.peacprotocol/attribution": {
+              "source": "agent.example",
+              "method": "header"
+            }
+          }
+        }
+      },
+      "expected": { "accepted": true }
+    },
+    {
+      "id": "df-003-evidence-consent-record",
+      "description": "Evidence record with consent-record type and matching extension group.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/consent-record",
+          "iss": "https://api.example.com",
+          "iat": 1735689600,
+          "jti": "df-003-jti-fixed-value",
+          "extensions": {
+            "org.peacprotocol/consent": {
+              "subject": "user-pseudonym-001",
+              "scope": "read"
+            }
+          }
+        }
+      },
+      "expected": { "accepted": true }
+    },
+    {
+      "id": "df-004-evidence-purpose-declaration",
+      "description": "Evidence record with purpose-declaration type and matching extension group.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/purpose-declaration",
+          "iss": "https://api.example.com",
+          "iat": 1735689600,
+          "jti": "df-004-jti-fixed-value",
+          "extensions": {
+            "org.peacprotocol/purpose": {
+              "stated": "fraud-detection"
+            }
+          }
+        }
+      },
+      "expected": { "accepted": true }
+    },
+    {
+      "id": "df-005-evidence-safety-review",
+      "description": "Evidence record with safety-review type and matching extension group.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/safety-review",
+          "iss": "https://api.example.com",
+          "iat": 1735689600,
+          "jti": "df-005-jti-fixed-value",
+          "extensions": {
+            "org.peacprotocol/safety": {
+              "outcome": "passed"
+            }
+          }
+        }
+      },
+      "expected": { "accepted": true }
+    },
+    {
+      "id": "df-006-evidence-identity-attestation",
+      "description": "Evidence record with identity-attestation type and matching extension group.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/identity-attestation",
+          "iss": "https://api.example.com",
+          "iat": 1735689600,
+          "jti": "df-006-jti-fixed-value",
+          "extensions": {
+            "org.peacprotocol/identity": {
+              "subject_ref": "did:example:abc123"
+            }
+          }
+        }
+      },
+      "expected": { "accepted": true }
+    },
+    {
+      "id": "df-007-agreement-payment",
+      "description": "Minimal valid agreement record with registered payment type.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "agreement",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1735689600,
+          "jti": "df-007-jti-fixed-value",
+          "extensions": {
+            "org.peacprotocol/commerce": {
+              "amount": "5.00",
+              "currency": "USD"
+            }
+          }
+        }
+      },
+      "expected": { "accepted": true }
+    },
+    {
+      "id": "df-008-evidence-with-pillars",
+      "description": "Evidence record with single pillar value.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1735689600,
+          "jti": "df-008-jti-fixed-value",
+          "pillars": ["commerce"],
+          "extensions": {
+            "org.peacprotocol/commerce": {
+              "amount": "0.10",
+              "currency": "USD"
+            }
+          }
+        }
+      },
+      "expected": { "accepted": true }
+    },
+    {
+      "id": "df-009-evidence-multi-extension",
+      "description": "Evidence record with two registered extension groups.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1735689600,
+          "jti": "df-009-jti-fixed-value",
+          "extensions": {
+            "org.peacprotocol/commerce": {
+              "amount": "2.50",
+              "currency": "USD"
+            },
+            "org.peacprotocol/purpose": {
+              "stated": "subscription-renewal"
+            }
+          }
+        }
+      },
+      "expected": { "accepted": true }
+    },
+    {
+      "id": "df-010-evidence-with-occurred-at",
+      "description": "Evidence record with explicit occurred_at distinct from iat.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1735689600,
+          "occurred_at": 1735689500,
+          "jti": "df-010-jti-fixed-value",
+          "extensions": {
+            "org.peacprotocol/commerce": {
+              "amount": "0.99",
+              "currency": "USD"
+            }
+          }
+        }
+      },
+      "expected": { "accepted": true }
+    },
+    {
+      "id": "df-011-evidence-unregistered-type-allowed",
+      "description": "Evidence record with non-registered reverse-DNS type. Acceptance allowed; type-extension mapping does not gate non-registered types.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "com.example.custom/event",
+          "iss": "https://api.example.com",
+          "iat": 1735689600,
+          "jti": "df-011-jti-fixed-value"
+        }
+      },
+      "expected": { "accepted": true }
+    },
+    {
+      "id": "df-012-agreement-multi-pillar",
+      "description": "Agreement record with multiple distinct pillar values.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "agreement",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1735689600,
+          "jti": "df-012-jti-fixed-value",
+          "pillars": ["commerce", "purpose"],
+          "extensions": {
+            "org.peacprotocol/commerce": {
+              "amount": "10.00",
+              "currency": "USD"
+            }
+          }
+        }
+      },
+      "expected": { "accepted": true }
+    }
+  ]
+}

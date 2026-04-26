@@ -1,0 +1,162 @@
+{
+  "family": "runtime-governance",
+  "description": "Managed-runtime wedge parity vectors. Covers the 6 observation-specific type URIs from @peac/adapter-runtime-governance plus one negative vector (malformed observation extension). The bounded validator foundation must reach zero divergence with the existing path on every vector.",
+  "version": "0.13.1",
+  "generator": "manual; v0.13.1 PR C floor",
+  "vectors": [
+    {
+      "id": "rg-001-policy-decision",
+      "description": "Runtime governance policy-decision observation; provider-supplied; accepted.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/runtime-governance-policy-decision",
+          "iss": "https://api.example.com",
+          "iat": 1735689600,
+          "jti": "rg-001-jti-fixed-value",
+          "extensions": {
+            "org.peacprotocol/runtime-governance": {
+              "provider": "example-runtime",
+              "decision": "allow",
+              "policy_name": "default-deny-with-allowlist",
+              "matched_rule": "allow:read:public"
+            }
+          }
+        }
+      },
+      "expected": { "accepted": true }
+    },
+    {
+      "id": "rg-002-audit-entry",
+      "description": "Runtime governance audit-entry observation; provider-supplied; accepted.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/runtime-governance-audit-entry",
+          "iss": "https://api.example.com",
+          "iat": 1735689600,
+          "jti": "rg-002-jti-fixed-value",
+          "extensions": {
+            "org.peacprotocol/runtime-governance": {
+              "provider": "example-runtime",
+              "entry_id": "audit-entry-001",
+              "action": "tool.invoke",
+              "agent_id": "agent-001"
+            }
+          }
+        }
+      },
+      "expected": { "accepted": true }
+    },
+    {
+      "id": "rg-003-authority-scope",
+      "description": "Runtime governance authority-scope observation; provider-supplied; accepted.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/runtime-governance-authority-scope",
+          "iss": "https://api.example.com",
+          "iat": 1735689600,
+          "jti": "rg-003-jti-fixed-value",
+          "extensions": {
+            "org.peacprotocol/runtime-governance": {
+              "provider": "example-runtime",
+              "agent_id": "agent-001",
+              "effective_scope": ["read:public", "tool:safe"]
+            }
+          }
+        }
+      },
+      "expected": { "accepted": true }
+    },
+    {
+      "id": "rg-004-lifecycle-event",
+      "description": "Runtime governance lifecycle-event observation; provider-supplied; accepted.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/runtime-governance-lifecycle-event",
+          "iss": "https://api.example.com",
+          "iat": 1735689600,
+          "jti": "rg-004-jti-fixed-value",
+          "extensions": {
+            "org.peacprotocol/runtime-governance": {
+              "provider": "example-runtime",
+              "session_id": "session-001",
+              "event": "session.start"
+            }
+          }
+        }
+      },
+      "expected": { "accepted": true }
+    },
+    {
+      "id": "rg-005-trust-observation",
+      "description": "Runtime governance trust-observation observation; provider-supplied; accepted.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/runtime-governance-trust-observation",
+          "iss": "https://api.example.com",
+          "iat": 1735689600,
+          "jti": "rg-005-jti-fixed-value",
+          "extensions": {
+            "org.peacprotocol/runtime-governance": {
+              "provider": "example-runtime",
+              "agent_id": "agent-001",
+              "observation": "no-policy-violation-in-window"
+            }
+          }
+        }
+      },
+      "expected": { "accepted": true }
+    },
+    {
+      "id": "rg-006-compliance-observation",
+      "description": "Runtime governance compliance-observation; provider-supplied; accepted.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/runtime-governance-compliance-observation",
+          "iss": "https://api.example.com",
+          "iat": 1735689600,
+          "jti": "rg-006-jti-fixed-value",
+          "extensions": {
+            "org.peacprotocol/runtime-governance": {
+              "provider": "example-runtime",
+              "framework": "iso-42001",
+              "observation": "control-aligned"
+            }
+          }
+        }
+      },
+      "expected": { "accepted": true }
+    },
+    {
+      "id": "rg-007-negative-missing-provider",
+      "description": "Negative: runtime-governance type with extension missing the required provider field. Validator behavior is observational at the kernel layer (provider check is inside @peac/adapter-runtime-governance, not in the kernel validator chain). Vector exists to assert that LEFT and RIGHT validators reach the SAME verdict for this shape, whatever that verdict is.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/runtime-governance-policy-decision",
+          "iss": "https://api.example.com",
+          "iat": 1735689600,
+          "jti": "rg-007-jti-fixed-value",
+          "extensions": {
+            "org.peacprotocol/runtime-governance": {
+              "decision": "allow"
+            }
+          }
+        }
+      },
+      "expected": { "accepted": true }
+    }
+  ]
+}

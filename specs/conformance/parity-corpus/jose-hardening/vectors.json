@@ -1,0 +1,203 @@
+{
+  "family": "jose-hardening",
+  "description": "Wire 0.2 JOSE rejection parity vectors. Each vector supplies a malformed JOSE protected header that the canonical hardening check MUST reject. The bounded validator foundation must reach zero divergence with the existing JOSE hardening path on every vector.",
+  "version": "0.13.1",
+  "generator": "manual; v0.13.1 PR C floor",
+  "vectors": [
+    {
+      "id": "jh-001-embedded-jwk",
+      "description": "Header carries an embedded jwk; rejected to prevent self-asserted key trust.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1735689600,
+          "jti": "jh-001-jti-fixed-value"
+        },
+        "header": {
+          "alg": "EdDSA",
+          "typ": "interaction-record+jwt",
+          "kid": "test-kid",
+          "jwk": {
+            "kty": "OKP",
+            "crv": "Ed25519",
+            "x": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo"
+          }
+        }
+      },
+      "expected": {
+        "accepted": false,
+        "errors": [{ "code": "E_JOSE_EMBEDDED_KEY", "path": "/header/jwk" }]
+      }
+    },
+    {
+      "id": "jh-002-embedded-x5c",
+      "description": "Header carries an embedded x5c chain; rejected to prevent self-asserted certificate trust.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1735689600,
+          "jti": "jh-002-jti-fixed-value"
+        },
+        "header": {
+          "alg": "EdDSA",
+          "typ": "interaction-record+jwt",
+          "kid": "test-kid",
+          "x5c": ["MIIBkTCB-EXAMPLE-CERT-BASE64"]
+        }
+      },
+      "expected": {
+        "accepted": false,
+        "errors": [{ "code": "E_JOSE_EMBEDDED_KEY", "path": "/header/x5c" }]
+      }
+    },
+    {
+      "id": "jh-003-embedded-x5u",
+      "description": "Header carries an x5u (certificate URL) reference; rejected to prevent network-resolved trust.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1735689600,
+          "jti": "jh-003-jti-fixed-value"
+        },
+        "header": {
+          "alg": "EdDSA",
+          "typ": "interaction-record+jwt",
+          "kid": "test-kid",
+          "x5u": "https://example.com/cert.pem"
+        }
+      },
+      "expected": {
+        "accepted": false,
+        "errors": [{ "code": "E_JOSE_EMBEDDED_KEY", "path": "/header/x5u" }]
+      }
+    },
+    {
+      "id": "jh-004-embedded-jku",
+      "description": "Header carries a jku (JWK Set URL) reference; rejected to prevent network-resolved trust.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1735689600,
+          "jti": "jh-004-jti-fixed-value"
+        },
+        "header": {
+          "alg": "EdDSA",
+          "typ": "interaction-record+jwt",
+          "kid": "test-kid",
+          "jku": "https://example.com/jwks.json"
+        }
+      },
+      "expected": {
+        "accepted": false,
+        "errors": [{ "code": "E_JOSE_EMBEDDED_KEY", "path": "/header/jku" }]
+      }
+    },
+    {
+      "id": "jh-005-crit-set",
+      "description": "Header carries a crit array; rejected because no critical extensions are defined for this typ.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1735689600,
+          "jti": "jh-005-jti-fixed-value"
+        },
+        "header": {
+          "alg": "EdDSA",
+          "typ": "interaction-record+jwt",
+          "kid": "test-kid",
+          "crit": ["x-custom-flag"]
+        }
+      },
+      "expected": {
+        "accepted": false,
+        "errors": [{ "code": "E_JOSE_CRIT_PRESENT", "path": "/header/crit" }]
+      }
+    },
+    {
+      "id": "jh-006-b64-false",
+      "description": "Header carries b64 set to false (RFC 7797 unencoded payload); rejected for Wire 0.2.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1735689600,
+          "jti": "jh-006-jti-fixed-value"
+        },
+        "header": {
+          "alg": "EdDSA",
+          "typ": "interaction-record+jwt",
+          "kid": "test-kid",
+          "b64": false
+        }
+      },
+      "expected": {
+        "accepted": false,
+        "errors": [{ "code": "E_JOSE_B64_FALSE", "path": "/header/b64" }]
+      }
+    },
+    {
+      "id": "jh-007-zip-set",
+      "description": "Header carries a zip compression algorithm; rejected for Wire 0.2.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1735689600,
+          "jti": "jh-007-jti-fixed-value"
+        },
+        "header": {
+          "alg": "EdDSA",
+          "typ": "interaction-record+jwt",
+          "kid": "test-kid",
+          "zip": "DEF"
+        }
+      },
+      "expected": {
+        "accepted": false,
+        "errors": [{ "code": "E_JOSE_ZIP_PRESENT", "path": "/header/zip" }]
+      }
+    },
+    {
+      "id": "jh-008-unsupported-alg",
+      "description": "Header declares an unsupported alg (none); rejected because Wire 0.2 mandates EdDSA.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1735689600,
+          "jti": "jh-008-jti-fixed-value"
+        },
+        "header": {
+          "alg": "none",
+          "typ": "interaction-record+jwt",
+          "kid": "test-kid"
+        }
+      },
+      "expected": {
+        "accepted": false,
+        "errors": [{ "code": "E_JOSE_UNSUPPORTED_ALG", "path": "/header/alg" }]
+      }
+    }
+  ]
+}

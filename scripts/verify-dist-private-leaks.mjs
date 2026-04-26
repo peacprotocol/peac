@@ -73,6 +73,10 @@ const TIER_2_FORBIDDEN_IDENTIFIERS = [
   'ArchivalBundle',
   'defaultCodec',
   'classifyMigration',
+  'ParityVerdict',
+  'ParityError',
+  'ParityWarning',
+  'validateWire02Record',
 ];
 
 const WORKSPACE_PATH_MAP = WORKSPACE_PACKAGE_MAP;
