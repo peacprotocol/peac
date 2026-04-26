@@ -20,7 +20,8 @@ export type IncludedCategory =
   | 'included_jose_header_hardening'
   | 'included_warning_vector'
   | 'included_type_extension_mapping_warning'
-  | 'included_issuer_form';
+  | 'included_issuer_form'
+  | 'included_temporal_warning';
 
 export type ExcludedCategory =
   | 'excluded_legacy_or_bundle_only'
@@ -109,6 +110,13 @@ const TYPE_EXTENSION_MAPPING_WARNING_CODES: ReadonlySet<string> = new Set([
   'extension_group_missing',
   'extension_group_mismatch',
 ]);
+
+/**
+ * Warning codes emitted by the temporal-skew surface
+ * (checkOccurredAtSkew in @peac/schema). Step 5b re-includes warning
+ * fixtures whose expected warnings are entirely drawn from this set.
+ */
+const TEMPORAL_WARNING_CODES: ReadonlySet<string> = new Set(['occurred_at_skew']);
 
 /**
  * jws-security fixtures whose semantics are covered by the canonical
@@ -315,13 +323,14 @@ function categorizeWire02(
       };
     }
 
-    if (codes.includes('occurred_at_skew')) {
+    if (codes.every((c) => TEMPORAL_WARNING_CODES.has(c))) {
       return {
         source: 'wire-02-conformance',
         family,
         id,
-        category: 'excluded_requires_temporal_warning_runner',
-        reason: `wire-02/${family}/${sourceFile}: occurred_at_skew warning belongs to the temporal layer (verifyLocal occurred_at vs iat skew); no temporal runner in the parity foundation yet`,
+        category: 'included_temporal_warning',
+        runnerKind: 'envelope',
+        input: claims as Record<string, unknown>,
       };
     }
 

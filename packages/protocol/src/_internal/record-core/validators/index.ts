@@ -16,3 +16,4 @@ export {
   type JoseHardeningResult,
 } from './jose-hardening.js';
 export { validateIssuerFormInternal, type IssuerFormResult } from './issuer-form.js';
+export { validateTemporalInternal, type TemporalResult, type TemporalWarning } from './temporal.js';
