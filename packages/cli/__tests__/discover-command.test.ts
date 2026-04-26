@@ -1,5 +1,5 @@
 /**
- * peac discover <url> command: round-trip tests covering 7 scenarios:
+ * peac discover <url> command: round-trip tests covering 8 scenarios:
  *   1. happy-path well-formed peac.txt
  *   2. malformed peac.txt (mock returns invalid YAML/JSON)
  *   3. HTTP 5xx response
@@ -7,6 +7,7 @@
  *   5. byte cap exceeded
  *   6. happy-path with legacy key-discovery lines (warnings populated)
  *   7. redirect cap exceeded (E_NET_SSRF_TOO_MANY_REDIRECTS)
+ *   8. non-HTTP(S) URL scheme rejection
  *
  * The CLI helper at packages/cli/src/lib/policy-document-discovery.ts is
  * exercised end-to-end via the public DiscoverCommand class. Network is
@@ -91,7 +92,7 @@ function failure(code: string, error: string): MockSafeFetchFailure {
   return { ok: false, code, error };
 }
 
-describe('peac discover <url>: 6 scenarios', () => {
+describe('peac discover <url>: 8 scenarios', () => {
   beforeEach(() => {
     closeSpy.mockClear();
     mockSafeFetchRaw.mockReset();

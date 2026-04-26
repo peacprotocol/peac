@@ -54,6 +54,14 @@
       "published": false,
       "note": "Archived at v0.13.1. Source moved out of the packages/* workspace glob. Active publish-manifest count drops 37 -> 36. CLI peac discover continues via internal helper at packages/cli/src/lib/policy-document-discovery.ts. Historical npm versions <= 0.13.0 remain installable with their existing deprecation messages."
     },
+    "packages/registries": {
+      "npm": "@peac/registries",
+      "state": "internal",
+      "wire": "0.2",
+      "layer": 0,
+      "published": false,
+      "note": "Workspace-private internal facade re-grouping public @peac/kernel constants for internal-consumer ergonomics. Not published to npm. Direction-of-dependency: imports FROM public @peac/kernel; never the reverse (private-package dependency invariant)."
+    },
     "packages/audit": {
       "npm": "@peac/audit",
       "state": "default",
