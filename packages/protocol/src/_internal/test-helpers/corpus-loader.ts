@@ -10,9 +10,8 @@
  * from packages/protocol/src/index.ts. Not part of the published surface.
  */
 
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import Ajv2020 from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
 
@@ -61,14 +60,26 @@ export interface ParityCorpusFamily {
 }
 
 /**
- * Resolve the parity-corpus root directory relative to the loader file.
- * Override allowed for tests via the optional argument.
+ * Resolve the parity-corpus root directory.
+ *
+ * Walks up from `process.cwd()` looking for `specs/conformance/parity-corpus/`.
+ * Works whether tests run from the repo root or from any package directory.
+ * Override allowed via the optional argument.
  */
 export function resolveCorpusRoot(override?: string): string {
   if (override) return override;
-  const here = dirname(fileURLToPath(import.meta.url));
-  // packages/protocol/src/_internal/test-helpers/ -> repo root is five levels up
-  return resolve(here, '..', '..', '..', '..', '..', 'specs', 'conformance', 'parity-corpus');
+  let cur = process.cwd();
+  for (let i = 0; i < 16; i++) {
+    const candidate = resolve(cur, 'specs', 'conformance', 'parity-corpus');
+    if (existsSync(candidate)) return candidate;
+    const parent = dirname(cur);
+    if (parent === cur) break;
+    cur = parent;
+  }
+  throw new Error(
+    `parity-corpus root not found by walking up from ${process.cwd()}; ` +
+      `expected to find specs/conformance/parity-corpus/`
+  );
 }
 
 /**
