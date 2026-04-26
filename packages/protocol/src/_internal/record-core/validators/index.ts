@@ -4,3 +4,4 @@
  * INTERNAL ONLY. Not re-exported from packages/protocol/src/index.ts.
  */
 export type { ParityVerdict, ParityError, ParityWarning } from './types.js';
+export { validateKernelConstraintsInternal } from './kernel-constraints.js';
