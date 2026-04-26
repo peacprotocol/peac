@@ -76,21 +76,53 @@ interface Mutation {
   readonly description: string;
 }
 
+// Base64url alphabet (RFC 4648 §5) used by the JWS segments. A 6-bit
+// value per character; 64 characters total. Used by the byte-flip
+// mutator to guarantee a replacement char whose decoded value differs
+// from the original (an XOR of the high bit, equivalent to a +32 shift
+// in alphabet position).
+const BASE64URL_ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+
 function mutateByteFlip(jws: string, rand: () => number): Mutation {
   if (jws.length === 0) {
     return { kind: 'flip', mutated: 'X', description: 'flip on empty input' };
   }
   const idx = rand() % jws.length;
-  const original = jws.charCodeAt(idx);
-  // Pick a different printable ASCII byte. JWS uses base64url + '.', so
-  // any letter / digit substitution may collide; use a deliberately
-  // out-of-class byte (printable, non-base64url, non-dot).
-  const replacement = original === 0x2a /* '*' */ ? 0x40 : 0x2a; // '*' or '@'
-  const mutated = jws.slice(0, idx) + String.fromCharCode(replacement) + jws.slice(idx + 1);
+  const original = jws[idx];
+  let replacement: string;
+  let detail: string;
+  if (original === '.') {
+    // Replacing a JWS separator with a non-separator collapses the
+    // three-segment structure to two segments. Every conformant JWS
+    // parser MUST reject by structure check.
+    replacement = 'A';
+    detail = `separator '.' -> 'A' (collapses segment count)`;
+  } else {
+    const aIdx = BASE64URL_ALPHABET.indexOf(original);
+    if (aIdx < 0) {
+      // Non-base64url, non-separator. Use a base64url-alphabet char so
+      // the JWS segment shape is preserved but a previously-invalid
+      // byte is now a valid different one.
+      replacement = 'A';
+      detail = `non-alphabet '${original}' -> 'A'`;
+    } else {
+      // Shift the alphabet index by 32 (XOR the high bit of the 6-bit
+      // value). Guarantees a different decoded value at this position
+      // even when the position contributes only to padding bits at the
+      // last character of a segment, because the high bit of the 6-bit
+      // value always participates in either a byte boundary or the
+      // first padding bit. Either way the produced byte sequence
+      // differs from the original so signature verification fails
+      // deterministically.
+      replacement = BASE64URL_ALPHABET[(aIdx + 32) % 64];
+      detail = `'${original}' -> '${replacement}' (alphabet shift)`;
+    }
+  }
+  const mutated = jws.slice(0, idx) + replacement + jws.slice(idx + 1);
   return {
     kind: 'flip',
     mutated,
-    description: `flip @ ${idx} (0x${original.toString(16)} -> 0x${replacement.toString(16)})`,
+    description: `flip @ ${idx} (${detail})`,
   };
 }
 
