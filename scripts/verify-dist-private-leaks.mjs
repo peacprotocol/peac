@@ -52,6 +52,26 @@ const FORBIDDEN_IDENTIFIERS = [
   '_internal.codec',
 ];
 
+// Tier 1 scoped runtime allowlist.
+//
+// A few Tier 1 identifiers are intentionally wired into a specific
+// package's runtime implementation files. The internal flag
+// PEAC_INTERNAL_SHADOW_CORE / _internal.shadowCore is read by the
+// shadow scheduler in @peac/protocol; the env-var literal must appear
+// in the bundled runtime for the flag to actually function. The
+// identifier remains forbidden in every other package and in every
+// .d.ts (the public TypeScript surface) so the option/flag is
+// observable only from inside @peac/protocol's own runtime, never
+// surfaced through the type system.
+//
+// Scope rules per entry:
+//   - keyed by npm package name;
+//   - the identifier is permitted only in *.mjs / *.cjs (runtime),
+//     never in *.d.ts (public TypeScript surface).
+const TIER_1_RUNTIME_ALLOWLIST = {
+  '@peac/protocol': new Set(['PEAC_INTERNAL_SHADOW_CORE', '_internal.shadowCore']),
+};
+
 // Tier 2: forbidden ONLY on public-surface files. These are implementation
 // symbols that legitimately appear in internal dist files (e.g.,
 // packages/protocol/dist/_internal/record-core/codec/jws-jwt.cjs) and in
@@ -217,6 +237,13 @@ async function scanPackage(npmName, pkgRootOverride = null) {
         }
       }
       if (lineIdx >= 0) {
+        // Tier 1 scoped runtime allowlist: skip if this (npmName, ident)
+        // pair is permitted in *.mjs / *.cjs (never in *.d.ts).
+        const allowedSet = TIER_1_RUNTIME_ALLOWLIST[npmName];
+        const isDts = file.endsWith('.d.ts');
+        if (!isDts && allowedSet?.has(ident)) {
+          continue;
+        }
         leaks.push({
           file: relative(ROOT, file),
           identifier: ident,
