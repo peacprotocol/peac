@@ -1,0 +1,186 @@
+/**
+ * Shadow-mode telemetry redaction and canonical hashing.
+ *
+ * @internal
+ *
+ * INTERNAL ONLY. Not re-exported from packages/protocol/src/index.ts.
+ *
+ * Two responsibilities:
+ *
+ *   1. `redactNote(input, maxBytes)`: scrub known secret classes from
+ *      a free-form string and bound it to a UTF-8 byte ceiling. Used
+ *      for the `notes` field on every shadow divergence record so
+ *      that an accidental string concatenation cannot leak credential
+ *      material into the in-memory shadow log.
+ *
+ *   2. `canonicalHashOf(value)` / `hashJws(jws)`: produce a SHA-256
+ *      hex digest of a canonicalized representation. Used as the
+ *      comparison primitive between real-path and shadow-path results
+ *      so the divergence log never needs to store raw output.
+ *
+ * SECRET_PATTERNS is the ground-truth contract for what counts as a
+ * leakable secret class. Adding a regex here REQUIRES a paired
+ * adversarial test vector in shadow-redact-adversarial.test.ts (one
+ * matching vector + one adjacent benign-not-matched vector). Removing
+ * a regex here REQUIRES the same justification.
+ */
+
+import { createHash } from 'node:crypto';
+
+/**
+ * Known secret-class patterns. Order matters only for performance
+ * (broader patterns first reduce the search space for narrower ones).
+ *
+ * @internal
+ */
+const SECRET_PATTERNS: readonly RegExp[] = [
+  // Compact JWS / JWT (header.payload.signature with eyJ-prefixed header).
+  /eyJ[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+/g,
+
+  // PEM-encoded blocks. Covers RSA / EC / OPENSSH / generic PRIVATE KEY
+  // header variants in a single pattern.
+  /-----BEGIN [A-Z0-9 ]+-----[\s\S]+?-----END [A-Z0-9 ]+-----/g,
+
+  // Long base64 / base64url runs (>=40 chars). Matches API keys, tokens,
+  // hashes, and the second segment of a compact JWS when the JWS pattern
+  // above does not match.
+  /\b[A-Za-z0-9+/_-]{40,}={0,2}\b/g,
+
+  // Bearer token (Authorization header value with Bearer scheme).
+  /Bearer\s+[A-Za-z0-9._\-/+=]+/gi,
+
+  // Generic Authorization header line (any scheme, including Basic /
+  // Digest / Negotiate). Multiline-anchored.
+  /^authorization:\s*[^\r\n]+/gim,
+
+  // Generic auth-token header line (X-Auth-Token, X-API-Key).
+  /^x-(?:auth-token|api-key):\s*[^\r\n]+/gim,
+
+  // Cookie request header line (raw client cookies).
+  /^cookie:\s*[^\r\n]+/gim,
+
+  // Set-Cookie response header line (server-issued sessions).
+  /^set-cookie:\s*[^\r\n]+/gim,
+
+  // URL query token / API key / secret / access_token.
+  /[?&](?:token|key|secret|access_token|api_key|apikey)=[^&\s#]+/gi,
+
+  // AWS access key ID (AKIA + 16 alphanumeric).
+  /\bAKIA[0-9A-Z]{16}\b/g,
+
+  // Email address (PII).
+  /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g,
+
+  // Phone numbers (E.164 with + and 7+ digits, plus common North-American
+  // and dotted / hyphenated / parenthesized variants).
+  /\+?\d[\d\s\-().]{7,}\d/g,
+];
+
+/**
+ * Redaction marker used in place of any matched secret class.
+ *
+ * @internal
+ */
+const REDACTION_MARKER = '[REDACTED]';
+
+const REDACTION_MARKER_BYTES = Buffer.byteLength(REDACTION_MARKER, 'utf8');
+
+/**
+ * Redact known secret classes from `input` and bound the result to
+ * `maxBytes` UTF-8 bytes. The output always either matches the input
+ * (when no secret was found and the byte budget permits) or contains
+ * the `[REDACTED]` marker.
+ *
+ * Truncation is byte-aware so multibyte UTF-8 sequences are not split
+ * mid-character. When the redacted string exceeds `maxBytes`, the
+ * tail is replaced with the marker.
+ *
+ * @internal
+ */
+export function redactNote(input: string, maxBytes: number): string {
+  if (typeof input !== 'string') return REDACTION_MARKER;
+
+  let redacted = input;
+  for (const pattern of SECRET_PATTERNS) {
+    redacted = redacted.replace(pattern, REDACTION_MARKER);
+  }
+
+  const buf = Buffer.from(redacted, 'utf8');
+  if (buf.length <= maxBytes) return redacted;
+
+  if (maxBytes <= REDACTION_MARKER_BYTES) {
+    return REDACTION_MARKER.slice(0, maxBytes);
+  }
+
+  const headBytes = maxBytes - REDACTION_MARKER_BYTES;
+  return safeUtf8Slice(buf, headBytes) + REDACTION_MARKER;
+}
+
+/**
+ * SHA-256 hex digest of a canonical-stringified value. Used by the
+ * shadow comparator to detect output-byte-diff WITHOUT logging raw
+ * content. Object keys are sorted recursively so equivalent objects
+ * with different key orders produce identical digests.
+ *
+ * @internal
+ */
+export function canonicalHashOf(value: unknown): string {
+  return createHash('sha256').update(canonicalStringify(value)).digest('hex');
+}
+
+/**
+ * SHA-256 hex digest of a JWS string. Used as the primary
+ * `recordRefHash` input for divergence records.
+ *
+ * @internal
+ */
+export function hashJws(jws: string): string {
+  return createHash('sha256').update(jws).digest('hex');
+}
+
+/**
+ * Canonical JSON serialization with stable key order. Internal helper
+ * for `canonicalHashOf`. Not exported.
+ */
+function canonicalStringify(value: unknown): string {
+  if (value === null) return 'null';
+  if (typeof value === 'undefined') return 'null';
+  if (typeof value === 'string') return JSON.stringify(value);
+  if (typeof value === 'number') {
+    return Number.isFinite(value) ? String(value) : 'null';
+  }
+  if (typeof value === 'boolean') return String(value);
+  if (typeof value === 'bigint') return String(value);
+  if (Array.isArray(value)) {
+    return '[' + value.map(canonicalStringify).join(',') + ']';
+  }
+  if (value instanceof Uint8Array) {
+    return JSON.stringify(Buffer.from(value).toString('base64'));
+  }
+  if (typeof value === 'object') {
+    const obj = value as Record<string, unknown>;
+    const keys = Object.keys(obj).sort();
+    return (
+      '{' + keys.map((k) => JSON.stringify(k) + ':' + canonicalStringify(obj[k])).join(',') + '}'
+    );
+  }
+  return 'null';
+}
+
+/**
+ * Slice a UTF-8 byte buffer to at most `byteLen` bytes without
+ * splitting a multi-byte sequence mid-character. Returns a decoded
+ * string. Internal helper for `redactNote`. Not exported.
+ */
+function safeUtf8Slice(buf: Buffer, byteLen: number): string {
+  if (byteLen <= 0) return '';
+  if (buf.length <= byteLen) return buf.toString('utf8');
+
+  let end = byteLen;
+  // Walk back over UTF-8 continuation bytes (0b10xxxxxx) so the slice
+  // ends on a complete code-point boundary.
+  while (end > 0 && (buf[end] & 0xc0) === 0x80) {
+    end -= 1;
+  }
+  return buf.subarray(0, end).toString('utf8');
+}
