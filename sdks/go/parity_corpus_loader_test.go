@@ -2,7 +2,6 @@ package peac
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -165,6 +164,4 @@ func TestParityCorpusLoaderUnknownFamilyHandled(t *testing.T) {
 			t.Fatalf("parityFloorCounts missing family %q", want)
 		}
 	}
-	// Format the map deterministically for log clarity.
-	fmt.Sprintf("%v", parityFloorCounts)
 }
