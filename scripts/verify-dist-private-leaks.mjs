@@ -81,6 +81,9 @@ const TIER_2_FORBIDDEN_IDENTIFIERS = [
   'validateTypeExtensionMappingInternal',
   'TypeExtensionMappingInput',
   'TypeExtensionMappingWarning',
+  'validateJoseHardeningInternal',
+  'JoseHardeningInput',
+  'JoseHardeningResult',
 ];
 
 const WORKSPACE_PATH_MAP = WORKSPACE_PACKAGE_MAP;

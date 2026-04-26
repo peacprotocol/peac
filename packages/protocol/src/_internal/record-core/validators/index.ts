@@ -10,3 +10,8 @@ export {
   type TypeExtensionMappingInput,
   type TypeExtensionMappingWarning,
 } from './type-extension-mapping.js';
+export {
+  validateJoseHardeningInternal,
+  type JoseHardeningInput,
+  type JoseHardeningResult,
+} from './jose-hardening.js';

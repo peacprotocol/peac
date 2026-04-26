@@ -17,7 +17,7 @@ import type { CanonicalRunnerKind } from './canonical-runner.js';
 export type IncludedCategory =
   | 'included_valid_wire_record'
   | 'included_invalid_wire_record'
-  | 'included_jose_negative'
+  | 'included_jose_header_hardening'
   | 'included_warning_vector'
   | 'included_type_extension_mapping_warning';
 
@@ -30,7 +30,9 @@ export type ExcludedCategory =
   | 'excluded_requires_full_jws_verification_runner'
   | 'excluded_requires_policy_binding_runner'
   | 'excluded_requires_temporal_warning_runner'
-  | 'excluded_requires_verify_local_strictness_runner';
+  | 'excluded_requires_verify_local_strictness_runner'
+  | 'excluded_requires_compact_jws_size_runner'
+  | 'excluded_requires_signature_verification_runner';
 
 export type ManifestCategory = IncludedCategory | ExcludedCategory;
 
@@ -108,12 +110,20 @@ const TYPE_EXTENSION_MAPPING_WARNING_CODES: ReadonlySet<string> = new Set([
 ]);
 
 /**
- * JOSE rejection vectors that map directly to validateWire02Header
- * checks for embedded key material / crit / b64:false / zip. Other
- * jws-security fixtures (kid presence/length checks, oversized JWS,
- * full-token format checks) require a full JWS verification runner
- * that the parity foundation does not yet provide; they are excluded
- * with category excluded_requires_full_jws_verification_runner.
+ * jws-security fixtures whose semantics are covered by the canonical
+ * JOSE header hardening function (validateWire02Header in
+ * @peac/crypto). Confirmed by inspection of jws.ts: the function
+ * checks kid presence/length, embedded key material (jwk/x5c/x5u/jku),
+ * crit, b64:false, and zip — in that order. Fixtures matching these
+ * checks are included under category included_jose_header_hardening.
+ *
+ * Out of scope (excluded under more specific categories):
+ *   - oversized JWS (size limit enforced outside validateWire02Header)
+ *     -> excluded_requires_compact_jws_size_runner
+ *   - signature verification / public-key resolution
+ *     -> excluded_requires_signature_verification_runner
+ *   - full compact-token format checks
+ *     -> excluded_requires_full_jws_verification_runner
  */
 const JOSE_HEADER_HARDENING_FIXTURE_NAMES: ReadonlySet<string> = new Set([
   // wire-02/jose/conformance.json
@@ -124,6 +134,10 @@ const JOSE_HEADER_HARDENING_FIXTURE_NAMES: ReadonlySet<string> = new Set([
   'reject-crit-header',
   'reject-b64-false',
   'reject-zip-header',
+  'reject-missing-kid',
+  'reject-empty-kid',
+  'reject-kid-over-256',
+  'boundary-kid-256-chars',
   // wire-02/invalid.json
   'reject-jwk',
   'reject-x5c',
@@ -131,6 +145,34 @@ const JOSE_HEADER_HARDENING_FIXTURE_NAMES: ReadonlySet<string> = new Set([
   'reject-jku',
   'reject-crit',
   'reject-zip',
+  'reject-kid-too-long',
+]);
+
+/**
+ * jws-security fixtures that require a runner outside the parity
+ * foundation. Mapped to specific excluded categories so reviewers can
+ * see which future runner each one needs.
+ */
+const JOSE_NON_HEADER_FIXTURE_CATEGORIES: ReadonlyMap<
+  string,
+  { category: ExcludedCategory; reason: string }
+> = new Map([
+  [
+    'reject-jws-exceeds-256kb',
+    {
+      category: 'excluded_requires_compact_jws_size_runner',
+      reason:
+        'jws-size cap is enforced outside validateWire02Header; needs a compact-JWS size runner',
+    },
+  ],
+  [
+    'reject-typ-with-parameters',
+    {
+      category: 'excluded_requires_full_jws_verification_runner',
+      reason:
+        'typ-with-parameters check operates on the full compact JWS (header + payload + signature); needs a full JWS verification runner',
+    },
+  ],
 ]);
 
 function loadJsonManifest(path: string): RawFixture[] {
@@ -193,8 +235,8 @@ function categorizeWire02(
         source: 'wire-02-conformance',
         family,
         id,
-        category: 'excluded_requires_full_jws_verification_runner',
-        reason: `wire-02/${family}/${sourceFile}: jws_size_exceeds_bytes requires a real signed compact JWS; not testable via header-only canonical runner`,
+        category: 'excluded_requires_compact_jws_size_runner',
+        reason: `wire-02/${family}/${sourceFile}: jws_size_exceeds_bytes is enforced outside validateWire02Header; needs a compact-JWS size runner`,
       };
     }
     const header = fx.input?.header_overrides;
@@ -207,20 +249,30 @@ function categorizeWire02(
         reason: `wire-02/${family}/${sourceFile}: jws-security fixture without header_overrides; requires full JWS verification runner`,
       };
     }
+    const nonHeaderEntry = JOSE_NON_HEADER_FIXTURE_CATEGORIES.get(id);
+    if (nonHeaderEntry) {
+      return {
+        source: 'wire-02-conformance',
+        family,
+        id,
+        category: nonHeaderEntry.category,
+        reason: `wire-02/${family}/${sourceFile}: ${nonHeaderEntry.reason}`,
+      };
+    }
     if (!JOSE_HEADER_HARDENING_FIXTURE_NAMES.has(id)) {
       return {
         source: 'wire-02-conformance',
         family,
         id,
         category: 'excluded_requires_full_jws_verification_runner',
-        reason: `wire-02/${family}/${sourceFile}: jws-security fixture "${id}" exercises kid-presence / kid-length / size / token-format checks beyond validateWire02Header header-hardening scope; defer to full JWS verification runner`,
+        reason: `wire-02/${family}/${sourceFile}: jws-security fixture "${id}" is not on the validateWire02Header allowlist; defer to full JWS verification runner`,
       };
     }
     return {
       source: 'wire-02-conformance',
       family,
       id,
-      category: 'included_jose_negative',
+      category: 'included_jose_header_hardening',
       runnerKind: 'jose',
       input: header as Record<string, unknown>,
     };
@@ -311,7 +363,7 @@ function categorizeParityCorpus(family: string, vector: RawParityVector): Includ
       source: 'parity-corpus',
       family,
       id: vector.id,
-      category: 'included_jose_negative',
+      category: 'included_jose_header_hardening',
       runnerKind: 'jose',
       input: (vector.input?.header ?? {}) as Record<string, unknown>,
     };
