@@ -211,8 +211,8 @@ jobs:
 
           {
             echo "npm_tag=$NPM_TAG"
-            echo "skip_release=${SKIP_RELEASE_INPUT:-false}"
-            echo "release_stage_1_mode=${STAGE_1_MODE_INPUT:-draft}"
+            echo "skip_release=${SKIP_RELEASE_INPUT:-true}"
+            echo "release_stage_1_mode=${STAGE_1_MODE_INPUT:-prerelease}"
           } >> "$GITHUB_OUTPUT"
 
           echo ""
@@ -220,8 +220,8 @@ jobs:
           echo "  tag:                  $TAG"
           echo "  version:              $VERSION"
           echo "  npm_tag:              $NPM_TAG"
-          echo "  skip_release:         ${SKIP_RELEASE_INPUT:-false}"
-          echo "  release_stage_1_mode: ${STAGE_1_MODE_INPUT:-draft}"
+          echo "  skip_release:         ${SKIP_RELEASE_INPUT:-true}"
+          echo "  release_stage_1_mode: ${STAGE_1_MODE_INPUT:-prerelease}"
 
       - name: Enable Corepack
         run: |
