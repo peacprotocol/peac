@@ -5,40 +5,26 @@ All notable changes to PEAC Protocol will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.13.1] - Unreleased
+## [0.13.1] - 2026-04-27
 
-Internal foundations release. No public API change. No wire format change. No new public package. Published to npm `next` only; **no `latest` promotion** in this release. GitHub Release ships as a prerelease.
-
-### Changed
-
-- `@peac/protocol` exercises the bounded internal validator pipeline through an observation-only scheduler under an internal-only flag. Real-path return value is byte-identical with the flag on or off; comparison happens off the public-call boundary and accumulates into a bounded in-memory log.
-- `@peac/protocol`'s internal redaction module loses two over-broad patterns. Long-base64 detection no longer matches kebab-case identifiers; phone-number detection requires an explicit separator so plain consecutive-digit runs do not collateral-match. Coverage of every retained pattern is pinned by adversarial vectors plus benign controls.
+Internal foundations release. No public API change. No wire format change. No new public package. Published to npm `next` only.
 
 ### Added
 
-- Internal infrastructure for normalized observation, scheduling, and bounded telemetry redaction. Internal-only; not published to npm; not exposed on any public TypeScript surface.
-- Mutation oracle suite: every byte-level mutation of a valid Wire 0.2 JWS is rejected by `verifyLocal` with a registered `E_*` error code (deterministic seeded sample of 100 mutations per fixture across four classes).
-- Resource-limit invariant suite: every receipt-content invariant in [`docs/specs/RESOURCE-LIMITS.md`](docs/specs/RESOURCE-LIMITS.md) is asserted with at-bound-pass and at-bound-plus-one-fail vectors against the bounded internal validator.
-- Property-based fuzz suite: 200 random inputs per property exercise `verifyLocal` with arbitrary unicode strings and JWS-shaped strings; both must produce structured rejection or a structured throw.
-- Shadow-mode CI lane: nightly runs the `@peac/protocol` test suite with the internal flag enabled and exercises the redaction-log verifier. Pull requests opt in via the `run-shadow-lane` label.
-- Local CI parity gate: `scripts/pre-push-strict.sh` runs `scripts/ci/forbid-strings.sh`, `gofmt -l`, and `go vet ./...` so contributors catch CI-only failures before pushing.
-- `archive/` is marked `linguist-vendored` so the repository language statistics reflect active source rather than preserved historical material.
-- [`docs/STABILITY-CONTRACT.md`](docs/STABILITY-CONTRACT.md) gains an Internal-only flags section and a Shadow-mode timeout guarantee class section so the cooperative-timeout shape and the internal flag's allowed locations are documented.
-- [`docs/release-notes/v0.13.1.md`](docs/release-notes/v0.13.1.md) details the release shape, compatibility surface, and verification commands.
+- Mutation, resource-limit, and property-based fuzz test suites for `@peac/protocol`.
+- `docs/STABILITY-CONTRACT.md`: Internal-only flags section and shadow-mode timeout guarantee class.
+- `docs/release-notes/v0.13.1.md`.
+
+### Changed
+
+- Pre-push and release verification gates broadened to mirror CI (`pnpm verify:release` now runs publish-manifest topological order check).
+- Repository language statistics exclude `archive/` (vendored).
 
 ### Compatibility
 
 - `@peac/protocol.{issue, verifyLocal}` signatures and serialized output: byte-identical to v0.13.0.
 - Wire format (`peac-receipt/0.1` envelope, `interaction-record+jwt` JWS `typ`): unchanged.
-- `@peac/kernel` public TypeScript surface: byte-stable from v0.13.0.
-- OpenAPI verify contract, error code count (186), extension group count (12), and active publish-manifest count (36): all unchanged.
-
-### Migration
-
-No migration is required. Every public symbol from v0.13.0 continues to behave identically. The discovery-package migration shipped at v0.13.0 still applies to anyone moving off `@peac/disc`:
-
-- `import { parse } from '@peac/disc'` → `import { parsePolicyDocument } from '@peac/policy-kit'`
-- `import { discover } from '@peac/disc'` → inline using `@peac/net-node.safeFetch` followed by `@peac/policy-kit.parsePolicyDocument`. The `peac discover <url>` CLI command continues to work via this composition.
+- OpenAPI verify contract, error code count (186), extension group count (12), and active publish-manifest count (36): unchanged.
 
 ## [0.13.0] - Unreleased
 
