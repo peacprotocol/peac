@@ -38,7 +38,7 @@ export interface Wire01JWSHeader {
 }
 
 /**
- * JWS header for Wire 0.2 receipts (typ: 'interaction-record+jwt', compact canonical form)
+ * JWS header for Wire 0.2 records (typ: 'interaction-record+jwt', compact canonical form)
  *
  * The full media type 'application/interaction-record+jwt' is accepted by verify()
  * and decode() but normalized to this compact form before returning.

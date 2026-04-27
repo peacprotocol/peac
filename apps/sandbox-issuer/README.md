@@ -1,6 +1,6 @@
 # Sandbox Issuer
 
-Test receipt issuer for local development and integration testing.
+Test record issuer for local development and integration testing.
 
 Issues signed interaction records with Ed25519 stable keys. Supports `interaction-record+jwt` (Wire 0.2) and `peac-receipt/0.1` (Wire 0.1 legacy).
 Not for production use.
@@ -21,9 +21,9 @@ pnpm start
 | GET    | `/health`                       | Health check         |
 | GET    | `/.well-known/peac-issuer.json` | Issuer configuration |
 | GET    | `/.well-known/jwks.json`        | Public keys (JWKS)   |
-| POST   | `/api/v1/issue`                 | Issue a receipt      |
+| POST   | `/api/v1/issue`                 | Issue a record       |
 
-## Issue a receipt
+## Issue a record
 
 ```bash
 curl -X POST http://127.0.0.1:3100/api/v1/issue \
@@ -58,7 +58,7 @@ to `.local/keys.json`.
 | Variable                   | Default                | Description                                        |
 | -------------------------- | ---------------------- | -------------------------------------------------- |
 | `PORT`                     | `3100`                 | HTTP listen port                                   |
-| `PEAC_ISSUER_URL`          | (derived from request) | Override the `iss` claim in issued receipts        |
+| `PEAC_ISSUER_URL`          | (derived from request) | Override the `iss` claim in issued records         |
 | `PEAC_SANDBOX_PRIVATE_JWK` | (none)                 | Ed25519 private key as JWK JSON string             |
 | `PEAC_TRUST_PROXY`         | (unset)                | Set to `1` to trust X-Forwarded-Proto/Host headers |
 

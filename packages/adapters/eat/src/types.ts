@@ -103,13 +103,13 @@ export interface ClaimMapperOptions {
    * List specific integer keys here to include their raw values.
    */
   includeRawClaims?: number[];
-  /** Receipt type (reverse-DNS or URI). Defaults to 'org.peacprotocol/attestation' */
+  /** Record type (reverse-DNS or URI). Defaults to 'org.peacprotocol/attestation' */
   type?: string;
-  /** Pillars to include on the receipt. Defaults to ['identity'] */
+  /** Pillars to include on the record. Defaults to ['identity'] */
   pillars?: string[];
 }
 
-/** Mapped Wire 0.2 claims from an EAT passport */
+/** Mapped Wire record claims from an EAT passport */
 export interface MappedEatClaims {
   kind: 'evidence';
   type: string;

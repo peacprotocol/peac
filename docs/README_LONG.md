@@ -123,7 +123,7 @@ app.get('/data', async (req, res) => {
 
 ### Express middleware
 
-`@peac/middleware-express` provides automatic receipt issuance:
+`@peac/middleware-express` provides automatic record issuance:
 
 ```typescript
 import express from 'express';

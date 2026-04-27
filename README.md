@@ -56,8 +56,8 @@ Full loop: [`docs/HOW-IT-WORKS.md`](docs/HOW-IT-WORKS.md). Artifact vocabulary (
 Outcome-led recipes under [`docs/SOLUTIONS/`](docs/SOLUTIONS/):
 
 - [Runtime evidence export](docs/SOLUTIONS/runtime-evidence-export.md)
-- [API receipt issuance](docs/SOLUTIONS/api-receipt-issuance.md)
-- [MCP tool-call receipts](docs/SOLUTIONS/mcp-tool-call-receipts.md)
+- [API record issuance](docs/SOLUTIONS/api-receipt-issuance.md)
+- [MCP tool-call records](docs/SOLUTIONS/mcp-tool-call-receipts.md)
 - [Commerce evidence bundle](docs/SOLUTIONS/commerce-evidence-bundle.md)
 - [Regulatory audit trail](docs/SOLUTIONS/regulatory-audit-trail.md)
 

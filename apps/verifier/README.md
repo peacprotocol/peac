@@ -35,7 +35,7 @@ The verifier uses `verifyLocal()` from `@peac/protocol` to verify receipt signat
 - **File upload**: Drag-and-drop support for .jwt, .jws, .json files
 - **Trust configuration**: Add/remove trusted issuers and public keys via the UI
 - **Offline mode**: Service worker caches the app shell for offline use
-- **Claims display**: Formatted breakdown of all receipt claims
+- **Claims display**: Formatted breakdown of all record claims
 
 ## Trust Store
 

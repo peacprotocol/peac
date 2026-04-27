@@ -263,7 +263,7 @@ export const VERIFICATION_MODES = {
 export const WIRE_01_JWS_TYP = 'peac-receipt/0.1' as const;
 
 /**
- * JWS header typ value for Wire 0.2 receipts (compact form).
+ * JWS header typ value for Wire 0.2 records (compact form).
  * Per RFC 7515 Section 4.1.9, the full media type form
  * 'application/interaction-record+jwt' is also accepted by verifiers and
  * normalized to this compact form before returning the header.

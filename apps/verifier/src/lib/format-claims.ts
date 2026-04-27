@@ -1,7 +1,7 @@
 /**
  * Claims Formatting
  *
- * Formats receipt claims for human-readable display.
+ * Formats record claims for human-readable display.
  */
 
 export function formatTimestamp(epoch: number): string {

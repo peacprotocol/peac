@@ -85,7 +85,7 @@
         },
         "wire_version": {
           "type": ["string", "null"],
-          "description": "Wire format version (e.g. '0.2') or null for non-receipt integrations"
+          "description": "Wire format version (e.g. '0.2') or null for non-record integrations"
         },
         "rationale": {
           "type": "string",
