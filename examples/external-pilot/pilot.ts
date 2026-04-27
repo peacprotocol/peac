@@ -97,8 +97,9 @@ async function main() {
     } else {
       console.log(`   Reference verifier returned ${res.status} (falling back to local)`);
     }
-  } catch {
-    console.log('   Reference verifier not reachable (using local result)');
+  } catch (err) {
+    const reason = err instanceof Error ? err.message : String(err);
+    console.log(`   Reference verifier not reachable (${reason}); using local result`);
   }
 
   // Step 5: Compute receipt_ref for the artifact

@@ -33,9 +33,10 @@ export async function sha256Hex(data: Uint8Array | string): Promise<string> {
     const hash = createHash('sha256');
     hash.update(bytes);
     return hash.digest('hex');
-  } catch {
+  } catch (err) {
     throw new Error(
-      'No SHA-256 implementation available. Ensure Web Crypto API or Node.js crypto is available.'
+      'No SHA-256 implementation available. Ensure Web Crypto API or Node.js crypto is available.',
+      { cause: err }
     );
   }
 }
@@ -61,8 +62,8 @@ export async function sha256Bytes(data: Uint8Array | string): Promise<Uint8Array
     const hash = createHash('sha256');
     hash.update(bytes);
     return new Uint8Array(hash.digest());
-  } catch {
-    throw new Error('No SHA-256 implementation available.');
+  } catch (err) {
+    throw new Error('No SHA-256 implementation available.', { cause: err });
   }
 }
 

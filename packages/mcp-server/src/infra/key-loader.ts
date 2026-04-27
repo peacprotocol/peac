@@ -39,7 +39,8 @@ export async function loadIssuerKey(schemeUri: string): Promise<LoadedKey> {
       raw = await readFile(filePath, 'utf-8');
     } catch (err) {
       throw new KeyLoadError(
-        `Failed to read key file: ${filePath} -- ${err instanceof Error ? err.message : String(err)}`
+        `Failed to read key file: ${filePath} -- ${err instanceof Error ? err.message : String(err)}`,
+        { cause: err }
       );
     }
   } else {
@@ -51,8 +52,8 @@ export async function loadIssuerKey(schemeUri: string): Promise<LoadedKey> {
   let jwk: unknown;
   try {
     jwk = JSON.parse(raw);
-  } catch {
-    throw new KeyLoadError('Key data is not valid JSON');
+  } catch (err) {
+    throw new KeyLoadError('Key data is not valid JSON', { cause: err });
   }
 
   // Validate JWK structure

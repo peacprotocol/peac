@@ -24,6 +24,7 @@
  * 14. SDK status completeness (typescript, go, python)
  * 15. Shadow-redaction self-test (scripts/verify-shadow-redaction.test.mjs)
  * 16. Publish-manifest topological order (scripts/check-manifest-topo.mjs)
+ * 17. Error-path hygiene (scripts/verify-error-path-hygiene.mjs)
  *
  * Exit codes:
  * - 0: All release checks passed
@@ -481,6 +482,27 @@ function checkShadowRedactionSelfTest() {
   }
 }
 
+function checkErrorPathHygiene() {
+  console.log(colors.bold('\n--- Error-path Hygiene ---\n'));
+  const script = join(ROOT, 'scripts/verify-error-path-hygiene.mjs');
+  if (!existsSync(script)) {
+    skip('error-path hygiene', 'scripts/verify-error-path-hygiene.mjs not present');
+    return;
+  }
+  try {
+    execFileSync(process.execPath, [script], { stdio: 'pipe' });
+    pass('error-path hygiene: no BLOCKED findings outside allowlist');
+  } catch (err) {
+    const stdout = err.stdout?.toString() ?? '';
+    const stderr = err.stderr?.toString() ?? '';
+    fail(
+      `error-path hygiene failed (exit ${err.status}); last stdout line: ${
+        stdout.trim().split('\n').slice(-1)[0] ?? stderr.trim().split('\n').slice(-1)[0] ?? '(no output)'
+      }`
+    );
+  }
+}
+
 function checkManifestTopologicalOrder() {
   console.log(colors.bold('\n--- Publish-manifest Topological Order ---\n'));
   const script = join(ROOT, 'scripts/check-manifest-topo.mjs');
@@ -528,6 +550,7 @@ function main() {
   checkSdkStatus(facts);
   checkShadowRedactionSelfTest();
   checkManifestTopologicalOrder();
+  checkErrorPathHygiene();
 
   // Summary
   console.log(colors.bold('\n--- Summary ---\n'));

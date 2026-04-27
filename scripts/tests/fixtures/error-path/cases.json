@@ -1,0 +1,94 @@
+[
+  {
+    "name": "01 flags empty catch in sensitive production path",
+    "file": "01-empty-catch-blocked.ts",
+    "relPath": "packages/protocol/src/example.ts",
+    "expectBlocked": 1,
+    "expectAllowed": 0
+  },
+  {
+    "name": "02 allows cleanup-only empty catch with allowlist entry",
+    "file": "02-empty-catch-allowed.ts",
+    "relPath": "packages/mcp-server/src/example.ts",
+    "allowlist": [
+      {
+        "rule": "emptyCatch",
+        "path": "packages/mcp-server/src/example.ts",
+        "lineHint": 5,
+        "symbolHint": "close",
+        "reason": "best-effort temp-dir cleanup; cleanup-only does not affect protocol result",
+        "category": "cleanup-only",
+        "reviewAfter": "0.14.0"
+      }
+    ],
+    "expectBlocked": 0,
+    "expectAllowed": 1
+  },
+  {
+    "name": "03 flags replacement Error without cause in sensitive path",
+    "file": "03-replacement-error-no-cause.ts",
+    "relPath": "packages/protocol/src/example.ts",
+    "expectBlocked": 1,
+    "expectAllowed": 0
+  },
+  {
+    "name": "04 does not flag replacement Error with cause",
+    "file": "04-replacement-error-with-cause.ts",
+    "relPath": "packages/protocol/src/example.ts",
+    "expectBlocked": 0,
+    "expectAllowed": 0
+  },
+  {
+    "name": "05 flags log-and-continue in sensitive production path",
+    "file": "05-log-and-continue-blocked.ts",
+    "relPath": "packages/protocol/src/example.ts",
+    "expectBlocked": 1,
+    "expectAllowed": 0
+  },
+  {
+    "name": "06 allows log-and-continue with explicit allowlist entry",
+    "file": "06-log-and-continue-allowed.ts",
+    "relPath": "packages/pay402/src/example.ts",
+    "allowlist": [
+      {
+        "rule": "logAndContinue",
+        "path": "packages/pay402/src/example.ts",
+        "lineHint": 6,
+        "symbolHint": "negotiate",
+        "reason": "graceful per-rail degradation in payment-rail negotiation",
+        "category": "telemetry-only",
+        "reviewAfter": "0.14.0"
+      }
+    ],
+    "expectBlocked": 0,
+    "expectAllowed": 1
+  },
+  {
+    "name": "07 flags forbidden public wording in tracked source",
+    "file": "07-forbidden-wording.ts",
+    "relPath": "packages/example/src/note.ts",
+    "expectBlocked": 2,
+    "expectAllowed": 0
+  },
+  {
+    "name": "08 does not flag package-root barrel without catches",
+    "file": "08-package-root-barrel.ts",
+    "relPath": "packages/example/src/index.ts",
+    "expectBlocked": 0,
+    "expectAllowed": 0
+  },
+  {
+    "name": "09 does not flag pass-through wrapper helpers",
+    "file": "09-pass-through-helper.ts",
+    "relPath": "packages/example/src/wrap.ts",
+    "expectBlocked": 0,
+    "expectAllowed": 0
+  },
+  {
+    "name": "10 ignores content classified under reference/",
+    "file": "10-reference-skipped.ts",
+    "relPath": "reference/example.ts",
+    "expectBlocked": 0,
+    "expectAllowed": 0
+  }
+]

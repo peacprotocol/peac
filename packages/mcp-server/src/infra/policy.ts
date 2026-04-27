@@ -105,7 +105,8 @@ export async function loadPolicy(
     raw = await readFile(filePath, 'utf-8');
   } catch (err) {
     throw new PolicyLoadError(
-      `Failed to read policy file: ${filePath} -- ${err instanceof Error ? err.message : String(err)}`
+      `Failed to read policy file: ${filePath} -- ${err instanceof Error ? err.message : String(err)}`,
+      { cause: err }
     );
   }
 
@@ -124,8 +125,8 @@ export async function loadPolicy(
   let parsed: unknown;
   try {
     parsed = JSON.parse(raw);
-  } catch {
-    throw new PolicyLoadError(`Policy file is not valid JSON: ${filePath}`);
+  } catch (err) {
+    throw new PolicyLoadError(`Policy file is not valid JSON: ${filePath}`, { cause: err });
   }
 
   const result = PolicySchema.safeParse(parsed);

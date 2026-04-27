@@ -83,8 +83,9 @@ async function main() {
         console.log(`   MCP verify result: ${text.slice(0, 100)}...`);
       }
     }
-  } catch {
-    console.log(`   MCP server not reachable at ${MCP_URL}`);
+  } catch (err) {
+    const reason = err instanceof Error ? err.message : String(err);
+    console.log(`   MCP server not reachable at ${MCP_URL} (${reason})`);
     console.log('   Falling back to local verification...');
   }
 
