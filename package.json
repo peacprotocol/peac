@@ -70,6 +70,7 @@
     "verify:error-path-hygiene": "node scripts/verify-error-path-hygiene.mjs",
     "verify:error-path-hygiene:test": "node scripts/tests/verify-error-path-hygiene.test.mjs",
     "test:error-path-hygiene": "node scripts/tests/verify-error-path-hygiene.test.mjs",
+    "verify:wire-language": "node scripts/verify-wire-language.mjs",
     "verify:trust-artifacts": "node scripts/verify-trust-artifacts.mjs",
     "verify:public-surface-names": "node scripts/verify-public-surface-names.mjs",
     "verify:compliance-mappings": "node scripts/verify-compliance-mappings.mjs",

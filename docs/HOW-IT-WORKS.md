@@ -93,7 +93,7 @@ Under the hood, `verifyLocal()` checks:
 1. JOSE header hardening (no embedded keys, no `crit`, no `zip`, algorithm is Ed25519).
 2. Signature validity against the provided public key.
 3. Kernel constraints (size caps, pointer depth, canonical form).
-4. Schema validity (Wire 0.2 claims shape, extension groups, pillar taxonomy).
+4. Schema validity (Wire claims shape, extension groups, pillar taxonomy).
 5. Policy binding (if `peac.policy` is present, three-state: `verified` / `failed` / `unavailable`).
 6. Timing bounds (`iat` / `nbf` / `exp` within configured clock skew).
 

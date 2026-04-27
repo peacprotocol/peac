@@ -68,12 +68,12 @@ PEAC's DID adapter (`@peac/adapter-did`) resolves `did:key` and `did:web` public
 
 Some managed runtimes expose their own native attestation or audit export (Microsoft AGT evidence export, Claude Managed Agents audit JSON, OpenAI ACP runtime events).
 
-| Property    | Native runtime attestation  | PEAC records                             |
-| ----------- | --------------------------- | ---------------------------------------- |
-| Scope       | One runtime vendor          | Cross-runtime portable                   |
-| Schema      | Vendor-specific             | Open Wire 0.2 (`interaction-record+jwt`) |
-| Verifier    | Vendor's verifier (or none) | Any party with the issuer public key     |
-| Replaceable | Tied to the runtime         | Stays consistent across vendors          |
+| Property    | Native runtime attestation  | PEAC records                         |
+| ----------- | --------------------------- | ------------------------------------ |
+| Scope       | One runtime vendor          | Cross-runtime portable               |
+| Schema      | Vendor-specific             | Open Wire (`interaction-record+jwt`) |
+| Verifier    | Vendor's verifier (or none) | Any party with the issuer public key |
+| Replaceable | Tied to the runtime         | Stays consistent across vendors      |
 
 Where a native attestation exists, PEAC records its output as portable signed evidence. The adapter layer (`@peac/adapter-managed-agents`, `@peac/adapter-runtime-governance`) carries the vendor's attestation verbatim in `upstream_artifact` fields; PEAC never synthesizes semantics the vendor did not claim.
 

@@ -41,7 +41,7 @@ Prerequisites: Node 22+, pnpm 8+.
    ls packages/adapters/runtime-governance/tests/
    ```
 
-3. Issue a signed record from a managed-runtime observation. The adapter translates the upstream event into Wire 0.2 claims and preserves the upstream attestation verbatim in `upstream_artifact`:
+3. Issue a signed record from a managed-runtime observation. The adapter translates the upstream event into Wire claims and preserves the upstream attestation verbatim in `upstream_artifact`:
 
    ```typescript
    import { issue } from '@peac/protocol';
