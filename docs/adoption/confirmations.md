@@ -19,7 +19,7 @@ Each confirmation entry MUST include all 6 fields:
 <!-- Example:
 ### Acme Agent Platform
 - **Team/Project:** Acme Agent Platform
-- **Integration Surface:** MCP receipt issuance via `peac_issue` tool
+- **Integration Surface:** MCP record issuance via `peac_issue` tool
 - **Integration Impact:** Replaced custom audit log with structured receipts, reducing compliance integration time.
 - **Date:** 2026-04-01
 - **Public Link:** https://github.com/acme/agent-platform/pull/42

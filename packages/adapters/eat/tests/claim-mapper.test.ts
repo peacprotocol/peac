@@ -1,7 +1,7 @@
 /**
  * EAT Claim Mapper tests
  *
- * Tests privacy-first claim mapping from EAT to Wire 0.2 receipt claims.
+ * Tests privacy-first claim mapping from EAT to Wire record claims.
  */
 
 import { describe, it, expect } from 'vitest';

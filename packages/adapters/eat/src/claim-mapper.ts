@@ -1,9 +1,9 @@
 /**
- * EAT Claim Mapper: maps EAT claims to Wire 0.2 receipt claims
+ * EAT Claim Mapper: maps EAT claims to Wire record claims.
  *
  * Privacy-first: all claim values are SHA-256 hashed by default.
  * Callers opt in to raw value inclusion via `includeRawClaims` option.
- * This prevents accidental PII leakage from EAT attestations into PEAC receipts.
+ * This prevents accidental PII leakage from EAT attestations into PEAC records.
  *
  * References:
  *   - RFC 9711 (Entity Attestation Token)
@@ -55,14 +55,14 @@ function serializeClaimValue(value: unknown): string {
 }
 
 /**
- * Map EAT claims to Wire 0.2 receipt claims.
+ * Map EAT claims to Wire record claims.
  *
  * Privacy-first: claim values are SHA-256 hashed unless their integer key
  * appears in `options.includeRawClaims`. This prevents accidental PII leakage.
  *
  * @param claims - Decoded EAT claims map
  * @param options - Mapper configuration
- * @returns Mapped claims suitable for Wire 0.2 receipt issuance
+ * @returns Mapped claims suitable for Wire record issuance
  */
 export async function mapEatClaims(
   claims: EatClaims,

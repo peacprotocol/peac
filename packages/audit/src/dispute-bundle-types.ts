@@ -150,7 +150,7 @@ export interface DisputeBundleManifest {
    * sha256:<hex> hash of peac.txt file if included.
    *
    * Enables offline policy binding verification: verifiers can compare this
-   * hash against the policy digest in Wire 0.2 receipts to confirm the policy
+   * hash against the policy digest in Wire records to confirm the policy
    * in effect at issuance time matches what is bundled.
    *
    * Bundle path: policy/peac.txt (locked convention).

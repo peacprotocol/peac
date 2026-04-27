@@ -1,4 +1,4 @@
-# MCP tool-call receipts
+# MCP tool-call records
 
 > **Outcome:** Your MCP server emits a signed record for every tool call so downstream agents, auditors, or counterparties can verify what tool ran, what arguments were used, and what the result was — offline, with just your public key.
 >

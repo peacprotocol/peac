@@ -1,6 +1,6 @@
-# API receipt issuance
+# API record issuance
 
-> **Outcome:** Your HTTP API emits signed receipts on every response so consumers can verify what terms applied and what happened — offline, with just your public key.
+> **Outcome:** Your HTTP API emits signed records on every response so consumers can verify what terms applied and what happened — offline, with just your public key.
 >
 > **Audience:** API provider.
 >

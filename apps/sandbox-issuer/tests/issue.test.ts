@@ -2,7 +2,7 @@
  * Issue endpoint tests
  *
  * Tests the POST /api/v1/issue flow including request validation,
- * receipt issuance, and round-trip verification.
+ * record issuance, and round-trip verification.
  */
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';

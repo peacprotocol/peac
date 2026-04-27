@@ -82,11 +82,11 @@ MCP Client (Claude, Cursor)     MCP Server (@peac/mcp-server)
 
 ### Packages involved
 
-| Layer | Package              | Role                                                 |
-| ----- | -------------------- | ---------------------------------------------------- |
-| 5     | `@peac/mcp-server`   | MCP tool handlers; receipt issuance and verification |
-| 3     | `@peac/protocol`     | `issue()` and `verifyLocal()`                        |
-| 4     | `@peac/mappings-mcp` | MCP-specific carrier adapter; `_meta` key mapping    |
+| Layer | Package              | Role                                                |
+| ----- | -------------------- | --------------------------------------------------- |
+| 5     | `@peac/mcp-server`   | MCP tool handlers; record issuance and verification |
+| 3     | `@peac/protocol`     | `issue()` and `verifyLocal()`                       |
+| 4     | `@peac/mappings-mcp` | MCP-specific carrier adapter; `_meta` key mapping   |
 
 ## 3. A2A Handoff Evidence Flow
 

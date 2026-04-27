@@ -8,7 +8,7 @@ Each surface is cataloged in `docs/adoption/integration-evidence.json` with full
 
 ### MCP (Model Context Protocol)
 
-Round-trip receipt issuance and verification via MCP tool calls (`peac_issue`, `peac_verify`). Pack-install smoke verified (ESM, CJS, types).
+Round-trip record issuance and verification via MCP tool calls (`peac_issue`, `peac_verify`). Pack-install smoke verified (ESM, CJS, types).
 
 ### A2A (Agent-to-Agent Protocol)
 

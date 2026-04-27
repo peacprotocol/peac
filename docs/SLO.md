@@ -40,7 +40,7 @@ asserts `verifyLocal` p95 MUST be ≤ 10 ms. That gate runs in CI on every PR.
 | `/v1/verify` (Ed25519, ~1 KB record)                          | `release-prep` | `release-prep` | `release-prep` | Loopback; no JWKS resolution                 |
 | `/v1/verify` with JWKS resolution (single issuer, warm cache) | `release-prep` | `release-prep` | `release-prep` | Measured after first request; JWKS cache hot |
 
-## MCP tool-call round-trip with receipt issuance
+## MCP tool-call round-trip with record issuance
 
 | Operation                                                                 | Median (p50)   | p95            | p99            | Notes                 |
 | ------------------------------------------------------------------------- | -------------- | -------------- | -------------- | --------------------- |

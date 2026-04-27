@@ -61,7 +61,7 @@ function pseudonymise(value: string): string {
 /**
  * Top-level claim keys whose values are protocol metadata that the
  * redactor MUST preserve verbatim. This set is conservative and
- * reflects PEAC Wire 0.2 surface.
+ * reflects PEAC Wire surface.
  */
 const PROTOCOL_METADATA_KEYS = new Set([
   'iss',

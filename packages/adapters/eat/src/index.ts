@@ -2,10 +2,10 @@
  * @peac/adapter-eat
  *
  * EAT (Entity Attestation Token, RFC 9711) passport decoder and
- * PEAC Wire 0.2 claim mapper.
+ * PEAC Wire record claim mapper.
  *
  * Decodes COSE_Sign1 structures (RFC 9052) with Ed25519 signatures,
- * extracts EAT claims, and maps them to Wire 0.2 receipt claims
+ * extracts EAT claims, and maps them to Wire record claims
  * with privacy-first defaults (SHA-256 hashing of claim values).
  *
  * @packageDocumentation
