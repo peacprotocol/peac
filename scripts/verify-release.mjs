@@ -494,13 +494,23 @@ function checkErrorPathHygiene() {
     pass('error-path hygiene: no BLOCKED findings outside allowlist');
   } catch (err) {
     const stdout = err.stdout?.toString() ?? '';
-    const stderr = err.stderr?.toString() ?? '';
-    fail(
-      `error-path hygiene failed (exit ${err.status}); last stdout line: ${
-        stdout.trim().split('\n').slice(-1)[0] ?? stderr.trim().split('\n').slice(-1)[0] ?? '(no output)'
-      }`
-    );
+    const blockedBlock = extractBlockedBlock(stdout);
+    const detail = blockedBlock || stdout.trim().split('\n').slice(-1)[0] || '(no output)';
+    fail(`error-path hygiene failed (exit ${err.status}):\n${detail}`);
   }
+}
+
+function extractBlockedBlock(stdout) {
+  const lines = stdout.split('\n');
+  const startIdx = lines.findIndex((l) => /^BLOCKED \(\d+\):/.test(l));
+  if (startIdx < 0) return '';
+  const block = [];
+  for (let i = startIdx; i < lines.length; i++) {
+    const line = lines[i];
+    if (i > startIdx && /^\S/.test(line) && !line.startsWith('  ')) break;
+    block.push(line);
+  }
+  return block.join('\n');
 }
 
 function checkManifestTopologicalOrder() {

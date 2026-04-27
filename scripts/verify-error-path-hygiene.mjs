@@ -9,15 +9,16 @@
  *
  * BLOCKED in production code (unambiguous AST patterns only):
  *   - empty catch blocks
- *   - catch blocks that throw new Error(...) without { cause: ... }
+ *   - catch blocks that throw a replacement error without { cause: ... }
  *   - catch blocks that log-and-continue in sensitive paths
- *     (protocol/security/network/payment)
+ *     (protocol / security / network / payment)
  *   - catch blocks that return a silent default in sensitive paths
  *
  * BLOCKED in tracked public artifacts:
- *   - forbidden vocabulary (slop / AI slop / vibe / Claude / LLM / bot
- *     / generated-code) in code, comments, docs, examples, public PR
- *     bodies, and commit messages
+ *   - forbidden public vocabulary; the canonical pattern set is the
+ *     FORBIDDEN_WORDS array below. The patterns are written as regex
+ *     literals with character classes so the verifier source itself
+ *     does not match.
  *
  * ALLOWED-WITH-RATIONALE: must appear in the allowlist
  *   (scripts/verify-error-path-hygiene.allowlist.json) with reason +
@@ -28,7 +29,9 @@
  *   legitimate compatibility pass-through wrappers.
  *
  * Walks tracked files via `git ls-files` so untracked content
- * (reference/, paper/, .claude/, local scratch) is naturally excluded.
+ * (reference, paper, local scratch) is naturally excluded. Self-test
+ * fixtures under scripts/tests/fixtures/ are excluded from the
+ * production scan because they intentionally embed pattern triggers.
  *
  * Modes:
  *   default                human-readable report; non-zero on BLOCKED
@@ -64,6 +67,10 @@ const SKIP_DIR_PREFIXES = [
   'build/',
   'node_modules/',
   '.turbo/',
+  // Self-test fixtures intentionally embed pattern triggers; they are
+  // exercised through --self-test against per-case relPath classification,
+  // not via the production scan.
+  'scripts/tests/fixtures/',
 ];
 
 const PRODUCTION_PREFIXES = ['packages/', 'apps/', 'surfaces/', 'sdks/'];
