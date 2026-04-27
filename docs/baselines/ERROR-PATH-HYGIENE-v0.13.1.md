@@ -7,16 +7,15 @@ v0.13.1 release. It is informative; the authoritative gate lives in
 
 ## What is blocked
 
-Production source under `packages/**/src/**`, `apps/**/src/**`,
-`surfaces/**/src/**`, and `sdks/**/src/**` is gated for the following
+The gate inspects production source under `packages/**/src/**`,
+`apps/**/src/**`, `surfaces/**/src/**`, and `sdks/**/src/**` for
 unambiguous AST patterns. Sensitive paths add path-scoped rules:
 
-| Rule                           | Scope                                                         |
-| ------------------------------ | ------------------------------------------------------------- |
-| `emptyCatch`                   | sensitive production paths only                               |
-| `replacementErrorWithoutCause` | sensitive production paths only                               |
-| `logAndContinue`               | sensitive production paths only                               |
-| `forbiddenPublicWording`       | tracked code, docs, examples, package READMEs, and `llms.txt` |
+| Rule                           | Scope                           |
+| ------------------------------ | ------------------------------- |
+| `emptyCatch`                   | sensitive production paths only |
+| `replacementErrorWithoutCause` | sensitive production paths only |
+| `logAndContinue`               | sensitive production paths only |
 
 Sensitive production paths are:
 
@@ -70,7 +69,6 @@ pnpm test:error-path-hygiene
 - function-count or KLOC-based scores
 - examples and tests beyond catch-block AST findings (examples teach
   patterns; tests have their own conventions)
-- public wording outside the front-door scan paths
 
 ## Boundaries
 

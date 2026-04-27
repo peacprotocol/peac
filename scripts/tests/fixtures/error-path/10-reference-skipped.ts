@@ -1,7 +1,5 @@
-// Fixture: when classified under reference/ this content is skipped
-// even though it contains an empty catch and forbidden wording.
-//
-// AI slop placeholder.
+// Fixture: when classified under a skipped path this content is
+// ignored entirely, even though it contains an empty catch.
 export function bad(): void {
   try {
     JSON.parse('{');

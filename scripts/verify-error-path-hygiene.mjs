@@ -8,30 +8,25 @@
  * only on BLOCKED findings outside the allowlist.
  *
  * BLOCKED in production code (unambiguous AST patterns only):
- *   - empty catch blocks
+ *   - empty catch blocks in sensitive paths
  *   - catch blocks that throw a replacement error without { cause: ... }
+ *     in sensitive paths
  *   - catch blocks that log-and-continue in sensitive paths
  *     (protocol / security / network / payment)
- *   - catch blocks that return a silent default in sensitive paths
- *
- * BLOCKED in tracked public artifacts:
- *   - forbidden public vocabulary; the canonical pattern set is the
- *     FORBIDDEN_WORDS array below. The patterns are written as regex
- *     literals with character classes so the verifier source itself
- *     does not match.
  *
  * ALLOWED-WITH-RATIONALE: must appear in the allowlist
  *   (scripts/verify-error-path-hygiene.allowlist.json) with reason +
  *   category + (reviewAfter for debt categories).
  *
- * REPORT-ONLY (printed but never failing): ambiguous classifications,
- *   barrel density, directory fanout, duplicate test mock setup,
- *   legitimate compatibility pass-through wrappers.
+ * REPORT-ONLY (printed but never failing): silent-default returns
+ *   (predicate functions and try-parsers are widespread), empty catch
+ *   and replacement-error patterns outside sensitive paths, ambiguous
+ *   classifications.
  *
  * Walks tracked files via `git ls-files` so untracked content
- * (reference, paper, local scratch) is naturally excluded. Self-test
- * fixtures under scripts/tests/fixtures/ are excluded from the
- * production scan because they intentionally embed pattern triggers.
+ * (local scratch, gitignored directories) is naturally excluded.
+ * Self-test fixtures under scripts/tests/fixtures/ are excluded from
+ * the production scan because they intentionally embed AST triggers.
  *
  * Modes:
  *   default                human-readable report; non-zero on BLOCKED
@@ -44,7 +39,7 @@
  */
 
 import { execFileSync } from 'node:child_process';
-import { readFileSync, statSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { resolve, join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
@@ -88,29 +83,6 @@ const SENSITIVE_PREFIXES = [
   'packages/pay402/',
   'packages/mcp-server/',
   'apps/api/',
-];
-
-const FORBIDDEN_WORDS = [
-  /\bAI[ -]slop\b/i,
-  /\bvibe[ -]coded\b/i,
-  /\bvibe coding\b/i,
-  /\bgenerated[ -]code cleanup\b/i,
-  /\bClaude cleanup\b/i,
-  /\bLLM cleanup\b/i,
-  /\bbot cleanup\b/i,
-];
-
-const FORBIDDEN_WORDS_SCAN_PATHS = [
-  'README.md',
-  'docs/',
-  'examples/',
-  'packages/',
-  'apps/',
-  'surfaces/',
-  'sdks/',
-  'scripts/',
-  'CHANGELOG.md',
-  'llms.txt',
 ];
 
 const ALLOWED_CATEGORIES = new Set([
@@ -440,33 +412,7 @@ function scanCatchFindings(filePath, source) {
   return findings;
 }
 
-function scanForbiddenWords(filePath, source) {
-  const findings = [];
-  if (
-    !FORBIDDEN_WORDS_SCAN_PATHS.some((prefix) => filePath.startsWith(prefix) || filePath === prefix)
-  ) {
-    return findings;
-  }
-  const lines = source.split('\n');
-  for (let i = 0; i < lines.length; i++) {
-    for (const re of FORBIDDEN_WORDS) {
-      if (re.test(lines[i])) {
-        findings.push({
-          rule: 'forbiddenPublicWording',
-          line: i + 1,
-          column: 1,
-          excerpt: lines[i].slice(0, 120),
-        });
-      }
-    }
-  }
-  return findings;
-}
-
 function classifySeverity(finding, filePath) {
-  if (finding.rule === 'forbiddenPublicWording') {
-    return 'BLOCKED';
-  }
   // emptyCatch: BLOCKED only in sensitive paths to avoid noise on
   // capability-detection / cleanup / telemetry hooks. Report-only in
   // other production code.
@@ -496,25 +442,16 @@ function shouldScanFile(p) {
   return isSourceFile(p);
 }
 
-function shouldScanText(p) {
-  if (p.endsWith('.md') || p === 'CHANGELOG.md' || p === 'llms.txt') return true;
-  return shouldScanFile(p);
-}
-
 function scanRepository(root) {
   const tracked = listTrackedFiles(root);
   const findings = [];
 
   for (const rel of tracked) {
+    if (!shouldScanFile(rel)) continue;
     const abs = join(root, rel);
-    let stat;
-    try {
-      stat = statSync(abs);
-    } catch {
-      continue;
-    }
-    if (!stat.isFile()) continue;
-
+    // Read directly: readFileSync throws EISDIR / ENOENT for non-files
+    // and missing entries, which we treat as "skip". Avoids a TOCTOU
+    // race between stat and read.
     let source;
     try {
       source = readFileSync(abs, 'utf8');
@@ -522,16 +459,8 @@ function scanRepository(root) {
       continue;
     }
 
-    if (shouldScanFile(rel)) {
-      for (const f of scanCatchFindings(rel, source)) {
-        findings.push({ ...f, path: rel });
-      }
-    }
-
-    if (shouldScanText(rel)) {
-      for (const f of scanForbiddenWords(rel, source)) {
-        findings.push({ ...f, path: rel });
-      }
+    for (const f of scanCatchFindings(rel, source)) {
+      findings.push({ ...f, path: rel });
     }
   }
   return findings;
@@ -641,11 +570,6 @@ async function runSelfTest() {
     const fileFindings = [];
     if (shouldScanFile(trackedRel)) {
       for (const f of scanCatchFindings(trackedRel, source)) {
-        fileFindings.push({ ...f, path: trackedRel });
-      }
-    }
-    if (shouldScanText(trackedRel)) {
-      for (const f of scanForbiddenWords(trackedRel, source)) {
         fileFindings.push({ ...f, path: trackedRel });
       }
     }

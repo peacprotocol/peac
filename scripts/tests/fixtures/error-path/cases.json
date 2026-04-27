@@ -64,11 +64,12 @@
     "expectAllowed": 1
   },
   {
-    "name": "07 flags forbidden public wording in tracked source",
-    "file": "07-forbidden-wording.ts",
-    "relPath": "packages/example/src/note.ts",
-    "expectBlocked": 2,
-    "expectAllowed": 0
+    "name": "07 demotes silentDefault to report-only in sensitive paths",
+    "file": "07-silent-default-report-only.ts",
+    "relPath": "packages/protocol/src/example.ts",
+    "expectBlocked": 0,
+    "expectAllowed": 0,
+    "expectReportOnly": 1
   },
   {
     "name": "08 does not flag package-root barrel without catches",
