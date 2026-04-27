@@ -12,7 +12,7 @@
 - **Surface:** peac_issue tool produces Wire 0.2 records; peac_verify tool verifies them
 - **Evidence:** Round-trip issuance and verification via MCP tool calls
 - **Wire version:** Wire 0.2
-- **DD-90 gate:** YES (distinct ecosystem with Wire 0.2 production)
+- **DD-90 gate:** YES (distinct ecosystem with Wire 0.2 record production)
 - **Test files:** `packages/mcp-server/tests/handlers/issue.test.ts`, `packages/mcp-server/tests/handlers/verify.test.ts`
 - **Spec refs:** `docs/specs/EVIDENCE-CARRIER-CONTRACT.md`
 
@@ -22,7 +22,7 @@
 - **Surface:** Wire 0.2 records carried in A2A metadata[extensionURI] per Evidence Carrier Contract
 - **Evidence:** Round-trip through A2A metadata carrier (issue, embed, extract, verify)
 - **Wire version:** Wire 0.2
-- **DD-90 gate:** YES (distinct ecosystem with Wire 0.2 production)
+- **DD-90 gate:** YES (distinct ecosystem with Wire 0.2 record production)
 - **Test files:** `tests/integration/a2a/wire02-roundtrip.test.ts`
 - **Spec refs:** `docs/specs/EVIDENCE-CARRIER-CONTRACT.md`
 

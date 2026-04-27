@@ -163,7 +163,7 @@ function generateMarkdown(data) {
     '> **Purpose:** Documents which ecosystem integrations count toward DD-90 gates and which do not.'
   );
   lines.push(
-    '> **Rule:** Only integrations that produce or consume Wire 0.2 receipts in a distinct ecosystem count.'
+    '> **Rule:** Only integrations that produce or consume Wire 0.2 records in a distinct ecosystem count.'
   );
   lines.push(
     '> **Source:** Generated from `docs/adoption/integration-evidence.json`. Do not edit manually.'
@@ -179,7 +179,7 @@ function generateMarkdown(data) {
     lines.push(`- **Surface:** ${i.surface}`);
     lines.push(`- **Evidence:** ${i.evidence}`);
     lines.push(`- **Wire version:** Wire ${i.wire_version}`);
-    lines.push('- **DD-90 gate:** YES (distinct ecosystem with Wire 0.2 production)');
+    lines.push('- **DD-90 gate:** YES (distinct ecosystem with Wire 0.2 record production)');
     lines.push(`- **Test files:** ${i.test_files.map((f) => '`' + f + '`').join(', ')}`);
     lines.push(`- **Spec refs:** ${i.spec_refs.map((f) => '`' + f + '`').join(', ')}`);
     lines.push('');
@@ -196,7 +196,7 @@ function generateMarkdown(data) {
       lines.push(`- **Surface:** ${i.surface}`);
       lines.push(`- **Evidence:** ${i.evidence}`);
       lines.push(
-        `- **Wire version:** ${i.wire_version ? 'Wire ' + i.wire_version : 'N/A (identity input, not receipt output)'}`
+        `- **Wire version:** ${i.wire_version ? 'Wire ' + i.wire_version : 'N/A (identity input, not record output)'}`
       );
       lines.push(`- **DD-90 gate:** NO${i.dd_reference ? ` (${i.dd_reference})` : ''}`);
       if (i.rationale) {
