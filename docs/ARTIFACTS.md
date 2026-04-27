@@ -26,7 +26,7 @@ A record has a fixed structural shape:
 - `kind` — `evidence` or `challenge`. Two fixed structural kinds.
 - `type` — reverse-DNS or URI (open set). Identifies what the record represents.
 - `pillars` — subset of the ten-pillar closed taxonomy (access, attribution, commerce, consent, compliance, privacy, provenance, safety, identity, purpose).
-- `peac_version` — `"0.2"` for the current default (Wire 0.2).
+- `peac_version` — `"0.2"` for the current Wire default.
 - `schema` — `"interaction-record+jwt"`.
 - `ext` — optional typed extension groups keyed by pillar.
 

@@ -12,14 +12,14 @@ PEAC defines a compact JWS (JOSE `typ: interaction-record+jwt`) that any party w
 
 Evidence you can point at:
 
-- The conformance fixture corpus under [`specs/conformance/`](../specs/conformance/) covers positive and negative vectors for the core issue and verify path across Wire 0.2.
+- The conformance fixture corpus under [`specs/conformance/`](../specs/conformance/) covers positive and negative vectors for the core issue and verify path across the current Wire default.
 - The hello-world quickstart at [`examples/hello-world/`](../examples/hello-world/) issues a record and verifies it offline in under a minute using `@peac/protocol` and `@peac/crypto`.
 - The JOSE hardening test suite at [`packages/protocol/__tests__/`](../packages/protocol/__tests__/) enforces the stability-contract rules (no embedded keys, no `crit`, no `zip`, Ed25519 only).
 - Cross-language parity: the Go SDK ([`sdks/go/`](../sdks/go/)) emits byte-equivalent JCS output against 22 shared fixtures.
 
 ## 2. Cross-protocol record normalization across MCP, A2A, x402, ACP, paymentauth, and runtime-governance ecosystems
 
-PEAC defines a single record shape that composes with every major agent, commerce, and runtime ecosystem PEAC integrates with. The adapter and mapping layer translates each ecosystem's native attestations into a Wire 0.2 record, preserves the upstream artifact verbatim, and never synthesizes semantics the upstream did not claim.
+PEAC defines a single record shape that composes with every major agent, commerce, and runtime ecosystem PEAC integrates with. The adapter and mapping layer translates each ecosystem's native attestations into a Wire record, preserves the upstream artifact verbatim, and never synthesizes semantics the upstream did not claim.
 
 Evidence you can point at:
 

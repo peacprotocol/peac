@@ -17,7 +17,7 @@ pnpm demo
 ## What it does
 
 1. Generates an Ed25519 keypair
-2. Issues an Interaction Record (Wire 0.2) receipt with payment evidence
+2. Issues an Interaction Record receipt with payment evidence
 3. Verifies the receipt signature and schema
 4. Prints the verified claims
 

@@ -11,7 +11,7 @@ x402 PR-1986 `terms`; PEAC does not replace either.
 ## What it shows
 
 1. A `peac-policy/0.1` document is canonicalized via JCS+SHA-256 and
-   bound into a Wire 0.2 evidence receipt's `policy.digest` field.
+   bound into a Wire evidence receipt's `policy.digest` field.
 2. The same document advertises x402 `terms` in four representations
    (under `terms/`). Each representation envelope produces its own
    binding identity via `computeX402TermsDigest`.
