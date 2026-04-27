@@ -23,6 +23,7 @@
  * 13. Gate report presence for current version (advisory)
  * 14. SDK status completeness (typescript, go, python)
  * 15. Shadow-redaction self-test (scripts/verify-shadow-redaction.test.mjs)
+ * 16. Publish-manifest topological order (scripts/check-manifest-topo.mjs)
  *
  * Exit codes:
  * - 0: All release checks passed
@@ -480,6 +481,31 @@ function checkShadowRedactionSelfTest() {
   }
 }
 
+function checkManifestTopologicalOrder() {
+  console.log(colors.bold('\n--- Publish-manifest Topological Order ---\n'));
+  const script = join(ROOT, 'scripts/check-manifest-topo.mjs');
+  if (!existsSync(script)) {
+    skip('publish-manifest topological order', 'scripts/check-manifest-topo.mjs not present');
+    return;
+  }
+  try {
+    execFileSync(process.execPath, [script], { stdio: 'pipe' });
+    pass('publish-manifest topological order: dependencies precede dependents');
+  } catch (err) {
+    const stdout = err.stdout?.toString() ?? '';
+    const stderr = err.stderr?.toString() ?? '';
+    const tail = (stderr || stdout)
+      .trim()
+      .split('\n')
+      .filter((l) => l.length > 0)
+      .slice(-5)
+      .join(' | ');
+    fail(
+      `publish-manifest topological order failed (exit ${err.status}): ${tail || '(no output)'}`
+    );
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Main
 // ---------------------------------------------------------------------------
@@ -501,6 +527,7 @@ function main() {
   checkGateReport(facts);
   checkSdkStatus(facts);
   checkShadowRedactionSelfTest();
+  checkManifestTopologicalOrder();
 
   // Summary
   console.log(colors.bold('\n--- Summary ---\n'));
