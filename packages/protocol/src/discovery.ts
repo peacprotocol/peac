@@ -43,8 +43,8 @@ export function parseIssuerConfig(json: string | object): PEACIssuerConfig {
 
     try {
       config = JSON.parse(json);
-    } catch {
-      throw new Error('Issuer config is not valid JSON');
+    } catch (err) {
+      throw new Error('Issuer config is not valid JSON', { cause: err });
     }
   } else {
     config = json;
@@ -76,8 +76,8 @@ export function parseIssuerConfig(json: string | object): PEACIssuerConfig {
   // separated. This makes E_VERIFY_JWKS_URI_INVALID a reachable error code.
   try {
     new URL(obj.jwks_uri);
-  } catch {
-    throw new Error('jwks_uri must be a valid URL');
+  } catch (err) {
+    throw new Error('jwks_uri must be a valid URL', { cause: err });
   }
 
   // Validate optional fields
@@ -216,8 +216,8 @@ export function parsePolicyManifest(text: string, contentType?: string): PEACPol
     // Parse as JSON
     try {
       manifest = JSON.parse(text);
-    } catch {
-      throw new Error('Policy manifest is not valid JSON');
+    } catch (err) {
+      throw new Error('Policy manifest is not valid JSON', { cause: err });
     }
   } else {
     // Parse as simple YAML (key: value format)

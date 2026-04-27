@@ -29,51 +29,51 @@ export type McpServerErrorCode =
 export class McpServerError extends Error {
   readonly code: McpServerErrorCode;
 
-  constructor(code: McpServerErrorCode, message: string) {
-    super(message);
+  constructor(code: McpServerErrorCode, message: string, options?: ErrorOptions) {
+    super(message, options);
     this.name = 'McpServerError';
     this.code = code;
   }
 }
 
 export class KeyLoadError extends McpServerError {
-  constructor(message: string) {
-    super('E_MCP_KEY_LOAD', message);
+  constructor(message: string, options?: ErrorOptions) {
+    super('E_MCP_KEY_LOAD', message, options);
     this.name = 'KeyLoadError';
   }
 }
 
 export class PolicyLoadError extends McpServerError {
-  constructor(message: string) {
-    super('E_MCP_POLICY_LOAD', message);
+  constructor(message: string, options?: ErrorOptions) {
+    super('E_MCP_POLICY_LOAD', message, options);
     this.name = 'PolicyLoadError';
   }
 }
 
 export class JwksLoadError extends McpServerError {
-  constructor(message: string) {
-    super('E_MCP_JWKS_LOAD', message);
+  constructor(message: string, options?: ErrorOptions) {
+    super('E_MCP_JWKS_LOAD', message, options);
     this.name = 'JwksLoadError';
   }
 }
 
 export class IssueToolError extends McpServerError {
-  constructor(message: string) {
-    super('E_MCP_ISSUE_FAILED', message);
+  constructor(message: string, options?: ErrorOptions) {
+    super('E_MCP_ISSUE_FAILED', message, options);
     this.name = 'IssueToolError';
   }
 }
 
 export class BundleToolError extends McpServerError {
-  constructor(message: string) {
-    super('E_MCP_BUNDLE_FAILED', message);
+  constructor(message: string, options?: ErrorOptions) {
+    super('E_MCP_BUNDLE_FAILED', message, options);
     this.name = 'BundleToolError';
   }
 }
 
 export class PathTraversalError extends McpServerError {
-  constructor(message: string) {
-    super('E_MCP_PATH_TRAVERSAL', message);
+  constructor(message: string, options?: ErrorOptions) {
+    super('E_MCP_PATH_TRAVERSAL', message, options);
     this.name = 'PathTraversalError';
   }
 }

@@ -1,0 +1,155 @@
+{
+  "$schema": "./verify-error-path-hygiene.allowlist.schema.json",
+  "entries": [
+    {
+      "rule": "emptyCatch",
+      "path": "packages/mcp-server/src/handlers/bundle.ts",
+      "lineHint": 300,
+      "symbolHint": "handleCreateBundle",
+      "reason": "best-effort temp-dir cleanup on bundle failure; cleanup-only does not affect protocol result",
+      "category": "cleanup-only",
+      "reviewAfter": "0.14.0"
+    },
+    {
+      "rule": "emptyCatch",
+      "path": "packages/mcp-server/src/handlers/inspect.ts",
+      "lineHint": 49,
+      "symbolHint": "handleInspect",
+      "reason": "receipt classification failure is non-fatal; inspect handler degrades to variant=unknown",
+      "category": "telemetry-only",
+      "reviewAfter": "0.14.0"
+    },
+    {
+      "rule": "emptyCatch",
+      "path": "packages/mcp-server/src/http-transport.ts",
+      "lineHint": 228,
+      "symbolHint": "createHttpTransport",
+      "reason": "invalid publicUrl is skipped; allowedHosts derived from validated bind addresses already",
+      "category": "cleanup-only",
+      "reviewAfter": "0.14.0"
+    },
+    {
+      "rule": "emptyCatch",
+      "path": "packages/mcp-server/src/infra/jwks-loader.ts",
+      "lineHint": 59,
+      "symbolHint": "loadJwksFile",
+      "reason": "cleanup-only filter-skip of malformed Ed25519 base64url entries during JWKS load",
+      "category": "cleanup-only",
+      "reviewAfter": "0.14.0"
+    },
+    {
+      "rule": "emptyCatch",
+      "path": "packages/mcp-server/src/infra/path-safety.ts",
+      "lineHint": 171,
+      "symbolHint": "atomicWriteDir",
+      "reason": "best-effort temp-dir cleanup after rename failure; the surrounding catch rethrows the original error",
+      "category": "cleanup-only",
+      "reviewAfter": "0.14.0"
+    },
+    {
+      "rule": "emptyCatch",
+      "path": "packages/mcp-server/src/infra/policy.ts",
+      "lineHint": 120,
+      "symbolHint": "loadPolicy",
+      "reason": "stat-mode warning probe is non-fatal; world-writable warning does not block policy load",
+      "category": "telemetry-only",
+      "reviewAfter": "0.14.0"
+    },
+    {
+      "rule": "emptyCatch",
+      "path": "packages/mcp-server/src/session-manager.ts",
+      "lineHint": 119,
+      "symbolHint": "terminateSession",
+      "reason": "cleanup-only transport/server close on session termination",
+      "category": "cleanup-only",
+      "reviewAfter": "0.14.0"
+    },
+    {
+      "rule": "emptyCatch",
+      "path": "packages/mcp-server/src/session-manager.ts",
+      "lineHint": 141,
+      "symbolHint": "cleanup",
+      "reason": "cleanup-only transport/server close during sweep cleanup",
+      "category": "cleanup-only",
+      "reviewAfter": "0.14.0"
+    },
+    {
+      "rule": "emptyCatch",
+      "path": "packages/net/node/src/impl.ts",
+      "lineHint": 395,
+      "symbolHint": "cidrOverlapsDangerousRanges",
+      "reason": "filter-skip parse failure for sampled IP test points inside CIDR overlap probe",
+      "category": "cleanup-only",
+      "reviewAfter": "0.14.0",
+      "scoped": true
+    },
+    {
+      "rule": "emptyCatch",
+      "path": "packages/net/node/src/impl.ts",
+      "lineHint": 1351,
+      "symbolHint": "emitAuditEvent",
+      "reason": "audit hooks MUST NOT throw per documented contract; failures are silently dropped",
+      "category": "telemetry-only",
+      "reviewAfter": "0.14.0",
+      "scoped": true
+    },
+    {
+      "rule": "emptyCatch",
+      "path": "packages/net/node/src/impl.ts",
+      "lineHint": 1426,
+      "symbolHint": "emitAuditEvent",
+      "reason": "second-line audit-hook-error guard; primary guard prevents re-entry",
+      "category": "telemetry-only",
+      "reviewAfter": "0.14.0",
+      "scoped": true
+    },
+    {
+      "rule": "emptyCatch",
+      "path": "packages/net/node/src/index.ts",
+      "lineHint": 995,
+      "symbolHint": "resolveAll",
+      "reason": "DNS A-record family-fallback; ipv6 lookup continues independently",
+      "category": "cleanup-only",
+      "reviewAfter": "0.14.0",
+      "scoped": true
+    },
+    {
+      "rule": "emptyCatch",
+      "path": "packages/net/node/src/index.ts",
+      "lineHint": 1003,
+      "symbolHint": "resolveAll",
+      "reason": "DNS AAAA-record family-fallback; result aggregation handles either family present",
+      "category": "cleanup-only",
+      "reviewAfter": "0.14.0",
+      "scoped": true
+    },
+    {
+      "rule": "emptyCatch",
+      "path": "packages/net/node/src/receipt-url-middleware.ts",
+      "lineHint": 196,
+      "symbolHint": "createReceiptUrlResolver",
+      "reason": "audit/telemetry callback failure must not affect carrier result",
+      "category": "telemetry-only",
+      "reviewAfter": "0.14.0",
+      "scoped": true
+    },
+    {
+      "rule": "logAndContinue",
+      "path": "packages/pay402/src/negotiator.ts",
+      "lineHint": 63,
+      "symbolHint": "negotiate",
+      "reason": "graceful per-rail degradation in payment-rail negotiation; aggregates challenges across multiple adapters",
+      "category": "telemetry-only",
+      "reviewAfter": "0.14.0"
+    },
+    {
+      "rule": "emptyCatch",
+      "path": "packages/protocol/src/telemetry.ts",
+      "lineHint": 63,
+      "symbolHint": "fireTelemetryHook",
+      "reason": "telemetry MUST NOT break core flow per documented contract",
+      "category": "telemetry-only",
+      "reviewAfter": "0.14.0"
+    }
+  ]
+}

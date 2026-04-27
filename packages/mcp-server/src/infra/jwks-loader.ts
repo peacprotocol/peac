@@ -20,15 +20,16 @@ export async function loadJwksFile(filePath: string): Promise<JwksKeyEntry[]> {
     raw = await readFile(filePath, 'utf-8');
   } catch (err) {
     throw new JwksLoadError(
-      `Failed to read JWKS file: ${filePath} -- ${err instanceof Error ? err.message : String(err)}`
+      `Failed to read JWKS file: ${filePath} -- ${err instanceof Error ? err.message : String(err)}`,
+      { cause: err }
     );
   }
 
   let parsed: unknown;
   try {
     parsed = JSON.parse(raw);
-  } catch {
-    throw new JwksLoadError(`JWKS file is not valid JSON: ${filePath}`);
+  } catch (err) {
+    throw new JwksLoadError(`JWKS file is not valid JSON: ${filePath}`, { cause: err });
   }
 
   if (typeof parsed !== 'object' || parsed === null || !('keys' in parsed)) {
