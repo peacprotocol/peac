@@ -27,7 +27,7 @@ import { checkDocumentBinding, computeJsonDocumentDigestJcs } from './document-b
  * `'sha256:<64 lowercase hex>'`.
  *
  * This is the normative digest format for the policy.digest field in
- * Wire 0.2 receipts. The format is stable and identical across
+ * Wire 0.2 records. The format is stable and identical across
  * implementations. Output is byte-identical to
  * `computeJsonDocumentDigestJcs(policy)` from `document-binding.ts`.
  *

@@ -41,10 +41,10 @@ export interface A2AAuthEvent {
 }
 
 /**
- * Output structure for the access extension in a Wire 0.2 receipt.
+ * Output structure for the access extension in a Wire 0.2 record.
  *
  * Uses `org.peacprotocol/access` extension group with `auth_event`
- * set to `'observation'` to distinguish from access-decision receipts.
+ * set to `'observation'` to distinguish from access-decision records.
  */
 export interface A2AAuthEvidenceResult {
   /** Extension key for receipt `ext` field */
