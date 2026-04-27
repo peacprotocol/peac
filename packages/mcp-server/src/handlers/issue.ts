@@ -1,7 +1,7 @@
 /**
  * Issue handler -- Wire 0.2 only, ZERO MCP SDK imports
  *
- * Signs and returns a Wire 0.2 PEAC receipt JWS (in-memory only, no side-effects).
+ * Signs and returns a Wire 0.2 PEAC record JWS (in-memory only, no side-effects).
  * Requires issuerKey + issuerId on ServerContext.
  */
 

@@ -45,7 +45,7 @@ import {
 import { hashReceipt, fireTelemetryHook, type TelemetryHook } from './telemetry.js';
 
 /**
- * Wire 0.1 receipt options (frozen legacy).
+ * Wire 0.1 record options (frozen legacy).
  *
  * @deprecated Use {@link IssueWire02Options} (or the {@link IssueOptions} alias)
  * for current stable issuance.
@@ -172,12 +172,12 @@ export class IssueError extends Error {
 }
 
 /**
- * Issue a Wire 0.1 PEAC receipt.
+ * Issue a Wire 0.1 PEAC record.
  *
  * @deprecated Wire 0.1 issuance is frozen legacy. Use {@link issue} (current stable format)
- * or {@link issueWire02} (explicit wire-pinned API) for Wire 0.2 receipts.
+ * or {@link issueWire02} (explicit wire-pinned API) for Wire 0.2 records.
  *
- * @param options - Wire 0.1 receipt options
+ * @param options - Wire 0.1 record options
  * @returns Issue result with JWS and optional subject_snapshot
  * @throws IssueError if evidence contains non-JSON-safe values
  */
@@ -363,11 +363,11 @@ export async function issueWire01(options: IssueWire01Options): Promise<IssueRes
 }
 
 /**
- * Issue a Wire 0.1 PEAC receipt and return just the JWS string
+ * Issue a Wire 0.1 PEAC record and return just the JWS string
  *
  * @deprecated Wire 0.1 issuance is frozen legacy. Use {@link issue} for the current stable format.
  *
- * @param options - Wire 0.1 receipt options
+ * @param options - Wire 0.1 record options
  * @returns JWS compact serialization
  */
 export async function issueJws(options: IssueWire01Options): Promise<string> {
@@ -376,13 +376,13 @@ export async function issueJws(options: IssueWire01Options): Promise<string> {
 }
 
 /**
- * Issue a PEAC receipt in the current stable public format.
+ * Issue a PEAC record in the current stable public format.
  *
- * This is the canonical public issuance API. It issues Wire 0.2 receipts
+ * This is the canonical public issuance API. It issues Wire 0.2 records
  * (`typ: interaction-record+jwt`). For an explicit wire-pinned API, use
  * {@link issueWire02} directly.
  *
- * @param options - Receipt options (same as {@link IssueWire02Options})
+ * @param options - Record options (same as {@link IssueWire02Options})
  * @returns Issue result with JWS
  * @throws IssueError if iss is not canonical or schema validation fails
  */
@@ -395,7 +395,7 @@ export async function issue(options: IssueWire02Options): Promise<IssueResult> {
 // ---------------------------------------------------------------------------
 
 /**
- * Options for issuing a Wire 0.2 receipt
+ * Options for issuing a Wire 0.2 record
  */
 export interface IssueWire02Options {
   /**
@@ -462,7 +462,7 @@ export interface IssueWire02Options {
 export type IssueOptions = IssueWire02Options;
 
 /**
- * Issue a Wire 0.2 receipt (explicit wire-pinned API).
+ * Issue a Wire 0.2 record (explicit wire-pinned API).
  *
  * Most callers should use {@link issue} instead, which delegates here.
  * Use `issueWire02` directly for conformance tests, benchmarks, and
@@ -471,7 +471,7 @@ export type IssueOptions = IssueWire02Options;
  * Validates the iss canonical form and Wire02ClaimsSchema before signing.
  * Always sets typ to 'interaction-record+jwt' (WIRE_02_JWS_TYP).
  *
- * @param options - Wire 0.2 receipt options
+ * @param options - Wire 0.2 record options
  * @returns Issue result with JWS
  * @throws IssueError if iss is not canonical or schema validation fails
  */
