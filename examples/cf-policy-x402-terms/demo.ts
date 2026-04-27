@@ -6,7 +6,7 @@
  *
  * Steps:
  *   1. Read a `peac-policy/0.1` document and compute its JCS+SHA-256 digest.
- *   2. Issue a Wire 0.2 evidence receipt that binds `policy.digest` and
+ *   2. Issue a Wire evidence receipt that binds `policy.digest` and
  *      advertises x402 terms via the commerce extension.
  *   3. Compute a per-representation `terms` digest with
  *      `computeX402TermsDigest` for each of the four representations.
@@ -142,7 +142,7 @@ async function main() {
   const policyDigest = `sha256:${await jcsHash(policyDoc as never)}`;
   console.log(`\n[1] policy digest:  ${policyDigest}`);
 
-  // 2. Issue a Wire 0.2 evidence receipt with the policy.digest bound in.
+  // 2. Issue a Wire evidence receipt with the policy.digest bound in.
   const { privateKey, publicKey } = await generateKeypair();
   const kid = '2026-04-22';
   const { jws } = await issue({

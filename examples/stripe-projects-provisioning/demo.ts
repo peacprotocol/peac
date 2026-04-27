@@ -3,7 +3,7 @@
  *
  * Demonstrates the observer pattern: read sanitized captures from real
  * `stripe projects <cmd> --json` runs, hash artifacts via JCS (RFC 8785),
- * and emit typed Wire 0.2 PEAC evidence receipts for each observed action.
+ * and emit typed Wire evidence receipts for each observed action.
  *
  * Fixtures under fixtures/ are sanitized real captures from Stripe Projects
  * CLI v0.0.53 (Stripe CLI v1.39.0).
