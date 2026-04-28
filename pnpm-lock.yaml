@@ -1921,6 +1921,18 @@ importers:
         specifier: ^5.0.0
         version: 5.9.3
 
+  packages/resolver-http:
+    devDependencies:
+      tsup:
+        specifier: ^8.0.0
+        version: 8.5.1(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.3)
+      typescript:
+        specifier: ^5.0.0
+        version: 5.9.3
+      vitest:
+        specifier: ^4.0.0
+        version: 4.1.0(@types/node@22.19.11)(vite@6.4.1)
+
   packages/schema:
     dependencies:
       '@peac/kernel':
