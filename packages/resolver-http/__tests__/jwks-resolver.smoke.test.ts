@@ -104,7 +104,7 @@ describe('jwks-resolver smoke', () => {
       'k1'
     );
     expect(b.ok).toBe(true);
-    // Still 1 — second call served from cache.
+    // Still 1 ; second call served from cache.
     expect(mockSafeFetchJWKS).toHaveBeenCalledTimes(1);
   });
 

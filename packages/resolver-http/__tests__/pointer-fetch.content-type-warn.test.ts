@@ -30,7 +30,14 @@ vi.mock('@peac/net-node', async () => {
 
 import { fetchPointerWithDigest } from '../src/pointer-fetch.js';
 
-const VALID_JWS = 'aGVhZGVy.cGF5bG9hZA.c2lnbmF0dXJl';
+// Compact-like JWS string: 3 base64url segments (matches COMPACT_JWS_REGEX)
+// but NOT a real signed JWS. The protected header decodes to 'header' (not
+// JSON) and the signature is not real Ed25519 material. resolver-http's
+// pointer-fetch only validates 3-segment base64url shape before computing
+// the digest, so this fixture is sufficient for digest / content-type /
+// redaction tests. Commit 4 will introduce real signed-JWS fixtures for
+// cross-implementation byte-equal parity.
+const COMPACT_LIKE_JWS = 'aGVhZGVy.cGF5bG9hZA.c2lnbmF0dXJl';
 
 beforeEach(() => {
   resetMock();
@@ -43,11 +50,11 @@ describe('pointer-fetch content-type warn', () => {
         ok: true,
         status: 200,
         contentType: accepted,
-        body: VALID_JWS,
+        body: COMPACT_LIKE_JWS,
       });
       const result = await fetchPointerWithDigest(
         'https://issuer.example.com/r',
-        await sha256Hex(VALID_JWS)
+        await sha256Hex(COMPACT_LIKE_JWS)
       );
       expect(result.ok).toBe(true);
       if (result.ok) expect(result.contentTypeWarning).toBeUndefined();
@@ -59,11 +66,11 @@ describe('pointer-fetch content-type warn', () => {
       ok: true,
       status: 200,
       contentType: 'text/html; charset=utf-8',
-      body: VALID_JWS,
+      body: COMPACT_LIKE_JWS,
     });
     const result = await fetchPointerWithDigest(
       'https://issuer.example.com/r',
-      await sha256Hex(VALID_JWS)
+      await sha256Hex(COMPACT_LIKE_JWS)
     );
     expect(result.ok).toBe(true);
     if (result.ok) {
@@ -78,11 +85,11 @@ describe('pointer-fetch content-type warn', () => {
       ok: true,
       status: 200,
       contentType: longCT,
-      body: VALID_JWS,
+      body: COMPACT_LIKE_JWS,
     });
     const result = await fetchPointerWithDigest(
       'https://issuer.example.com/r',
-      await sha256Hex(VALID_JWS)
+      await sha256Hex(COMPACT_LIKE_JWS)
     );
     expect(result.ok).toBe(true);
     if (result.ok) {
@@ -94,7 +101,7 @@ describe('pointer-fetch content-type warn', () => {
   it('warning contains NO body bytes / URL path / headers / secrets', async () => {
     // Server returns text/html body (still a valid 3-segment JWS string for digest).
     // The warning must not pull body bytes or URL path/query into its string.
-    const sensitiveBody = VALID_JWS; // valid JWS so digest succeeds
+    const sensitiveBody = COMPACT_LIKE_JWS; // valid JWS so digest succeeds
     enqueue('safeFetchRaw', {
       ok: true,
       status: 200,
@@ -127,11 +134,11 @@ describe('pointer-fetch content-type warn', () => {
       ok: true,
       status: 200,
       contentType: 'application/jose; charset=utf-8',
-      body: VALID_JWS,
+      body: COMPACT_LIKE_JWS,
     });
     const result = await fetchPointerWithDigest(
       'https://issuer.example.com/r',
-      await sha256Hex(VALID_JWS)
+      await sha256Hex(COMPACT_LIKE_JWS)
     );
     expect(result.ok).toBe(true);
     if (result.ok) {
@@ -145,11 +152,11 @@ describe('pointer-fetch content-type warn', () => {
       ok: true,
       status: 200,
       // no contentType set
-      body: VALID_JWS,
+      body: COMPACT_LIKE_JWS,
     });
     const result = await fetchPointerWithDigest(
       'https://issuer.example.com/r',
-      await sha256Hex(VALID_JWS)
+      await sha256Hex(COMPACT_LIKE_JWS)
     );
     expect(result.ok).toBe(true);
     if (result.ok) {

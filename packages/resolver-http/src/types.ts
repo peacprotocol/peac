@@ -26,6 +26,7 @@ export type ResolverHttpErrorCode =
   | 'pointer_digest_mismatch'
   | 'pointer_fetch_blocked'
   | 'pointer_malformed_jws'
+  | 'pointer_invalid_expected_digest'
   | 'resolver_internal_error';
 
 export interface FetchSafeOptions {

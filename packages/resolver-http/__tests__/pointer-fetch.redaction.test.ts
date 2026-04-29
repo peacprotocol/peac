@@ -25,7 +25,14 @@ vi.mock('@peac/net-node', async () => {
 
 import { fetchPointerWithDigest } from '../src/pointer-fetch.js';
 
-const VALID_JWS = 'aGVhZGVy.cGF5bG9hZA.c2lnbmF0dXJl';
+// Compact-like JWS string: 3 base64url segments (matches COMPACT_JWS_REGEX)
+// but NOT a real signed JWS. The protected header decodes to 'header' (not
+// JSON) and the signature is not real Ed25519 material. resolver-http's
+// pointer-fetch only validates 3-segment base64url shape before computing
+// the digest, so this fixture is sufficient for digest / content-type /
+// redaction tests. Commit 4 will introduce real signed-JWS fixtures for
+// cross-implementation byte-equal parity.
+const COMPACT_LIKE_JWS = 'aGVhZGVy.cGF5bG9hZA.c2lnbmF0dXJl';
 
 beforeEach(() => {
   resetMock();
@@ -60,7 +67,7 @@ describe('pointer-fetch redaction', () => {
       ok: true,
       status: 200,
       contentType: 'application/jose',
-      body: VALID_JWS,
+      body: COMPACT_LIKE_JWS,
     });
     const wrongExpected = '0'.repeat(64);
     const result = await fetchPointerWithDigest(
@@ -76,13 +83,13 @@ describe('pointer-fetch redaction', () => {
       expect(result.message).not.toContain('token=');
       expect(result.message).not.toContain('abc');
       expect(result.message).not.toContain('kid=');
-      // Both digests are public hashes — safe to surface
+      // Both digests are public hashes ; safe to surface
       expect(result.actualDigest).toMatch(/^[0-9a-f]{64}$/);
       expect(result.expectedDigest).toBe(wrongExpected);
       // No body content in any field
       const allStrings = flattenStrings(result);
       for (const s of allStrings) {
-        expect(s).not.toContain(VALID_JWS);
+        expect(s).not.toContain(COMPACT_LIKE_JWS);
       }
     }
   });
@@ -111,7 +118,7 @@ describe('pointer-fetch redaction', () => {
     }
   });
 
-  it('expected-digest format failure (pointer_fetch_blocked) does NOT leak the bad digest text', async () => {
+  it('expected-digest format failure (pointer_invalid_expected_digest) does NOT leak the bad digest text', async () => {
     const badInput = 'totally-not-a-digest';
     const result = await fetchPointerWithDigest(
       'https://issuer.example.com/r?token=secret',
@@ -119,6 +126,7 @@ describe('pointer-fetch redaction', () => {
     );
     expect(result.ok).toBe(false);
     if (!result.ok) {
+      expect(result.code).toBe('pointer_invalid_expected_digest');
       expect(result.message).not.toContain(badInput);
       expect(result.message).not.toContain('token');
     }

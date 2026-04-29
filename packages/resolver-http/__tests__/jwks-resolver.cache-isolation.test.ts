@@ -110,6 +110,60 @@ describe('jwks-resolver cache isolation', () => {
     expect(r2.cacheSize).toBe(1);
   });
 
+  it('same issuer + same kid + different jwksUri returns distinct keys (Commit 3.1 Fix #2)', async () => {
+    // Cache key includes a sha256 digest of the normalized jwksUri so
+    // an issuer with multiple JWKS endpoints (e.g. tenant-specific paths)
+    // does not collide on (origin, kid).
+    enqueue('safeFetchJWKS', {
+      ok: true,
+      status: 200,
+      contentType: 'application/json',
+      body: { keys: [{ kty: 'OKP', crv: 'Ed25519', kid: 'k1', x: ALPHA_X }] },
+    });
+    enqueue('safeFetchJWKS', {
+      ok: true,
+      status: 200,
+      contentType: 'application/json',
+      body: { keys: [{ kty: 'OKP', crv: 'Ed25519', kid: 'k1', x: BETA_X }] },
+    });
+
+    const resolver = new IssuerJwksResolver();
+    const a = await resolver.resolve(
+      'https://issuer.example.com',
+      'https://issuer.example.com/tenant-a/jwks',
+      'k1'
+    );
+    const b = await resolver.resolve(
+      'https://issuer.example.com',
+      'https://issuer.example.com/tenant-b/jwks',
+      'k1'
+    );
+    expect(a.ok && a.jwk.x).toBe(ALPHA_X);
+    expect(b.ok && b.jwk.x).toBe(BETA_X);
+    expect(mockSafeFetchJWKS).toHaveBeenCalledTimes(2);
+    // Cache populated for both jwksUri variants
+    expect(resolver.cacheSize).toBe(2);
+  });
+
+  it('error messages do not leak the raw jwksUri path/query', async () => {
+    // Use a metadata-IP URL with secrets in the path/query ; pre-check
+    // rejects before any fetch, but the surfaced message must not echo
+    // the raw URI components.
+    const resolver = new IssuerJwksResolver();
+    const result = await resolver.resolve(
+      'https://issuer.example.com',
+      'https://169.254.169.254/jwks?token=secret&tenant=a',
+      'k1'
+    );
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.message).not.toContain('token=');
+      expect(result.message).not.toContain('secret');
+      expect(result.message).not.toContain('tenant=');
+      expect(result.message).not.toContain('/jwks?');
+    }
+  });
+
   it('clearCache empties the resolver', async () => {
     enqueue('safeFetchJWKS', {
       ok: true,

@@ -28,16 +28,23 @@ beforeEach(() => {
   resetMock();
 });
 
-const VALID_JWS = 'aGVhZGVy.cGF5bG9hZA.c2lnbmF0dXJl';
+// Compact-like JWS string: 3 base64url segments (matches COMPACT_JWS_REGEX)
+// but NOT a real signed JWS. The protected header decodes to 'header' (not
+// JSON) and the signature is not real Ed25519 material. resolver-http's
+// pointer-fetch only validates 3-segment base64url shape before computing
+// the digest, so this fixture is sufficient for digest / content-type /
+// redaction tests. Commit 4 will introduce real signed-JWS fixtures for
+// cross-implementation byte-equal parity.
+const COMPACT_LIKE_JWS = 'aGVhZGVy.cGF5bG9hZA.c2lnbmF0dXJl';
 
 describe('pointer-fetch digest semantics (string-mode)', () => {
   it('ASCII compact JWS body: digest matches', async () => {
-    const expected = await sha256Hex(VALID_JWS);
+    const expected = await sha256Hex(COMPACT_LIKE_JWS);
     enqueue('safeFetchRaw', {
       ok: true,
       status: 200,
       contentType: 'application/jose',
-      body: VALID_JWS,
+      body: COMPACT_LIKE_JWS,
     });
     const result = await fetchPointerWithDigest('https://issuer.example.com/r', expected);
     expect(result.ok).toBe(true);
@@ -65,7 +72,7 @@ describe('pointer-fetch digest semantics (string-mode)', () => {
   });
 
   it('trailing newline in valid compact JWS surfaces pointer_malformed_jws (newline is not base64url)', async () => {
-    const withNewline = `${VALID_JWS}\n`;
+    const withNewline = `${COMPACT_LIKE_JWS}\n`;
     enqueue('safeFetchRaw', {
       ok: true,
       status: 200,

@@ -1,16 +1,13 @@
-// Real public-API parity test against @peac/protocol's pointer-fetch.
+// Public-API no-network parity SMOKE test against @peac/protocol.
 //
 // Imports ONLY public @peac/protocol exports (`fetchPointerWithDigest` and
-// public types). Compares NORMALIZED behavior classes only — not internal
-// error code strings or implementation internals. The full cross-
-// implementation byte-equal harness over fetched bodies belongs to Commit 4
-// (which adds dispatcher-mock infrastructure to drive both code paths
-// through synthetic responses).
-//
-// This test exercises the no-network cases (non-HTTPS URL pre-check;
-// invalid expected-digest format) where both paths short-circuit before any
-// network attempt. That is sufficient for "real parity" as a starting
-// point. Body-fetch parity is Commit 4 scope.
+// public types). Compares NORMALIZED behavior classes only ; not internal
+// error code strings or implementation internals. This is an explicit
+// SMOKE-level test, not full parity: it covers only the no-network short-
+// circuit cases (non-HTTPS URL; invalid expected-digest format) where both
+// paths fail before any network attempt. Body-fetch parity, byte-equal
+// digest parity, and full error-class parity are Commit 4's harness scope
+// (dispatcher mocks drive both implementations through synthetic responses).
 //
 // Parity test files are the ONLY allowed location for @peac/protocol
 // imports under packages/resolver-http/. Runtime source and shared helpers
@@ -30,7 +27,7 @@ import {
 
 /**
  * Normalized behavior class. Both implementations use different specific
- * error codes; the parity test compares classes only.
+ * error codes; this smoke test compares the broader class only.
  */
 type NormalizedClass =
   | 'success'
@@ -40,6 +37,16 @@ type NormalizedClass =
   | 'digest_mismatch'
   | 'fetch_failure';
 
+/**
+ * Map protocol's pointer-fetch result to a normalized class.
+ *
+ * Protocol uses `pointer_fetch_failed` for invalid digest input (per
+ * `packages/protocol/src/pointer-fetch.ts:155-160`). When the message
+ * contains "Invalid expected digest" we treat the failure as
+ * `invalid_digest_input` rather than the generic `fetch_failure` bucket so
+ * that resolver-http's dedicated `pointer_invalid_expected_digest` code
+ * normalizes to the same class.
+ */
 function normalizeProtocol(result: ProtocolPointerResult): NormalizedClass {
   if (result.ok) return 'success';
   switch (result.reason) {
@@ -50,6 +57,16 @@ function normalizeProtocol(result: ProtocolPointerResult): NormalizedClass {
     case 'malformed_receipt':
       return 'malformed_body';
     case 'pointer_fetch_failed':
+      // Protocol re-uses pointer_fetch_failed for invalid digest input
+      // (a programmer-error class) AND for generic fetch failures. Use
+      // the message string as the normalization signal.
+      if (
+        typeof result.message === 'string' &&
+        result.message.toLowerCase().includes('invalid expected digest')
+      ) {
+        return 'invalid_digest_input';
+      }
+      return 'fetch_failure';
     case 'pointer_fetch_timeout':
     case 'pointer_fetch_too_large':
       return 'fetch_failure';
@@ -61,6 +78,8 @@ function normalizeProtocol(result: ProtocolPointerResult): NormalizedClass {
 function normalizeResolver(result: ResolverPointerResult): NormalizedClass {
   if (result.ok) return 'success';
   switch (result.code) {
+    case 'pointer_invalid_expected_digest':
+      return 'invalid_digest_input';
     case 'pointer_fetch_blocked':
       return 'url_blocked';
     case 'pointer_digest_mismatch':
@@ -89,7 +108,7 @@ function normalizeResolver(result: ResolverPointerResult): NormalizedClass {
 
 const VALID_HEX_64 = '0'.repeat(64);
 
-describe('parity: pointer-fetch normalized class agreement (no-network cases)', () => {
+describe('parity smoke: pointer-fetch normalized class agreement (no-network cases)', () => {
   it('non-HTTPS URL: both surface url_blocked', async () => {
     const url = 'http://issuer.example.com/r';
     const proto = await protocolFetchPointer({ url, expectedDigest: VALID_HEX_64 });
@@ -109,22 +128,17 @@ describe('parity: pointer-fetch normalized class agreement (no-network cases)', 
     expect(normalizeResolver(ours)).toBe(normalizeProtocol(proto));
   });
 
-  it('invalid expected-digest format: both surface a non-success failure', async () => {
+  it('invalid expected-digest format: both surface invalid_digest_input', async () => {
     // Protocol uses pointer_fetch_failed for invalid digest input;
-    // resolver-http uses pointer_fetch_blocked. Both are non-success
-    // discriminated-union failures at the boundary. Normalized class
-    // agreement: both are pre-fetch failures (not 'success').
+    // resolver-http uses pointer_invalid_expected_digest (Commit 3.1
+    // Plan Fix #3). The normalization function maps both to the
+    // invalid_digest_input class.
     const url = 'https://issuer.example.com/r';
     const proto = await protocolFetchPointer({ url, expectedDigest: 'not-a-digest' });
     const ours = await resolverHttpFetchPointer(url, 'not-a-digest');
-    expect(proto.ok).toBe(false);
-    expect(ours.ok).toBe(false);
-    // Both implementations short-circuit at the boundary without network
-    // access — class agreement on "not success".
-    const protoClass = normalizeProtocol(proto);
-    const oursClass = normalizeResolver(ours);
-    expect(protoClass).not.toBe('success');
-    expect(oursClass).not.toBe('success');
+    expect(normalizeProtocol(proto)).toBe('invalid_digest_input');
+    expect(normalizeResolver(ours)).toBe('invalid_digest_input');
+    expect(normalizeResolver(ours)).toBe(normalizeProtocol(proto));
   });
 
   it('uppercase hex digest: both reject (lowercase rule)', async () => {

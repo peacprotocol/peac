@@ -3,8 +3,10 @@
 // Network goes through `fetchJwksSafe` (net-node-backed; verifier-grade DNS
 // pinning + redirect policy + verifier limits). `@peac/jwks-cache` is used
 // for: (a) string-level URL pre-check (`validateUrl`, `isMetadataIp`),
-// (b) cache primitives (`InMemoryCache`, `buildCacheKey`), and (c) key
-// material conversion (`importJwkAsEd25519`, `createJwkVerifier`).
+// (b) cache primitives (`InMemoryCache`, `buildCacheKey`), and (c) crypto
+// validation of the matched JWK before caching (`importJwkAsEd25519`).
+// `@peac/crypto.sha256Hex` derives the per-`jwksUri` cache-key fragment so
+// the same issuer with different JWKS endpoints does not collide on `kid`.
 //
 // `resolveKey` and `createResolver` from `@peac/jwks-cache` are NOT called:
 // they use global `fetch()` internally (verified at
@@ -18,9 +20,11 @@ import {
   type JWK,
   type JWKS,
   buildCacheKey,
+  importJwkAsEd25519,
   isMetadataIp,
   validateUrl,
 } from '@peac/jwks-cache';
+import { sha256Hex } from '@peac/crypto';
 import { VERIFIER_LIMITS } from '@peac/kernel';
 
 import { fetchJwksSafe } from './fetch-safe.js';
@@ -53,6 +57,23 @@ function safeOrigin(url: string): string {
     return `${u.protocol}//${u.host}`;
   } catch {
     return '<invalid-url>';
+  }
+}
+
+/**
+ * Normalize a `jwksUri` for cache-key derivation. Lowercases the host;
+ * keeps the rest of the URL byte-for-byte (path / query / fragment matter
+ * for cache identity). Returns the original string unchanged if URL parse
+ * fails (the cache lookup will simply miss for a malformed URI; this code
+ * path is reached only after the pre-fetch validateUrl pre-check).
+ */
+function normalizeJwksUri(jwksUri: string): string {
+  try {
+    const u = new URL(jwksUri);
+    u.host = u.host.toLowerCase();
+    return u.toString();
+  } catch {
+    return jwksUri;
   }
 }
 
@@ -176,13 +197,21 @@ export class IssuerJwksResolver {
   }
 
   /**
-   * Resolve a single key by `(issuer, kid)`.
+   * Resolve a single key by `(issuer, jwksUri, kid)`.
+   *
+   * Cache key includes a sha256 digest of the normalized `jwksUri` so that
+   * the same issuer with different JWKS endpoints (e.g. tenant-specific
+   * paths under one origin) does not collide on `kid`.
    *
    * Cache hit: returns the cached JWK without any network call.
    * Cache miss: pre-checks `jwksUri` via jwks-cache `validateUrl` /
    * `isMetadataIp`, fetches JWKS via `fetchJwksSafe`, validates body
-   * shape, finds the key by `kid`, caches it with `ttlSeconds`, returns.
-   * If `kid` is not present in the fetched JWKS, returns `jwks_kid_not_found`.
+   * shape, finds the key by `kid`, validates the JWK's cryptographic
+   * shape via `importJwkAsEd25519` (rejects structurally plausible but
+   * not actually Ed25519-loadable keys), caches it with `ttlSeconds`,
+   * returns. If `kid` is not present in the fetched JWKS, returns
+   * `jwks_kid_not_found`. If the matched JWK fails crypto-import,
+   * returns `jwks_invalid_shape` and the JWK is NOT cached.
    */
   async resolve(
     issuer: string,
@@ -197,7 +226,9 @@ export class IssuerJwksResolver {
       return fail('discovery_invalid_shape', '<invalid-url>');
     }
 
-    const cacheKey = buildCacheKey(issuerOrigin, kid);
+    const normalizedJwksUri = normalizeJwksUri(jwksUri);
+    const jwksUriDigest = await sha256Hex(normalizedJwksUri);
+    const cacheKey = buildCacheKey(`${issuerOrigin}#${jwksUriDigest}`, kid);
     const cached = await this.cache.get(cacheKey);
     if (cached !== null) {
       return { ok: true, jwk: cached.jwk };
@@ -211,6 +242,16 @@ export class IssuerJwksResolver {
     const matched = findKeyByKid(fetchResult.jwks, kid);
     if (matched === null) {
       return fail('jwks_kid_not_found', issuerOrigin);
+    }
+
+    // Crypto-validate the matched JWK before caching. importJwkAsEd25519
+    // calls crypto.subtle.importKey('jwk', ..., { name: 'Ed25519' }, ...)
+    // which throws on non-Ed25519 / malformed-x JWKs. A structurally
+    // plausible JWK with bad crypto material MUST NOT be cached.
+    try {
+      await importJwkAsEd25519(matched);
+    } catch {
+      return fail('jwks_invalid_shape', issuerOrigin);
     }
 
     const expiresAt = Math.floor(Date.now() / 1000) + this.ttlSeconds;

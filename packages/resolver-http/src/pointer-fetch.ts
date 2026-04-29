@@ -1,17 +1,21 @@
 // Pointer-fetch: fetch a compact-JWS receipt by URL, verify SHA-256 digest.
 //
-// Mirrors the protocol package's call sequence at
-// `packages/protocol/src/pointer-fetch.ts:202-235` byte-for-byte:
+// Semantically mirrors the protocol package's call sequence at
+// `packages/protocol/src/pointer-fetch.ts:202-235` (string-mode digest path):
 //   1. fetch raw bytes via fetchRawSafe (verifier-grade DNS pinning + caps)
 //   2. decode bytes to UTF-8 string via TextDecoder('utf-8', { fatal: false })
 //   3. compute sha256Hex(receiptString) -- string-mode digest
 //   4. compare to expected digest (lowercase hex, 64 chars)
-// Raw-bytes-only digest is forbidden (would diverge from protocol on the
-// theoretical malformed-UTF-8 edge case; parity is the rule).
+// Raw-bytes-only digest is forbidden because the parity rule mirrors
+// protocol's actual call sequence. Byte-equal parity over fetched bodies is
+// proven by Commit 4's full harness; this commit asserts class-level parity
+// only (Commit 3 parity smoke).
 //
-// Content-type behavior matches protocol exactly: do NOT reject on mismatch;
-// surface a bounded contentTypeWarning string on success when the upstream
-// content-type is outside the expected set.
+// Content-type behavior matches protocol's normalized warning behavior: do
+// NOT reject on mismatch; surface a bounded contentTypeWarning string on
+// success when the upstream content-type is outside the expected set. The
+// resolver-http warning string is its own (bounded, redaction-safe) ; it is
+// not byte-equal to protocol's warning string.
 //
 // Composition layer over a published primitive. Does not import the
 // protocol package.
@@ -100,7 +104,7 @@ function isValidCompactJws(s: string): boolean {
  *
  * Pre-checks:
  *   - HTTPS-only (delegated to fetchRawSafe; surfaces fetch_blocked_https_only)
- *   - expectedDigest format (64 lowercase hex chars; pointer_fetch_blocked otherwise)
+ *   - expectedDigest format (64 lowercase hex chars; pointer_invalid_expected_digest otherwise)
  *
  * Post-fetch checks:
  *   - empty body or non-3-segment compact JWS surfaces pointer_malformed_jws
@@ -117,7 +121,10 @@ export async function fetchPointerWithDigest(
   const origin = safeOrigin(url);
 
   if (!EXPECTED_DIGEST_REGEX.test(expectedDigest)) {
-    return fail('pointer_fetch_blocked', origin);
+    // Invalid digest input is a programmer error / API misuse class, not
+    // a URL-block / SSRF / policy block. Distinct code per Commit 3.1
+    // Plan Fix #3.
+    return fail('pointer_invalid_expected_digest', origin);
   }
 
   const fetchResult = await fetchRawSafe(url, {

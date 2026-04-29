@@ -95,6 +95,6 @@ describe('pointer-fetch no-throw invariant', () => {
     const upper = 'A'.repeat(64);
     const result = await fetchPointerWithDigest('https://issuer.example.com/r', upper);
     expect(result.ok).toBe(false);
-    if (!result.ok) expect(result.code).toBe('pointer_fetch_blocked');
+    if (!result.ok) expect(result.code).toBe('pointer_invalid_expected_digest');
   });
 });
