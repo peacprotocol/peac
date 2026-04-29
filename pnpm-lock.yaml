@@ -1922,6 +1922,13 @@ importers:
         version: 5.9.3
 
   packages/resolver-http:
+    dependencies:
+      '@peac/kernel':
+        specifier: workspace:*
+        version: link:../kernel
+      '@peac/net-node':
+        specifier: workspace:*
+        version: link:../net/node
     devDependencies:
       tsup:
         specifier: ^8.0.0
