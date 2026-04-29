@@ -1,13 +1,19 @@
-// Public-API no-network parity SMOKE test against @peac/protocol.
+// Public-API no-network smoke against @peac/protocol's pointer-fetch.
 //
 // Imports ONLY public @peac/protocol exports (`fetchPointerWithDigest` and
-// public types). Compares NORMALIZED behavior classes only ; not internal
-// error code strings or implementation internals. This is an explicit
-// SMOKE-level test, not full parity: it covers only the no-network short-
-// circuit cases (non-HTTPS URL; invalid expected-digest format) where both
-// paths fail before any network attempt. Body-fetch parity, byte-equal
-// digest parity, and full error-class parity are Commit 4's harness scope
-// (dispatcher mocks drive both implementations through synthetic responses).
+// public types). Compares NORMALIZED behavior classes only; not internal
+// error code strings or implementation internals.
+//
+// Scope: explicit SMOKE-level test, NOT full parity. Covers only the
+// no-network short-circuit cases (non-HTTPS URL; invalid expected-digest
+// format) where both paths fail before any network attempt.
+//
+// True cross-implementation pointer parity (body-fetch, byte-equal digest,
+// full error-class agreement, redaction parity, content-type warning class
+// agreement) is RE-HOMED to PR B's apps/api shadow-mode harness, where both
+// implementations naturally run side by side against the same fetched
+// response set. See plan PR B section "Cross-implementation pointer parity
+// gate (RE-HOMED from Commit 4 of PR A)".
 //
 // Parity test files are the ONLY allowed location for @peac/protocol
 // imports under packages/resolver-http/. Runtime source and shared helpers
@@ -108,7 +114,7 @@ function normalizeResolver(result: ResolverPointerResult): NormalizedClass {
 
 const VALID_HEX_64 = '0'.repeat(64);
 
-describe('parity smoke: pointer-fetch normalized class agreement (no-network cases)', () => {
+describe('public-API no-network smoke: pointer-fetch normalized class agreement (true parity is PR B shadow-mode scope)', () => {
   it('non-HTTPS URL: both surface url_blocked', async () => {
     const url = 'http://issuer.example.com/r';
     const proto = await protocolFetchPointer({ url, expectedDigest: VALID_HEX_64 });
