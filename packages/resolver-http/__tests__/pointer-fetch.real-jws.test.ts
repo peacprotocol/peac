@@ -1,4 +1,4 @@
-// Real-JWS pointer harness (Commit 4).
+// Real-JWS pointer harness (Commit 4; tightened in Commit 4.1).
 //
 // Drives resolver-http's pointer-fetch through real Ed25519-signed compact
 // JWS fixtures generated at runtime via package-root @peac/crypto exports.
@@ -6,6 +6,9 @@
 // cross-implementation parity" claims; cross-implementation pointer parity
 // is PR B's shadow-mode harness scope (see plan §"Cross-implementation
 // pointer parity gate" in PR B).
+//
+// Hygiene: the fixture helper does NOT expose the private signing key.
+// Tests assert behavior on the public surface only.
 
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 
@@ -28,7 +31,7 @@ vi.mock('@peac/net-node', async () => {
 });
 
 import { fetchPointerWithDigest } from '../src/pointer-fetch.js';
-import { generateSignedJws } from './_helpers/test-jws.js';
+import { generateSignedJws, digestOfBody } from './_helpers/test-jws.js';
 
 beforeEach(() => {
   resetMock();
@@ -75,13 +78,14 @@ describe('pointer-fetch real-JWS harness', () => {
     }
   });
 
-  it('Unicode claims are signed into a real compact JWS; pointer-fetch hashes the resulting compact JWS string after UTF-8 decode', async () => {
-    // The compact JWS itself is ASCII (base64url + dots), even though its
-    // payload claims contain non-ASCII characters. pointer-fetch fetches the
-    // raw bytes, decodes them via TextDecoder('utf-8', { fatal: false }), and
-    // hashes the resulting string. For ASCII bodies the decode round-trip is
-    // a no-op and digest math is byte-identical. The Unicode claim only lives
-    // inside the signed payload, not in the wire bytes.
+  it('Unicode claims live inside the signed payload; pointer-fetch hashes the resulting compact JWS string (which is ASCII)', async () => {
+    // Wire-level shape: a compact JWS is base64url + dots, so the JWS string
+    // itself is ASCII regardless of the Unicode characters in its payload
+    // claims. pointer-fetch fetches the raw bytes of the compact JWS,
+    // decodes them via TextDecoder('utf-8', { fatal: false }) (a no-op for
+    // ASCII bytes), and hashes the resulting string. The Unicode claim only
+    // exists inside the signed payload; pointer-fetch never receives raw
+    // non-ASCII JSON as the body.
     const fixture = await generateSignedJws({
       payload: {
         purpose: 'café',
@@ -89,8 +93,7 @@ describe('pointer-fetch real-JWS harness', () => {
         emoji: 'rocket',
       },
     });
-    // Sanity: the JWS itself is ASCII (base64url + dots) regardless of the
-    // non-ASCII claims it carries.
+    // Sanity: the compact JWS itself is ASCII-only.
     expect(/^[\x20-\x7e]+$/.test(fixture.jws)).toBe(true);
 
     enqueue('safeFetchRaw', {
@@ -116,10 +119,7 @@ describe('pointer-fetch real-JWS harness', () => {
     //   3. compact-JWS regex shape check -> reject as pointer_malformed_jws if not 3 base64url segments
     //   4. sha256Hex -> compare to expected digest
     // A trailing newline breaks the regex shape check at step 3; the test
-    // never reaches the digest comparison. This is asserted explicitly per
-    // the Commit 4.0.1 fixture rule "trailing newline fails as malformed or
-    // digest mismatch, depending on exact parser order, but must be explicit
-    // and tested".
+    // never reaches the digest comparison.
     const fixture = await generateSignedJws();
     const bodyWithNewline = `${fixture.jws}\n`;
     enqueue('safeFetchRaw', {
@@ -128,11 +128,10 @@ describe('pointer-fetch real-JWS harness', () => {
       contentType: 'application/jose',
       body: bodyWithNewline,
     });
-    // Even if caller passes the digest of the newline-terminated body, the
-    // shape check rejects first.
-    const expectedOfNewlineBody = (await import('@peac/crypto')).sha256Hex
-      ? await (await import('@peac/crypto')).sha256Hex(bodyWithNewline)
-      : '';
+    // Even if the caller passes the digest of the newline-terminated body,
+    // the shape check rejects first. Compute via digestOfBody helper to
+    // avoid dynamic imports inside the test body.
+    const expectedOfNewlineBody = await digestOfBody(bodyWithNewline);
     const result = await fetchPointerWithDigest(
       'https://issuer.example.com/receipt',
       expectedOfNewlineBody
@@ -143,14 +142,23 @@ describe('pointer-fetch real-JWS harness', () => {
     }
   });
 
-  it('helper self-validation: generated fixture verifies via @peac/crypto.verify (no private subpath)', async () => {
-    // The helper itself runs verify() before returning; this test makes the
-    // self-validation visible at the test boundary.
+  it('fixture self-validation surface: helper returns public material only (no private key)', async () => {
+    // The helper runs decode + verify + typ/alg/kid/peac_version checks
+    // before returning. This test makes the public-only surface visible at
+    // the test boundary.
     const fixture = await generateSignedJws();
     expect(fixture.jws.split('.')).toHaveLength(3);
     expect(fixture.publicKey).toBeInstanceOf(Uint8Array);
     expect(fixture.publicKey.length).toBe(32);
-    expect(fixture.privateKey.length).toBe(32);
     expect(fixture.expectedDigest).toMatch(/^[0-9a-f]{64}$/);
+    // Header round-trip: helper asserts these, but we surface them so a
+    // failed assertion gives reviewer signal at the test boundary.
+    expect(fixture.header.typ).toBe('interaction-record+jwt');
+    expect(fixture.header.alg).toBe('EdDSA');
+    expect(fixture.header.kid).toBe('test-key-1');
+    // Payload round-trip
+    expect(fixture.payload.peac_version).toBe('0.2');
+    // Hygiene: the fixture object MUST NOT expose privateKey.
+    expect((fixture as Record<string, unknown>).privateKey).toBeUndefined();
   });
 });
