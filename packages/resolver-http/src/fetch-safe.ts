@@ -3,7 +3,7 @@
 // Pulls verifier defaults from @peac/kernel.VERIFIER_LIMITS and overrides
 // net-node's broader defaults (5000ms vs 30000ms; 256 KiB vs 2 MiB; 64 KiB
 // JWKS vs 512 KiB; 3 redirects vs 5). Maps SAFE_FETCH_ERROR_CODES to a
-// closed local FetchSafeErrorCode set. Returns discriminated-union results;
+// closed local ResolverHttpErrorCode set. Returns discriminated-union results;
 // failure messages are redacted (origin host only; no path / query / headers
 // / body / secrets / upstream cause text).
 //
@@ -13,10 +13,10 @@ import { safeFetchJson, safeFetchJWKS, safeFetchRaw, SAFE_FETCH_ERROR_CODES } fr
 import { VERIFIER_LIMITS } from '@peac/kernel';
 
 import type {
-  FetchSafeErrorCode,
   FetchSafeFailure,
   FetchSafeOptions,
   FetchSafeResult,
+  ResolverHttpErrorCode,
 } from './types.js';
 
 function safeOrigin(url: string): string {
@@ -36,7 +36,7 @@ function isHttpsUrl(url: string): boolean {
   }
 }
 
-function fail(code: FetchSafeErrorCode, origin: string, status?: number): FetchSafeFailure {
+function fail(code: ResolverHttpErrorCode, origin: string, status?: number): FetchSafeFailure {
   const base: FetchSafeFailure = {
     ok: false,
     code,
@@ -45,7 +45,7 @@ function fail(code: FetchSafeErrorCode, origin: string, status?: number): FetchS
   return status === undefined ? base : { ...base, status };
 }
 
-function mapNetNodeCode(code: string): FetchSafeErrorCode {
+function mapNetNodeCode(code: string): ResolverHttpErrorCode {
   switch (code) {
     case SAFE_FETCH_ERROR_CODES.E_REQUEST_TIMEOUT:
     case SAFE_FETCH_ERROR_CODES.E_DNS_TIMEOUT:
@@ -99,7 +99,7 @@ function buildOptions(opts: FetchSafeOptions | undefined, kind: 'json' | 'jwks')
   };
 }
 
-function classifyStatus(status: number): FetchSafeErrorCode | null {
+function classifyStatus(status: number): ResolverHttpErrorCode | null {
   if (status >= 400 && status < 500) return 'fetch_status_4xx';
   if (status >= 500) return 'fetch_status_5xx';
   return null;
@@ -138,13 +138,16 @@ export async function fetchJsonSafe<T = unknown>(
   if (!result.ok) {
     return fail(mapNetNodeCode(result.code), origin);
   }
-  const contentType = result.response.headers.get('content-type') ?? undefined;
-  if (!checkContentType(contentType ?? null, options?.acceptContentTypes)) {
-    return fail('fetch_invalid_content_type', origin);
-  }
+  // Status precedence: classify HTTP status BEFORE content-type. A 4xx with
+  // text/html body is more usefully reported as fetch_status_4xx than as
+  // fetch_invalid_content_type. (Commit 2.1 Fix #2.)
   const statusFailure = classifyStatus(result.response.status);
   if (statusFailure !== null) {
     return fail(statusFailure, origin, result.response.status);
+  }
+  const contentType = result.response.headers.get('content-type') ?? undefined;
+  if (!checkContentType(contentType ?? null, options?.acceptContentTypes)) {
+    return fail('fetch_invalid_content_type', origin);
   }
   return {
     ok: true,
@@ -165,6 +168,11 @@ export async function fetchJwksSafe<T = { keys: unknown[] }>(
   const built = buildOptions(options, 'jwks');
   let result;
   try {
+    // JWKS endpoints are forced to zero redirects by upstream safeFetchJWKS
+    // (deliberate stricter case for key-material URLs); resolver-http's
+    // FetchSafeOptions.maxRedirects is silently ignored on this path because
+    // safeFetchJWKS has signature Omit<SafeFetchOptions, 'maxRedirects'>.
+    // Documented in plan "Commit 2.1, Fix #1".
     result = await safeFetchJWKS(url, {
       timeoutMs: built.timeoutMs,
       maxResponseBytes: built.maxResponseBytes,
@@ -176,13 +184,14 @@ export async function fetchJwksSafe<T = { keys: unknown[] }>(
   if (!result.ok) {
     return fail(mapNetNodeCode(result.code), origin);
   }
-  const contentType = result.response.headers.get('content-type') ?? undefined;
-  if (!checkContentType(contentType ?? null, options?.acceptContentTypes)) {
-    return fail('fetch_invalid_content_type', origin);
-  }
+  // Status precedence (Commit 2.1 Fix #2).
   const statusFailure = classifyStatus(result.response.status);
   if (statusFailure !== null) {
     return fail(statusFailure, origin, result.response.status);
+  }
+  const contentType = result.response.headers.get('content-type') ?? undefined;
+  if (!checkContentType(contentType ?? null, options?.acceptContentTypes)) {
+    return fail('fetch_invalid_content_type', origin);
   }
   return {
     ok: true,
@@ -216,13 +225,14 @@ export async function fetchRawSafe(
     return fail(mapNetNodeCode(raw.code), origin);
   }
   try {
-    const contentType = raw.response.headers.get('content-type') ?? undefined;
-    if (!checkContentType(contentType ?? null, options?.acceptContentTypes)) {
-      return fail('fetch_invalid_content_type', origin);
-    }
+    // Status precedence (Commit 2.1 Fix #2).
     const statusFailure = classifyStatus(raw.response.status);
     if (statusFailure !== null) {
       return fail(statusFailure, origin, raw.response.status);
+    }
+    const contentType = raw.response.headers.get('content-type') ?? undefined;
+    if (!checkContentType(contentType ?? null, options?.acceptContentTypes)) {
+      return fail('fetch_invalid_content_type', origin);
     }
     const buf = await raw.response.arrayBuffer();
     if (buf.byteLength > built.maxResponseBytes) {
@@ -246,4 +256,4 @@ export async function fetchRawSafe(
   }
 }
 
-export type { FetchSafeOptions, FetchSafeResult, FetchSafeErrorCode } from './types.js';
+export type { FetchSafeOptions, FetchSafeResult, ResolverHttpErrorCode } from './types.js';

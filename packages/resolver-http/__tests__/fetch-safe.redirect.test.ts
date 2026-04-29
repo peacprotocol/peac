@@ -26,7 +26,7 @@ vi.mock('@peac/net-node', async () => {
 
 import { VERIFIER_LIMITS } from '@peac/kernel';
 
-import { fetchJsonSafe, fetchRawSafe } from '../src/fetch-safe.js';
+import { fetchJsonSafe, fetchJwksSafe, fetchRawSafe } from '../src/fetch-safe.js';
 
 beforeEach(() => {
   resetMock();
@@ -69,5 +69,39 @@ describe('fetch-safe redirect: verifier 3-cap fires, not net-node default 5', ()
     const result = await fetchJsonSafe('https://issuer.example.com/x');
     expect(result.ok).toBe(false);
     if (!result.ok) expect(result.code).toBe('fetch_blocked_redirect');
+  });
+});
+
+describe('fetch-safe JWKS path: deliberate zero-redirect exception (Commit 2.1 Fix #1)', () => {
+  it('JWKS path does NOT pass maxRedirects to upstream safeFetchJWKS (signature Omit<..., maxRedirects>)', async () => {
+    enqueue('safeFetchJWKS', { ok: true, status: 200, body: { keys: [] } });
+    await fetchJwksSafe('https://issuer.example.com/jwks');
+    const opts = getLastOptions() as Record<string, unknown> | undefined;
+    expect(opts).toBeDefined();
+    if (opts) {
+      // Upstream safeFetchJWKS hardcodes maxRedirects: 0; resolver-http MUST
+      // NOT pass a maxRedirects option to it. The key must be absent from
+      // the options object passed across the boundary.
+      expect('maxRedirects' in opts).toBe(false);
+    }
+  });
+
+  it('caller-supplied maxRedirects on FetchSafeOptions is silently ignored on JWKS path', async () => {
+    enqueue('safeFetchJWKS', { ok: true, status: 200, body: { keys: [] } });
+    // Caller asks for 5 redirects; JWKS path forces 0 (upstream hardcode);
+    // resolver-http does not pass the value through.
+    await fetchJwksSafe('https://issuer.example.com/jwks', { maxRedirects: 5 });
+    const opts = getLastOptions() as Record<string, unknown> | undefined;
+    expect(opts).toBeDefined();
+    if (opts) {
+      expect('maxRedirects' in opts).toBe(false);
+    }
+  });
+
+  it('JSON path still honors caller-supplied maxRedirects (control case)', async () => {
+    enqueue('safeFetchJson', { ok: true, status: 200, body: {} });
+    await fetchJsonSafe('https://issuer.example.com/x', { maxRedirects: 5 });
+    const opts = getLastOptions() as { maxRedirects?: number } | undefined;
+    expect(opts?.maxRedirects).toBe(5);
   });
 });

@@ -18,9 +18,9 @@
 
 export { fetchJsonSafe, fetchJwksSafe, fetchRawSafe } from './fetch-safe.js';
 export type {
-  FetchSafeErrorCode,
   FetchSafeFailure,
   FetchSafeOptions,
   FetchSafeResult,
   FetchSafeSuccess,
+  ResolverHttpErrorCode,
 } from './types.js';

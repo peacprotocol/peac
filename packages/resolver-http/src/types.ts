@@ -1,10 +1,12 @@
-// Workspace-internal types for @peac/resolver-http.
+// Workspace-internal types for resolver-http.
 //
-// Discriminated-union result shape for verifier-oriented fetch primitives.
-// Closed local error-code set; mapping from upstream @peac/net-node and
-// @peac/jwks-cache codes lives in fetch-safe.ts and (later) jwks-resolver.ts.
+// Discriminated-union result shape for verifier-oriented fetch primitives
+// and the closed local error-code set for the whole private package
+// (fetch-safe today; discovery / jwks-resolver / pointer-fetch in Commit 3).
+// Mapping from upstream @peac/net-node and @peac/jwks-cache codes lives in
+// fetch-safe.ts and (later) jwks-resolver.ts.
 
-export type FetchSafeErrorCode =
+export type ResolverHttpErrorCode =
   | 'fetch_timeout'
   | 'fetch_network_error'
   | 'fetch_blocked_ssrf'
@@ -28,6 +30,14 @@ export type FetchSafeErrorCode =
 export interface FetchSafeOptions {
   timeoutMs?: number;
   maxResponseBytes?: number;
+  /**
+   * Caller-supplied redirect cap. Honored on the JSON and raw paths
+   * (default: VERIFIER_LIMITS.maxRedirects = 3). IGNORED on the JWKS
+   * path because upstream `@peac/net-node.safeFetchJWKS` has signature
+   * `Omit<SafeFetchOptions, 'maxRedirects'>` and hardcodes 0 redirects
+   * for key-material URLs (deliberate stricter case; documented in
+   * tranquil-mirroring-fermat.md "Commit 2.1, Fix #1").
+   */
   maxRedirects?: number;
   acceptContentTypes?: readonly string[];
 }
@@ -41,7 +51,7 @@ export interface FetchSafeSuccess<T> {
 
 export interface FetchSafeFailure {
   ok: false;
-  code: FetchSafeErrorCode;
+  code: ResolverHttpErrorCode;
   message: string;
   status?: number;
 }

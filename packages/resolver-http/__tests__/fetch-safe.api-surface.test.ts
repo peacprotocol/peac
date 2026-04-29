@@ -85,7 +85,7 @@ describe('fetch-safe verifier-oriented option surface', () => {
     if (opts) {
       for (const forbidden of FORBIDDEN_NET_NODE_OPTION_KEYS) {
         // allowedMethods is the one option fetch-safe passes deliberately
-        // (locked to ['GET']) — exclude from this gate.
+        // (locked to ['GET']); exclude from this gate.
         if (forbidden === 'allowedMethods') continue;
         expect(opts[forbidden]).toBeUndefined();
       }
