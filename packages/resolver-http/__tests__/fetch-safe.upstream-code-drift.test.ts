@@ -1,7 +1,7 @@
 // Upstream-code drift coverage (Commit 2.1 Fix #4).
 //
 // Imports the actual @peac/net-node SAFE_FETCH_ERROR_CODES via vi.importActual
-// (NOT the mocked module — see vi.unmock at the top scope) and asserts every
+// (NOT the mocked module; this file does not call vi.mock) and asserts every
 // current upstream code is either:
 //   - mapped by fetch-safe (MAPPED_UPSTREAM_CODES); or
 //   - explicitly listed as an internal-only / never-reaches-resolver-http
@@ -57,7 +57,7 @@ const MAPPED_UPSTREAM_CODES: ReadonlySet<string> = new Set([
 // surface as a distinct mapped class. Listed here so that "every upstream
 // code is consciously decided" is a hard test rather than a soft default.
 //
-// (Currently empty — every upstream code is mapped. Future net-node codes
+// (Currently empty: every upstream code is mapped. Future net-node codes
 // that are evidence-emission-only or telemetry-only should be added here
 // with a one-line rationale comment.)
 const EXPLICITLY_INTERNAL_ONLY_CODES: ReadonlySet<string> = new Set([
