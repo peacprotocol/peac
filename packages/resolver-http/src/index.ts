@@ -24,3 +24,27 @@ export type {
   FetchSafeSuccess,
   ResolverHttpErrorCode,
 } from './types.js';
+
+export { fetchIssuerConfig } from './discovery.js';
+export type { DiscoveryOptions, DiscoveryResult, IssuerConfig } from './discovery.js';
+
+export {
+  IssuerJwksResolver,
+  fetchAndValidateJwks,
+  findKeyByKid,
+  validateJwksShape,
+} from './jwks-resolver.js';
+export type {
+  JwksResolveFailure,
+  JwksResolveResult,
+  JwksResolveSuccess,
+  JwksResolverOptions,
+} from './jwks-resolver.js';
+
+export { fetchPointerWithDigest } from './pointer-fetch.js';
+export type {
+  PointerFetchFailure,
+  PointerFetchOptions,
+  PointerFetchResult,
+  PointerFetchSuccess,
+} from './pointer-fetch.js';

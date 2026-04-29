@@ -25,10 +25,13 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@peac/crypto": "workspace:*",
+    "@peac/jwks-cache": "workspace:*",
     "@peac/kernel": "workspace:*",
     "@peac/net-node": "workspace:*"
   },
   "devDependencies": {
+    "@peac/protocol": "workspace:*",
     "tsup": "^8.0.0",
     "typescript": "^5.0.0",
     "vitest": "^4.0.0"

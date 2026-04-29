@@ -1923,6 +1923,12 @@ importers:
 
   packages/resolver-http:
     dependencies:
+      '@peac/crypto':
+        specifier: workspace:*
+        version: link:../crypto
+      '@peac/jwks-cache':
+        specifier: workspace:*
+        version: link:../jwks-cache
       '@peac/kernel':
         specifier: workspace:*
         version: link:../kernel
@@ -1930,6 +1936,9 @@ importers:
         specifier: workspace:*
         version: link:../net/node
     devDependencies:
+      '@peac/protocol':
+        specifier: workspace:*
+        version: link:../protocol
       tsup:
         specifier: ^8.0.0
         version: 8.5.1(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.3)

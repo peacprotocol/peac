@@ -149,10 +149,16 @@ export const mockSafeFetchJson = vi.fn(async (_url: string, opts?: unknown) => {
     return err;
   }
   const { response, bytes } = asResponse(next);
+  // body represents the already-parsed value of result.data (matches real
+  // safeFetchJson semantics: JSON parse happens upstream of resolver-http).
+  // Tests that want to simulate JSON-parse failure should use
+  // { ok: false, code: NET_CODES.E_PARSE_ERROR }. An explicit body field
+  // (including null) is honored verbatim; the empty-object fallback fires
+  // only when body is absent.
   return {
     ok: true,
     response,
-    data: typeof next.body === 'string' ? JSON.parse(next.body) : (next.body ?? {}),
+    data: 'body' in next ? next.body : {},
     evidence: { response_bytes: next.responseBytes ?? bytes.byteLength },
   };
 });
@@ -171,7 +177,10 @@ export const mockSafeFetchJWKS = vi.fn(async (_url: string, opts?: unknown) => {
     return err;
   }
   const { response, bytes } = asResponse(next);
-  const data = typeof next.body === 'string' ? JSON.parse(next.body) : (next.body ?? { keys: [] });
+  // body represents the already-parsed value (matches real safeFetchJWKS
+  // semantics). An explicit body (including null) is honored verbatim; the
+  // { keys: [] } fallback fires only when body is absent.
+  const data = 'body' in next ? next.body : { keys: [] };
   return {
     ok: true,
     response,

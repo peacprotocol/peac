@@ -25,6 +25,7 @@ export type ResolverHttpErrorCode =
   | 'jwks_kid_not_found'
   | 'pointer_digest_mismatch'
   | 'pointer_fetch_blocked'
+  | 'pointer_malformed_jws'
   | 'resolver_internal_error';
 
 export interface FetchSafeOptions {
