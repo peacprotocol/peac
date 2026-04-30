@@ -126,6 +126,9 @@ importers:
       '@peac/receipts':
         specifier: workspace:*
         version: link:../../packages/receipts
+      '@peac/resolver-http':
+        specifier: workspace:*
+        version: link:../../packages/resolver-http
       '@peac/schema':
         specifier: workspace:*
         version: link:../../packages/schema
