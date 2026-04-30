@@ -3,7 +3,6 @@
 // numeric counters are surfaced.
 
 import { vi, describe, it, expect, beforeEach } from 'vitest';
-import { sha256Hex } from '@peac/crypto';
 
 import {
   mockSafeFetchJson,
