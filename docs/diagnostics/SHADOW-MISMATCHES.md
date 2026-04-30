@@ -4,7 +4,7 @@
 
 ## Purpose
 
-The PEAC reboot adds a workspace-private resolver composition layer over the existing published network and JWKS primitives. v0.13.2 PR B1 ships the **shadow-mode foundation** for comparing the protocol pointer-fetch path against the workspace-private resolver pointer-fetch path on the same input pair, without changing public protocol or wire behavior.
+v0.13.2 PR B1 adds a **shadow-mode diagnostic foundation** for comparing the protocol pointer-fetch path against a workspace-private resolver composition layer on the same input pair, without changing public protocol or wire behavior.
 
 The foundation provides:
 
@@ -25,10 +25,10 @@ The foundation provides:
 
 A live Hosted Verify route integration would have to either:
 
-1. Run protocol's pointer-fetch as a brand-new behavior on a route that has none today, then run resolver-http's pointer-fetch alongside as a "shadow." This would be a new feature, not shadow observation, and would double-fetch upstream pointer URLs. The reboot's "no double-fetch" invariant rejects this.
+1. Run protocol's pointer-fetch as a brand-new behavior on a route that has none today, then run the workspace-private resolver alongside as a "shadow." This would be a new feature, not shadow observation, and would double-fetch upstream pointer URLs. The diagnostic foundation's "no double-fetch" invariant rejects this.
 2. Wait for a primary-path pointer-fetch result to capture from a route that already does pointer-fetch. No such route exists in `apps/api` as of v0.13.2.
 
-The reboot plan therefore re-homes live route shadowing to a future PR contingent on either:
+Live route shadowing is therefore deferred to a future PR contingent on either:
 
 - A new Hosted Verify pointer-input feature that legitimately exercises pointer-fetch on the verify path (route would surface `pointer_url` + `expected_digest` in the request shape), OR
 - A protocol diagnostic capture hook (callback or telemetry channel exposed by `@peac/protocol`) that surfaces pointer-fetch outcomes from any caller for observation, without requiring the observer to invoke pointer-fetch a second time.

@@ -82,7 +82,7 @@ that every link resolves to a tracked path.
 
 ### Shadow-mode telemetry (internal-only)
 
-The reboot adds an internal-only shadow-mode foundation in `apps/api` for cross-implementation pointer-fetch parity observation. The foundation is governed by `PEAC_INTERNAL_SHADOW_RESOLVER` and `PEAC_INTERNAL_SHADOW_BUFFER_SIZE` (see `docs/STABILITY-CONTRACT.md` "Internal-only flags"). Diagnostic prose lives in [`docs/reboot/SHADOW-MISMATCHES.md`](reboot/SHADOW-MISMATCHES.md).
+v0.13.2 adds an internal-only shadow-mode diagnostic foundation in `apps/api` for cross-implementation pointer-fetch parity observation. The foundation is governed by `PEAC_INTERNAL_SHADOW_RESOLVER` and `PEAC_INTERNAL_SHADOW_BUFFER_SIZE` (see `docs/STABILITY-CONTRACT.md` "Internal-only flags"). Diagnostic prose lives in [`docs/diagnostics/SHADOW-MISMATCHES.md`](diagnostics/SHADOW-MISMATCHES.md).
 
 | ID        | Threat                                                     | Mitigation                                                                                                                                                   | Test coverage                                                                                                                                                                                            |
 | --------- | ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
