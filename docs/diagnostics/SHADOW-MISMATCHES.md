@@ -4,7 +4,7 @@
 
 ## Purpose
 
-v0.13.2 PR B1 adds a **shadow-mode diagnostic foundation** for comparing the protocol pointer-fetch path against a workspace-private resolver composition layer on the same input pair, without changing public protocol or wire behavior.
+v0.13.2 adds a **shadow-mode diagnostic foundation** for comparing the protocol pointer-fetch path against a workspace-private resolver composition layer on the same input pair, without changing public protocol or wire behavior.
 
 The foundation provides:
 
@@ -14,11 +14,11 @@ The foundation provides:
 - A pure-function parity verdict computer that tags each mismatch into a small set of public classes.
 - A no-network parity smoke that drives both implementations through inputs they reject before any network I/O is attempted.
 
-## What PR B1 does NOT ship
+## What this foundation does not ship
 
 - **No live Hosted Verify route shadowing.** The `apps/api` `/v1/verify` route receives an inline compact JWS receipt; it does not accept a pointer URL or expected digest. Pointer-fetch is caller-side today: callers dereference pointer URLs and pass the resulting JWS into `/v1/verify`. There is therefore no primary-path pointer-fetch result to capture for shadow comparison without introducing brand-new network behavior on the verify route.
-- **No internal mismatch endpoint.** A read-only viewer endpoint (`GET /__internal__/shadow-mismatches`) is intentionally omitted in PR B1 because the sink has no live producer in this PR; an empty endpoint adds review surface without operational value.
-- **No `packages/protocol` source change.** No diagnostic capture hook is added in this PR; that pattern is reserved for a future PR.
+- **No internal mismatch endpoint.** A read-only viewer endpoint (`GET /__internal__/shadow-mismatches`) is intentionally omitted because the sink has no live producer in this version; an empty endpoint adds review surface without operational value.
+- **No `packages/protocol` source change.** No diagnostic capture hook is added; that pattern is reserved for a future change.
 - **No public API, wire-format, OpenAPI, or publish-manifest change.**
 
 ## Why route integration is deferred
@@ -28,12 +28,12 @@ A live Hosted Verify route integration would have to either:
 1. Run protocol's pointer-fetch as a brand-new behavior on a route that has none today, then run the workspace-private resolver alongside as a "shadow." This would be a new feature, not shadow observation, and would double-fetch upstream pointer URLs. The diagnostic foundation's "no double-fetch" invariant rejects this.
 2. Wait for a primary-path pointer-fetch result to capture from a route that already does pointer-fetch. No such route exists in `apps/api` as of v0.13.2.
 
-Live route shadowing is therefore deferred to a future PR contingent on either:
+Live route shadowing is therefore deferred to a future change contingent on either:
 
 - A new Hosted Verify pointer-input feature that legitimately exercises pointer-fetch on the verify path (route would surface `pointer_url` + `expected_digest` in the request shape), OR
 - A protocol diagnostic capture hook (callback or telemetry channel exposed by `@peac/protocol`) that surfaces pointer-fetch outcomes from any caller for observation, without requiring the observer to invoke pointer-fetch a second time.
 
-Until one of those exists, PR B1's foundation supports offline parity comparison only.
+Until one of those exists, this foundation supports offline parity comparison only.
 
 ## Mismatch classes
 
@@ -62,8 +62,8 @@ requestHash       sha256 hex of normalized request signature (<=64 chars)
 class             one of the classes above
 legacySummary     bounded { ok, code? <=64, byteCount?, jwksKid? <=32, durationBucket? }
 shadowSummary     same shape as legacySummary
-excerptLegacy?    <=128 bytes; only for output-byte-diff (no live producer in PR B1)
-excerptShadow?    <=128 bytes; only for output-byte-diff (no live producer in PR B1)
+excerptLegacy?    <=128 bytes; only for output-byte-diff (no live producer yet)
+excerptShadow?    <=128 bytes; only for output-byte-diff (no live producer yet)
 ```
 
 When an entry would exceed the `~512`-byte cap, the sink degrades progressively: clamp string fields to per-field caps, then drop excerpts, then replace summary codes with the placeholder `truncated`, then fall back to a minimal entry (`ts`, `class`, `ok` flags).
@@ -72,11 +72,11 @@ When an entry would exceed the `~512`-byte cap, the sink degrades progressively:
 
 The buffer is a fixed-capacity in-memory ring. Default capacity 1024 entries. `PEAC_INTERNAL_SHADOW_BUFFER_SIZE` is read once at first use and clamped to `[64, 16384]`. When the buffer is full, the oldest entry is overwritten; entries are never persisted to disk and never sent over the network.
 
-In clustered deployments each Hosted Verify instance has its own ring buffer; no cross-instance aggregation is built or planned in PR B1.
+In clustered deployments each Hosted Verify instance has its own ring buffer; no cross-instance aggregation is built or planned for this foundation.
 
 ## How to read entries (after a future producer ships)
 
-Once a real producer is wired (live route integration, protocol diagnostic hook, or both), entries can be inspected via the in-process getter `getMismatches()` exported from `apps/api/src/lib/shadow-mismatch-sink.ts`. PR B1 ships no remote retrieval surface.
+Once a real producer is wired (live route integration, protocol diagnostic hook, or both), entries can be inspected via the in-process getter `getMismatches()` exported from `apps/api/src/lib/shadow-mismatch-sink.ts`. This foundation ships no remote retrieval surface.
 
 When investigating drift:
 
@@ -86,7 +86,7 @@ When investigating drift:
 
 ## What this is not
 
-This document does not specify any normative protocol behavior. It does not commit to wire formats, public APIs, or operational SLOs. It is a maintainer-facing diagnostic note about the shadow-mode foundation shipped in v0.13.2 PR B1.
+This document does not specify any normative protocol behavior. It does not commit to wire formats, public APIs, or operational SLOs. It is a maintainer-facing diagnostic note about the shadow-mode foundation shipped in v0.13.2.
 
 ## Related documents
 
