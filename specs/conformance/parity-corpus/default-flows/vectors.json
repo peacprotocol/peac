@@ -1,7 +1,7 @@
 {
   "family": "default-flows",
   "description": "Wire 0.2 happy-path parity vectors. Every vector is accepted by the canonical validator chain (kernel constraints + Wire 0.2 envelope schema). Used to assert that the bounded shadow-mode validator foundation reaches zero divergence with the existing path on accepted records. All extension shapes follow the canonical typed extension-group schemas in @peac/schema/wire-02-extensions/.",
-  "version": "0.13.1",
+  "version": "0.13.2",
   "generator": "manual; v0.13.1 PR C floor",
   "vectors": [
     {
@@ -24,7 +24,9 @@
           }
         }
       },
-      "expected": { "accepted": true }
+      "expected": {
+        "accepted": true
+      }
     },
     {
       "id": "df-002-evidence-attribution",
@@ -44,7 +46,9 @@
           }
         }
       },
-      "expected": { "accepted": true }
+      "expected": {
+        "accepted": true
+      }
     },
     {
       "id": "df-003-evidence-consent-record",
@@ -65,7 +69,9 @@
           }
         }
       },
-      "expected": { "accepted": true }
+      "expected": {
+        "accepted": true
+      }
     },
     {
       "id": "df-004-evidence-purpose-declaration",
@@ -85,7 +91,9 @@
           }
         }
       },
-      "expected": { "accepted": true }
+      "expected": {
+        "accepted": true
+      }
     },
     {
       "id": "df-005-evidence-safety-review",
@@ -105,7 +113,9 @@
           }
         }
       },
-      "expected": { "accepted": true }
+      "expected": {
+        "accepted": true
+      }
     },
     {
       "id": "df-006-evidence-identity-attestation",
@@ -125,7 +135,9 @@
           }
         }
       },
-      "expected": { "accepted": true }
+      "expected": {
+        "accepted": true
+      }
     },
     {
       "id": "df-007-challenge-payment",
@@ -140,7 +152,9 @@
           "jti": "df-007-jti-fixed-value"
         }
       },
-      "expected": { "accepted": true }
+      "expected": {
+        "accepted": true
+      }
     },
     {
       "id": "df-008-evidence-with-pillars",
@@ -163,7 +177,9 @@
           }
         }
       },
-      "expected": { "accepted": true }
+      "expected": {
+        "accepted": true
+      }
     },
     {
       "id": "df-009-evidence-multi-extension",
@@ -188,7 +204,9 @@
           }
         }
       },
-      "expected": { "accepted": true }
+      "expected": {
+        "accepted": true
+      }
     },
     {
       "id": "df-010-evidence-with-occurred-at",
@@ -211,7 +229,9 @@
           }
         }
       },
-      "expected": { "accepted": true }
+      "expected": {
+        "accepted": true
+      }
     },
     {
       "id": "df-011-evidence-unregistered-type-allowed",
@@ -226,7 +246,9 @@
           "jti": "df-011-jti-fixed-value"
         }
       },
-      "expected": { "accepted": true }
+      "expected": {
+        "accepted": true
+      }
     },
     {
       "id": "df-012-evidence-multi-pillar",
@@ -249,7 +271,9 @@
           }
         }
       },
-      "expected": { "accepted": true }
+      "expected": {
+        "accepted": true
+      }
     }
   ]
 }

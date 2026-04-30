@@ -5,6 +5,45 @@ All notable changes to PEAC Protocol will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.13.2] - 2026-05-01
+
+Internal foundations release. No public API change. No wire format change. No new public package. No publish-manifest change. Published to npm `next` only.
+
+### Added
+
+- `apps/api/src/lib/shadow-resolver.ts`, `shadow-types.ts`, `shadow-classify.ts`, `shadow-mismatch-sink.ts`, `shadow-execute.ts`: workspace-private shadow-mode pointer-fetch foundation. Lazy-import boundary gated by `PEAC_INTERNAL_SHADOW_RESOLVER=1` (default OFF); bounded normalization shapes; redaction-safe in-memory ring-buffer mismatch sink with progressive-degradation cap; pure-function parity verdict computer; factory-injected execution wrapper. Internal-only; no live route shadowing in this release.
+- `apps/api/tests/{shadow-resolver.boundary, shadow-classify, shadow-mismatch-sink, shadow-execute, parity-public-root-smoke, body-limit.boundary}.test.ts`: shadow-mode foundation coverage plus exact-byte-length boundary tests for the 256 KiB raw body-size invariant on `/v1/verify` and `/v1/issue`.
+- `docs/diagnostics/SHADOW-MISMATCHES.md`: foundation diagnostic notes describing mismatch taxonomy, bounded entry shape, ring-buffer behaviour, and explicit non-goals.
+- `docs/diagnostics/RELEASE-EXERCISE-v0.13.2.md`: release validation record. No third-party external claim and no live Hosted Verify pointer-fetch route shadow claim; Hosted Verify accepts inline compact JWS receipts today.
+- `docs/STABILITY-CONTRACT.md`: two new internal-only flag rows for `PEAC_INTERNAL_SHADOW_RESOLVER` and `PEAC_INTERNAL_SHADOW_BUFFER_SIZE`.
+- `docs/THREAT_MODEL.md`: new "Shadow-mode telemetry (internal-only)" subsection with six T-SHDW-\* entries linked to test files.
+- `packages/compat/src/archival-export.ts` reader / writer / validator: `serializeArchivalBundle` (deterministic stable-key JSON output), `parseArchivalBundle`, `validateArchivalBundle` (discriminated-union return), plus the `ArchivalValidationFailure` / `ArchivalValidationResult` types. Cyclic payloads and sparse arrays are rejected as `archival_invalid_payload`. Version-mismatch error messages do not echo caller-provided values. `ARCHIVAL_BUNDLE_VERSION` constant exported. Workspace-private; not published.
+- `packages/resolver-http/`: workspace-private resolver composition layer over published primitives (`@peac/net-node`, `@peac/jwks-cache`, `@peac/kernel`, `@peac/crypto`). Workspace-private; absent from publish manifest. No `@peac/protocol` runtime dependency.
+
+### Changed
+
+- `apps/api/package.json`: workspace dep added on the workspace-private resolver composition layer (workspace-private; not published).
+- `surfaces/nextjs/middleware/package.json`: `next` range bumped from `^15.5.12` to `^15.5.15`.
+- `apps/api/package.json`, `packages/pay402/package.json`, `packages/receipts/package.json`: `ts-jest` range bumped from `^29.0.0` to `^29.4.9` so the workspace lockfile resolves the transitive `handlebars` dependency to a patched version.
+- `apps/api/package.json`, `apps/sandbox-issuer/package.json`, `packages/server/package.json`: `hono` range bumped from `^4.12.12` to `^4.12.15`.
+- Root `package.json` `pnpm.overrides`: added range-scoped overrides for `defu` (>= 6.1.5), `esbuild` (< 0.25.0 to >= 0.25.0), `undici` (< 6.24.0 to >= 6.24.0), `postcss` (< 8.5.10 to >= 8.5.10), and `vite` (< 6.4.2 to >= 6.4.2). Each override carries a corresponding `overridesComments` entry naming the GHSA, dependency path, and rationale. All overrides target dev-scope dependencies; no published package ships any of them.
+- `packages/compat/spec/ARCHIVAL-EXPORT.md`, `packages/compat/spec/MIGRATION-CLASSES.md`, `packages/compat/README.md`, `packages/compat/SECURITY.md`: rewritten as workspace-private package contract; "internal scaffold" / "future release" / "normative document under docs/specs/" framing removed.
+
+### Compatibility
+
+- `@peac/protocol.{issue, verifyLocal}` signatures and serialized output: byte-identical to v0.13.1.
+- Wire format (`peac-receipt/0.1` envelope, `interaction-record+jwt` JWS `typ`): unchanged.
+- `@peac/kernel` public TypeScript surface: byte-stable from v0.13.1.
+- OpenAPI verify contract: unchanged.
+- Error code count: 186 (unchanged); no new emitted-on-primary-path codes.
+- Extension group count: 12 (unchanged).
+- Active publish-manifest count: 36 (unchanged from v0.13.1).
+- Workspace-private packages remain workspace-private; absent from `pnpm publish --dry-run --recursive`.
+
+### Security
+
+- All 16 open Dependabot alerts present at the start of the v0.13.2 window were closed. Closures: `handlebars` (1 critical, 3 high, 2 medium, 1 low — all dev-only via `ts-jest` upgrade); `hono` (1 medium runtime; reachability audit confirmed `hono/jsx` is not imported, upgraded for hygiene); 8 dev-only alerts via range-scoped `pnpm.overrides` (`defu`, `vite` ×2, `esbuild`, `next`, `postcss`, `undici` ×2). 0 open Dependabot alerts on the release commit.
+
 ## [0.13.1] - 2026-04-27
 
 Internal foundations release. No public API change. No wire format change. No new public package. Published to npm `next` only.
