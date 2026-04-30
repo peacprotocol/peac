@@ -158,7 +158,12 @@
       "yaml": "2.8.3",
       "@hono/node-server": ">=1.19.13",
       "hono": ">=4.12.12",
-      "protobufjs": ">=8.0.1"
+      "protobufjs": ">=8.0.1",
+      "defu": ">=6.1.5",
+      "esbuild@<0.25.0": ">=0.25.0",
+      "undici@<6.24.0": ">=6.24.0",
+      "postcss@<8.5.10": ">=8.5.10",
+      "vite@<6.4.2": ">=6.4.2"
     },
     "overridesComments": {
       "minimatch": "Cross-major pin to 10.2.4: typescript-estree requires ^9.0.4 but 9.x has no patch for GHSA-3ppc-4f35-3m26. minimatch 10.x is API-compatible (same globbing interface). 10.2.4 patches GHSA-7r86-cg39-jmmj and GHSA-23c5-xmqv-rm74 (ReDoS). Drops Node 18 (fine: repo baseline is >=22.0.0). Lint verified clean.",
@@ -170,7 +175,12 @@
       "flatted": "Override to >=3.4.2 (fixes GHSA-25h7-pfq9-p65f unbounded recursion DoS + GHSA-rf6f-7fwh-wjgh prototype pollution via parse()). Dev-only via eslint -> file-entry-cache -> flat-cache.",
       "path-to-regexp@>=8.0.0": "Override to >=8.4.0 (fixes GHSA-j3q9-mxjg-w52f sequential optional groups DoS). Prod dep via @modelcontextprotocol/sdk -> express@5 -> router. path-to-regexp@0.1.12 in express@4 (examples only, not published) is not overridden because 0.1.13 breaks express@4 internal API.",
       "yaml": "Pin to 2.8.3 (fixes GHSA-48c2-rrv3-qjmp). Dep via @peac/policy-kit.",
-      "protobufjs": "Override to >=8.0.1 (fixes GHSA-xq3m-2v4x-88gg arbitrary code execution in protobufjs@8.0.0). Transitive dep via examples/telemetry-otel -> @opentelemetry/otlp-transformer@0.212.0. Examples are private (never published); override protects local eval flows and unblocks CI prod-audit gate."
+      "protobufjs": "Override to >=8.0.1 (fixes GHSA-xq3m-2v4x-88gg arbitrary code execution in protobufjs@8.0.0). Transitive dep via examples/telemetry-otel -> @opentelemetry/otlp-transformer@0.212.0. Examples are private (never published); override protects local eval flows and unblocks CI prod-audit gate.",
+      "defu": "Override to >=6.1.5 (fixes GHSA-737v-mqg7-c878 prototype pollution via __proto__ in defaults argument). Dev-only via wrangler -> @cloudflare/unenv-preset / unenv. Wrangler 3.x bundles defu 6.1.4; Wrangler 4 (latest) is a major bump deferred for separate review.",
+      "esbuild@<0.25.0": "Range-scoped to <0.25.0 only (forces patched 0.25.0+, fixes GHSA-67mh-4wv8-2f99 dev-server CORS bypass). Dev-only via wrangler / @esbuild-plugins/node-globals-polyfill peer / @esbuild-plugins/node-modules-polyfill peer (all ship esbuild 0.17.19). Newer esbuild instances at 0.25.12+ already pulled by vitest/tsx are unaffected.",
+      "undici@<6.24.0": "Range-scoped to <6.24.0 only (forces patched 6.24.0+, fixes GHSA-4992-7rv2-5pvq CRLF injection via upgrade and GHSA-2mjp-6q6p-2qxm HTTP request/response smuggling). Dev-only via wrangler -> miniflare which bundles undici 5.29.0. @peac/net-node already uses undici 6.24.0+ (production path unaffected).",
+      "postcss@<8.5.10": "Range-scoped to <8.5.10 only (forces patched 8.5.10+, fixes GHSA-qx2v-qp2m-jg93 XSS via unescaped </style> in CSS Stringify output). Dev-only via next 15.5.x (bundles postcss 8.4.31 internally) and vite. Workspace doesn't import postcss directly; affects build tooling only.",
+      "vite@<6.4.2": "Range-scoped to <6.4.2 only (forces patched 6.4.2+, fixes GHSA-p9ff-h696-f583 arbitrary file read via dev server WebSocket and GHSA-4w7w-66w2-5vf9 path traversal in optimized deps .map handling). Dev-only via vitest/@vitest/coverage-v8. pnpm resolves the override to vite 8.0.10 in practice; full test suite passes."
     }
   },
   "lint-staged": {
