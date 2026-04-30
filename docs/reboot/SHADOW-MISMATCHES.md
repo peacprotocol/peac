@@ -18,7 +18,7 @@ The foundation provides:
 
 - **No live Hosted Verify route shadowing.** The `apps/api` `/v1/verify` route receives an inline compact JWS receipt; it does not accept a pointer URL or expected digest. Pointer-fetch is caller-side today: callers dereference pointer URLs and pass the resulting JWS into `/v1/verify`. There is therefore no primary-path pointer-fetch result to capture for shadow comparison without introducing brand-new network behavior on the verify route.
 - **No internal mismatch endpoint.** A read-only viewer endpoint (`GET /__internal__/shadow-mismatches`) is intentionally omitted in PR B1 because the sink has no live producer in this PR; an empty endpoint adds review surface without operational value.
-- **No `packages/protocol/**` change.\*\* No diagnostic capture hook is added; that pattern is reserved for a future PR.
+- **No `packages/protocol` source change.** No diagnostic capture hook is added in this PR; that pattern is reserved for a future PR.
 - **No public API, wire-format, OpenAPI, or publish-manifest change.**
 
 ## Why route integration is deferred
