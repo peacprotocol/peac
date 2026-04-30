@@ -4,11 +4,11 @@
 
 ## Purpose
 
-The PEAC reboot adds a workspace-private composition layer (`@peac/resolver-http`) over the existing published network and JWKS primitives. v0.13.2 PR B1 ships the **shadow-mode foundation** for comparing the protocol pointer-fetch path against the resolver-http pointer-fetch path on the same input pair, without changing public protocol or wire behavior.
+The PEAC reboot adds a workspace-private resolver composition layer over the existing published network and JWKS primitives. v0.13.2 PR B1 ships the **shadow-mode foundation** for comparing the protocol pointer-fetch path against the workspace-private resolver pointer-fetch path on the same input pair, without changing public protocol or wire behavior.
 
 The foundation provides:
 
-- A lazy-import boundary that loads `@peac/resolver-http` only when `PEAC_INTERNAL_SHADOW_RESOLVER=1`.
+- A lazy-import boundary that loads the workspace-private resolver composition layer only when `PEAC_INTERNAL_SHADOW_RESOLVER=1`.
 - Bounded normalization shapes so two implementations with different native taxonomies can be compared like-for-like.
 - A redaction-safe in-memory ring buffer (`shadow-mismatch-sink`) capped to `[64, 16384]` entries with a `~512`-byte JSON-stringified cap per entry.
 - A pure-function parity verdict computer that tags each mismatch into a small set of public classes.
