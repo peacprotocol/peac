@@ -295,6 +295,40 @@ describe('validateArchivalBundle', () => {
     expect(failureCode(r)).toBe('archival_invalid_payload');
   });
 
+  it('rejects a sparse array payload (constructor-allocated holes) with archival_invalid_payload', () => {
+    // `new Array(3)` allocates a length-3 array with three holes; no
+    // index has an own property. Array.prototype.every skips holes, so
+    // this slips past naive validators. The contract requires every
+    // index 0..length-1 to be present.
+    const r = validateArchivalBundle({
+      ...baseBundle,
+      records: [{ ...baseRecord, payload: { items: new Array(3) } }],
+    });
+    expect(failureCode(r)).toBe('archival_invalid_payload');
+  });
+
+  it('rejects a sparse array payload (constructor + index 0 set) with archival_invalid_payload', () => {
+    // length is 3 but only index 0 has an own property; indexes 1 and 2
+    // are holes. Mirrors the [1, , 3] hole pattern without tripping the
+    // no-sparse-arrays parser hint that some toolchains emit.
+    const sparse = new Array(3) as unknown[];
+    sparse[0] = 'first';
+    const r = validateArchivalBundle({
+      ...baseBundle,
+      records: [{ ...baseRecord, payload: { items: sparse } }],
+    });
+    expect(failureCode(r)).toBe('archival_invalid_payload');
+  });
+
+  it('accepts a dense array payload', () => {
+    const dense: unknown[] = [1, 'two', null, true, { nested: 'ok' }, [1, 2, 3]];
+    const r = validateArchivalBundle({
+      ...baseBundle,
+      records: [{ ...baseRecord, payload: { items: dense } }],
+    });
+    expect(r.ok).toBe(true);
+  });
+
   it('does not echo the supplied invalid version value in the error message', () => {
     const malicious = '"><script>alert(1)</script>';
     const r = validateArchivalBundle({ ...baseBundle, version: malicious });
@@ -307,13 +341,21 @@ describe('validateArchivalBundle', () => {
   });
 });
 
-describe('serializeArchivalBundle: cyclic payload hardening', () => {
+describe('serializeArchivalBundle: payload hardening', () => {
   it('throws archival_invalid_payload for a cyclic payload', () => {
     const cyclic: Record<string, unknown> = { tag: 'loop' };
     cyclic.self = cyclic;
     const bundle = {
       ...baseBundle,
       records: [{ ...baseRecord, payload: cyclic }],
+    } as unknown as ArchivalBundle;
+    expect(() => serializeArchivalBundle(bundle)).toThrow(/archival_invalid_payload/);
+  });
+
+  it('throws archival_invalid_payload for a sparse-array payload', () => {
+    const bundle = {
+      ...baseBundle,
+      records: [{ ...baseRecord, payload: { items: new Array(2) } }],
     } as unknown as ArchivalBundle;
     expect(() => serializeArchivalBundle(bundle)).toThrow(/archival_invalid_payload/);
   });

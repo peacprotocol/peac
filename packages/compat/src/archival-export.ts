@@ -65,16 +65,31 @@ function isJsonCompatible(v: unknown, seen: WeakSet<object> = new WeakSet()): bo
   if (Array.isArray(v)) {
     if (seen.has(v)) return false;
     seen.add(v);
-    const ok = v.every((entry) => isJsonCompatible(entry, seen));
-    seen.delete(v);
-    return ok;
+    try {
+      for (let i = 0; i < v.length; i += 1) {
+        // Reject sparse arrays: every index from 0 to length - 1 must be
+        // an own property. Array.prototype.every / map skip holes, which
+        // can let `new Array(N)` or `[ , "x" ]` round-trip ambiguously
+        // through the deterministic writer.
+        if (!Object.prototype.hasOwnProperty.call(v, i)) return false;
+        if (!isJsonCompatible(v[i], seen)) return false;
+      }
+      return true;
+    } finally {
+      seen.delete(v);
+    }
   }
   if (isPlainObject(v)) {
     if (seen.has(v)) return false;
     seen.add(v);
-    const ok = Object.values(v).every((entry) => isJsonCompatible(entry, seen));
-    seen.delete(v);
-    return ok;
+    try {
+      for (const entry of Object.values(v)) {
+        if (!isJsonCompatible(entry, seen)) return false;
+      }
+      return true;
+    } finally {
+      seen.delete(v);
+    }
   }
   return false;
 }
