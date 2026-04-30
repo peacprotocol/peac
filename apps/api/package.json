@@ -37,7 +37,7 @@
     "@peac/protocol": "workspace:*",
     "@peac/receipts": "workspace:*",
     "@peac/schema": "workspace:*",
-    "hono": "^4.12.12",
+    "hono": "^4.12.15",
     "zod": "^4.3.6"
   },
   "devDependencies": {
