@@ -1,9 +1,9 @@
-// Workspace-private internal scaffold. NOT published.
+// Workspace-private package contract. NOT published.
 //
 // This package holds the migration-class taxonomy and the archival-export
-// type surface. v0.13.1 is the scaffold release; future releases finalize
-// the normative documents under docs/specs/ and add reader/writer
-// implementations.
+// reader / writer / validator. The exports describe a workspace-private
+// package contract; they are not a public protocol surface and not a
+// stable cross-organization interchange format.
 //
 // IMPORTANT: no published package depends on this package at runtime.
 // @peac/protocol does NOT import from this package, even from its
@@ -12,4 +12,15 @@
 
 export type { MigrationClass, MigrationVerdict } from './taxonomy.js';
 export { classifyMigration } from './taxonomy.js';
-export type { ArchivalRecord, ArchivalBundle } from './archival-export.js';
+export type {
+  ArchivalRecord,
+  ArchivalBundle,
+  ArchivalValidationFailure,
+  ArchivalValidationResult,
+} from './archival-export.js';
+export {
+  ARCHIVAL_BUNDLE_VERSION,
+  serializeArchivalBundle,
+  parseArchivalBundle,
+  validateArchivalBundle,
+} from './archival-export.js';
