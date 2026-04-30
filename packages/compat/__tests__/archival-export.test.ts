@@ -274,4 +274,47 @@ describe('validateArchivalBundle', () => {
       expect(r.bundle.records[0].payload).toEqual(payload);
     }
   });
+
+  it('rejects a cyclic object payload with archival_invalid_payload', () => {
+    const cyclic: Record<string, unknown> = { name: 'cyclic' };
+    cyclic.self = cyclic;
+    const r = validateArchivalBundle({
+      ...baseBundle,
+      records: [{ ...baseRecord, payload: cyclic }],
+    });
+    expect(failureCode(r)).toBe('archival_invalid_payload');
+  });
+
+  it('rejects a cyclic array payload with archival_invalid_payload', () => {
+    const cyclic: unknown[] = [1, 2];
+    cyclic.push(cyclic);
+    const r = validateArchivalBundle({
+      ...baseBundle,
+      records: [{ ...baseRecord, payload: cyclic }],
+    });
+    expect(failureCode(r)).toBe('archival_invalid_payload');
+  });
+
+  it('does not echo the supplied invalid version value in the error message', () => {
+    const malicious = '"><script>alert(1)</script>';
+    const r = validateArchivalBundle({ ...baseBundle, version: malicious });
+    expect(r.ok).toBe(false);
+    if (!r.ok) {
+      expect(r.code).toBe('archival_invalid_version');
+      expect(r.message).not.toContain(malicious);
+      expect(r.message).not.toContain('<script>');
+    }
+  });
+});
+
+describe('serializeArchivalBundle: cyclic payload hardening', () => {
+  it('throws archival_invalid_payload for a cyclic payload', () => {
+    const cyclic: Record<string, unknown> = { tag: 'loop' };
+    cyclic.self = cyclic;
+    const bundle = {
+      ...baseBundle,
+      records: [{ ...baseRecord, payload: cyclic }],
+    } as unknown as ArchivalBundle;
+    expect(() => serializeArchivalBundle(bundle)).toThrow(/archival_invalid_payload/);
+  });
 });

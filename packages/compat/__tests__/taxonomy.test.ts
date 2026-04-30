@@ -1,9 +1,9 @@
 /**
  * @peac/compat: migration-class taxonomy invariants.
  *
- * v0.13.1 scaffold: classifyMigration returns 'exact' for identity
- * migrations, 'impossible' for the frozen legacy boundary, and 'lossy'
- * as the default verdict for unclassified pairs.
+ * classifyMigration returns 'exact' for identity migrations,
+ * 'impossible' for the frozen legacy boundary, and 'lossy' as the
+ * default verdict for unclassified pairs.
  */
 
 import { describe, expect, it } from 'vitest';

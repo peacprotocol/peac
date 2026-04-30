@@ -19,6 +19,7 @@ export type {
   ArchivalValidationResult,
 } from './archival-export.js';
 export {
+  ARCHIVAL_BUNDLE_VERSION,
   serializeArchivalBundle,
   parseArchivalBundle,
   validateArchivalBundle,

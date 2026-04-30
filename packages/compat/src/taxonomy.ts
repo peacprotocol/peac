@@ -21,12 +21,15 @@ export interface MigrationVerdict {
 }
 
 /**
- * Internal helper: compute a migration verdict for a (sourceWire, targetWire)
- * pair. v0.13.1 scaffold: returns 'exact' for identity migrations, 'impossible'
- * for the frozen legacy boundary, 'lossy' as the default-unclassified verdict.
+ * Workspace-private helper: compute a migration verdict for a
+ * (sourceWire, targetWire) pair. Covers three concrete cases:
  *
- * Future releases extend this with cross-version and cross-codec verdicts as
- * they are designed; v0.13.1 only sets the type surface.
+ *   - identity migrations -> 'exact'
+ *   - the frozen legacy boundary (peac.receipt/0.9 -> peac-receipt/0.1) -> 'impossible'
+ *   - default-unclassified pair -> 'lossy'
+ *
+ * Cross-version, cross-codec, and cross-profile verdicts beyond these
+ * three are not part of this package contract.
  */
 export function classifyMigration(sourceWire: string, targetWire: string): MigrationVerdict {
   if (sourceWire === targetWire) {

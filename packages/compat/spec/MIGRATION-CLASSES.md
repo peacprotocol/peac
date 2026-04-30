@@ -1,6 +1,6 @@
 # Migration classes
 
-Workspace-private migration-class taxonomy used by `@peac/compat`. Not a public protocol surface; not part of `docs/specs/`. The taxonomy describes the package-local shape of migration verdicts.
+Workspace-private migration-class taxonomy used by `@peac/compat`. Not a public protocol surface and not a stable cross-organization interchange format. The taxonomy describes the package-local shape of migration verdicts.
 
 The four migration classes are defined in `packages/compat/src/taxonomy.ts`:
 

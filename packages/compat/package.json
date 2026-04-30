@@ -2,7 +2,7 @@
   "name": "@peac/compat",
   "version": "0.13.1",
   "private": true,
-  "description": "PEAC Protocol - workspace-private migration-class taxonomy and archival-export scaffolding. Not published. Internal scaffold only; not imported by any published package. Version tracks the workspace-wide value enforced by scripts/check-version-coherence.sh; the workspace-wide bump to 0.13.1 happens in the v0.13.1 release-prep PR.",
+  "description": "PEAC Protocol - workspace-private package contract for the migration-class taxonomy and the archival-export reader/writer/validator. Not published. Not a public protocol surface. Not a stable cross-organization interchange format. Not imported by any published package. Version tracks the workspace-wide value enforced by scripts/check-version-coherence.sh.",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",

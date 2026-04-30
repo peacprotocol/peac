@@ -7,7 +7,7 @@
 
 import type { MigrationClass } from './taxonomy.js';
 
-const ARCHIVAL_BUNDLE_VERSION = 'peac-archival/0.1-internal';
+export const ARCHIVAL_BUNDLE_VERSION = 'peac-archival/0.1-internal';
 const VALID_MIGRATION_CLASSES: readonly MigrationClass[] = [
   'exact',
   'derived',
@@ -57,13 +57,25 @@ function isBoundedString(v: unknown, max: number): v is string {
   return typeof v === 'string' && v.length > 0 && v.length <= max;
 }
 
-function isJsonCompatible(v: unknown): boolean {
+function isJsonCompatible(v: unknown, seen: WeakSet<object> = new WeakSet()): boolean {
   if (v === null) return true;
   const t = typeof v;
   if (t === 'string' || t === 'boolean') return true;
   if (t === 'number') return Number.isFinite(v as number);
-  if (Array.isArray(v)) return v.every(isJsonCompatible);
-  if (isPlainObject(v)) return Object.values(v).every(isJsonCompatible);
+  if (Array.isArray(v)) {
+    if (seen.has(v)) return false;
+    seen.add(v);
+    const ok = v.every((entry) => isJsonCompatible(entry, seen));
+    seen.delete(v);
+    return ok;
+  }
+  if (isPlainObject(v)) {
+    if (seen.has(v)) return false;
+    seen.add(v);
+    const ok = Object.values(v).every((entry) => isJsonCompatible(entry, seen));
+    seen.delete(v);
+    return ok;
+  }
   return false;
 }
 
@@ -179,10 +191,7 @@ export function validateArchivalBundle(input: unknown): ArchivalValidationResult
     return fail('archival_invalid_input', 'bundle must be a plain object');
   }
   if (input.version !== ARCHIVAL_BUNDLE_VERSION) {
-    return fail(
-      'archival_invalid_version',
-      `expected version "${ARCHIVAL_BUNDLE_VERSION}", got ${JSON.stringify(input.version)}`
-    );
+    return fail('archival_invalid_version', `version must be exactly "${ARCHIVAL_BUNDLE_VERSION}"`);
   }
   if (!isBoundedString(input.createdAt, FIELD_MAX_LENGTH)) {
     return fail('archival_invalid_created_at', 'createdAt must be a non-empty bounded string');
