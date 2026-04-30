@@ -10,7 +10,7 @@
 // `ssrfSafeFetch` via a relative path inside the protocol package, so a
 // public `vi.mock('@peac/protocol')` does not intercept the internal call.
 // Forcing a private mock would violate the no-private-subpath rule. The
-// public-root no-network smoke is the safe boundary for PR B1; full
+// public-root no-network smoke is the safe boundary for this diagnostic foundation; full
 // cross-implementation fetched-body parity is deferred until either a
 // protocol diagnostic hook lands or a Hosted Verify pointer-input feature
 // exists to capture a real primary-path result.
