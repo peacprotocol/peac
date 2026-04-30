@@ -39,18 +39,18 @@ Until one of those exists, this foundation supports offline parity comparison on
 
 The sink records entries with the following `class` field. Parity classes capture cross-implementation drift detected by the verdict computer; the remaining classes are reserved for future producers.
 
-| Class                                  | Meaning                                                                                                               |
-| -------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| `parity_class_mismatch`                | Protocol and resolver-http normalize to different `NormalizedPointerClass` values for the same input.                 |
-| `parity_digest_mismatch`               | Both implementations succeeded but reported different `actualDigest` values. Stop-the-line if observed in production. |
-| `parity_content_type_warning_mismatch` | One implementation surfaced a content-type warning class and the other did not.                                       |
-| `parity_success_shape_mismatch`        | Both succeeded but the public success-shape keys (`actualDigest`, `contentType` presence) differ.                     |
-| `output-byte-diff`                     | Reserved. Future producer for raw-output byte divergence under a future capture hook.                                 |
-| `error-code-diff`                      | Reserved. Future producer for native-error-code divergence under a future capture hook.                               |
-| `timing-diff`                          | Reserved. Future producer for cross-implementation timing-bucket divergence.                                          |
-| `resource-limit-diff`                  | Reserved. Future producer for resource-limit-class divergence.                                                        |
-| `cache-hit-diff`                       | Reserved. Future producer for JWKS cache-hit divergence.                                                              |
-| `cross-runtime-drift`                  | Reserved. Future producer for cross-runtime drift.                                                                    |
+| Class                                  | Meaning                                                                                                                          |
+| -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `parity_class_mismatch`                | Protocol path and the workspace-private resolver path normalize to different `NormalizedPointerClass` values for the same input. |
+| `parity_digest_mismatch`               | Both implementations succeeded but reported different `actualDigest` values. Stop-the-line if observed in production.            |
+| `parity_content_type_warning_mismatch` | One implementation surfaced a content-type warning class and the other did not.                                                  |
+| `parity_success_shape_mismatch`        | Both succeeded but the public success-shape keys (`actualDigest`, `contentType` presence) differ.                                |
+| `output-byte-diff`                     | Reserved. Future producer for raw-output byte divergence under a future capture hook.                                            |
+| `error-code-diff`                      | Reserved. Future producer for native-error-code divergence under a future capture hook.                                          |
+| `timing-diff`                          | Reserved. Future producer for cross-implementation timing-bucket divergence.                                                     |
+| `resource-limit-diff`                  | Reserved. Future producer for resource-limit-class divergence.                                                                   |
+| `cache-hit-diff`                       | Reserved. Future producer for JWKS cache-hit divergence.                                                                         |
+| `cross-runtime-drift`                  | Reserved. Future producer for cross-runtime drift.                                                                               |
 
 ## Sink entry shape
 
