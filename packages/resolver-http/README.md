@@ -8,11 +8,13 @@
 
 `@peac/resolver-http` is a workspace-private composition layer over
 existing published primitives. v0.13.2 PR A adds the package and its
-runtime modules, parity tests against `@peac/protocol`'s self-contained
-resolver path on shared local fixtures, and SSRF, redirect, timeout,
-cache-isolation, and byte-cap test coverage. No `apps/api` or Hosted
-Verify production-path switch is included in PR A; that wiring is
-deferred to PR B.
+runtime modules, no-network public-API smoke coverage, resolver-http
+local harness coverage, and SSRF, redirect, timeout, cache-isolation,
+and byte-cap test coverage. No `apps/api` or Hosted Verify
+production-path switch is included in PR A; that wiring is deferred to
+PR B. Full fetched-body cross-implementation pointer parity is
+intentionally re-homed to PR B shadow mode (see `## Parity testing`
+below).
 
 ## Why this exists
 
@@ -21,8 +23,8 @@ published network and JWKS primitives so the verifier core path can be
 exercised in shadow mode by PR B without changing public protocol
 behavior or dependency direction. Protocol stays self-contained and
 byte-stable; resolver-http composes the published primitives behind a
-verifier-oriented interface; parity tests compare both paths on shared
-local fixtures.
+verifier-oriented interface; full cross-implementation parity belongs
+to PR B shadow mode.
 
 ## Composition
 
