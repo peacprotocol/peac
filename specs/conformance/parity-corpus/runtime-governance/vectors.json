@@ -1,7 +1,7 @@
 {
   "family": "runtime-governance",
   "description": "Managed-runtime wedge parity vectors. Covers the 6 observation-specific type URIs from @peac/adapter-runtime-governance plus one negative vector (malformed observation extension). The bounded validator foundation must reach zero divergence with the existing path on every vector.",
-  "version": "0.13.1",
+  "version": "0.13.2",
   "generator": "manual; v0.13.1 PR C floor",
   "vectors": [
     {
@@ -25,7 +25,9 @@
           }
         }
       },
-      "expected": { "accepted": true }
+      "expected": {
+        "accepted": true
+      }
     },
     {
       "id": "rg-002-audit-entry",
@@ -48,7 +50,9 @@
           }
         }
       },
-      "expected": { "accepted": true }
+      "expected": {
+        "accepted": true
+      }
     },
     {
       "id": "rg-003-authority-scope",
@@ -70,7 +74,9 @@
           }
         }
       },
-      "expected": { "accepted": true }
+      "expected": {
+        "accepted": true
+      }
     },
     {
       "id": "rg-004-lifecycle-event",
@@ -92,7 +98,9 @@
           }
         }
       },
-      "expected": { "accepted": true }
+      "expected": {
+        "accepted": true
+      }
     },
     {
       "id": "rg-005-trust-observation",
@@ -114,7 +122,9 @@
           }
         }
       },
-      "expected": { "accepted": true }
+      "expected": {
+        "accepted": true
+      }
     },
     {
       "id": "rg-006-compliance-observation",
@@ -136,7 +146,9 @@
           }
         }
       },
-      "expected": { "accepted": true }
+      "expected": {
+        "accepted": true
+      }
     },
     {
       "id": "rg-007-negative-missing-provider",
@@ -156,7 +168,9 @@
           }
         }
       },
-      "expected": { "accepted": true }
+      "expected": {
+        "accepted": true
+      }
     }
   ]
 }
