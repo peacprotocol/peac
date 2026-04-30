@@ -37,18 +37,18 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
+    "@peac/kernel": "workspace:*",
     "ajv": "^8.18.0",
     "ajv-formats": "^2.1.1",
-    "cbor": "^9.0.0",
-    "@peac/kernel": "workspace:*"
+    "cbor": "^9.0.0"
   },
   "devDependencies": {
-    "@types/node": "^22.19.11",
-    "typescript": "^5.0.0",
-    "jest": "^30.2.0",
     "@types/jest": "^30.0.0",
-    "ts-jest": "^29.0.0",
-    "tsup": "^8.0.0"
+    "@types/node": "^22.19.11",
+    "jest": "^30.2.0",
+    "ts-jest": "^29.4.9",
+    "tsup": "^8.0.0",
+    "typescript": "^5.0.0"
   },
   "keywords": [
     "peac",
