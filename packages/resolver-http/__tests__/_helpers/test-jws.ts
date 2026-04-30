@@ -3,8 +3,8 @@
 // Uses ONLY package-root @peac/crypto exports (generateKeypair, signWire02,
 // verify, decode, sha256Hex; verified package-root from resolver-http
 // context 2026-04-30). Private crypto subpaths (notably the testkit entry)
-// are forbidden. The protocol package is forbidden in all forms — runtime
-// or test — under packages/resolver-http/__tests__/_helpers/.
+// are forbidden. The protocol package is forbidden in all forms (runtime
+// and test) under packages/resolver-http/__tests__/_helpers/.
 //
 // Hygiene: the private key is kept LOCAL to this helper. signWire02
 // consumes it once; the returned fixture exposes only the public key, the
