@@ -28,6 +28,7 @@
       "@peac/cli": ["./packages/cli/src"],
       "@peac/net-node": ["./packages/net/node/src"],
       "@peac/registries": ["./packages/registries/src"],
+      "@peac/resolver-http": ["./packages/resolver-http/src"],
       "@peac/pay402": ["./packages/pay402/src"],
       "@peac/rails-stripe": ["./packages/rails/stripe/src"],
       "@peac/rails-x402": ["./packages/rails/x402/src"],

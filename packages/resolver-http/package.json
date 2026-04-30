@@ -1,0 +1,39 @@
+{
+  "name": "@peac/resolver-http",
+  "version": "0.13.1",
+  "private": true,
+  "description": "PEAC Protocol - workspace-private resolver-http composition layer introduced in v0.13.2 PR A per Revision 4 §7. Composes published primitives (@peac/net-node, @peac/jwks-cache, @peac/kernel, @peac/crypto, @peac/schema) behind a private verifier-oriented interface for parity testing against @peac/protocol's existing self-contained resolver path on shared local fixtures. NEVER published. NEVER referenced by published packages. P0 invariants: @peac/protocol must NOT import / depend on / re-export from / emit reference to this package; @peac/resolver-http runtime source must NOT import @peac/protocol (parity test files MAY). @peac/jwks-cache and @peac/net-node are reused as published primitives, not modified, not merged, not renamed in v0.13.2 (denylist seeded by v0.13.1 PR A in tests/tooling/protocol-private-imports.test.ts and friends).",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "scripts": {
+    "prebuild": "rm -rf dist",
+    "build": "pnpm run build:js && pnpm run build:types",
+    "build:js": "tsup",
+    "build:types": "rm -f dist/.tsbuildinfo && tsc && rm -f dist/.tsbuildinfo",
+    "clean": "rm -rf dist",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@peac/crypto": "workspace:*",
+    "@peac/jwks-cache": "workspace:*",
+    "@peac/kernel": "workspace:*",
+    "@peac/net-node": "workspace:*"
+  },
+  "devDependencies": {
+    "@peac/protocol": "workspace:*",
+    "tsup": "^8.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^4.0.0"
+  }
+}

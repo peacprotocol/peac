@@ -1,0 +1,5 @@
+{
+  "issuer": "https://issuer.example.com",
+  "jwks_uri": "https://issuer.example.com/.well-known/jwks.json",
+  "version": "peac-issuer/1"
+}
