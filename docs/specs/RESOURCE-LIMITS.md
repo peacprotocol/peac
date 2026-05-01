@@ -84,8 +84,8 @@ issuer-config (`/.well-known/peac-issuer.json`), JWKS, `peac.txt`, and
 The values above describe a layered contract. `@peac/net-node`
 exposes a generous default (`DEFAULT_TIMEOUT_MS = 30,000 ms` and
 `DEFAULT_MAX_RESPONSE_BYTES = 2 MiB`) for unrestricted callers.
-Verifier-bearing paths — pointer-fetch, JWKS resolution, issuer-config
-fetch, `peac.txt` discovery — pass explicit `timeoutMs` and `maxBytes`
+Verifier-bearing paths (pointer-fetch, JWKS resolution, issuer-config
+fetch, `peac.txt` discovery) pass explicit `timeoutMs` and `maxBytes`
 options that are tighter than the net-node default. The explicit value
 wins; the unrestricted default applies only to callers that do not
 supply one.
@@ -101,17 +101,17 @@ value.
 Three timeout classes apply to verifier-bearing and unrestricted
 network paths:
 
-- **5,000 ms** — verifier-bearing fetches: JWKS, `peac.txt`,
+- **5,000 ms**: verifier-bearing fetches: JWKS, `peac.txt`,
   pointer-fetch, ssrf-safe-fetch (default). Canonical verifier limit:
   `VERIFIER_LIMITS.fetchTimeoutMs` in
   [`packages/kernel/src/constants.ts`](../../packages/kernel/src/constants.ts).
-- **10,000 ms** — issuer-config fetch
+- **10,000 ms**: issuer-config fetch
   (`/.well-known/peac-issuer.json`). Canonical verifier limit:
   `ISSUER_CONFIG.fetchTimeoutMs` in
   [`packages/kernel/src/constants.ts`](../../packages/kernel/src/constants.ts).
   Slightly more generous than verifier-bearing fetches because
   issuer-config is the discovery anchor for verification.
-- **30,000 ms** — unrestricted net-node default for callers that do
+- **30,000 ms**: unrestricted net-node default for callers that do
   not supply `timeoutMs`. Canonical net-node default:
   `DEFAULT_TIMEOUT_MS` in
   [`packages/net/node/src/index.ts`](../../packages/net/node/src/index.ts).
