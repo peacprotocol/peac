@@ -71,14 +71,56 @@ issuer-config (`/.well-known/peac-issuer.json`), JWKS, `peac.txt`, and
 | -------------------------------- | --------- | --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
 | net-node fetch timeout (default) | 30,000 ms | `DEFAULT_TIMEOUT_MS` ([`packages/net/node/src/index.ts`](../../packages/net/node/src/index.ts))                       | [`packages/net/node/tests/safe-fetch.test.ts`](../../packages/net/node/tests/safe-fetch.test.ts)                         |
 | net-node redirect chain cap      | 5         | `DEFAULT_MAX_REDIRECTS`                                                                                               | same                                                                                                                     |
-| `peac.txt` fetch timeout         | 5,000 ms  | `DEFAULT_TIMEOUT_MS` ([`packages/discovery/src/index.ts`](../../packages/discovery/src/index.ts))                     | [`packages/discovery/tests/index.test.ts`](../../packages/discovery/tests/index.test.ts)                                 |
-| `peac.txt` fetch byte cap        | 256 KiB   | `MAX_BYTES` ([`packages/discovery/src/index.ts`](../../packages/discovery/src/index.ts))                              | same                                                                                                                     |
-| JWKS fetch timeout               | 5,000 ms  | `DEFAULT_TIMEOUT_MS` ([`packages/jwks-cache/src/resolver.ts`](../../packages/jwks-cache/src/resolver.ts))             | [`packages/jwks-cache/tests/resolver.test.ts`](../../packages/jwks-cache/tests/resolver.test.ts)                         |
+| `peac.txt` fetch byte cap        | 256 KiB   | `POLICY.maxBytes` ([`packages/kernel/src/constants.ts`](../../packages/kernel/src/constants.ts))                      | [`packages/policy-kit/tests/loader.test.ts`](../../packages/policy-kit/tests/loader.test.ts)                             |
+| JWKS fetch timeout               | 5,000 ms  | `VERIFIER_LIMITS.fetchTimeoutMs` ([`packages/kernel/src/constants.ts`](../../packages/kernel/src/constants.ts))       | [`packages/jwks-cache/tests/resolver.test.ts`](../../packages/jwks-cache/tests/resolver.test.ts)                         |
 | JWKS keys per response cap       | 100       | `DEFAULT_MAX_KEYS`                                                                                                    | same                                                                                                                     |
 | JWKS cache TTL (default)         | 3,600 s   | `DEFAULT_TTL_SECONDS`                                                                                                 | same                                                                                                                     |
 | JWKS cache TTL (max)             | 86,400 s  | `MAX_TTL_SECONDS`                                                                                                     | same                                                                                                                     |
 | JWKS cache TTL (min)             | 60 s      | `MIN_TTL_SECONDS`                                                                                                     | same                                                                                                                     |
 | receipt_url fetch timeout        | 5,000 ms  | `DEFAULT_TIMEOUT_MS` ([`packages/net/node/src/receipt-resolver.ts`](../../packages/net/node/src/receipt-resolver.ts)) | [`packages/net/node/tests/receipt-url-middleware.test.ts`](../../packages/net/node/tests/receipt-url-middleware.test.ts) |
+
+#### Layered network limits
+
+The values above describe a layered contract. `@peac/net-node`
+exposes a generous default (`DEFAULT_TIMEOUT_MS = 30,000 ms` and
+`DEFAULT_MAX_RESPONSE_BYTES = 2 MiB`) for unrestricted callers.
+Verifier-bearing paths — pointer-fetch, JWKS resolution, issuer-config
+fetch, `peac.txt` discovery — pass explicit `timeoutMs` and `maxBytes`
+options that are tighter than the net-node default. The explicit value
+wins; the unrestricted default applies only to callers that do not
+supply one.
+
+Implementations MUST NOT relax a verifier-bearing path's explicit cap
+to the unrestricted default, even when convenient. The net-node
+default exists for callers that manage their own timing and size
+guarantees; verifier-bearing fetch paths always pass the explicit
+value.
+
+#### Timeout classes
+
+Three timeout classes apply to verifier-bearing and unrestricted
+network paths:
+
+- **5,000 ms** — verifier-bearing fetches: JWKS, `peac.txt`,
+  pointer-fetch, ssrf-safe-fetch (default). Canonical verifier limit:
+  `VERIFIER_LIMITS.fetchTimeoutMs` in
+  [`packages/kernel/src/constants.ts`](../../packages/kernel/src/constants.ts).
+- **10,000 ms** — issuer-config fetch
+  (`/.well-known/peac-issuer.json`). Canonical verifier limit:
+  `ISSUER_CONFIG.fetchTimeoutMs` in
+  [`packages/kernel/src/constants.ts`](../../packages/kernel/src/constants.ts).
+  Slightly more generous than verifier-bearing fetches because
+  issuer-config is the discovery anchor for verification.
+- **30,000 ms** — unrestricted net-node default for callers that do
+  not supply `timeoutMs`. Canonical net-node default:
+  `DEFAULT_TIMEOUT_MS` in
+  [`packages/net/node/src/index.ts`](../../packages/net/node/src/index.ts).
+
+Every verifier-bearing path supplies an explicit timeout in the 5,000
+or 10,000 ms class, so the 30,000 ms default applies only outside the
+verification path. Some discovery call sites currently use the
+matching literal value; this document records the resource-limit
+contract, not a source refactor.
 
 ## SSRF policy
 
@@ -183,6 +225,13 @@ NOT skip any layer's cap.
 - **Header-carrier surfaces**: the `PEAC-Receipt` HTTP header carries
   a compact JWS only. Per-RFC HTTP-header byte budgets apply
   externally; PEAC does not introduce a separate header-byte cap.
+  The reference verifier (`apps/api`) does not currently define a
+  PEAC-managed app-level header-byte budget; header-size rejection is
+  left to the runtime / parser / deployment layer (Node's HTTP server
+  exposes `maxHeaderSize`; current Node documentation lists the
+  default at 16 KiB, but deployment hosts may differ). A request body
+  is the sized payload that PEAC enforces, capped at 256 KiB by
+  `MAX_BODY_SIZE` in [`apps/api/src/verify-v1.ts`](../../apps/api/src/verify-v1.ts).
 
 ## Tightening process
 
