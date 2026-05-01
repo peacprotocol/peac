@@ -5,6 +5,27 @@ All notable changes to PEAC Protocol will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.13.3] - 2026-05-01
+
+Documentation and internal test-infrastructure release. No public API change. No wire-format change. No new public package. No publish-manifest change. Published to npm `next` only.
+
+### Added
+
+- Operator runbook at `docs/diagnostics/ROLLBACK-PATH.md`.
+- `docs/specs/RESOURCE-LIMITS.md`: Layered network limits subsection, Timeout classes subsection, and a Header-carrier surfaces clarification.
+
+### Changed
+
+- `docs/specs/RESOURCE-LIMITS.md`: resource-limit table citations updated to canonical kernel constants; stale citations to a retired package replaced with current source paths.
+
+### Compatibility
+
+- Public API signatures unchanged.
+- Wire format unchanged.
+- OpenAPI verify contract unchanged.
+- Active publish-manifest count: 36 (unchanged from v0.13.2).
+- npm dist-tag: `next` only.
+
 ## [0.13.2] - 2026-05-01
 
 Internal foundations release. No public API change. No wire format change. No new public package. No publish-manifest change. Published to npm `next` only.

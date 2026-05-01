@@ -1,6 +1,6 @@
 {
   "name": "@peac/mappings-slsa",
-  "version": "0.13.2",
+  "version": "0.13.3",
   "description": "SLSA v1.2 provenance mapping for PEAC provenance extension",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
