@@ -898,6 +898,8 @@ Wire format `peac-receipt/0.1` is unchanged. `subject_snapshot` is envelope-leve
 
 Implementations MAY skip certain validations (e.g., policy fetch) if operating in "envelope-only" mode, but MUST document which validations are performed vs. deferred.
 
+Reference implementations may expose internal-only flags that route the validation pipeline through alternate code paths for diagnostic and rollback purposes. Such flags are not part of the public stability contract; the canonical inventory of internal-only flags lives in the [internal-only flags table](../STABILITY-CONTRACT.md#internal-only-flags) of `docs/STABILITY-CONTRACT.md`.
+
 ---
 
 ## 10. Future Extensions

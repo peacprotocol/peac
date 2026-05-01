@@ -180,6 +180,49 @@ Current advisory checks:
 - Performance SLO gate (on PRs; blocking on release tags)
 - Extension regression gate
 - Error code parity
+- Protocol Rollback-Path Matrix (Node Current, advisory)
+
+---
+
+## Rollback-path matrix
+
+The `protocol-rollback-path-matrix` job in `ci.yml` (Lane 3b) runs the
+`@peac/protocol` test suite under both internal rollback-path flag
+values (`PEAC_INTERNAL_LEGACY_PATH=0` and `=1`) across both supported
+LTS Node majors:
+
+| Dim            | Values         |
+| -------------- | -------------- |
+| `legacy_path`  | `'0'`, `'1'`   |
+| `node-version` | `'22'`, `'24'` |
+
+That is **4 blocking cells**. Both halves of the `legacy_path` axis must
+be green on every Node major in the matrix for the job to pass. Both
+flag values currently use the same protocol path, so the matrix asserts
+test-suite equivalence under both, not universal byte-equivalence.
+
+**Programmatic-option coverage** runs inside the Vitest test suite
+itself, in
+[`packages/protocol/__tests__/_internal/legacy-path-flag.test.ts`](../packages/protocol/__tests__/_internal/legacy-path-flag.test.ts),
+not as an extra CI matrix axis. The test exercises both env-variable
+and programmatic-option (`_internal.legacyPath: true`) entry points
+under fixed-seed deterministic inputs and asserts byte-equivalent
+output across both flag values.
+
+**Current Node line** is covered by the advisory
+`protocol-rollback-path-matrix-current-node` job (Lane 3c) with
+`continue-on-error: true`. Required gating stays on the LTS lanes; a
+Current-line regression does not block release. Re-verify the Node
+release schedule at maintenance time and adjust the LTS pair if Node 22
+moves to End-of-Life or Node 26 enters Active LTS.
+
+**Release-gate enforcement chain.** The matrix runs on every
+protocol-touching PR (per `detect-changes.outputs.core`), unconditionally
+on `main`, and unconditionally on every `release/*` branch. Tag-push to
+`v*` triggers `publish.yml`, which runs a `release_gate_rollback_matrix`
+preflight job that re-executes the same 4-cell matrix at the tagged SHA.
+Both `publish_dry_run` and `publish_prod` declare it as a `needs:`
+dependency, so any failed cell hard-blocks publish.
 
 ---
 
