@@ -92,3 +92,46 @@ export function verdictKey(v: ParityVerdict): string {
 export function verdictKeyShape(v: ParityVerdict): string {
   return JSON.stringify(verdictBase(v));
 }
+
+/**
+ * Stringify a ParityVerdict using error-class-equivalent semantics.
+ *
+ * Encodes ONLY:
+ *   - `accepted` boolean
+ *   - sorted error-code MULTISET preserving counts
+ *
+ * Ignores:
+ *   - error path
+ *   - warnings (codes and paths)
+ *   - canonicalClaimsDigest
+ *   - any other field
+ *
+ * Does NOT dedupe duplicate codes. Two errors emitted with the same
+ * `code` are encoded as two entries; this preserves multiset semantics
+ * because duplicate counts may carry meaningful diagnostic signal that
+ * dedup would erase.
+ *
+ * Use for diagnostic overlap comparisons where the goal is to assert
+ * agreement on what error CLASS was raised, independent of where it
+ * was emitted, what message it carried, or what warnings accompanied
+ * it. Path comparison is intentionally too strict for this gate;
+ * callers needing path-aware comparison should use `verdictKey` or
+ * `verdictKeyShape`.
+ *
+ * NOTE on input construction: `makeVerdict()` deduplicates errors by
+ * `(code, path)` before normalization. To preserve a true multiset of
+ * same-code entries through `verdictKeyErrorClass`, callers MUST
+ * construct the `ParityVerdict` literally (without `makeVerdict`) or
+ * supply errors with distinct `path` values that survive dedup. The
+ * function operates on the verdict's `.errors` array as given; it is
+ * the caller's responsibility to ensure that array carries the
+ * intended multiset shape.
+ */
+export function verdictKeyErrorClass(v: ParityVerdict): string {
+  const errorCodes = v.errors.map((e) => e.code);
+  const sorted = [...errorCodes].sort();
+  return JSON.stringify({
+    accepted: v.accepted,
+    errorCodes: sorted,
+  });
+}
