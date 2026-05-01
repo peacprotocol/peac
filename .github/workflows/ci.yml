@@ -469,8 +469,8 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - uses: ./.github/actions/setup-env
 
-      - name: Build @peac/protocol
-        run: pnpm --filter @peac/protocol build
+      - name: Build all packages
+        run: pnpm build
 
       - name: Run @peac/protocol tests with PEAC_INTERNAL_LEGACY_PATH=${{ matrix.legacy_path }}
         env:
