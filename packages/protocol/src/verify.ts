@@ -16,6 +16,7 @@ import {
 } from '@peac/schema';
 import { resolveJWKS, type JWK } from './jwks-resolver.js';
 import { hashReceipt, fireTelemetryHook, type TelemetryHook } from './telemetry.js';
+import { readLegacyPathFlag, type LegacyPathOptions } from './_internal/legacy-path.js';
 
 /**
  * Convert JWK x coordinate to Ed25519 public key
@@ -101,6 +102,12 @@ export interface VerifyOptions {
 export async function verifyReceipt(
   optionsOrJws: string | VerifyOptions
 ): Promise<VerifyResult | VerifyFailure> {
+  // Internal rollback-path flag. See `_internal/legacy-path.ts` for
+  // the full contract.
+  const legacyPathOptions =
+    typeof optionsOrJws === 'string' ? undefined : (optionsOrJws as unknown as LegacyPathOptions);
+  void readLegacyPathFlag(legacyPathOptions);
+
   // Support both old (string) and new (options) signatures for backwards compatibility
   const receiptJws = typeof optionsOrJws === 'string' ? optionsOrJws : optionsOrJws.receiptJws;
   const inputSnapshot =

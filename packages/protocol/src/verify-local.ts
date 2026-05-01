@@ -28,6 +28,7 @@ import { checkTypeExtensionMapping } from './type-extension-check';
 import { maybeRunShadowValidation } from './_internal/record-core/shadow-hook';
 import { runBoundedValidatorShadow } from './_internal/record-core/bounded-validator.js';
 import { isShadowEnabled, scheduleShadow, type ShadowEnableOptions } from './_internal/shadow.js';
+import { readLegacyPathFlag, type LegacyPathOptions } from './_internal/legacy-path.js';
 import {
   realObservationForVerifyLocalSuccess,
   shadowObservationFromBounded,
@@ -364,6 +365,10 @@ export async function verifyLocal(
   publicKey: Uint8Array,
   options: VerifyLocalOptions = {}
 ): Promise<VerifyLocalResult> {
+  // Internal rollback-path flag. See `_internal/legacy-path.ts` for
+  // the full contract.
+  void readLegacyPathFlag(options as unknown as LegacyPathOptions);
+
   const {
     issuer,
     subjectUri,

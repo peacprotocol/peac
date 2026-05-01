@@ -8,6 +8,7 @@ import { sign } from '@peac/crypto';
 import { defaultCodec } from './_internal/record-core/codec/jws-jwt.js';
 import { runBoundedValidatorShadow } from './_internal/record-core/bounded-validator.js';
 import { isShadowEnabled, scheduleShadow, type ShadowEnableOptions } from './_internal/shadow.js';
+import { readLegacyPathFlag, type LegacyPathOptions } from './_internal/legacy-path.js';
 import {
   realObservationForIssue,
   shadowObservationFromBoundedAcceptedOnly,
@@ -476,6 +477,11 @@ export type IssueOptions = IssueWire02Options;
  * @throws IssueError if iss is not canonical or schema validation fails
  */
 export async function issueWire02(options: IssueWire02Options): Promise<IssueResult> {
+  // Internal rollback-path flag. The returned boolean is intentionally
+  // discarded; both flag values currently use the same protocol path.
+  // See `_internal/legacy-path.ts` for the full contract.
+  void readLegacyPathFlag(options as unknown as LegacyPathOptions);
+
   // Validate canonical iss before signing
   if (!isCanonicalIss(options.iss)) {
     throw new IssueError({

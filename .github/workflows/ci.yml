@@ -436,6 +436,52 @@ jobs:
           retention-days: 90
 
   # ---------------------------------------------------------------------------
+  # Lane 3b: Protocol rollback-path matrix
+  #
+  # Runs the @peac/protocol test suite twice, once with the internal
+  # rollback-path flag PEAC_INTERNAL_LEGACY_PATH=0 (default) and once
+  # with =1. Both halves green verifies the flag is plumbed cleanly
+  # and no test silently depends on a specific flag state. Both flag
+  # values currently use the same protocol path, so the matrix asserts
+  # test-suite equivalence under both, not universal byte-equivalence.
+  #
+  # Scoped to protocol-touching PRs (detect-changes.outputs.core
+  # already covers packages/protocol/**) so apps-only and stamp-only
+  # PRs do not pay this cost.
+  # ---------------------------------------------------------------------------
+  protocol-rollback-path-matrix:
+    name: Protocol Rollback-Path Matrix
+    needs: detect-changes
+    if: >-
+      github.ref == 'refs/heads/main' ||
+      needs.detect-changes.outputs.core == 'true' ||
+      needs.detect-changes.outputs.ci == 'true' ||
+      needs.detect-changes.outputs.root_config == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        legacy_path: ['0', '1']
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: ./.github/actions/setup-env
+
+      - name: Build @peac/protocol and its workspace dependencies
+        # Trailing `...` selects @peac/protocol AND every workspace
+        # package it depends on (kernel, schema, crypto, ...). Targeted
+        # build keeps the matrix cost lower than `pnpm build` while
+        # ensuring tsc can resolve all `@peac/*` declarations.
+        run: pnpm --filter '@peac/protocol...' build
+
+      - name: Run @peac/protocol tests with PEAC_INTERNAL_LEGACY_PATH=${{ matrix.legacy_path }}
+        env:
+          PEAC_INTERNAL_LEGACY_PATH: ${{ matrix.legacy_path }}
+        run: pnpm --filter @peac/protocol test
+
+  # ---------------------------------------------------------------------------
   # Lane 4: Examples + Apps (only when relevant paths changed)
   # ---------------------------------------------------------------------------
   examples-apps:
