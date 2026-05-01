@@ -19,7 +19,12 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { makeVerdict, verdictKey } from '../../src/_internal/test-helpers/parity-verdict';
+import {
+  makeVerdict,
+  verdictKey,
+  verdictKeyErrorClass,
+  type ParityVerdict,
+} from '../../src/_internal/test-helpers/parity-verdict';
 import { runEnvelopeCanonical } from '../../src/_internal/test-helpers/canonical-runner';
 
 describe('parity verdict comparator: negative harness tests', () => {
@@ -188,5 +193,104 @@ describe('parity verdict comparator: negative harness tests', () => {
     const left = makeVerdict(false, [{ code: 'A' }, { code: 'Z' }]);
     const right = makeVerdict(false, [{ code: 'Z' }, { code: 'A' }]);
     expect(verdictKey(left)).toBe(verdictKey(right));
+  });
+});
+
+describe('verdictKeyErrorClass: error-class-equivalent comparison semantics', () => {
+  // Construct verdicts literally (bypassing makeVerdict's dedup) so the
+  // multiset semantics are preserved through the comparator. The helper
+  // operates on the verdict's `.errors` array as given.
+  function rawVerdict(
+    accepted: boolean,
+    errors: Array<{ code: string; path?: string }> = [],
+    warnings: Array<{ code: string; path?: string }> = [],
+    canonicalClaimsDigest?: string
+  ): ParityVerdict {
+    const verdict: ParityVerdict = {
+      accepted,
+      errors,
+      warnings,
+    };
+    if (canonicalClaimsDigest !== undefined) {
+      return { ...verdict, canonicalClaimsDigest };
+    }
+    return verdict;
+  }
+
+  it('same error codes in different order: equal key', () => {
+    const left = rawVerdict(false, [{ code: 'E_ALPHA' }, { code: 'E_BETA' }, { code: 'E_GAMMA' }]);
+    const right = rawVerdict(false, [{ code: 'E_GAMMA' }, { code: 'E_ALPHA' }, { code: 'E_BETA' }]);
+    expect(verdictKeyErrorClass(left)).toBe(verdictKeyErrorClass(right));
+  });
+
+  it('duplicate code counts are preserved (multiset, no dedup)', () => {
+    const single = rawVerdict(false, [{ code: 'E_DUP' }]);
+    const triple = rawVerdict(false, [{ code: 'E_DUP' }, { code: 'E_DUP' }, { code: 'E_DUP' }]);
+    expect(verdictKeyErrorClass(single)).not.toBe(verdictKeyErrorClass(triple));
+
+    const tripleReordered = rawVerdict(false, [
+      { code: 'E_DUP' },
+      { code: 'E_DUP' },
+      { code: 'E_DUP' },
+    ]);
+    expect(verdictKeyErrorClass(triple)).toBe(verdictKeyErrorClass(tripleReordered));
+  });
+
+  it('different duplicate counts of the same code: divergence', () => {
+    const two = rawVerdict(false, [{ code: 'E_X' }, { code: 'E_X' }]);
+    const three = rawVerdict(false, [{ code: 'E_X' }, { code: 'E_X' }, { code: 'E_X' }]);
+    expect(verdictKeyErrorClass(two)).not.toBe(verdictKeyErrorClass(three));
+  });
+
+  it('different accepted value: divergence even with identical error sets', () => {
+    const accepted = rawVerdict(true, [{ code: 'E_Y' }]);
+    const rejected = rawVerdict(false, [{ code: 'E_Y' }]);
+    expect(verdictKeyErrorClass(accepted)).not.toBe(verdictKeyErrorClass(rejected));
+  });
+
+  it('path differences do not affect the key (path is ignored)', () => {
+    const left = rawVerdict(false, [{ code: 'E_PATH', path: '/a' }]);
+    const right = rawVerdict(false, [{ code: 'E_PATH', path: '/b' }]);
+    expect(verdictKeyErrorClass(left)).toBe(verdictKeyErrorClass(right));
+
+    const noPath = rawVerdict(false, [{ code: 'E_PATH' }]);
+    expect(verdictKeyErrorClass(left)).toBe(verdictKeyErrorClass(noPath));
+  });
+
+  it('warning differences do not affect the key (warnings are ignored)', () => {
+    const noWarn = rawVerdict(true, [], []);
+    const oneWarn = rawVerdict(true, [], [{ code: 'W_X' }]);
+    const manyWarn = rawVerdict(true, [], [{ code: 'W_X' }, { code: 'W_Y', path: '/p' }]);
+    expect(verdictKeyErrorClass(noWarn)).toBe(verdictKeyErrorClass(oneWarn));
+    expect(verdictKeyErrorClass(noWarn)).toBe(verdictKeyErrorClass(manyWarn));
+  });
+
+  it('canonicalClaimsDigest does not affect the key (digest is ignored)', () => {
+    const noDigest = rawVerdict(true, [], []);
+    const withDigest = rawVerdict(true, [], [], 'sha256:aaaaaa');
+    const otherDigest = rawVerdict(true, [], [], 'sha256:bbbbbb');
+    expect(verdictKeyErrorClass(noDigest)).toBe(verdictKeyErrorClass(withDigest));
+    expect(verdictKeyErrorClass(withDigest)).toBe(verdictKeyErrorClass(otherDigest));
+  });
+
+  it('different error codes: divergence', () => {
+    const left = rawVerdict(false, [{ code: 'E_ALPHA' }]);
+    const right = rawVerdict(false, [{ code: 'E_BETA' }]);
+    expect(verdictKeyErrorClass(left)).not.toBe(verdictKeyErrorClass(right));
+  });
+
+  it('output is stable JSON with sorted errorCodes field', () => {
+    const v = rawVerdict(false, [{ code: 'C' }, { code: 'A' }, { code: 'B' }, { code: 'A' }]);
+    const key = verdictKeyErrorClass(v);
+    expect(key).toBe(JSON.stringify({ accepted: false, errorCodes: ['A', 'A', 'B', 'C'] }));
+  });
+
+  it('empty errors: stable encoding', () => {
+    const accepted = rawVerdict(true, [], []);
+    const rejected = rawVerdict(false, [], []);
+    expect(verdictKeyErrorClass(accepted)).toBe(JSON.stringify({ accepted: true, errorCodes: [] }));
+    expect(verdictKeyErrorClass(rejected)).toBe(
+      JSON.stringify({ accepted: false, errorCodes: [] })
+    );
   });
 });
