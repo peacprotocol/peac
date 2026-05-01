@@ -222,6 +222,8 @@ console.log('\n--- Internal-flag front-door grep ---');
 const FORBIDDEN_FLAGS = [
   'PEAC_INTERNAL_SHADOW_CORE',
   '_internal.shadowCore',
+  'PEAC_INTERNAL_LEGACY_PATH',
+  '_internal.legacyPath',
   'PEAC_EXPERIMENTAL_CODEC',
   '_internal.codec',
 ];

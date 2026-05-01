@@ -48,6 +48,8 @@ const FORBIDDEN_IDENTIFIERS = [
   '@peac/resolver-http',
   'PEAC_INTERNAL_SHADOW_CORE',
   '_internal.shadowCore',
+  'PEAC_INTERNAL_LEGACY_PATH',
+  '_internal.legacyPath',
   'PEAC_EXPERIMENTAL_CODEC',
   '_internal.codec',
 ];
@@ -69,7 +71,12 @@ const FORBIDDEN_IDENTIFIERS = [
 //   - the identifier is permitted only in *.mjs / *.cjs (runtime),
 //     never in *.d.ts (public TypeScript surface).
 const TIER_1_RUNTIME_ALLOWLIST = {
-  '@peac/protocol': new Set(['PEAC_INTERNAL_SHADOW_CORE', '_internal.shadowCore']),
+  '@peac/protocol': new Set([
+    'PEAC_INTERNAL_SHADOW_CORE',
+    '_internal.shadowCore',
+    'PEAC_INTERNAL_LEGACY_PATH',
+    '_internal.legacyPath',
+  ]),
 };
 
 // Tier 2: forbidden ONLY on public-surface files. These are implementation
