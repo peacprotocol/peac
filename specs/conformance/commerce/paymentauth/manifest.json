@@ -1,6 +1,6 @@
 {
   "name": "commerce/paymentauth",
-  "version": "0.13.2",
+  "version": "0.13.3",
   "section": 26,
   "subsection": "paymentauth",
   "description": "Conformance vectors for the v0.12.11 paymentauth commerce evidence mapping.",
