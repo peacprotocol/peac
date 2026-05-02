@@ -7,6 +7,7 @@ import { uuidv7 } from 'uuidv7';
 import { sign } from '@peac/crypto';
 import { defaultCodec } from './_internal/record-core/codec/jws-jwt.js';
 import { runBoundedValidatorShadow } from './_internal/record-core/bounded-validator.js';
+import { runBoundedValidationGate } from './_internal/record-core/validation-gate.js';
 import { isShadowEnabled, scheduleShadow, type ShadowEnableOptions } from './_internal/shadow.js';
 import { readLegacyPathFlag, type LegacyPathOptions } from './_internal/legacy-path.js';
 import {
@@ -477,10 +478,11 @@ export type IssueOptions = IssueWire02Options;
  * @throws IssueError if iss is not canonical or schema validation fails
  */
 export async function issueWire02(options: IssueWire02Options): Promise<IssueResult> {
-  // Internal rollback-path flag. The returned boolean is intentionally
-  // discarded; both flag values currently use the same protocol path.
-  // See `_internal/legacy-path.ts` for the full contract.
-  void readLegacyPathFlag(options as unknown as LegacyPathOptions);
+  // Internal rollback-path flag. Selects the bounded-validation
+  // admission gate (default) or the inline canonical schema check
+  // (rollback). Both branches share the canonical materializer that
+  // builds the IssueResult and the JWS bytes.
+  const legacyPath = readLegacyPathFlag(options as unknown as LegacyPathOptions);
 
   // Validate canonical iss before signing
   if (!isCanonicalIss(options.iss)) {
@@ -518,20 +520,40 @@ export async function issueWire02(options: IssueWire02Options): Promise<IssueRes
     ...(options.extensions !== undefined && { extensions: options.extensions }),
   };
 
-  // Validate schema before signing (fail-closed)
-  const parseResult = Wire02ClaimsSchema.safeParse(claims);
-  if (!parseResult.success) {
-    const firstIssue = parseResult.error.issues[0];
-    throw new IssueError({
-      code: 'E_INVALID_FORMAT',
-      category: 'validation',
-      severity: 'error',
-      retryable: false,
-      http_status: 400,
-      details: {
-        message: `Wire 0.2 claims schema validation failed: ${firstIssue?.message ?? 'unknown'}`,
-      },
-    } as PEACError);
+  // Validate schema before signing (fail-closed). The default branch
+  // routes through the bounded validation gate; the rollback branch
+  // retains the inline canonical schema check. Both branches produce
+  // byte-identical JWS bytes for every input both branches accept.
+  if (legacyPath) {
+    const parseResult = Wire02ClaimsSchema.safeParse(claims);
+    if (!parseResult.success) {
+      const firstIssue = parseResult.error.issues[0];
+      throw new IssueError({
+        code: 'E_INVALID_FORMAT',
+        category: 'validation',
+        severity: 'error',
+        retryable: false,
+        http_status: 400,
+        details: {
+          message: `Wire 0.2 claims schema validation failed: ${firstIssue?.message ?? 'unknown'}`,
+        },
+      } as PEACError);
+    }
+  } else {
+    const gateResult = runBoundedValidationGate({
+      surface: 'issueWire02',
+      payload: claims as unknown,
+    });
+    if (!gateResult.ok) {
+      throw new IssueError({
+        code: gateResult.code,
+        category: 'validation',
+        severity: 'error',
+        retryable: false,
+        http_status: 400,
+        details: { message: gateResult.message },
+      } as PEACError);
+    }
   }
 
   // Sign with Wire 0.2 via the internal codec boundary (always sets
@@ -540,7 +562,12 @@ export async function issueWire02(options: IssueWire02Options): Promise<IssueRes
   // the prior release.
   const jws = await defaultCodec.encode(claims, options.privateKey, options.kid);
 
-  if (isShadowEnabled(options as unknown as ShadowEnableOptions)) {
+  // Shadow scheduling fires only on the rollback branch where the
+  // bounded validator is genuinely a comparison path; under the
+  // default branch the bounded validator runs as the production
+  // admission gate, so a duplicate shadow run would compare the same
+  // code path against itself.
+  if (legacyPath && isShadowEnabled(options as unknown as ShadowEnableOptions)) {
     scheduleShadow<ShadowObservation>({
       call: 'issue',
       realResult: realObservationForIssue(),

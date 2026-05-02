@@ -36,6 +36,7 @@
 import { describe, it, expect } from 'vitest';
 import { generateKeypairFromSeed } from '@peac/crypto/testkit';
 import { readLegacyPathFlag, type LegacyPathOptions } from '../../src/_internal/legacy-path.js';
+import { defaultCodec } from '../../src/_internal/record-core/codec/jws-jwt.js';
 import { issue, verifyLocal } from '../../src/index.js';
 
 // 32-byte deterministic seed; isolated to this test file. Different from
@@ -284,5 +285,194 @@ describe('LegacyPathOptions structural shape (smoke; not a type-surface test)', 
     // (front-door grep across docs + tracked surfaces).
     const opts: LegacyPathOptions = { _internal: { legacyPath: true } };
     expect(readLegacyPathFlag(opts)).toBe(true);
+  });
+});
+
+// Rejection-shape parity: a malformed input rejected at admission must
+// produce the identical public failure shape on both branches. This is
+// the §1.5 byte-equivalence contract on the failure path; byte-equality
+// on acceptance is asserted by T8/T9 above.
+
+describe('issue(): rejection-shape parity across both flag values', () => {
+  it('T10: invalid `iss` produces identical IssueError under both flag values', async () => {
+    const { privateKey } = await generateKeypairFromSeed(FIXED_SEED);
+    const malformed = {
+      ...STABLE_OPTIONS,
+      pillars: [...STABLE_OPTIONS.pillars],
+      privateKey,
+      iss: 'http://not-canonical.example', // missing https:// canonical iss
+    };
+
+    let errorOff: unknown;
+    let errorOn: unknown;
+    try {
+      await withEnvFlagAsync('0', async () => issue(malformed));
+    } catch (err) {
+      errorOff = err;
+    }
+    try {
+      await withEnvFlagAsync('1', async () => issue(malformed));
+    } catch (err) {
+      errorOn = err;
+    }
+
+    expect(errorOff).toBeDefined();
+    expect(errorOn).toBeDefined();
+    // `isCanonicalIss` rejection happens inline above the gate dispatch
+    // on both branches; the IssueError shape must be byte-equal.
+    expect((errorOff as { name?: string }).name).toBe('IssueError');
+    expect((errorOn as { name?: string }).name).toBe('IssueError');
+    expect((errorOff as { peacError?: { code?: string } }).peacError?.code).toBe(
+      (errorOn as { peacError?: { code?: string } }).peacError?.code
+    );
+    expect((errorOff as Error).message).toBe((errorOn as Error).message);
+  });
+});
+
+describe('verifyLocal(): rejection-shape parity across both flag values', () => {
+  // T11 covers a tampered-signature path that fails before the
+  // admission gate / inline canonical sequence is reached. T13 below
+  // covers the gate-failure parity with a validly signed but admission-
+  // rejected payload.
+  it('T11: tampered-signature payload produces identical VerifyLocalFailure shape under both flag values', async () => {
+    const { privateKey, publicKey } = await generateKeypairFromSeed(FIXED_SEED);
+    const baseline = await issue({
+      ...STABLE_OPTIONS,
+      pillars: [...STABLE_OPTIONS.pillars],
+      privateKey,
+    });
+    const tampered = baseline.jws.slice(0, baseline.jws.lastIndexOf('.') + 1) + 'A'.repeat(86); // fabricate a 64-byte signature that will not verify
+
+    const failOff = await withEnvFlagAsync('0', async () => verifyLocal(tampered, publicKey));
+    const failOn = await withEnvFlagAsync('1', async () => verifyLocal(tampered, publicKey));
+
+    expect(failOff.valid).toBe(false);
+    expect(failOn.valid).toBe(false);
+    expect(JSON.stringify(failOff)).toBe(JSON.stringify(failOn));
+  });
+});
+
+// Real gate-failure parity: the failures below originate inside the
+// admission step itself. Default branch fails inside
+// `runBoundedValidationGate`; rollback branch fails inside the inline
+// canonical sequence (`Wire02ClaimsSchema.safeParse` for issueWire02;
+// `validateKernelConstraints` + `parseReceiptClaims` for verifyLocal).
+// Public-facing IssueError / VerifyLocalFailure shape must be byte-
+// equal across both branches.
+
+describe('issue(): real gate-failure parity (canonical iss + schema-rejected claims)', () => {
+  it('T12: malformed `type` after canonical iss produces identical IssueError under both flag values', async () => {
+    const { privateKey } = await generateKeypairFromSeed(FIXED_SEED);
+    // `iss` is canonical so `isCanonicalIss` accepts inline above the
+    // gate. The malformed `type` value violates the Wire 0.2 schema,
+    // forcing the failure to land inside admission: the gate on the
+    // default branch, the inline `Wire02ClaimsSchema.safeParse` on the
+    // rollback branch.
+    const malformed = {
+      ...STABLE_OPTIONS,
+      pillars: [...STABLE_OPTIONS.pillars],
+      privateKey,
+      type: 'invalid type with spaces',
+    };
+
+    let errorOff: unknown;
+    let errorOn: unknown;
+    try {
+      await withEnvFlagAsync('0', async () => issue(malformed));
+    } catch (err) {
+      errorOff = err;
+    }
+    try {
+      await withEnvFlagAsync('1', async () => issue(malformed));
+    } catch (err) {
+      errorOn = err;
+    }
+
+    expect(errorOff).toBeDefined();
+    expect(errorOn).toBeDefined();
+    expect((errorOff as { name?: string }).name).toBe('IssueError');
+    expect((errorOn as { name?: string }).name).toBe('IssueError');
+    expect((errorOff as { peacError?: { code?: string } }).peacError?.code).toBe(
+      'E_INVALID_FORMAT'
+    );
+    expect((errorOn as { peacError?: { code?: string } }).peacError?.code).toBe('E_INVALID_FORMAT');
+    // Byte-equal Error.message (gate's projection vs canonical
+    // Wire02ClaimsSchema.safeParse first-issue message).
+    expect((errorOff as Error).message).toBe((errorOn as Error).message);
+    // Byte-equal peacError.details.message (the canonical issuance
+    // surface places the message under details.message).
+    const detailsOff = (errorOff as { peacError?: { details?: { message?: string } } }).peacError
+      ?.details;
+    const detailsOn = (errorOn as { peacError?: { details?: { message?: string } } }).peacError
+      ?.details;
+    expect(detailsOff?.message).toBe(detailsOn?.message);
+  });
+});
+
+describe('verifyLocal(): real gate-failure parity (validly signed but admission-rejected payload)', () => {
+  it('T13: validly signed Wire 0.2 payload with malformed `type` produces identical VerifyLocalFailure under both flag values', async () => {
+    const { privateKey, publicKey } = await generateKeypairFromSeed(FIXED_SEED);
+    // Construct a Wire 0.2 payload that signature-verifies but fails
+    // canonical Wire 0.2 admission: the `type` value violates the
+    // schema's reverse-DNS / URI validator. The codec encodes any
+    // object whose shape is compatible with `Wire02Claims`; we cast
+    // through `unknown` to bypass the TypeScript guard so the failure
+    // lands inside admission rather than at the codec boundary.
+    const malformedClaims = {
+      peac_version: '0.2',
+      kind: 'evidence',
+      type: 'invalid type with spaces',
+      iss: FIXED_ISS,
+      iat: 1700000000,
+      jti: FIXED_JTI,
+    } as unknown as Parameters<typeof defaultCodec.encode>[0];
+
+    const jws = await defaultCodec.encode(malformedClaims, privateKey, FIXED_KID);
+
+    const failOff = await withEnvFlagAsync('0', async () => verifyLocal(jws, publicKey));
+    const failOn = await withEnvFlagAsync('1', async () => verifyLocal(jws, publicKey));
+
+    expect(failOff.valid).toBe(false);
+    expect(failOn.valid).toBe(false);
+    if (failOff.valid || failOn.valid) return; // narrowing for the type system
+
+    expect(failOff.code).toBe('E_INVALID_FORMAT');
+    expect(failOn.code).toBe('E_INVALID_FORMAT');
+    expect(JSON.stringify(failOff)).toBe(JSON.stringify(failOn));
+  });
+
+  it('T13b: validly signed Wire 0.2 payload that violates kernel constraints produces identical VerifyLocalFailure under both flag values', async () => {
+    const { privateKey, publicKey } = await generateKeypairFromSeed(FIXED_SEED);
+    // Construct deeply nested extensions to violate the kernel
+    // depth constraint. Both branches run kernel-constraints first
+    // (gate inside `runBoundedValidationGate`; canonical inline at
+    // `validateKernelConstraints` on the rollback branch); both must
+    // surface byte-equal `E_CONSTRAINT_VIOLATION`.
+    let deep: Record<string, unknown> = { v: 1 };
+    for (let i = 0; i < 32; i += 1) {
+      deep = { nested: deep };
+    }
+    const malformedClaims = {
+      peac_version: '0.2',
+      kind: 'evidence',
+      type: FIXED_TYPE,
+      iss: FIXED_ISS,
+      iat: 1700000000,
+      jti: FIXED_JTI,
+      extensions: { 'org.example/deep': deep },
+    } as unknown as Parameters<typeof defaultCodec.encode>[0];
+
+    const jws = await defaultCodec.encode(malformedClaims, privateKey, FIXED_KID);
+
+    const failOff = await withEnvFlagAsync('0', async () => verifyLocal(jws, publicKey));
+    const failOn = await withEnvFlagAsync('1', async () => verifyLocal(jws, publicKey));
+
+    expect(failOff.valid).toBe(false);
+    expect(failOn.valid).toBe(false);
+    if (failOff.valid || failOn.valid) return;
+
+    expect(failOff.code).toBe('E_CONSTRAINT_VIOLATION');
+    expect(failOn.code).toBe('E_CONSTRAINT_VIOLATION');
+    expect(JSON.stringify(failOff)).toBe(JSON.stringify(failOn));
   });
 });
