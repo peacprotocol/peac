@@ -1,19 +1,20 @@
 # Internal rollback-path flag
 
-Operator runbook for the `PEAC_INTERNAL_LEGACY_PATH` flag introduced for release validation.
-
-Both flag values currently use the same protocol path. The flag reader is exercised for release validation without changing public behavior.
+Release-neutral operator runbook for the `PEAC_INTERNAL_LEGACY_PATH` flag.
 
 This document explains what the flag does, how to set it, how to verify both flag values, and how to remove the setting if needed.
 
-## What the flag does today
+For the version-specific operator runbook covering the post-flip state on Wire 0.2 issuance and local verification, see [`ROLLBACK-v0.14.0.md`](ROLLBACK-v0.14.0.md).
+
+## What the flag does
 
 - Internal-only flag plumbed into `issueWire02()`, `verifyLocal()`, and `verifyReceipt()` in `@peac/protocol`.
-- Read at the top of each entry point as a guarded read that intentionally discards the returned boolean.
-- Both flag values currently use the same protocol path. The flag reader is exercised for release validation without changing public behavior.
+- Read at the top of each entry point. The boolean selects between the bounded validation path (default) and the previous direct-canonical admission path (rollback) for `issue()` and `verifyLocal()`.
+- For `verifyReceipt()` (Wire 0.1 verifier): no behavioral effect at this entry point; the bounded validation path is keyed on Wire 0.2 claim shapes.
+- Both flag values produce byte-equivalent public outputs across the covered runtime matrix. The flag exists for diagnostic and rollback purposes; both branches are tested on every protocol-touching change.
 - Internal-only: not declared on any public option type (`IssueOptions`, `VerifyLocalOptions`, `VerifyOptions`); accessible only via internal cast inside `@peac/protocol`. The public TypeScript declaration surface is unchanged.
 
-The implementation lives at [`packages/protocol/src/_internal/legacy-path.ts`](../../packages/protocol/src/_internal/legacy-path.ts) and mirrors the existing internal-flag pattern at [`packages/protocol/src/_internal/shadow.ts`](../../packages/protocol/src/_internal/shadow.ts).
+The implementation lives at [`packages/protocol/src/_internal/legacy-path.ts`](../../packages/protocol/src/_internal/legacy-path.ts) and mirrors the existing internal-flag pattern at [`packages/protocol/src/_internal/shadow.ts`](../../packages/protocol/src/_internal/shadow.ts). The bounded validation gate that the default branch routes through lives at [`packages/protocol/src/_internal/record-core/validation-gate.ts`](../../packages/protocol/src/_internal/record-core/validation-gate.ts).
 
 ## How to enable or set the flag
 
@@ -53,7 +54,7 @@ PEAC_INTERNAL_LEGACY_PATH=0 pnpm --filter @peac/protocol test
 PEAC_INTERNAL_LEGACY_PATH=1 pnpm --filter @peac/protocol test
 ```
 
-Identical pass counts under both values demonstrate that the flag has no observable runtime effect on the protocol test suite.
+Identical pass counts under both values demonstrate that the bounded validation path and the direct-canonical admission path produce byte-equivalent public outputs across the protocol test suite.
 
 ### Self-tests
 
@@ -61,7 +62,7 @@ The flag reader has dedicated unit tests at [`packages/protocol/__tests__/_inter
 
 ## How to remove the setting
 
-The rollback procedure is intentionally trivial because both flag values use the same path:
+The rollback procedure is intentionally trivial because both flag values produce byte-equivalent public outputs:
 
 1. **Unset the environment variable**:
 
