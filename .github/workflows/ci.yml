@@ -436,29 +436,86 @@ jobs:
           retention-days: 90
 
   # ---------------------------------------------------------------------------
-  # Lane 3b: Protocol rollback-path matrix
+  # Lane 3b: Protocol rollback-path matrix (release-class gate)
   #
   # Runs the @peac/protocol test suite twice, once with the internal
   # rollback-path flag PEAC_INTERNAL_LEGACY_PATH=0 (default) and once
-  # with =1. Both halves green verifies the flag is plumbed cleanly
-  # and no test silently depends on a specific flag state. Both flag
-  # values currently use the same protocol path, so the matrix asserts
-  # test-suite equivalence under both, not universal byte-equivalence.
+  # with =1, across both supported LTS Node majors. Both halves green
+  # verifies the flag is plumbed cleanly and no test silently depends
+  # on a specific flag state. Both flag values currently use the same
+  # protocol path, so the matrix asserts test-suite equivalence under
+  # both, not universal byte-equivalence.
   #
-  # Scoped to protocol-touching PRs (detect-changes.outputs.core
-  # already covers packages/protocol/**) so apps-only and stamp-only
-  # PRs do not pay this cost.
+  # Blocking matrix: Node 22 (Maintenance LTS) + Node 24 (Active LTS)
+  # × legacy_path 0/1 = 4 cells. Programmatic-option coverage runs
+  # inside the Vitest test suite itself
+  # (packages/protocol/__tests__/_internal/legacy-path-flag.test.ts),
+  # not as an extra CI matrix axis.
+  #
+  # Runs on every protocol-touching PR (detect-changes covers core),
+  # on every release/* branch, and unconditionally on main, so the
+  # release-prep gate inherits a hard tag-blocker.
   # ---------------------------------------------------------------------------
   protocol-rollback-path-matrix:
     name: Protocol Rollback-Path Matrix
     needs: detect-changes
     if: >-
       github.ref == 'refs/heads/main' ||
+      startsWith(github.ref, 'refs/heads/release/') ||
       needs.detect-changes.outputs.core == 'true' ||
       needs.detect-changes.outputs.ci == 'true' ||
       needs.detect-changes.outputs.root_config == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        legacy_path: ['0', '1']
+        node-version: ['22', '24']
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: ./.github/actions/setup-env
+
+      - name: Override Node to ${{ matrix.node-version }}
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
+
+      - name: Build @peac/protocol and its workspace dependencies
+        # Trailing `...` selects @peac/protocol AND every workspace
+        # package it depends on (kernel, schema, crypto, ...). Targeted
+        # build keeps the matrix cost lower than `pnpm build` while
+        # ensuring tsc can resolve all `@peac/*` declarations.
+        run: pnpm --filter '@peac/protocol...' build
+
+      - name: Run @peac/protocol tests with PEAC_INTERNAL_LEGACY_PATH=${{ matrix.legacy_path }}
+        env:
+          PEAC_INTERNAL_LEGACY_PATH: ${{ matrix.legacy_path }}
+        run: pnpm --filter @peac/protocol test
+
+  # ---------------------------------------------------------------------------
+  # Lane 3c: Protocol rollback-path matrix (advisory Current Node lane)
+  #
+  # Runs the same @peac/protocol test suite under both legacy-path
+  # values on the latest Node Current line. Advisory only:
+  # `continue-on-error: true` so a Current-line regression does not
+  # block release. Required gating stays on the LTS lanes (Lane 3b).
+  # ---------------------------------------------------------------------------
+  protocol-rollback-path-matrix-current-node:
+    name: Protocol Rollback-Path Matrix (Node Current, advisory)
+    needs: detect-changes
+    if: >-
+      github.ref == 'refs/heads/main' ||
+      startsWith(github.ref, 'refs/heads/release/') ||
+      needs.detect-changes.outputs.core == 'true' ||
+      needs.detect-changes.outputs.ci == 'true' ||
+      needs.detect-changes.outputs.root_config == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    continue-on-error: true
     strategy:
       fail-fast: false
       matrix:
@@ -469,11 +526,16 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
       - uses: ./.github/actions/setup-env
 
+      - name: Setup Node Current
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          # `current` resolves to the latest released Node line. Verify
+          # at maintenance time that this still maps to a supported
+          # Current major (Node release schedule moves over time).
+          node-version: 'current'
+          cache: 'pnpm'
+
       - name: Build @peac/protocol and its workspace dependencies
-        # Trailing `...` selects @peac/protocol AND every workspace
-        # package it depends on (kernel, schema, crypto, ...). Targeted
-        # build keeps the matrix cost lower than `pnpm build` while
-        # ensuring tsc can resolve all `@peac/*` declarations.
         run: pnpm --filter '@peac/protocol...' build
 
       - name: Run @peac/protocol tests with PEAC_INTERNAL_LEGACY_PATH=${{ matrix.legacy_path }}

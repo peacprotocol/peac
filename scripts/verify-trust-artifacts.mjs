@@ -2,7 +2,7 @@
 /**
  * Trust-artifact integrity verifier.
  *
- * Three checks, all fail-closed:
+ * Four checks, all fail-closed:
  *
  *   1. docs/THREAT_MODEL.md table rows: every threat-ID row must carry at
  *      least one markdown link in its Test-coverage column, and every
@@ -14,6 +14,11 @@
  *      README.md) MUST NOT link to gitignored reference/ paths. The
  *      reference/ tree is local-only; external contributors cannot
  *      resolve those links.
+ *   4. docs/specs/RESOURCE-LIMITS.md invariant tables: every row must
+ *      carry at least one markdown link in its Constant column and one
+ *      in its Test column, and every linked repository-relative path
+ *      MUST resolve to a tracked file. Locks the existing invariant
+ *      reference set against future drift.
  *
  * Usage:
  *   node scripts/verify-trust-artifacts.mjs        # human-readable
@@ -35,6 +40,7 @@ const REPO_ROOT = resolve(__dirname, '..');
 
 const THREAT_MODEL = resolve(REPO_ROOT, 'docs/THREAT_MODEL.md');
 const STABILITY_CONTRACT = resolve(REPO_ROOT, 'docs/STABILITY-CONTRACT.md');
+const RESOURCE_LIMITS = resolve(REPO_ROOT, 'docs/specs/RESOURCE-LIMITS.md');
 
 const args = process.argv.slice(2);
 const JSON_MODE = args.includes('--json');
@@ -194,7 +200,191 @@ function checkStabilityContract() {
   }
 }
 
-// ---------- Check 3: no gitignored reference/ links in public docs ----------
+// ---------- Check 3: RESOURCE-LIMITS.md invariant rows resolve ----------
+//
+// Parses every invariant table under `## Invariant table` (and its `###`
+// subsections). Each row must carry at least one markdown link in the
+// Constant column and one in the Test column. Every linked
+// repository-relative path MUST resolve to a tracked file. This locks
+// the existing invariant reference set against future drift; new rows
+// added without proper Constant + Test references fail the gate.
+//
+// The parser is structural: it skips the section header and the
+// surrounding markdown table delimiter row (`| --- | --- |`), then
+// iterates body rows. A row is recognized as a body row only when the
+// surrounding markdown table contains at least three columns.
+
+function checkResourceLimits() {
+  if (!existsSync(RESOURCE_LIMITS)) {
+    addViolation(
+      'resource-limits-exists',
+      RESOURCE_LIMITS,
+      0,
+      'docs/specs/RESOURCE-LIMITS.md is missing'
+    );
+    return;
+  }
+
+  const lines = readLines(RESOURCE_LIMITS);
+
+  // Walk the file collecting body rows of every table that lives under
+  // the "Invariant table" section. The section starts at "## Invariant
+  // table" and ends at the next "## " heading. Inside the section, every
+  // markdown table whose header includes both a "Constant" cell and a
+  // "Test" cell is in scope. We track each table's column indices so
+  // links in the Constant and Test columns can be checked individually.
+
+  let inSection = false;
+  let inTable = false;
+  let constantCol = -1;
+  let testCol = -1;
+  let tableStartLine = 0;
+  // Per-table: whether any prior body row in this table carried a
+  // Constant or Test link. The doc uses two inheritance idioms within a
+  // table: an explicit "same" cell, and a Constant cell that lists only
+  // a backticked identifier (no link). Both inherit the prior row's
+  // location, but only when the prior row established one.
+  let priorRowHadConstantLink = false;
+  let priorRowHadTestLink = false;
+
+  const SECTION_HEADER_RE = /^##\s+Invariant\s+table\s*$/i;
+  const ANY_H2_RE = /^##\s+/;
+  const TABLE_DELIM_RE = /^\|(\s*:?-+:?\s*\|)+\s*$/;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+
+    if (!inSection) {
+      if (SECTION_HEADER_RE.test(line)) inSection = true;
+      continue;
+    }
+
+    // Exit the section when a peer or higher heading starts (any line
+    // beginning with "## " other than the section header itself, OR a
+    // single "#" heading). H3 (### subsections) stay inside.
+    if (ANY_H2_RE.test(line) && !SECTION_HEADER_RE.test(line)) {
+      inSection = false;
+      inTable = false;
+      continue;
+    }
+
+    if (!inTable) {
+      if (line.startsWith('|')) {
+        // Header row of a new table. Inspect the column labels.
+        const cells = line
+          .split('|')
+          .map((c) => c.trim())
+          .filter((_, idx, arr) => idx > 0 && idx < arr.length - 1);
+        constantCol = cells.findIndex((c) => /^constant$/i.test(c) || /constant\s*\/\s*file/i.test(c));
+        testCol = cells.findIndex((c) => /^test$/i.test(c));
+        if (constantCol >= 0 && testCol >= 0) {
+          inTable = true;
+          tableStartLine = i + 1;
+          priorRowHadConstantLink = false;
+          priorRowHadTestLink = false;
+        }
+      }
+      continue;
+    }
+
+    // Inside a table. Skip the delimiter row. End the table on a blank
+    // line or any non-pipe line.
+    if (TABLE_DELIM_RE.test(line)) continue;
+    if (!line.startsWith('|')) {
+      inTable = false;
+      constantCol = -1;
+      testCol = -1;
+      priorRowHadConstantLink = false;
+      priorRowHadTestLink = false;
+      continue;
+    }
+
+    // Body row. Split into trimmed cells, drop the leading/trailing
+    // empties produced by the outer pipes.
+    const cells = line
+      .split('|')
+      .map((c) => c.trim())
+      .filter((_, idx, arr) => idx > 0 && idx < arr.length - 1);
+
+    if (cells.length <= Math.max(constantCol, testCol)) {
+      addViolation(
+        'resource-limits-row-shape',
+        RESOURCE_LIMITS,
+        i + 1,
+        `row has fewer columns than the table header advertises`
+      );
+      continue;
+    }
+
+    const constantCell = cells[constantCol] ?? '';
+    const testCell = cells[testCol] ?? '';
+
+    const constantLinks = [...constantCell.matchAll(MD_LINK_RE)].map((x) => x[1]);
+    const testLinks = [...testCell.matchAll(MD_LINK_RE)].map((x) => x[1]);
+
+    // Two inheritance idioms in the doc:
+    //
+    //   (a) Literal "same": case-insensitive whole-cell match. Inherits
+    //       the link target from the same column of the previous body
+    //       row. Used in the Test column for repeated-test rows.
+    //   (b) Bare backticked identifier (no markdown link): used in the
+    //       Constant column when several rows share a file (e.g., every
+    //       `KERNEL_CONSTRAINTS.*` row inherits the file referenced by
+    //       the first row of the kernel-constraints table).
+    //
+    // Both inherit only when a prior body row in the same table
+    // established a link. A leading row with no link cannot inherit and
+    // must be flagged.
+    const SAME_RE = /^same$/i;
+    const constantHasOnlyBareIdentifier =
+      constantLinks.length === 0 && /^`[^`]+`(\s*)$/.test(constantCell);
+    const constantInherited =
+      (SAME_RE.test(constantCell) || constantHasOnlyBareIdentifier) && priorRowHadConstantLink;
+    const testInherited = SAME_RE.test(testCell) && priorRowHadTestLink;
+
+    if (!constantInherited && constantLinks.length === 0) {
+      addViolation(
+        'resource-limits-missing-constant-link',
+        RESOURCE_LIMITS,
+        i + 1,
+        `row has no markdown link in the Constant column`
+      );
+    }
+    if (!testInherited && testLinks.length === 0) {
+      addViolation(
+        'resource-limits-missing-test-link',
+        RESOURCE_LIMITS,
+        i + 1,
+        `row has no markdown link in the Test column`
+      );
+    }
+
+    if (constantLinks.length > 0) priorRowHadConstantLink = true;
+    if (testLinks.length > 0) priorRowHadTestLink = true;
+
+    for (const link of [...constantLinks, ...testLinks]) {
+      if (link.startsWith('http://') || link.startsWith('https://')) continue;
+      if (link.startsWith('mailto:')) continue;
+      const abs = resolveRepoPath(RESOURCE_LIMITS, link);
+      if (!abs) continue; // pure fragment
+      if (!isTrackedPath(abs)) {
+        addViolation(
+          'resource-limits-broken-link',
+          RESOURCE_LIMITS,
+          i + 1,
+          `link does not resolve: ${link}`
+        );
+      }
+    }
+  }
+
+  // tableStartLine is referenced only via violation messages above; the
+  // local consumes it implicitly through `i + 1`. Keep the variable so
+  // future enhancements can group violations per-table.
+  void tableStartLine;
+}
+
+// ---------- Check 4: no gitignored reference/ links in public docs ----------
 
 function listPublicDocs() {
   try {
@@ -257,6 +447,7 @@ function checkNoReferenceLinks() {
 try {
   checkThreatModel();
   checkStabilityContract();
+  checkResourceLimits();
   checkNoReferenceLinks();
 } catch (err) {
   if (JSON_MODE) {
@@ -276,6 +467,7 @@ if (JSON_MODE) {
     process.stdout.write('verify-trust-artifacts: OK\n');
     process.stdout.write('  threat-model rows: per-row test links resolve\n');
     process.stdout.write('  stability-contract rows: surface identifiers present\n');
+    process.stdout.write('  resource-limits invariant rows: constant + test links resolve\n');
     process.stdout.write('  public docs: no links to gitignored reference/ tree\n');
   } else {
     process.stderr.write(`verify-trust-artifacts: ${violations.length} violation(s)\n\n`);

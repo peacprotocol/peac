@@ -1,15 +1,16 @@
 #!/usr/bin/env node
 /**
- * No-semantic-widening gate for v0.13.1 release prep.
+ * No-semantic-widening gate.
  *
- * This is a release-specific gate with baselines hard-coded to the
- * v0.13.0 published state (36 packages after @peac/disc retirement,
- * 12 extension groups, 186 error codes, 0 emitted-on-primary-path
- * codes). It is not a general semantic-drift framework. Future
- * releases either update the baselines here or author a new gate
- * script for their release window.
+ * Release-window gate with baselines anchored to the v0.13.0 published
+ * state (36 packages after @peac/disc retirement, 12 extension groups,
+ * 186 error codes, 0 emitted-on-primary-path codes). Subsequent v0.13.x
+ * releases inherit these baselines unchanged because they ship no new
+ * public package, extension key, or emitted error code; if a future
+ * release widens any baseline, update the values here together with
+ * the corresponding CHANGELOG entry.
  *
- * Verifies that the v0.13.1 release has not widened the protocol
+ * Verifies that the in-flight release has not widened the protocol
  * surface beyond what is documented as additive observational behavior.
  *
  * Checks:
@@ -25,6 +26,7 @@
  *      `"private": true` and are absent from the publish manifest.
  *   7. Internal-only flags
  *      (`PEAC_INTERNAL_SHADOW_CORE`, `_internal.shadowCore`,
+ *      `PEAC_INTERNAL_LEGACY_PATH`, `_internal.legacyPath`,
  *      `PEAC_EXPERIMENTAL_CODEC`, `_internal.codec`) do not appear
  *      on any front-door tracked surface (README, START_HERE,
  *      PACKAGE_STATUS, examples, integrator-kits, surfaces, llms.txt,
@@ -63,8 +65,8 @@ function readJSON(p) {
   }
 }
 
-console.log('No-semantic-widening gate (v0.13.1)');
-console.log('=====================================\n');
+console.log('No-semantic-widening gate');
+console.log('=========================\n');
 
 // ---------------------------------------------------------------------------
 // 1. Wire format versions unchanged
