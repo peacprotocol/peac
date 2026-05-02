@@ -27,6 +27,7 @@ import { TYPE_TO_EXTENSION_MAP } from '@peac/kernel';
 import { checkTypeExtensionMapping } from './type-extension-check';
 import { maybeRunShadowValidation } from './_internal/record-core/shadow-hook';
 import { runBoundedValidatorShadow } from './_internal/record-core/bounded-validator.js';
+import { runBoundedValidationGate } from './_internal/record-core/validation-gate.js';
 import { isShadowEnabled, scheduleShadow, type ShadowEnableOptions } from './_internal/shadow.js';
 import { readLegacyPathFlag, type LegacyPathOptions } from './_internal/legacy-path.js';
 import {
@@ -365,9 +366,12 @@ export async function verifyLocal(
   publicKey: Uint8Array,
   options: VerifyLocalOptions = {}
 ): Promise<VerifyLocalResult> {
-  // Internal rollback-path flag. See `_internal/legacy-path.ts` for
-  // the full contract.
-  void readLegacyPathFlag(options as unknown as LegacyPathOptions);
+  // Internal rollback-path flag. Selects the bounded validation
+  // admission gate (default) or the inline canonical sequence
+  // (rollback). Both branches share the post-admission flow: caller-
+  // option binding, temporal checks, type-extension enforcement,
+  // policy-binding compute, bindings construction, sortWarnings.
+  const legacyPath = readLegacyPathFlag(options as unknown as LegacyPathOptions);
 
   const {
     issuer,
@@ -413,30 +417,76 @@ export async function verifyLocal(
       });
     }
 
-    // 3. Validate structural kernel constraints (fail-closed)
-    const constraintResult = validateKernelConstraints(result.payload);
-    if (!constraintResult.valid) {
-      const v = constraintResult.violations[0];
-      return {
-        valid: false,
-        code: 'E_CONSTRAINT_VIOLATION',
-        message: `Kernel constraint violated: ${v.constraint} (actual: ${v.actual}, limit: ${v.limit})`,
+    // 3-5. Admission: kernel constraints, schema parse, parser warnings.
+    //
+    // The default branch routes through the bounded validation gate,
+    // which surfaces canonical-equivalent E_CONSTRAINT_VIOLATION /
+    // E_INVALID_FORMAT / E_UNSUPPORTED_WIRE_VERSION verdicts on
+    // rejection and the parsed Wire 0.2 claims plus parser warnings
+    // on acceptance. The rollback branch retains the inline canonical
+    // sequence (validateKernelConstraints + parseReceiptClaims). Both
+    // branches feed the same post-admission flow.
+    type AdmittedClaims = {
+      readonly ok: true;
+      readonly wireVersion: '0.1' | '0.2';
+      readonly warnings: readonly VerificationWarning[];
+      readonly claims: unknown;
+    };
+    let pr: AdmittedClaims;
+
+    if (legacyPath) {
+      const constraintResult = validateKernelConstraints(result.payload);
+      if (!constraintResult.valid) {
+        const v = constraintResult.violations[0];
+        return {
+          valid: false,
+          code: 'E_CONSTRAINT_VIOLATION',
+          message: `Kernel constraint violated: ${v.constraint} (actual: ${v.actual}, limit: ${v.limit})`,
+        };
+      }
+      const parsed = parseReceiptClaims(result.payload);
+      if (!parsed.ok) {
+        return {
+          valid: false,
+          code: 'E_INVALID_FORMAT',
+          message: `Receipt schema validation failed: ${parsed.error.message}`,
+          details: {
+            parse_code: parsed.error.code,
+            issues: sanitizeParseIssues(parsed.error.issues),
+          },
+        };
+      }
+      pr = parsed;
+    } else {
+      const gateResult = runBoundedValidationGate({
+        surface: 'verifyLocal',
+        payload: result.payload,
+      });
+      if (!gateResult.ok) {
+        return {
+          valid: false,
+          code: gateResult.code as VerifyLocalErrorCode,
+          message: gateResult.message,
+          ...(gateResult.details !== undefined && { details: gateResult.details }),
+        };
+      }
+      const parsedFromGate = gateResult.parsed;
+      if (parsedFromGate === undefined) {
+        return {
+          valid: false,
+          code: 'E_INTERNAL',
+          message: 'Bounded validation gate accepted without surfacing parsed claims',
+        };
+      }
+      pr = {
+        ok: true,
+        wireVersion: parsedFromGate.wireVersion,
+        warnings: parsedFromGate.parserWarnings,
+        claims: parsedFromGate.claims,
       };
     }
 
-    // 4. Validate schema (unified parser supports Wire 0.1 and Wire 0.2)
-    const pr = parseReceiptClaims(result.payload);
-
-    if (!pr.ok) {
-      return {
-        valid: false,
-        code: 'E_INVALID_FORMAT',
-        message: `Receipt schema validation failed: ${pr.error.message}`,
-        details: { parse_code: pr.error.code, issues: sanitizeParseIssues(pr.error.issues) },
-      };
-    }
-
-    // 5. Collect parser warnings (Wire 0.2 parser may emit type/extension warnings)
+    // Collect parser warnings (Wire 0.2 parser may emit type/extension warnings).
     if (pr.wireVersion === '0.2') {
       accumulatedWarnings.push(...pr.warnings);
     }
@@ -603,7 +653,12 @@ export async function verifyLocal(
 
       const sortedWarnings = sortWarnings(accumulatedWarnings);
 
-      if (isShadowEnabled(options as unknown as ShadowEnableOptions)) {
+      // Shadow scheduling fires only on the rollback branch where the
+      // bounded validator is genuinely a comparison path. Under the
+      // default branch the gate runs as the production admission
+      // path, so a duplicate shadow run would compare the same code
+      // path against itself.
+      if (legacyPath && isShadowEnabled(options as unknown as ShadowEnableOptions)) {
         const headerSnapshot = { ...result.header } as Record<string, unknown>;
         scheduleShadow<ShadowObservation>({
           call: 'verifyLocal',
