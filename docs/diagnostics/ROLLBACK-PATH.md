@@ -54,7 +54,7 @@ PEAC_INTERNAL_LEGACY_PATH=0 pnpm --filter @peac/protocol test
 PEAC_INTERNAL_LEGACY_PATH=1 pnpm --filter @peac/protocol test
 ```
 
-Identical pass counts under both values demonstrate that the bounded validation path and the direct-canonical admission path produce byte-equivalent public outputs across the protocol test suite.
+The dual-mode test suite must pass under both values. Byte-equivalence assertions in the rollback-path tests cover deterministic issuance, local verification, and admission-rejection shapes.
 
 ### Self-tests
 

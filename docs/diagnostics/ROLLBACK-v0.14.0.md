@@ -41,10 +41,9 @@ keyed on Wire 0.2 claim shapes.
 ## When to set the flag
 
 Set the rollback flag only as a diagnostic measure or as a controlled
-fallback if a specific operational need surfaces. The default
-unrolled-back path is the supported runtime for production. Both
-paths are tested on every protocol-touching change by the rollback-
-path CI matrix.
+fallback if a specific operational need surfaces. The default path is
+the supported runtime for production. Both paths are tested on every
+protocol-touching change by the rollback-path CI matrix.
 
 Typical operator scenarios:
 
@@ -132,7 +131,8 @@ green is the gate.
 
 The rollback flag does not emit telemetry by default. The flag's
 value is not stamped on any emitted record, header, or response
-body, and it does not appear in any public artifact.
+body, and it is not emitted in any runtime record, header, response
+body, or package declaration surface.
 
 Operators investigating a regression may log the flag value through
 their own observability layer. The reader function
@@ -142,9 +142,9 @@ supported.
 
 ## Expected support window
 
-The rollback flag is supported through the v0.14.x line. Removal of
-the rollback path is a separate decision in a future release with
-its own CHANGELOG entry; it is not committed in this release.
+The rollback flag is supported for the current release line. Any
+removal or narrowing of the rollback path requires a separate
+documented release note.
 
 ## How to remove the setting
 
@@ -173,7 +173,7 @@ values produce byte-equivalent public outputs:
 - Does NOT change the wire format. The `peac-receipt/0.1` envelope
   and the `interaction-record+jwt` JWS `typ` are unchanged.
 - Does NOT change the OpenAPI verify contract.
-- Does NOT change the Hosted Verify response shape.
+- Does NOT change the reference verifier `POST /v1/verify` response shape.
 - Does NOT publish from a workspace-private package. The flag lives
   entirely inside `@peac/protocol`.
 - Does NOT introduce a new public emitted error code, a new public
