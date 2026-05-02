@@ -3,20 +3,20 @@
  *
  * INTERNAL ONLY. Not re-exported from `packages/protocol/src/index.ts`.
  *
- * The gate is the single production entry point for the bounded
- * validation path. The pre-existing `runBoundedValidatorShadow` from
- * `bounded-validator.ts` is reserved for shadow / corpus / parity-
- * harness consumers and MUST NOT be invoked from the protocol entry
- * points. The boundary is enforced by
- * `tests/tooling/no-production-shadow-import.test.ts`.
+ * The gate is the only production wrapper for the bounded validation
+ * path. The pre-existing `runBoundedValidatorShadow` from
+ * `bounded-validator.ts` remains the entry point for shadow / corpus
+ * / parity-harness consumers and is not the primary admission path
+ * for the protocol entry points; the production-wrapper boundary is
+ * enforced by `tests/tooling/production-gate-boundary.test.ts`.
  *
  * The gate is entrypoint-aware: callers identify themselves with a
  * `surface` discriminator, and the gate applies a per-surface
  * production projection allowlist. Layers in the bounded validator's
  * broader composition that fall outside the allowlist for a given
- * surface are observed (still available to shadow / parity tests
- * through `runBoundedValidatorShadow`) but NEVER surfaced as
- * production failure or production warning here.
+ * surface stay available to shadow / parity tests through
+ * `runBoundedValidatorShadow` but are not surfaced as production
+ * failure or production warning here.
  *
  * Allowlist for surface 'issueWire02':
  *   - schema-parse only.
@@ -128,9 +128,9 @@ function sanitizeIssues(issues: unknown): readonly SanitizedParseIssue[] | undef
  * Behavior is byte-equivalent to the inline canonical sequences at
  * `issue.ts` and `verify-local.ts` for every input on the covered
  * runtime matrix. Any cross-branch divergence on JWS bytes, result
- * shape, error code, warning order, thrown error class, success/
- * failure classification, or observable default behavior is a stop-
- * the-line event for the maintainer.
+ * shape, error code, warning order, thrown error class, success /
+ * failure classification, or observable default behavior is a
+ * validation-equivalence regression.
  */
 export function runBoundedValidationGate(input: ValidationGateInput): ValidationGateResult {
   if (input.surface === 'issueWire02') {
