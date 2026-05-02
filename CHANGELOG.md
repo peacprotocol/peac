@@ -5,6 +5,90 @@ All notable changes to PEAC Protocol will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.13.4] - 2026-05-02
+
+Validation Readiness and Runtime Invariants. This release is
+behavior-preserving. It strengthens runtime-invariant verification
+coverage, internal validation parity coverage, and release-gate
+checks.
+
+There is no public API change, wire-format change, package-surface
+change, extension-key change, or default-path behavior change.
+
+### Added
+
+- `scripts/verify-trust-artifacts.mjs`: fourth check that walks every
+  invariant table under `docs/specs/RESOURCE-LIMITS.md` and asserts
+  every Constant + Test column markdown link resolves to a tracked
+  file. Recognizes the existing `same` and bare-identifier
+  inheritance idioms used by the doc.
+- `tests/tooling/resource-limits-trust-artifact.test.ts`: live-tree
+  happy path plus contrived broken-link smoke for the new check.
+- `docs/STABILITY-CONTRACT.md`: row in the internal-only flags table
+  for the internal rollback flag. Operator runbook continues at
+  `docs/diagnostics/ROLLBACK-PATH.md`.
+- `tests/tooling/stability-contract-coverage.test.ts`: enumerates
+  runtime-read internal flag literals in
+  `packages/protocol/src/_internal/` and asserts each has a row in
+  the contract.
+- `.github/workflows/ci.yml`: rollback-path matrix promoted to a
+  release-class gate. Blocking matrix covers Node 22 and Node 24 LTS
+  across both rollback-path modes (4 cells). Advisory Current-Node
+  lane runs with `continue-on-error: true`.
+- `.github/workflows/publish.yml`: `release_gate_rollback_matrix`
+  preflight that re-runs the matrix at the tagged SHA;
+  `publish_dry_run` and `publish_prod` declare it as a `needs:`
+  dependency, hard-blocking publish on any failure.
+- `docs/CI_BEHAVIOR.md`: Rollback-path matrix subsection.
+- Seven canonical-composed validators under
+  `packages/protocol/src/_internal/record-core/validators/`
+  (schema-parse, jose-typ-strictness, iat-not-yet-valid,
+  policy-binding, unknown-extension-grammar,
+  type-extension-enforcement, signature). Each layer either delegates
+  to a canonical helper from `@peac/schema` / `@peac/crypto` /
+  `@peac/protocol` or mirrors a canonical inline check verbatim.
+- `runBoundedValidatorShadow` wired with the six sync layers as
+  optional-input layers that skip when their inputs are absent. The
+  async signature wrapper is exported standalone, not composed into
+  the bounded validator.
+- `packages/protocol/src/_internal/test-helpers/candidate-runner.ts`:
+  projects bounded-validator output into the canonical-runner's
+  `ParityVerdict` shape.
+- `packages/protocol/__tests__/_internal/parity-canonical-vs-candidate.test.ts`:
+  230 fixtures from the existing manifest assert canonical-vs-candidate
+  verdict byte-equality.
+- `packages/protocol/__tests__/_internal/bounded-validator-expanded-layers.test.ts`:
+  per-layer activation + skip proof for the six new sync layers.
+- `packages/protocol/__tests__/_internal/canonical-composed-validators.test.ts`:
+  per-validator unit tests including the standalone signature wrapper.
+- `packages/protocol/__tests__/_internal/shadow-byte-equivalence.test.ts`:
+  with `Date.now` locked, `issue()` produces byte-identical compact
+  JWS output across both internal shadow flag values; `verifyLocal()`
+  returns byte-equal result shape on a fixed JWS across both values.
+
+### Changed
+
+- `docs/specs/RESOURCE-LIMITS.md`: stale MCP mapping test path
+  corrected from `packages/mappings/mcp/__tests__/` to
+  `packages/mappings/mcp/tests/budget.test.ts`.
+- `scripts/verify-no-semantic-widening.mjs`: header refreshed to
+  release-neutral wording. Baselines (36 packages, 12 extension
+  groups, 186 errors, 0 emitted-on-primary-path) unchanged.
+
+### Compatibility
+
+- `@peac/protocol.{issue, verifyLocal, verify}`: public TypeScript
+  signatures unchanged. Wire-format behavior and default-path
+  behavior unchanged.
+- Wire format (`peac-receipt/0.1` envelope, `interaction-record+jwt`
+  JWS `typ`): unchanged.
+- Active publish-manifest count: 36 (unchanged).
+- Extension group count: 12 (unchanged).
+- Error code count: 186 (unchanged); no new emitted-on-primary-path
+  codes.
+- OpenAPI verify contract: unchanged. OpenAPI 3.1.x unchanged.
+- npm dist-tag: `next` only.
+
 ## [0.13.3] - 2026-05-01
 
 Documentation and internal test-infrastructure release. No public API change. No wire-format change. No new public package. No publish-manifest change. Published to npm `next` only.
