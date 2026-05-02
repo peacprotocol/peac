@@ -1,6 +1,6 @@
 {
   "name": "commerce/x402",
-  "version": "0.13.4",
+  "version": "0.14.0",
   "section": 26,
   "subsection": "x402",
   "description": "Conformance vectors for the v0.12.11 x402 commerce evidence mapping.",

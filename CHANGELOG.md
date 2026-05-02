@@ -5,6 +5,52 @@ All notable changes to PEAC Protocol will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.14.0] - 2026-05-02
+
+Internal Default Switch.
+
+The bounded validation path is now the primary internal runtime path
+for PEAC interaction-record issuance and local verification. The
+previous direct-canonical path remains available as an internal
+rollback path.
+
+Public API: unchanged.
+Wire format: unchanged.
+Package surface: unchanged.
+Extension keys: unchanged.
+Default observable behavior: unchanged.
+
+This release makes the internal rollback path meaningful while
+preserving byte-equivalent behavior across the covered runtime matrix.
+
+### Changed
+
+- The bounded validation path is now the primary internal runtime
+  path for `@peac/protocol` `issue()` and `verifyLocal()`. The
+  previous direct-canonical admission path remains available as the
+  internal rollback path.
+- The internal rollback flag is now meaningful: both flag values
+  exercise different internal admission paths and produce
+  byte-equivalent public outputs across the covered runtime matrix.
+  See [`docs/STABILITY-CONTRACT.md`](docs/STABILITY-CONTRACT.md) and
+  [`docs/diagnostics/ROLLBACK-v0.14.0.md`](docs/diagnostics/ROLLBACK-v0.14.0.md)
+  for the operator runbook.
+
+### Added
+
+- `packages/protocol/src/_internal/record-core/validation-gate.ts`:
+  production wrapper for the bounded validation path. Entrypoint-aware
+  (`surface: 'issueWire02' | 'verifyLocal'`) with a per-surface
+  production projection allowlist.
+- `docs/diagnostics/ROLLBACK-v0.14.0.md`: version-specific operator
+  runbook for the active internal rollback path.
+
+### Notes
+
+- No public API change, wire-format change, package-surface change,
+  extension-key change, or default-path behavior change.
+- npm `next` only. No `latest` promotion in this release.
+
 ## [0.13.4] - 2026-05-02
 
 Validation Readiness and Runtime Invariants. This release is
