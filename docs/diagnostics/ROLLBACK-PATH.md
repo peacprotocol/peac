@@ -81,7 +81,7 @@ The rollback procedure is intentionally trivial because both flag values produce
 - Does NOT change `@peac/protocol.{issue, verifyLocal, verify}` signatures.
 - Does NOT change the wire format. The `peac-receipt/0.1` envelope and the `interaction-record+jwt` JWS `typ` are unchanged.
 - Does NOT change the OpenAPI verify contract.
-- Does NOT change the Hosted Verify response shape.
+- Does NOT change the reference verifier `POST /v1/verify` response shape.
 - Does NOT publish from a workspace-private package. The flag lives entirely inside `@peac/protocol`.
 - Does NOT introduce a new public emitted error code, a new public extension key, or a new typ.
 
