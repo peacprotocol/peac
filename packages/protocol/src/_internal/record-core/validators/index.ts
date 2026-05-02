@@ -22,3 +22,23 @@ export {
   type ExtensionBudgetResult,
   type ExtensionBudgetViolation,
 } from './extension-budget.js';
+export { validateSchemaParseInternal, type SchemaParseResult } from './schema-parse.js';
+export {
+  validateJoseTypStrictnessInternal,
+  type JoseTypStrictnessResult,
+  type JoseTypStrictnessWarning,
+  type Strictness,
+} from './jose-typ-strictness.js';
+export { validateIatNotYetValidInternal, type IatNotYetValidResult } from './iat-not-yet-valid.js';
+export { validatePolicyBindingInternal, type PolicyBindingResult } from './policy-binding.js';
+export {
+  validateUnknownExtensionGrammarInternal,
+  type UnknownExtensionGrammarResult,
+  type UnknownExtensionWarning,
+} from './unknown-extension-grammar.js';
+export {
+  validateTypeExtensionEnforcementInternal,
+  type TypeExtensionEnforcementResult,
+  type TypeExtensionEnforcementWarning,
+} from './type-extension-enforcement.js';
+export { validateSignatureInternal, type SignatureResult } from './signature.js';

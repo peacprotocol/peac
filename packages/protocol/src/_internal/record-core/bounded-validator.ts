@@ -1,49 +1,61 @@
 /**
- * Bounded observation subset: composition aggregator.
+ * Canonical-composed shadow validation: composition aggregator.
  *
- * INTERNAL ONLY. Composes the six proven layer validators introduced
- * across this PR (kernel constraints; type-extension mapping; JOSE
- * header hardening; issuer form; occurred_at temporal skew;
- * extension byte budget) into a single aggregated result. The
- * canonical-truth sanity test, layer-isolated parity tests, and
- * differential same-path proof have already established that each
- * underlying validator is byte-equal with the existing canonical
- * surface for the layer it covers.
+ * INTERNAL ONLY. Composes layer validators into a single aggregated
+ * result. Each layer either delegates to a canonical helper from
+ * `@peac/schema` / `@peac/crypto` / `@peac/protocol` (canonical-
+ * composed wrapper pattern) or mirrors a canonical inline check
+ * verbatim. The canonical-vs-candidate differential test asserts
+ * byte-equality of the candidate verdict with the canonical verdict
+ * on every eligible fixture; any divergence indicates a defect in
+ * the projection logic.
  *
- * NOT WIRED. This module is NOT called from issue.ts, verify-local.ts,
- * or any runtime path in v0.13.1. It exists as a composition example
- * so PR D can wire the inert shadow-call hook to a real bounded
- * pipeline behind an internal feature flag without re-deriving the
- * composition shape.
+ * Always-on layers (run on every input):
+ *   - kernel-constraints (depth / array / keys / string / nodes)
+ *   - issuer-form (canonical iss)
+ *   - type-extension-mapping (warnings only)
+ *   - extension-byte-budget
+ *   - unknown-extension-grammar (warnings only)
  *
- * NOT FULL VALIDATION. The bounded subset deliberately EXCLUDES:
- *   - full Wire 0.2 schema parsing (parseReceiptClaims; the canonical
- *     parse continues to drive the runtime path)
- *   - signature verification and full JWS decode (decodeWire02;
- *     @peac/crypto remains canonical)
- *   - iat-not-yet-valid temporal check (lives inline at
- *     verify-local.ts:454 with no helper to import)
- *   - typ_missing strictness handling
- *   - policy binding verification
- *   - unknown_extension key grammar / plain-JSON guard / typed
- *     extension schema parse (only the byte-budget portion of
- *     validateKnownExtensions is in scope)
+ * Optional-input layers (skip when their inputs are absent):
+ *   - jose-header-hardening (header)
+ *   - temporal occurred_at skew (evidence kind)
+ *   - schema-parse (fullClaims)
+ *   - jose-typ-strictness (header + strictness)
+ *   - iat-not-yet-valid (maxClockSkew)
+ *   - policy-binding (receiptPolicyDigest + localPolicyDigest)
+ *   - type-extension-enforcement (strictness)
+ *
+ * Out of scope:
+ *   - signature verification (the standalone `validateSignatureInternal`
+ *     export is async and is not composed here; callers that need it
+ *     invoke it directly with serialized + publicKey)
  *   - any control-plane behavior (issuer resolver, JWKS fetch, etc.)
  *
- * Public-facing wording for this module: "bounded observation subset",
- * never "complete validator" or "primary validator".
+ * Public-facing wording for this module: "canonical-composed shadow
+ * validation" or "observational equivalence harness". Never
+ * "complete validator", "primary validator", or "divergent validator".
  */
 
 import {
   validateExtensionBudgetInternal,
+  validateIatNotYetValidInternal,
   validateIssuerFormInternal,
   validateJoseHardeningInternal,
+  validateJoseTypStrictnessInternal,
   validateKernelConstraintsInternal,
+  validatePolicyBindingInternal,
+  validateSchemaParseInternal,
   validateTemporalInternal,
+  validateTypeExtensionEnforcementInternal,
   validateTypeExtensionMappingInternal,
+  validateUnknownExtensionGrammarInternal,
   type ExtensionBudgetViolation,
+  type Strictness,
   type TemporalWarning,
+  type TypeExtensionEnforcementWarning,
   type TypeExtensionMappingWarning,
+  type UnknownExtensionWarning,
 } from './validators/index.js';
 
 /** Minimal claims shape required by the bounded subset. */
@@ -65,6 +77,38 @@ export interface BoundedValidationInput {
   readonly header?: BoundedHeaderInput;
   /** Fixed Unix-second clock for temporal evaluation; required. */
   readonly now: number;
+  /**
+   * Strictness profile for layers that promote warnings to errors
+   * under `'strict'` mode. When omitted, layers that consume
+   * strictness skip (they do not run). Mirrors the canonical
+   * `verifyLocal({ strictness })` option.
+   */
+  readonly strictness?: Strictness;
+  /**
+   * Maximum permitted clock skew in seconds for the iat-not-yet-valid
+   * check. When omitted, the iat layer skips. Mirrors
+   * `verifyLocal({ maxClockSkew })`; canonical default is 300.
+   */
+  readonly maxClockSkew?: number;
+  /**
+   * Receipt-side policy digest (`claims.policy.digest`). Used together
+   * with `localPolicyDigest` by the policy-binding layer. Either
+   * absent skips the layer.
+   */
+  readonly receiptPolicyDigest?: string;
+  /**
+   * Caller-supplied policy digest. Used together with
+   * `receiptPolicyDigest`. Either absent skips the layer.
+   */
+  readonly localPolicyDigest?: string;
+  /**
+   * Full receipt-claims object for the schema-parse layer. When
+   * omitted, the schema-parse layer falls back to running on the
+   * minimal `BoundedClaimsInput` projection (which may not surface
+   * field-level parse errors that depend on optional fields outside
+   * the bounded subset).
+   */
+  readonly fullClaims?: Record<string, unknown>;
 }
 
 /**
@@ -78,7 +122,13 @@ export type BoundedLayer =
   | 'jose-header-hardening'
   | 'issuer-form'
   | 'temporal'
-  | 'extension-budget';
+  | 'extension-budget'
+  | 'schema-parse'
+  | 'jose-typ-strictness'
+  | 'iat-not-yet-valid'
+  | 'policy-binding'
+  | 'unknown-extension-grammar'
+  | 'type-extension-enforcement';
 
 export interface BoundedViolation {
   readonly layer: BoundedLayer;
@@ -175,6 +225,94 @@ export function runBoundedValidatorShadow(input: BoundedValidationInput): Bounde
     const list: readonly ExtensionBudgetViolation[] = budgetRes.violations;
     for (const v of list) {
       violations.push({ layer: 'extension-budget', code: v.code, path: v.path });
+    }
+  }
+
+  // 7. Schema-parse projection (canonical-composed; delegates to
+  // parseReceiptClaims). Skips when `fullClaims` is not supplied;
+  // `BoundedClaimsInput` is a 6-field subset and would never satisfy
+  // the canonical Wire 0.2 schema. Callers that want the schema-parse
+  // layer to fire MUST pass the full claims object via `fullClaims`.
+  if (input.fullClaims !== undefined) {
+    const schemaRes = validateSchemaParseInternal(input.fullClaims);
+    if (!schemaRes.accepted && schemaRes.errorCode !== undefined) {
+      violations.push({ layer: 'schema-parse', code: schemaRes.errorCode });
+    }
+  }
+
+  // 8. JOSE typ-strictness (canonical-composed; mirrors verify-local
+  // strictness routing). Skip when no header or no strictness
+  // supplied; canonical surface only routes typ-missing under a
+  // declared strictness.
+  if (input.header !== undefined && input.strictness !== undefined) {
+    const typRes = validateJoseTypStrictnessInternal(input.header.typ, input.strictness);
+    if (!typRes.accepted) {
+      violations.push({ layer: 'jose-typ-strictness', code: typRes.errorCode });
+    } else if (typRes.warnings) {
+      for (const w of typRes.warnings) {
+        warnings.push({ layer: 'jose-typ-strictness', code: w.code });
+      }
+    }
+  }
+
+  // 9. iat-not-yet-valid (mirrors the inline verify-local check).
+  // Skip when no maxClockSkew supplied; canonical surface only runs
+  // this check inside verifyLocal where maxClockSkew is bound.
+  if (input.maxClockSkew !== undefined) {
+    const iatRes = validateIatNotYetValidInternal(input.claims.iat, input.now, input.maxClockSkew);
+    if (!iatRes.accepted && iatRes.errorCode !== undefined) {
+      violations.push({ layer: 'iat-not-yet-valid', code: iatRes.errorCode });
+    }
+  }
+
+  // 10. Policy-binding (canonical-composed; delegates to
+  // verifyPolicyBinding). The `unavailable` projection (either
+  // digest absent) is accepted with no surfacing; only `failed`
+  // produces a violation.
+  if (input.receiptPolicyDigest !== undefined && input.localPolicyDigest !== undefined) {
+    const policyRes = validatePolicyBindingInternal(
+      input.receiptPolicyDigest,
+      input.localPolicyDigest
+    );
+    if (!policyRes.accepted && policyRes.errorCode !== undefined) {
+      violations.push({ layer: 'policy-binding', code: policyRes.errorCode });
+    }
+  }
+
+  // 11. Unknown-extension grammar (canonical-composed; warnings only).
+  const unknownExtRes = validateUnknownExtensionGrammarInternal(input.claims.extensions);
+  for (const w of unknownExtRes.warnings as readonly UnknownExtensionWarning[]) {
+    warnings.push({
+      layer: 'unknown-extension-grammar',
+      code: w.code,
+      path: w.pointer,
+    });
+  }
+
+  // 12. Type-extension enforcement (canonical-composed; promotes
+  // missing/mismatch to errors under strict mode, surfaces them as
+  // warnings under interop). Skip when no strictness supplied.
+  if (input.strictness !== undefined) {
+    const enforceRes = validateTypeExtensionEnforcementInternal(
+      input.claims.kind,
+      input.claims.type,
+      input.claims.extensions,
+      input.strictness
+    );
+    if (!enforceRes.accepted) {
+      violations.push({
+        layer: 'type-extension-enforcement',
+        code: enforceRes.errorCode,
+        path: enforceRes.pointer,
+      });
+    } else if (enforceRes.warnings) {
+      for (const w of enforceRes.warnings as readonly TypeExtensionEnforcementWarning[]) {
+        warnings.push({
+          layer: 'type-extension-enforcement',
+          code: w.code,
+          path: w.pointer,
+        });
+      }
     }
   }
 
