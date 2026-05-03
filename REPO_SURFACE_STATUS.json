@@ -1,7 +1,7 @@
 {
   "description": "Machine-readable surface classification for PEAC Protocol workspace. CI fails if any workspace member is missing. See docs/PACKAGE_STATUS.md for human-readable view.",
   "version": "0.13.0",
-  "updated": "2026-05-02",
+  "updated": "2026-05-03",
   "states": {
     "default": "Current recommended path. Actively maintained, Wire 0.2 native.",
     "supported": "Actively maintained, published, production-ready. May not be on default quickstart path.",
