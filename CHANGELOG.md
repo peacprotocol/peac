@@ -7,12 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.14.0] - 2026-05-02
 
-Internal Default Switch.
+Bounded Validation Gate.
 
-The bounded validation path is now the primary internal runtime path
-for PEAC interaction-record issuance and local verification. The
-previous direct-canonical path remains available as an internal
-rollback path.
+Wire 0.2 issuance and local verification now route through the
+bounded validation gate. The previous direct-canonical admission
+path remains available as an internal rollback path.
 
 Public API: unchanged.
 Wire format: unchanged.
