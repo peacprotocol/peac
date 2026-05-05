@@ -1,5 +1,5 @@
 /**
- * v0.14.1 — Artifact-shape import-graph test for A2A observation helpers.
+ * v0.14.1: Artifact-shape import-graph test for A2A observation helpers.
  *
  * The A2A observation helpers in `packages/mappings/a2a/src/observation/` are
  * strictly observational. They MUST NOT verify Agent Card signatures and MUST

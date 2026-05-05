@@ -1,5 +1,5 @@
 /**
- * v0.14.1 — Artifact-shape snapshot test for the a2a-handoff schema.
+ * v0.14.1: Artifact-shape snapshot test for the a2a-handoff schema.
  *
  * For each of the 10 type URIs (Agent Card observation + 9 task-lifecycle
  * events), validates a happy-path payload and asserts the emitted shape

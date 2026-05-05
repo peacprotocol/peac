@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * v0.14.1 — Reference fixture verifier for the A2A handoff integrator kit.
+ * v0.14.1: Reference fixture verifier for the A2A handoff integrator kit.
  *
  * Loads each observation fixture and validates it directly against
  * `validateA2AHandoff` from `@peac/schema`. Loads the Agent Card example

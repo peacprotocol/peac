@@ -1,5 +1,5 @@
 /**
- * v0.14.1 — Registry-completeness regression test for A2A handoff.
+ * v0.14.1: Registry-completeness regression test for A2A handoff.
  *
  * Asserts that the kernel's `TYPE_TO_EXTENSION_MAP` registers every one of
  * the 10 A2A handoff type URIs with `org.peacprotocol/a2a-handoff` as the

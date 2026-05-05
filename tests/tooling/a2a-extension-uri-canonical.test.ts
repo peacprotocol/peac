@@ -1,5 +1,5 @@
 /**
- * v0.14.1 — A2A extension URI canonicalization audit (narrowly scoped).
+ * v0.14.1: A2A extension URI canonicalization audit (narrowly scoped).
  *
  * The PEAC A2A traceability extension URI is the canonical full URI
  *   https://www.peacprotocol.org/ext/traceability/v1

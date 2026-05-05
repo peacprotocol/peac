@@ -1,5 +1,5 @@
 /**
- * v0.14.1 — OpaqueRefSchema grammar tests.
+ * v0.14.1: OpaqueRefSchema grammar tests.
  *
  * Per the v0.14.1 plan amendments lock and the brutal-honest review's
  * grammar-based approach, OpaqueRefSchema rejects email shapes, raw human
