@@ -33,6 +33,16 @@ describe('A2A extension URI canonicalization (integrator-kits/a2a/README.md)', (
     // Also exclude inline-code mentions of the bare token in negative-example
     // prose (e.g. "Verify the metadata key is ... not the bare reverse-DNS prefix
     // `org.peacprotocol`, which is not the extension URI" remains acceptable).
+    //
+    // CodeQL note: substring matching on URLs (e.g. `line.includes('https://...')`)
+    // is flagged as URL-substring-sanitization (CWE-20) because an attacker
+    // could embed the canonical URL as a substring of a different host. We use
+    // a token-bounded regex instead: the canonical URL must appear as a
+    // discrete token (surrounded by whitespace, quote, backtick, paren, or
+    // start/end of line) so a path/query suffix on a different host cannot
+    // satisfy the check.
+    const CANONICAL_URL_TOKEN =
+      /(^|[\s"'`(<>])https:\/\/www\.peacprotocol\.org\/ext\/traceability\/v1(?=$|[\s"'`)<>])/;
     const lines = text.split(/\r?\n/);
     const offenders: { line: number; content: string }[] = [];
     lines.forEach((line, idx) => {
@@ -41,8 +51,8 @@ describe('A2A extension URI canonicalization (integrator-kits/a2a/README.md)', (
         line.includes('not the bare reverse-DNS prefix') ||
         line.includes('which is not the extension URI');
       if (isCorrectionProse) return;
-      // Strip lines that already use the canonical full URI
-      const usesCanonical = line.includes('https://www.peacprotocol.org/ext/traceability/v1');
+      // Strip lines that already use the canonical full URI as a discrete token
+      const usesCanonical = CANONICAL_URL_TOKEN.test(line);
       // Match bare `org.peacprotocol` (boundary, not followed by /)
       const m = line.match(/org\.peacprotocol(?!\/[a-z])/g);
       if (m && !usesCanonical) {
