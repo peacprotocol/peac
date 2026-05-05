@@ -1,6 +1,6 @@
 # A2A Receipt Profile
 
-**Version:** 0.2
+**Version:** 0.3
 **Status:** Normative
 **Package:** `@peac/mappings-a2a`
 **A2A Spec Version:** v1.0.0 (stable). v0.3.0 compatibility was deprecated in v0.12.3 and removed in v0.13.0 (DD-186).
@@ -61,7 +61,7 @@ Agents that support PEAC evidence MUST declare the extension in their Agent Card
 
 ### 2.2 Discovery
 
-The Agent Card is discoverable at `/.well-known/agent.json` (A2A v1.0.0 canonical path). Implementations SHOULD also check `/.well-known/agent-card.json` as a fallback for pre-v1.0 agents.
+The Agent Card is discoverable at `/.well-known/agent-card.json`, the A2A v1.0.0 canonical path. The v0.3.0 legacy path `/.well-known/agent.json` was deprecated in v0.12.3 and removed in v0.13.0 (DD-186); implementations MUST NOT probe it. Implementations MAY additionally probe `/.well-known/peac.json` as a PEAC-specific discovery extension and MAY use a HEAD-request header probe as a secondary fallback (see `packages/mappings/a2a/src/discovery.ts`).
 
 ## 3. Metadata Layout
 
@@ -194,3 +194,10 @@ An implementation is conformant with this profile if it:
 3. Enforces the 64 KB size limit
 4. Validates carrier structure at extraction time
 5. Declares the extension in Agent Card when advertising support
+
+## 9. Changes since 0.2
+
+Profile version 0.3 (introduced in v0.14.1):
+
+- §2.2 corrected: `/.well-known/agent-card.json` is the A2A v1.0.0 canonical Agent Card discovery path. The v0.3.0 legacy path `/.well-known/agent.json` was removed in v0.13.0 (DD-186) and MUST NOT be probed. Earlier wording in profile 0.2 inverted these labels; the implementation in `packages/mappings/a2a/src/discovery.ts` always behaved per the corrected version.
+- Companion observational profile `docs/specs/A2A-HANDOFF-RECORDS.md` (profile 0.1) introduced in v0.14.1 defines the `org.peacprotocol/a2a-handoff` extension namespace and 10 type URIs (Agent Card observation + 9 task-lifecycle event observations).

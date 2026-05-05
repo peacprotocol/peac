@@ -323,6 +323,76 @@
         "description": "Purpose declaration or limitation evidence",
         "extension_group": "org.peacprotocol/purpose",
         "status": "informational"
+      },
+      {
+        "id": "org.peacprotocol/a2a-agent-card-observation",
+        "pillar": "provenance",
+        "description": "Observational record of an A2A v1.0 Agent Card discovery; signature_observation is caller-reported.",
+        "extension_group": "org.peacprotocol/a2a-handoff",
+        "status": "informational"
+      },
+      {
+        "id": "org.peacprotocol/a2a-task-submitted",
+        "pillar": "provenance",
+        "description": "Observational record of an A2A v1.0 task.submitted handoff event.",
+        "extension_group": "org.peacprotocol/a2a-handoff",
+        "status": "informational"
+      },
+      {
+        "id": "org.peacprotocol/a2a-task-accepted",
+        "pillar": "provenance",
+        "description": "Observational record of an A2A v1.0 task.accepted handoff event.",
+        "extension_group": "org.peacprotocol/a2a-handoff",
+        "status": "informational"
+      },
+      {
+        "id": "org.peacprotocol/a2a-task-rejected",
+        "pillar": "provenance",
+        "description": "Observational record of an A2A v1.0 task.rejected handoff event.",
+        "extension_group": "org.peacprotocol/a2a-handoff",
+        "status": "informational"
+      },
+      {
+        "id": "org.peacprotocol/a2a-task-state-changed",
+        "pillar": "provenance",
+        "description": "Observational record of an A2A v1.0 task state transition.",
+        "extension_group": "org.peacprotocol/a2a-handoff",
+        "status": "informational"
+      },
+      {
+        "id": "org.peacprotocol/a2a-task-completed",
+        "pillar": "provenance",
+        "description": "Observational record of an A2A v1.0 task.completed handoff event.",
+        "extension_group": "org.peacprotocol/a2a-handoff",
+        "status": "informational"
+      },
+      {
+        "id": "org.peacprotocol/a2a-task-failed",
+        "pillar": "provenance",
+        "description": "Observational record of an A2A v1.0 task.failed handoff event.",
+        "extension_group": "org.peacprotocol/a2a-handoff",
+        "status": "informational"
+      },
+      {
+        "id": "org.peacprotocol/a2a-human-review-requested",
+        "pillar": "provenance",
+        "description": "Observational record of an A2A v1.0 human review request.",
+        "extension_group": "org.peacprotocol/a2a-handoff",
+        "status": "informational"
+      },
+      {
+        "id": "org.peacprotocol/a2a-human-approved",
+        "pillar": "provenance",
+        "description": "Observational record of an A2A v1.0 human approval; PEAC records what an external approver indicated.",
+        "extension_group": "org.peacprotocol/a2a-handoff",
+        "status": "informational"
+      },
+      {
+        "id": "org.peacprotocol/a2a-human-rejected",
+        "pillar": "provenance",
+        "description": "Observational record of an A2A v1.0 human rejection; PEAC records what an external approver indicated.",
+        "extension_group": "org.peacprotocol/a2a-handoff",
+        "status": "informational"
       }
     ]
   },
@@ -387,6 +457,11 @@
       {
         "id": "org.peacprotocol/purpose",
         "description": "Purpose extension: external_purposes, purpose_basis, purpose_limitation, data_minimization, compatible_purposes, peac_purpose_mapping",
+        "status": "informational"
+      },
+      {
+        "id": "org.peacprotocol/a2a-handoff",
+        "description": "A2A handoff observation extension: records observational events emitted alongside A2A v1.0 task lifecycle transitions (Agent Card observation + 9 task-lifecycle event types). Strictly observational; helpers do not verify Agent Card signatures or fetch upstream events. Introduced in v0.14.1.",
         "status": "informational"
       }
     ]

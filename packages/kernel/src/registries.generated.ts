@@ -227,8 +227,7 @@ export const PROOF_TYPES: readonly ProofTypeEntry[] = [
   {
     id: 'eat-background-check',
     category: 'rats',
-    description:
-      'Verifier fetches attestation result from registry in RATS Background-Check model (RFC 9711)',
+    description: 'Verifier fetches attestation result from registry in RATS Background-Check model (RFC 9711)',
     reference: 'https://www.rfc-editor.org/rfc/rfc9711',
     status: 'informational',
   },
@@ -285,6 +284,76 @@ export const PROOF_TYPES: readonly ProofTypeEntry[] = [
 
 /** Receipt type registry (Wire 0.2, 10 pillar-aligned types) */
 export const RECEIPT_TYPES: readonly ReceiptTypeEntry[] = [
+  {
+    id: 'org.peacprotocol/a2a-agent-card-observation',
+    pillar: 'provenance',
+    description: 'Observational record of an A2A v1.0 Agent Card discovery; signature_observation is caller-reported.',
+    extension_group: 'org.peacprotocol/a2a-handoff',
+    status: 'informational',
+  },
+  {
+    id: 'org.peacprotocol/a2a-human-approved',
+    pillar: 'provenance',
+    description: 'Observational record of an A2A v1.0 human approval; PEAC records what an external approver indicated.',
+    extension_group: 'org.peacprotocol/a2a-handoff',
+    status: 'informational',
+  },
+  {
+    id: 'org.peacprotocol/a2a-human-rejected',
+    pillar: 'provenance',
+    description: 'Observational record of an A2A v1.0 human rejection; PEAC records what an external approver indicated.',
+    extension_group: 'org.peacprotocol/a2a-handoff',
+    status: 'informational',
+  },
+  {
+    id: 'org.peacprotocol/a2a-human-review-requested',
+    pillar: 'provenance',
+    description: 'Observational record of an A2A v1.0 human review request.',
+    extension_group: 'org.peacprotocol/a2a-handoff',
+    status: 'informational',
+  },
+  {
+    id: 'org.peacprotocol/a2a-task-accepted',
+    pillar: 'provenance',
+    description: 'Observational record of an A2A v1.0 task.accepted handoff event.',
+    extension_group: 'org.peacprotocol/a2a-handoff',
+    status: 'informational',
+  },
+  {
+    id: 'org.peacprotocol/a2a-task-completed',
+    pillar: 'provenance',
+    description: 'Observational record of an A2A v1.0 task.completed handoff event.',
+    extension_group: 'org.peacprotocol/a2a-handoff',
+    status: 'informational',
+  },
+  {
+    id: 'org.peacprotocol/a2a-task-failed',
+    pillar: 'provenance',
+    description: 'Observational record of an A2A v1.0 task.failed handoff event.',
+    extension_group: 'org.peacprotocol/a2a-handoff',
+    status: 'informational',
+  },
+  {
+    id: 'org.peacprotocol/a2a-task-rejected',
+    pillar: 'provenance',
+    description: 'Observational record of an A2A v1.0 task.rejected handoff event.',
+    extension_group: 'org.peacprotocol/a2a-handoff',
+    status: 'informational',
+  },
+  {
+    id: 'org.peacprotocol/a2a-task-state-changed',
+    pillar: 'provenance',
+    description: 'Observational record of an A2A v1.0 task state transition.',
+    extension_group: 'org.peacprotocol/a2a-handoff',
+    status: 'informational',
+  },
+  {
+    id: 'org.peacprotocol/a2a-task-submitted',
+    pillar: 'provenance',
+    description: 'Observational record of an A2A v1.0 task.submitted handoff event.',
+    extension_group: 'org.peacprotocol/a2a-handoff',
+    status: 'informational',
+  },
   {
     id: 'org.peacprotocol/access-decision',
     pillar: 'access',
@@ -360,14 +429,18 @@ export const RECEIPT_TYPES: readonly ReceiptTypeEntry[] = [
 /** Extension group registry (Wire 0.2) */
 export const EXTENSION_GROUPS: readonly ExtensionGroupEntry[] = [
   {
+    id: 'org.peacprotocol/a2a-handoff',
+    description: 'A2A handoff observation extension: records observational events emitted alongside A2A v1.0 task lifecycle transitions (Agent Card observation + 9 task-lifecycle event types). Strictly observational; helpers do not verify Agent Card signatures or fetch upstream events. Introduced in v0.14.1.',
+    status: 'informational',
+  },
+  {
     id: 'org.peacprotocol/access',
     description: 'Access extension: resource, action, decision (allow/deny/review)',
     status: 'informational',
   },
   {
     id: 'org.peacprotocol/attribution',
-    description:
-      'Attribution extension: creator_ref, license_spdx, obligation_type, attribution_text, content_signal_source, content_digest',
+    description: 'Attribution extension: creator_ref, license_spdx, obligation_type, attribution_text, content_signal_source, content_digest',
     status: 'informational',
   },
   {
@@ -382,14 +455,12 @@ export const EXTENSION_GROUPS: readonly ExtensionGroupEntry[] = [
   },
   {
     id: 'org.peacprotocol/compliance',
-    description:
-      'Compliance extension: framework, compliance_status, audit_ref, auditor, audit_date, scope, validity_period, evidence_ref',
+    description: 'Compliance extension: framework, compliance_status, audit_ref, auditor, audit_date, scope, validity_period, evidence_ref',
     status: 'informational',
   },
   {
     id: 'org.peacprotocol/consent',
-    description:
-      'Consent extension: consent_basis, consent_status, data_categories, retention_period, consent_method, withdrawal_uri, scope, jurisdiction',
+    description: 'Consent extension: consent_basis, consent_status, data_categories, retention_period, consent_method, withdrawal_uri, scope, jurisdiction',
     status: 'informational',
   },
   {
@@ -404,26 +475,22 @@ export const EXTENSION_GROUPS: readonly ExtensionGroupEntry[] = [
   },
   {
     id: 'org.peacprotocol/privacy',
-    description:
-      'Privacy extension: data_classification, processing_basis, retention_period, retention_mode, recipient_scope, anonymization_method, data_subject_category, transfer_mechanism',
+    description: 'Privacy extension: data_classification, processing_basis, retention_period, retention_mode, recipient_scope, anonymization_method, data_subject_category, transfer_mechanism',
     status: 'informational',
   },
   {
     id: 'org.peacprotocol/provenance',
-    description:
-      'Provenance extension: source_type, source_ref, source_uri, build_provenance_uri, verification_method, custody_chain, slsa',
+    description: 'Provenance extension: source_type, source_ref, source_uri, build_provenance_uri, verification_method, custody_chain, slsa',
     status: 'informational',
   },
   {
     id: 'org.peacprotocol/purpose',
-    description:
-      'Purpose extension: external_purposes, purpose_basis, purpose_limitation, data_minimization, compatible_purposes, peac_purpose_mapping',
+    description: 'Purpose extension: external_purposes, purpose_basis, purpose_limitation, data_minimization, compatible_purposes, peac_purpose_mapping',
     status: 'informational',
   },
   {
     id: 'org.peacprotocol/safety',
-    description:
-      'Safety extension: review_status, risk_level, assessment_method, safety_measures, incident_ref, model_ref, category',
+    description: 'Safety extension: review_status, risk_level, assessment_method, safety_measures, incident_ref, model_ref, category',
     status: 'informational',
   },
 ];
@@ -434,6 +501,16 @@ export const EXTENSION_GROUPS: readonly ExtensionGroupEntry[] = [
  * Entries with extension_group === null are excluded (no enforcement yet).
  */
 export const TYPE_TO_EXTENSION_MAP: ReadonlyMap<string, string> = new Map([
+  ['org.peacprotocol/a2a-agent-card-observation', 'org.peacprotocol/a2a-handoff'],
+  ['org.peacprotocol/a2a-human-approved', 'org.peacprotocol/a2a-handoff'],
+  ['org.peacprotocol/a2a-human-rejected', 'org.peacprotocol/a2a-handoff'],
+  ['org.peacprotocol/a2a-human-review-requested', 'org.peacprotocol/a2a-handoff'],
+  ['org.peacprotocol/a2a-task-accepted', 'org.peacprotocol/a2a-handoff'],
+  ['org.peacprotocol/a2a-task-completed', 'org.peacprotocol/a2a-handoff'],
+  ['org.peacprotocol/a2a-task-failed', 'org.peacprotocol/a2a-handoff'],
+  ['org.peacprotocol/a2a-task-rejected', 'org.peacprotocol/a2a-handoff'],
+  ['org.peacprotocol/a2a-task-state-changed', 'org.peacprotocol/a2a-handoff'],
+  ['org.peacprotocol/a2a-task-submitted', 'org.peacprotocol/a2a-handoff'],
   ['org.peacprotocol/access-decision', 'org.peacprotocol/access'],
   ['org.peacprotocol/attribution-event', 'org.peacprotocol/attribution'],
   ['org.peacprotocol/compliance-check', 'org.peacprotocol/compliance'],

@@ -1,9 +1,49 @@
 {
   "package": "@peac/schema",
-  "version": "0.12.14",
-  "extracted_at": "2026-04-24",
+  "version": "0.14.0",
+  "extracted_at": "2026-05-05",
   "node_version": "v24.13.0",
   "value_exports": [
+    {
+      "name": "A2AAgentCardObservationSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "A2AHandoffSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "A2ATaskObservationSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "A2A_AGENT_CARD_OBSERVATION_TYPE",
+      "typeof": "static"
+    },
+    {
+      "name": "A2A_HANDOFF_ERROR_CODES",
+      "typeof": "static"
+    },
+    {
+      "name": "A2A_HANDOFF_EXTENSION_KEY",
+      "typeof": "static"
+    },
+    {
+      "name": "A2A_HANDOFF_TYPE_URIS",
+      "typeof": "static"
+    },
+    {
+      "name": "A2A_TASK_EVENT_SCHEMAS",
+      "typeof": "static"
+    },
+    {
+      "name": "A2A_TASK_EVENT_TYPES",
+      "typeof": "static"
+    },
+    {
+      "name": "A2A_TASK_TYPE_URIS",
+      "typeof": "static"
+    },
     {
       "name": "ACCESS_EXTENSION_KEY",
       "typeof": "static"
@@ -597,11 +637,19 @@
       "typeof": "static"
     },
     {
+      "name": "OPAQUE_REF_PREFIXES",
+      "typeof": "static"
+    },
+    {
       "name": "ORCHESTRATION_FRAMEWORKS",
       "typeof": "static"
     },
     {
       "name": "ObligationsExtensionSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "OpaqueRefSchema",
       "typeof": "static"
     },
     {
@@ -1101,6 +1149,10 @@
       "typeof": "static"
     },
     {
+      "name": "createOpaqueRefSchema",
+      "typeof": "static"
+    },
+    {
       "name": "createPEACError",
       "typeof": "static"
     },
@@ -1405,6 +1457,10 @@
       "typeof": "static"
     },
     {
+      "name": "validateA2AHandoff",
+      "typeof": "static"
+    },
+    {
       "name": "validateActorBinding",
       "typeof": "static"
     },
@@ -1542,6 +1598,12 @@
     }
   ],
   "type_exports": [
+    "A2AAgentCardObservation",
+    "A2AHandoffPayload",
+    "A2ATaskEvent",
+    "A2ATaskObservation",
+    "A2AValidationError",
+    "A2AValidationResult",
     "AIPREFSnapshot",
     "AccessExtension",
     "ActorBinding",
@@ -1650,6 +1712,8 @@
     "NormalizedControlStep",
     "NormalizedPayment",
     "ObligationsExtension",
+    "OpaqueRef",
+    "OpaqueRefSchemaOptions",
     "OrchestrationFramework",
     "PEACDiscovery",
     "PEACEnvelope",
@@ -1762,6 +1826,7 @@
     "SAFETY_EXTENSION_KEY"
   ],
   "legacy_extension_keys": [
+    "A2A_HANDOFF_EXTENSION_KEY",
     "ACTOR_BINDING_EXTENSION_KEY",
     "CONTROL_ACTION_EXTENSION_KEY",
     "CREDENTIAL_EVENT_EXTENSION_KEY",
@@ -1786,6 +1851,6 @@
     "PurposeExtensionSchema",
     "SafetyExtensionSchema"
   ],
-  "total_value_exports": 384,
-  "total_type_exports": 189
+  "total_value_exports": 398,
+  "total_type_exports": 197
 }

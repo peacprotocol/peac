@@ -2542,6 +2542,114 @@
           "last_reviewed_in": "0.12.9"
         }
       ]
+    },
+    {
+      "section_number": 28,
+      "section_title": "A2A Handoff Records",
+      "section_anchor": "a2a-handoff-records",
+      "governing_spec": "docs/specs/A2A-HANDOFF-RECORDS.md",
+      "requirements": [
+        {
+          "id": "A2A-HANDOFF-001",
+          "keyword": "MUST",
+          "summary": "Records carry exactly one of the 10 A2A handoff type URIs in the extension payload",
+          "source_fragment": "A record carries exactly one type URI",
+          "source_fragment_hash": "sha256:c3bf9d9259f9cb83a7c288fbdaca07d7e8855e7108c4a192b3073c6e10849559",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.14.1",
+          "last_reviewed_in": "0.14.1"
+        },
+        {
+          "id": "A2A-HANDOFF-002",
+          "keyword": "MUST",
+          "summary": "Extension payload type field equals the wire-record type URI",
+          "source_fragment": "The payload's type field MUST equal the type URI declared at the wire-record level",
+          "source_fragment_hash": "sha256:26b1b28a35368e365a34a377b9412079e9286b0e55af8365777c00a3cda0239d",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.14.1",
+          "last_reviewed_in": "0.14.1"
+        },
+        {
+          "id": "A2A-HANDOFF-003",
+          "keyword": "MUST",
+          "summary": "All *_ref fields use the OpaqueRefSchema grammar (no whitespace, no @, recognized prefix)",
+          "source_fragment": "All *_ref fields in this profile use the shared opaque-reference grammar",
+          "source_fragment_hash": "sha256:aedad82587ee8156f9a7b170acbf5a3acf0cf7dcc9b9953b4efd108da77a0100",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.14.1",
+          "last_reviewed_in": "0.14.1"
+        },
+        {
+          "id": "A2A-HANDOFF-004",
+          "keyword": "MUST",
+          "summary": "Agent Card observation uses signature_observation.caller_reported_verification (not legacy signature.verified)",
+          "source_fragment": "The legacy shape signature: { verified: true, ... } was REJECTED in v0.14.1",
+          "source_fragment_hash": "sha256:9dc5dcc649f2cffbb23b3f1c2cb83a930a7e6c3a177959c6b0bbf7da841b4a14",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.14.1",
+          "last_reviewed_in": "0.14.1"
+        },
+        {
+          "id": "A2A-HANDOFF-005",
+          "keyword": "MUST NOT",
+          "summary": "Helper file does not import signature-verification APIs (artifact-shape import-graph test enforces)",
+          "source_fragment": "The Agent Card observation helper MUST NOT verify Agent Card signatures",
+          "source_fragment_hash": "sha256:6b4a2e27b05ca185fbe7cadd395139db773866e130a068b914584832d097c7df",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.14.1",
+          "last_reviewed_in": "0.14.1"
+        },
+        {
+          "id": "A2A-HANDOFF-006",
+          "keyword": "MUST NOT",
+          "summary": "Extension payload top-level keys do not include decision/verdict/score/result/etc.",
+          "source_fragment": "An emitted record's extension payload MUST NOT contain any of: decision, verdict, score, result, passed, failed, policy_result, approval_result, outcome, judgment, rating, grade, pass, fail, allow, deny, authorized, denied, granted, rejected_reason as top-level keys",
+          "source_fragment_hash": "sha256:c43b21fd2db052460e0d7116e460e6b25cfe6999b2ffd97e8fe188395da65566",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.14.1",
+          "last_reviewed_in": "0.14.1"
+        },
+        {
+          "id": "A2A-HANDOFF-007",
+          "keyword": "MUST",
+          "summary": "Agent Card payload's discovery_path is one of the three recognized values",
+          "source_fragment": "discovery_path: enum (one of /.well-known/agent-card.json, /.well-known/peac.json, header-probe)",
+          "source_fragment_hash": "sha256:4b22e7ae81a9090d69b65824afdba0a2b4efc530a3e798e7bfa4252382a162b9",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.14.1",
+          "last_reviewed_in": "0.14.1"
+        },
+        {
+          "id": "A2A-HANDOFF-008",
+          "keyword": "MUST",
+          "summary": "Task observation event field matches the type URI",
+          "source_fragment": "event: enum (one of task.submitted, task.accepted, ...) MUST match type",
+          "source_fragment_hash": "sha256:3074afe8827a87a229ef245eb0012baee11ca8e41db4dcb014ffdd9a57da75a3",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.14.1",
+          "last_reviewed_in": "0.14.1"
+        },
+        {
+          "id": "A2A-HANDOFF-009",
+          "keyword": "MUST",
+          "summary": "observed_at and discovered_at are RFC 3339 timestamps with offset",
+          "source_fragment": "RFC 3339 timestamp",
+          "source_fragment_hash": "sha256:0b8f89f8215448e2398a812caf0a68af3409828a087dd125e78bd77278c10ca8",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.14.1",
+          "last_reviewed_in": "0.14.1"
+        },
+        {
+          "id": "A2A-HANDOFF-010",
+          "keyword": "MUST",
+          "summary": "upstream_event_digest, when present, is sha256:<64 hex>",
+          "source_fragment": "sha256:<64 hex> digest of the upstream A2A event payload",
+          "source_fragment_hash": "sha256:2d1c1bcbdec95b963cacbc6ada0a8733064d0e31ed609011d449627a489bebaa",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.14.1",
+          "last_reviewed_in": "0.14.1"
+        }
+      ]
     }
   ]
 }

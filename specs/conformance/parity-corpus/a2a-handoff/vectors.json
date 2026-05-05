@@ -1,0 +1,468 @@
+{
+  "family": "a2a-handoff",
+  "description": "v0.14.1 A2A handoff observation parity vectors. Covers the 10 type URIs of org.peacprotocol/a2a-handoff (Agent Card observation + 9 task / human lifecycle events) plus 5 envelope-level vectors that exercise extension-content edge cases (digest-only card_ref violation, decision-vocabulary injection, legacy signature shape, type/event mismatch, opaque-ref grammar violation on task_id). Per the parity-corpus convention established by runtime-governance vector rg-007, all vectors here assert envelope-level canonical agreement (LEFT/RIGHT verifier agreement on the wire envelope) and set expected.accepted=true; the actual semantic rejection of the extension content lives at the Layer 3 validator surface (validateA2AHandoff exported from @peac/schema, exercised by packages/schema/__tests__/extensions/a2a-handoff-shape.test.ts and a2a-handoff-registry.test.ts).",
+  "version": "0.14.1",
+  "generator": "manual; v0.14.1 PR 1 floor",
+  "vectors": [
+    {
+      "id": "ah-001-agent-card-observation",
+      "description": "A2A v1.0 Agent Card observation; caller-reported verified; canonical discovery path.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/a2a-agent-card-observation",
+          "iss": "https://gateway.example.com",
+          "iat": 1735689600,
+          "jti": "ah-001-jti-fixed-value",
+          "extensions": {
+            "org.peacprotocol/a2a-handoff": {
+              "type": "org.peacprotocol/a2a-agent-card-observation",
+              "card_ref": "sha256:abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789",
+              "selected_interface_url": "https://agent.example.com/a2a/v1",
+              "signature_observation": {
+                "present": true,
+                "caller_reported_verification": "verified",
+                "method_ref": "ref:detached-jws",
+                "kid": "k-2026-001",
+                "observed_by_ref": "urn:peac:verifier:internal"
+              },
+              "discovered_at": "2026-05-05T12:00:00Z",
+              "discovery_path": "/.well-known/agent-card.json"
+            }
+          }
+        }
+      },
+      "expected": {
+        "accepted": true
+      }
+    },
+    {
+      "id": "ah-002-task-submitted",
+      "description": "A2A task.submitted observation; from_agent only (no to_agent).",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/a2a-task-submitted",
+          "iss": "https://gateway.example.com",
+          "iat": 1735689600,
+          "jti": "ah-002-jti-fixed-value",
+          "extensions": {
+            "org.peacprotocol/a2a-handoff": {
+              "type": "org.peacprotocol/a2a-task-submitted",
+              "event": "task.submitted",
+              "task_id": "urn:a2a:task:42",
+              "from_agent": {
+                "card_ref": "sha256:abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789",
+                "selected_interface_url": "https://gateway.example.com/a2a/v1"
+              },
+              "state": "submitted",
+              "observed_at": "2026-05-05T12:00:00Z"
+            }
+          }
+        }
+      },
+      "expected": {
+        "accepted": true
+      }
+    },
+    {
+      "id": "ah-003-task-accepted",
+      "description": "A2A task.accepted observation; from_agent and to_agent.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/a2a-task-accepted",
+          "iss": "https://gateway.example.com",
+          "iat": 1735689600,
+          "jti": "ah-003-jti-fixed-value",
+          "extensions": {
+            "org.peacprotocol/a2a-handoff": {
+              "type": "org.peacprotocol/a2a-task-accepted",
+              "event": "task.accepted",
+              "task_id": "urn:a2a:task:42",
+              "from_agent": {
+                "card_ref": "sha256:abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789"
+              },
+              "to_agent": {
+                "card_ref": "sha256:fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210"
+              },
+              "state": "accepted",
+              "observed_at": "2026-05-05T12:00:01Z"
+            }
+          }
+        }
+      },
+      "expected": {
+        "accepted": true
+      }
+    },
+    {
+      "id": "ah-004-task-rejected",
+      "description": "A2A task.rejected observation; reason populated.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/a2a-task-rejected",
+          "iss": "https://gateway.example.com",
+          "iat": 1735689600,
+          "jti": "ah-004-jti-fixed-value",
+          "extensions": {
+            "org.peacprotocol/a2a-handoff": {
+              "type": "org.peacprotocol/a2a-task-rejected",
+              "event": "task.rejected",
+              "task_id": "urn:a2a:task:42",
+              "from_agent": {
+                "card_ref": "sha256:abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789"
+              },
+              "to_agent": {
+                "card_ref": "sha256:fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210"
+              },
+              "state": "rejected",
+              "reason": "capability mismatch (observed)",
+              "observed_at": "2026-05-05T12:00:02Z"
+            }
+          }
+        }
+      },
+      "expected": {
+        "accepted": true
+      }
+    },
+    {
+      "id": "ah-005-task-state-changed",
+      "description": "A2A task.state_changed observation; intermediate transition.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/a2a-task-state-changed",
+          "iss": "https://gateway.example.com",
+          "iat": 1735689600,
+          "jti": "ah-005-jti-fixed-value",
+          "extensions": {
+            "org.peacprotocol/a2a-handoff": {
+              "type": "org.peacprotocol/a2a-task-state-changed",
+              "event": "task.state_changed",
+              "task_id": "urn:a2a:task:42",
+              "from_agent": {
+                "card_ref": "sha256:abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789"
+              },
+              "to_agent": {
+                "card_ref": "sha256:fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210"
+              },
+              "state": "working",
+              "observed_at": "2026-05-05T12:00:03Z"
+            }
+          }
+        }
+      },
+      "expected": {
+        "accepted": true
+      }
+    },
+    {
+      "id": "ah-006-task-completed",
+      "description": "A2A task.completed observation; upstream digest carried.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/a2a-task-completed",
+          "iss": "https://gateway.example.com",
+          "iat": 1735689600,
+          "jti": "ah-006-jti-fixed-value",
+          "extensions": {
+            "org.peacprotocol/a2a-handoff": {
+              "type": "org.peacprotocol/a2a-task-completed",
+              "event": "task.completed",
+              "task_id": "urn:a2a:task:42",
+              "from_agent": {
+                "card_ref": "sha256:abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789"
+              },
+              "to_agent": {
+                "card_ref": "sha256:fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210"
+              },
+              "state": "completed",
+              "observed_at": "2026-05-05T12:00:04Z",
+              "upstream_event_ref": "urn:a2a:event:e1",
+              "upstream_event_digest": "sha256:0000000000000000000000000000000000000000000000000000000000000001"
+            }
+          }
+        }
+      },
+      "expected": {
+        "accepted": true
+      }
+    },
+    {
+      "id": "ah-007-task-failed",
+      "description": "A2A task.failed observation; reason populated.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/a2a-task-failed",
+          "iss": "https://gateway.example.com",
+          "iat": 1735689600,
+          "jti": "ah-007-jti-fixed-value",
+          "extensions": {
+            "org.peacprotocol/a2a-handoff": {
+              "type": "org.peacprotocol/a2a-task-failed",
+              "event": "task.failed",
+              "task_id": "urn:a2a:task:42",
+              "from_agent": {
+                "card_ref": "sha256:abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789"
+              },
+              "to_agent": {
+                "card_ref": "sha256:fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210"
+              },
+              "state": "failed",
+              "reason": "upstream timeout (observed)",
+              "observed_at": "2026-05-05T12:00:05Z"
+            }
+          }
+        }
+      },
+      "expected": {
+        "accepted": true
+      }
+    },
+    {
+      "id": "ah-008-human-review-requested",
+      "description": "Human review requested observation.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/a2a-human-review-requested",
+          "iss": "https://gateway.example.com",
+          "iat": 1735689600,
+          "jti": "ah-008-jti-fixed-value",
+          "extensions": {
+            "org.peacprotocol/a2a-handoff": {
+              "type": "org.peacprotocol/a2a-human-review-requested",
+              "event": "human.review_requested",
+              "task_id": "urn:a2a:task:42",
+              "from_agent": {
+                "card_ref": "sha256:abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789"
+              },
+              "state": "awaiting_review",
+              "observed_at": "2026-05-05T12:00:06Z"
+            }
+          }
+        }
+      },
+      "expected": {
+        "accepted": true
+      }
+    },
+    {
+      "id": "ah-009-human-approved",
+      "description": "Human approved observation. PEAC records what an external approver indicated.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/a2a-human-approved",
+          "iss": "https://gateway.example.com",
+          "iat": 1735689600,
+          "jti": "ah-009-jti-fixed-value",
+          "extensions": {
+            "org.peacprotocol/a2a-handoff": {
+              "type": "org.peacprotocol/a2a-human-approved",
+              "event": "human.approved",
+              "task_id": "urn:a2a:task:42",
+              "from_agent": {
+                "card_ref": "sha256:abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789"
+              },
+              "state": "approved_by_human",
+              "observed_at": "2026-05-05T12:00:07Z"
+            }
+          }
+        }
+      },
+      "expected": {
+        "accepted": true
+      }
+    },
+    {
+      "id": "ah-010-human-rejected",
+      "description": "Human rejected observation. PEAC records what an external approver indicated.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/a2a-human-rejected",
+          "iss": "https://gateway.example.com",
+          "iat": 1735689600,
+          "jti": "ah-010-jti-fixed-value",
+          "extensions": {
+            "org.peacprotocol/a2a-handoff": {
+              "type": "org.peacprotocol/a2a-human-rejected",
+              "event": "human.rejected",
+              "task_id": "urn:a2a:task:42",
+              "from_agent": {
+                "card_ref": "sha256:abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789"
+              },
+              "state": "rejected_by_human",
+              "reason": "policy mismatch (observed)",
+              "observed_at": "2026-05-05T12:00:08Z"
+            }
+          }
+        }
+      },
+      "expected": {
+        "accepted": true
+      }
+    },
+    {
+      "id": "ah-neg-001-bare-org-peacprotocol-card-ref",
+      "description": "Negative: card_ref violates the strict sha256 digest grammar (bare 'org.peacprotocol' is not a digest). card_ref is digest-only per v0.14.1 spec §5.1.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/a2a-agent-card-observation",
+          "iss": "https://gateway.example.com",
+          "iat": 1735689600,
+          "jti": "ah-neg-001-jti-fixed-value",
+          "extensions": {
+            "org.peacprotocol/a2a-handoff": {
+              "type": "org.peacprotocol/a2a-agent-card-observation",
+              "card_ref": "org.peacprotocol",
+              "signature_observation": {
+                "present": true,
+                "caller_reported_verification": "not_checked"
+              },
+              "discovered_at": "2026-05-05T12:00:00Z",
+              "discovery_path": "/.well-known/agent-card.json"
+            }
+          }
+        }
+      },
+      "expected": {
+        "accepted": true
+      }
+    },
+    {
+      "id": "ah-neg-002-decision-key-injection",
+      "description": "Negative: extension payload attempts to inject a top-level 'decision' key (one of 20 forbidden top-level keys per v0.14.1 no-inline-value invariant).",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/a2a-task-completed",
+          "iss": "https://gateway.example.com",
+          "iat": 1735689600,
+          "jti": "ah-neg-002-jti-fixed-value",
+          "extensions": {
+            "org.peacprotocol/a2a-handoff": {
+              "type": "org.peacprotocol/a2a-task-completed",
+              "event": "task.completed",
+              "task_id": "urn:a2a:task:42",
+              "from_agent": {
+                "card_ref": "sha256:abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789"
+              },
+              "observed_at": "2026-05-05T12:00:00Z",
+              "decision": "allow"
+            }
+          }
+        }
+      },
+      "expected": {
+        "accepted": true
+      }
+    },
+    {
+      "id": "ah-neg-003-legacy-signature-verified-field",
+      "description": "Negative: agent card observation uses the legacy 'signature: { verified: true }' shape; rejected with stable code a2a.legacy_signature_shape_blocked (renamed to 'signature_observation.caller_reported_verification' in v0.14.1).",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/a2a-agent-card-observation",
+          "iss": "https://gateway.example.com",
+          "iat": 1735689600,
+          "jti": "ah-neg-003-jti-fixed-value",
+          "extensions": {
+            "org.peacprotocol/a2a-handoff": {
+              "type": "org.peacprotocol/a2a-agent-card-observation",
+              "card_ref": "sha256:abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789",
+              "signature": {
+                "present": true,
+                "verified": true,
+                "method": "jws",
+                "kid": "k-2026-001"
+              },
+              "discovered_at": "2026-05-05T12:00:00Z",
+              "discovery_path": "/.well-known/agent-card.json"
+            }
+          }
+        }
+      },
+      "expected": {
+        "accepted": true
+      }
+    },
+    {
+      "id": "ah-neg-004-type-event-mismatch",
+      "description": "Negative: type and event do not agree (type=task-completed, event=task.failed). Per v0.14.1 spec §4.2, event MUST match type.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/a2a-task-completed",
+          "iss": "https://gateway.example.com",
+          "iat": 1735689600,
+          "jti": "ah-neg-004-jti-fixed-value",
+          "extensions": {
+            "org.peacprotocol/a2a-handoff": {
+              "type": "org.peacprotocol/a2a-task-completed",
+              "event": "task.failed",
+              "task_id": "urn:a2a:task:42",
+              "from_agent": {
+                "card_ref": "sha256:abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789"
+              },
+              "observed_at": "2026-05-05T12:00:00Z"
+            }
+          }
+        }
+      },
+      "expected": {
+        "accepted": true
+      }
+    },
+    {
+      "id": "ah-neg-005-task-id-grammar-violation",
+      "description": "Negative: task_id is bare 'org.peacprotocol' which violates the multi-prefix opaque-reference grammar (no recognized prefix).",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/a2a-task-submitted",
+          "iss": "https://gateway.example.com",
+          "iat": 1735689600,
+          "jti": "ah-neg-005-jti-fixed-value",
+          "extensions": {
+            "org.peacprotocol/a2a-handoff": {
+              "type": "org.peacprotocol/a2a-task-submitted",
+              "event": "task.submitted",
+              "task_id": "org.peacprotocol",
+              "from_agent": {
+                "card_ref": "sha256:abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789"
+              },
+              "observed_at": "2026-05-05T12:00:00Z"
+            }
+          }
+        }
+      },
+      "expected": {
+        "accepted": true
+      }
+    }
+  ]
+}

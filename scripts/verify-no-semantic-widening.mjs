@@ -4,11 +4,15 @@
  *
  * Release-window gate with baselines anchored to the v0.13.0 published
  * state (36 packages after @peac/disc retirement, 12 extension groups,
- * 186 error codes, 0 emitted-on-primary-path codes). Subsequent v0.13.x
- * releases inherit these baselines unchanged because they ship no new
- * public package, extension key, or emitted error code; if a future
- * release widens any baseline, update the values here together with
- * the corresponding CHANGELOG entry.
+ * 186 error codes, 0 emitted-on-primary-path codes). v0.13.x releases
+ * inherited these baselines unchanged because they shipped no new
+ * public package, extension key, or emitted error code. v0.14.1
+ * widens the extension-group baseline 12 -> 13 to admit
+ * `org.peacprotocol/a2a-handoff` (the new observational namespace for
+ * A2A v1.0 handoff records, governed by `docs/specs/A2A-HANDOFF-RECORDS.md`);
+ * package count, error-code totals, and emitted-on-primary-path counts
+ * remain unchanged. If a future release widens any baseline, update
+ * the values here together with the corresponding CHANGELOG entry.
  *
  * Verifies that the in-flight release has not widened the protocol
  * surface beyond what is documented as additive observational behavior.
@@ -112,7 +116,7 @@ const regs = readJSON(join(ROOT, 'specs/kernel/registries.json'));
 if (!regs) {
   fail('specs/kernel/registries.json not found');
 } else {
-  const BASELINE_EXT_GROUPS = 12;
+  const BASELINE_EXT_GROUPS = 13;
   const groups = regs.extension_groups ?? regs.registries?.extension_groups ?? [];
   const groupCount = Array.isArray(groups)
     ? groups.length

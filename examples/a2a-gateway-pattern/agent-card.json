@@ -1,8 +1,14 @@
 {
   "name": "PEAC Gateway Agent",
   "description": "Demonstrates A2A receipt issuance per state transition",
-  "url": "https://gateway.example.com",
   "version": "1.0.0",
+  "supportedInterfaces": [
+    {
+      "url": "https://gateway.example.com/a2a/v1",
+      "protocolBinding": "http+json",
+      "protocolVersion": "1.0"
+    }
+  ],
   "capabilities": {
     "streaming": false,
     "pushNotifications": false,

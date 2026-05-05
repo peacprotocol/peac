@@ -52,3 +52,26 @@ export {
   MAX_FINGERPRINT_REF_LENGTH,
 } from './fingerprint-ref';
 export type { FingerprintRefObject } from './fingerprint-ref';
+
+// A2A Handoff Observation (org.peacprotocol/a2a-handoff): v0.14.1
+export {
+  A2A_HANDOFF_EXTENSION_KEY,
+  A2A_AGENT_CARD_OBSERVATION_TYPE,
+  A2A_TASK_EVENT_TYPES,
+  A2A_TASK_TYPE_URIS,
+  A2A_HANDOFF_TYPE_URIS,
+  A2A_TASK_EVENT_SCHEMAS,
+  A2A_HANDOFF_ERROR_CODES,
+  A2AAgentCardObservationSchema,
+  A2ATaskObservationSchema,
+  A2AHandoffSchema,
+  validateA2AHandoff,
+} from './a2a-handoff';
+export type {
+  A2ATaskEvent,
+  A2AAgentCardObservation,
+  A2ATaskObservation,
+  A2AHandoffPayload,
+  A2AValidationError,
+  A2AValidationResult,
+} from './a2a-handoff';

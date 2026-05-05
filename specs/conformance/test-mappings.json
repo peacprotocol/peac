@@ -271,6 +271,66 @@
       "test_file": "packages/adapters/runtime-governance/tests/normalize.test.ts",
       "test_description": "Compliance observations are observational, never authoritative determinations",
       "notes": "Compliance score structural validation (0-100) without compliance determination"
+    },
+    {
+      "requirement_id": "A2A-HANDOFF-001",
+      "test_file": "packages/schema/__tests__/extensions/a2a-handoff-shape.test.ts",
+      "test_description": "validates and uses only allowed top-level keys",
+      "notes": "10 type URIs (Agent Card observation + 9 task/human events) covered by per-type happy-path validation; A2A_HANDOFF_TYPE_URIS.length === 10 asserted directly."
+    },
+    {
+      "requirement_id": "A2A-HANDOFF-002",
+      "test_file": "packages/schema/__tests__/extensions/a2a-handoff-shape.test.ts",
+      "test_description": "Task / human events: shape snapshot",
+      "notes": "Each per-event schema literal-binds type to event via z.literal(); A2ATaskObservationSchema rejects type/event mismatch."
+    },
+    {
+      "requirement_id": "A2A-HANDOFF-003",
+      "test_file": "packages/schema/__tests__/opaque-ref.test.ts",
+      "test_description": "OpaqueRefSchema rejects grammar violations",
+      "notes": "All *_ref fields use OpaqueRefSchema (no whitespace, no @, no JSON-opening character, recognized prefix); covered by 17 negative grammar tests + UTF-8 byte-length tests."
+    },
+    {
+      "requirement_id": "A2A-HANDOFF-004",
+      "test_file": "packages/schema/__tests__/extensions/a2a-handoff-shape.test.ts",
+      "test_description": "rejects legacy signature.verified shape",
+      "notes": "Strict-object Agent Card schema rejects the legacy `signature` key; validateA2AHandoff returns stable error code a2a.legacy_signature_shape_blocked."
+    },
+    {
+      "requirement_id": "A2A-HANDOFF-005",
+      "test_file": "tests/tooling/no-signature-verification-in-a2a-observation.test.ts",
+      "test_description": "A2A observation helpers cannot import signature-verification APIs",
+      "notes": "TS AST walker over import statements asserts no @peac/crypto, node:crypto, jose, or **/jws*/sign*/verify* imports in the 3 helper files."
+    },
+    {
+      "requirement_id": "A2A-HANDOFF-006",
+      "test_file": "packages/schema/__tests__/extensions/a2a-handoff-shape.test.ts",
+      "test_description": "validateA2AHandoff structured errors (Improvement 8)",
+      "notes": "20 forbidden top-level keys (decision/verdict/score/result/etc.) rejected with stable error a2a.observation_decision_blocked."
+    },
+    {
+      "requirement_id": "A2A-HANDOFF-007",
+      "test_file": "packages/mappings/a2a/tests/observation/agent-card.test.ts",
+      "test_description": "accepts discovery_path = ...",
+      "notes": "Three discovery_path values exhaustively tested via it.each over the enum."
+    },
+    {
+      "requirement_id": "A2A-HANDOFF-008",
+      "test_file": "packages/mappings/a2a/tests/observation/handoff.test.ts",
+      "test_description": "9 events x happy-path produces a valid extension payload",
+      "notes": "Each per-event schema literal-binds type to event via z.literal(); event/type mismatch rejected by discriminated union."
+    },
+    {
+      "requirement_id": "A2A-HANDOFF-009",
+      "test_file": "packages/schema/__tests__/extensions/a2a-handoff-shape.test.ts",
+      "test_description": "validateA2AHandoff structured errors",
+      "notes": "RFC 3339 datetime with offset enforced via z.string().datetime({ offset: true }); malformed timestamps rejected with stable error a2a.timestamp_invalid."
+    },
+    {
+      "requirement_id": "A2A-HANDOFF-010",
+      "test_file": "packages/mappings/a2a/tests/observation/handoff.test.ts",
+      "test_description": "rejects malformed upstream_event_digest",
+      "notes": "upstream_event_digest validated by canonical Sha256DigestSchema (sha256:<64 lowercase hex>); malformed values rejected by zod parse."
     }
   ]
 }

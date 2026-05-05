@@ -16,6 +16,7 @@ import {
   attachReceiptToTaskStatus,
   extractReceiptFromTaskStatusAsync,
   hasPeacExtension,
+  normalizeAgentCard,
   type A2ATaskStatusLike,
 } from '@peac/mappings-a2a';
 import { issue, verifyLocal } from '@peac/protocol';
@@ -28,7 +29,15 @@ import agentCard from './agent-card.json' with { type: 'json' };
 
 console.log('=== Agent Card ===\n');
 console.log('Agent:', agentCard.name);
-console.log('PEAC extension declared:', hasPeacExtension(agentCard));
+
+const normalizedCard = normalizeAgentCard(agentCard);
+if (!normalizedCard) {
+  throw new Error(
+    'Agent Card does not conform to A2A v1.0.0 shape (supportedInterfaces[] required)'
+  );
+}
+console.log('Selected interface URL:', normalizedCard.url);
+console.log('PEAC extension declared:', hasPeacExtension(normalizedCard.original));
 
 // --- 2. Gateway keypair ---
 

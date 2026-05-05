@@ -1,0 +1,10 @@
+{
+  "type": "org.peacprotocol/a2a-human-approved",
+  "event": "human.approved",
+  "task_id": "urn:a2a:task:42",
+  "from_agent": {
+    "card_ref": "sha256:abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789"
+  },
+  "state": "approved_by_human",
+  "observed_at": "2026-05-05T12:00:02Z"
+}

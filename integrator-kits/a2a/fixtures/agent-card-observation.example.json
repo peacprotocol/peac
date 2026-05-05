@@ -1,0 +1,14 @@
+{
+  "type": "org.peacprotocol/a2a-agent-card-observation",
+  "card_ref": "sha256:abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789",
+  "selected_interface_url": "https://agent.example.com/a2a/v1",
+  "signature_observation": {
+    "present": true,
+    "caller_reported_verification": "verified",
+    "method_ref": "ref:detached-jws",
+    "kid": "k-2026-001",
+    "observed_by_ref": "urn:peac:verifier:internal"
+  },
+  "discovered_at": "2026-05-05T12:00:00Z",
+  "discovery_path": "/.well-known/agent-card.json"
+}

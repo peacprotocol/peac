@@ -38,6 +38,8 @@ const REGISTERED_KEYS = new Set([
   'org.peacprotocol/provenance',
   'org.peacprotocol/attribution',
   'org.peacprotocol/purpose',
+  // v0.14.1
+  'org.peacprotocol/a2a-handoff',
 ]);
 
 describe('checkTypeExtensionMapping(): pure helper', () => {
@@ -148,7 +150,12 @@ describe('checkTypeExtensionMapping(): pure helper', () => {
 const testKid = '2026-03-15T00:00:00Z';
 const testIss = 'https://api.example.com';
 
-/** Minimal valid extension values for each registered group */
+/**
+ * Minimal valid extension values for each registered group. The a2a-handoff
+ * minimal value here uses the Agent Card observation shape (sufficient for the
+ * `match` cell of the matrix; type-specific shape is exercised by the
+ * a2a-handoff parity corpus).
+ */
 const MINIMAL_EXTENSIONS: Record<string, Record<string, unknown>> = {
   'org.peacprotocol/commerce': { payment_rail: 'stripe', amount_minor: '1000', currency: 'USD' },
   'org.peacprotocol/access': {
@@ -166,9 +173,20 @@ const MINIMAL_EXTENSIONS: Record<string, Record<string, unknown>> = {
   'org.peacprotocol/provenance': { source_type: 'original' },
   'org.peacprotocol/attribution': { creator_ref: 'acme-corp' },
   'org.peacprotocol/purpose': { external_purposes: ['ai_training'] },
+  'org.peacprotocol/a2a-handoff': {
+    type: 'org.peacprotocol/a2a-agent-card-observation',
+    card_ref: 'sha256:0000000000000000000000000000000000000000000000000000000000000001',
+    signature_observation: { present: true, caller_reported_verification: 'not_checked' },
+    discovered_at: '2026-05-05T12:00:00Z',
+    discovery_path: '/.well-known/agent-card.json',
+  },
 };
 
-/** Pillar value for each receipt type */
+/**
+ * Pillar value for each receipt type. The 10 a2a-handoff types share
+ * pillar `provenance` per `specs/kernel/registries.json` (chain-of-handoff /
+ * chain-of-custody for an agent task is provenance-shaped).
+ */
 const TYPE_PILLARS: Record<string, string> = {
   'org.peacprotocol/payment': 'commerce',
   'org.peacprotocol/access-decision': 'access',
@@ -180,6 +198,17 @@ const TYPE_PILLARS: Record<string, string> = {
   'org.peacprotocol/provenance-record': 'provenance',
   'org.peacprotocol/attribution-event': 'attribution',
   'org.peacprotocol/purpose-declaration': 'purpose',
+  // v0.14.1 a2a-handoff family (10 type URIs, all pillar=provenance)
+  'org.peacprotocol/a2a-agent-card-observation': 'provenance',
+  'org.peacprotocol/a2a-task-submitted': 'provenance',
+  'org.peacprotocol/a2a-task-accepted': 'provenance',
+  'org.peacprotocol/a2a-task-rejected': 'provenance',
+  'org.peacprotocol/a2a-task-state-changed': 'provenance',
+  'org.peacprotocol/a2a-task-completed': 'provenance',
+  'org.peacprotocol/a2a-task-failed': 'provenance',
+  'org.peacprotocol/a2a-human-review-requested': 'provenance',
+  'org.peacprotocol/a2a-human-approved': 'provenance',
+  'org.peacprotocol/a2a-human-rejected': 'provenance',
 };
 
 /** Get a different registered extension group (for mismatch testing) */
@@ -339,8 +368,8 @@ describe('verifyLocal(): type-to-extension edge cases', () => {
 // ---------------------------------------------------------------------------
 
 describe('Registry completion: type-to-extension surface', () => {
-  it('TYPE_TO_EXTENSION_MAP covers all 10 registered receipt types', () => {
-    expect(TYPE_TO_EXTENSION_MAP.size).toBe(10);
+  it('TYPE_TO_EXTENSION_MAP covers all 20 registered receipt types (10 pillars + 10 a2a-handoff added in v0.14.1)', () => {
+    expect(TYPE_TO_EXTENSION_MAP.size).toBe(20);
   });
 
   it('every mapped extension group is in REGISTERED_EXTENSION_GROUP_KEYS', () => {
@@ -349,8 +378,8 @@ describe('Registry completion: type-to-extension surface', () => {
     }
   });
 
-  it('REGISTERED_EXTENSION_GROUP_KEYS has exactly 12 entries', () => {
-    expect(REGISTERED_KEYS.size).toBe(12);
+  it('REGISTERED_EXTENSION_GROUP_KEYS has exactly 13 entries (12 pillars/cross-cutting + a2a-handoff added in v0.14.1)', () => {
+    expect(REGISTERED_KEYS.size).toBe(13);
   });
 });
 

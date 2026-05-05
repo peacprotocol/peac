@@ -1,0 +1,16 @@
+{
+  "type": "org.peacprotocol/a2a-task-completed",
+  "event": "task.completed",
+  "task_id": "urn:a2a:task:42",
+  "from_agent": {
+    "card_ref": "sha256:abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789",
+    "selected_interface_url": "https://gateway.example.com/a2a/v1"
+  },
+  "to_agent": {
+    "card_ref": "sha256:fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210"
+  },
+  "state": "completed",
+  "observed_at": "2026-05-05T12:00:01Z",
+  "upstream_event_ref": "urn:a2a:event:e1",
+  "upstream_event_digest": "sha256:0000000000000000000000000000000000000000000000000000000000000001"
+}
