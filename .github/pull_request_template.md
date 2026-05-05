@@ -32,6 +32,17 @@
 - [ ] PR title is technical and under 70 chars
 - [ ] PR body contains only technical content (no internal planning, sequencing, or process language)
 
+## Neutrality and abstraction check
+
+For changes involving an external standard, ecosystem, vendor, or framework
+(see [`docs/architecture/ABSTRACTION-BOUNDARIES.md`](../docs/architecture/ABSTRACTION-BOUNDARIES.md)):
+
+- [ ] Generic PEAC primitive identified.
+- [ ] Ecosystem-specific semantics kept in profile, mapping, adapter, fixture, or example (not in core).
+- [ ] No external SDK dependency added to PEAC core (`@peac/kernel`, `@peac/schema`, `@peac/crypto`, `@peac/protocol`).
+- [ ] Generic abstraction does not weaken profile-specific validation.
+- [ ] Normative vs informative boundaries are clear.
+
 ## Follow-ups
 
 <!-- Technical follow-ups only. Leave empty if none. -->
