@@ -9,18 +9,21 @@
  * Exit code 0 on success, 1 on any failure.
  *
  * Usage (from the repo root after `pnpm build`):
- *   node integrator-kits/a2a/fixtures/verify-fixtures.mjs
+ *   node scripts/integrator-kits/verify-a2a-fixtures.mjs
  *
  * Modules are resolved via explicit relative paths into the built `dist/`
  * tree because the integrator-kit fixtures directory is a documentation
- * surface and intentionally has no package.json.
+ * surface and intentionally has no package.json. This script lives under
+ * `scripts/` so the dist-import guard rule allows it (per scripts/guard.sh
+ * "forbid dist imports" allowlist).
  */
 import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const REPO_ROOT = join(__dirname, '..', '..', '..');
+const REPO_ROOT = join(__dirname, '..', '..');
+const FIXTURES_DIR = join(REPO_ROOT, 'integrator-kits/a2a/fixtures');
 
 const SCHEMA_DIST = join(REPO_ROOT, 'packages/schema/dist/index.mjs');
 const MAPPINGS_A2A_DIST = join(REPO_ROOT, 'packages/mappings/a2a/dist/index.mjs');
@@ -38,7 +41,7 @@ const OBSERVATION_FIXTURES = [
 const AGENT_CARD_FIXTURE = 'agent-card.example.json';
 
 function loadJson(rel) {
-  return JSON.parse(readFileSync(join(__dirname, rel), 'utf8'));
+  return JSON.parse(readFileSync(join(FIXTURES_DIR, rel), 'utf8'));
 }
 
 let pass = 0;

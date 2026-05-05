@@ -17,7 +17,7 @@ All `card_ref` values are strict `sha256:<64 lowercase hex>` digests (per the v0
 Run from the repo root after `pnpm build`:
 
 ```sh
-node integrator-kits/a2a/fixtures/verify-fixtures.mjs
+node scripts/integrator-kits/verify-a2a-fixtures.mjs
 ```
 
 The script validates each observation fixture directly against
