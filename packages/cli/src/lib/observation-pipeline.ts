@@ -72,25 +72,22 @@ export type CoreObservationResult =
   | { ok: false; code: string; message: string };
 
 /**
- * Resolve a program token to its absolute path. Honors `childEnv.PATH`
- * (the environment that will be passed to spawn), NOT the ambient
- * `process.env.PATH`. Falls back to `process.env.PATH` only when
- * `childEnv.PATH` is undefined. Returns the token unchanged when no
- * executable is found (spawn surfaces a clearer ENOENT error).
+ * Resolve a program token to its absolute path. Resolution honors the
+ * supplied `childEnv` ONLY (the environment that will be passed to
+ * spawn). The ambient `process.env` is not consulted: callers must
+ * pass `childEnv` explicitly so the execution-environment source is
+ * auditable at the call site. When no executable is found in
+ * `childEnv.PATH`, returns the token unchanged so spawn surfaces a
+ * clear ENOENT error.
  */
-export function resolveProgramPath(
-  token: string,
-  childEnv: NodeJS.ProcessEnv = process.env
-): string {
+export function resolveProgramPath(token: string, childEnv: NodeJS.ProcessEnv): string {
   if (token.includes('/') || token.includes('\\')) {
     return pathResolve(token);
   }
-  const PATH = childEnv.PATH ?? process.env.PATH ?? '';
+  const PATH = childEnv.PATH ?? '';
   const dirs = PATH.split(delimiter);
   const exts =
-    process.platform === 'win32'
-      ? (childEnv.PATHEXT ?? process.env.PATHEXT ?? '.EXE;.CMD;.BAT').split(';')
-      : [''];
+    process.platform === 'win32' ? (childEnv.PATHEXT ?? '.EXE;.CMD;.BAT').split(';') : [''];
   for (const dir of dirs) {
     if (!dir) continue;
     for (const ext of exts) {

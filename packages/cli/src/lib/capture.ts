@@ -260,13 +260,20 @@ async function pumpStdin(
   const truncated = false;
   const hasher = mode === 'hashed' ? createHash('sha256') : null;
 
-  // Abort path: race async iteration against the abort signal so the
-  // pump terminates as soon as the child closes, even if the parent
-  // stream is still open (TTY, never-ending pipe, etc.).
+  // Abort path: when the abort signal fires, end the child's stdin
+  // and pause the parent stream. Ending child stdin breaks the
+  // for-await loop on the next pending write (EPIPE / writable close);
+  // pausing the parent stops further data delivery. The pump never
+  // calls `removeAllListeners()` on the parent because the parent
+  // stream (typically `process.stdin`) is owned by the caller, and
+  // removing listeners would clobber unrelated consumers.
   const onAbort = () => {
     try {
-      // Detaching the parent stream ends the for-await loop on the next tick.
-      parent.removeAllListeners('data');
+      childStdin.end();
+    } catch {
+      // ignore
+    }
+    try {
       parent.pause();
     } catch {
       // ignore
@@ -339,9 +346,10 @@ export async function captureCommand(opts: CaptureOptions): Promise<CaptureResul
   // wrapper's documented purpose (CLI-CARRIER-PROFILE.md section 2)
   // is to spawn a caller-supplied child process; the security floor
   // is `shell: false` (no metacharacter expansion). The barrier
-  // additionally rejects empty / shell-metachar-bearing program
-  // tokens and non-string argv tokens that could indicate a
-  // wrapper-side bug rather than a deliberate operator command.
+  // additionally rejects empty program tokens, NUL bytes, and
+  // non-string argv tokens. It intentionally permits shell
+  // metacharacters as ordinary argv bytes because spawn() is called
+  // with shell: false and PEAC does not synthesize shell syntax.
   const { program, args } = validateSpawnInputs(opts.program, opts.args);
   const child = spawn(program, args, {
     cwd: opts.cwd,

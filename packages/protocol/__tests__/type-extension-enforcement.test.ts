@@ -25,6 +25,10 @@ import {
 // Pure helper unit tests (no crypto, no I/O)
 // ---------------------------------------------------------------------------
 
+// Intentionally hardcoded registry drift sentinel. When
+// specs/kernel/registries.json adds an extension group, update this
+// set and the count assertion together; the codegen-drift gate +
+// API-contract snapshot will catch a one-sided change.
 const REGISTERED_KEYS = new Set([
   'org.peacprotocol/commerce',
   'org.peacprotocol/access',

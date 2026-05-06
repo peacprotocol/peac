@@ -508,7 +508,7 @@ describe('observe command: --output preflight blocks child execution', () => {
   }, 15_000);
 });
 
-describe('observe command: resolveProgramPath honors childEnv.PATH', () => {
+describe('observe command: resolveProgramPath uses only the supplied childEnv', () => {
   it('finds executables on childEnv.PATH that are NOT on process.env.PATH', () => {
     const tmp = mkdtempSync(join(tmpdir(), 'peac-resolver-'));
     const fakeName = 'peac-resolver-fixture-marker';
@@ -521,11 +521,6 @@ describe('observe command: resolveProgramPath honors childEnv.PATH', () => {
       // resolver that ignored childEnv would fail to find the binary.
       expect((process.env.PATH ?? '').includes(tmp)).toBe(false);
 
-      const resolvedFromAmbient = resolveProgramPath(fakeName);
-      // Without childEnv override, resolution falls through to ambient PATH
-      // and returns the bare token (executable not found).
-      expect(resolvedFromAmbient).toBe(fakeName);
-
       const resolvedFromChildEnv = resolveProgramPath(fakeName, {
         PATH: tmp,
       });
@@ -536,13 +531,19 @@ describe('observe command: resolveProgramPath honors childEnv.PATH', () => {
     }
   });
 
-  it('falls back to process.env.PATH when childEnv.PATH is undefined', () => {
-    // Just resolve `node` against an empty childEnv; the resolver
-    // should fall through to process.env.PATH and find Node.
+  it('ignores ambient process.env.PATH when childEnv.PATH is empty/undefined', () => {
+    // Even though `node` is resolvable on the ambient PATH, an empty
+    // childEnv must NOT fall back to it; the resolver returns the
+    // bare token unchanged so spawn surfaces a clear ENOENT.
     const resolved = resolveProgramPath('node', {});
-    // Either resolves to an absolute path or returns the bare token;
-    // either way, the call must not throw.
-    expect(typeof resolved).toBe('string');
+    expect(resolved).toBe('node');
+  });
+
+  it('returns the bare token unchanged when no executable is found', () => {
+    const resolved = resolveProgramPath('peac-nonexistent-binary-xyz', {
+      PATH: '/this/dir/does/not/exist',
+    });
+    expect(resolved).toBe('peac-nonexistent-binary-xyz');
   });
 });
 

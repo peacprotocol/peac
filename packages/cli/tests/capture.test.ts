@@ -34,6 +34,41 @@ describe('exitCodeForSignal: POSIX signal mapping', () => {
   });
 });
 
+describe('captureCommand: shell:false treats metacharacters as argv data', () => {
+  it('passes shell metacharacters in argv verbatim without shell expansion', async () => {
+    // Under shell:false, tokens like `;`, `|`, `$VAR` MUST reach the
+    // child as plain argv bytes. The child here echoes its argv
+    // length so we can prove the token was not split or expanded.
+    const metacharToken = '; echo PWNED | cat $HOME `id`';
+    const result = await captureCommand({
+      program: NODE,
+      args: [
+        '-e',
+        'process.stdout.write(String(process.argv.length) + ":" + process.argv.slice(-1)[0])',
+        metacharToken,
+      ],
+      cwd: process.cwd(),
+      env: process.env,
+      stdinMode: 'none',
+      rawCaptureEnabled: true,
+      stdoutSampleBytes: 16384,
+      stderrSampleBytes: 16384,
+      timeoutMs: 5000,
+      killGraceMs: 1000,
+    });
+    expect(result.exitCode).toBe(0);
+    const decoded = Buffer.from(result.stdout.sample_base64!, 'base64').toString('utf8');
+    // The child must observe the literal metachar token as its last
+    // argv element; a shell expansion would have split it on `;` or
+    // `|`, dereferenced `$HOME`, or executed `id`. Under `node -e
+    // <script>`, the token is argv[1] (argv[0] is the node binary
+    // path), so argv.length is 2 and the trailing element is the
+    // verbatim metachar token.
+    expect(decoded.endsWith(`:${metacharToken}`)).toBe(true);
+    expect(decoded.startsWith('2:')).toBe(true);
+  }, 15_000);
+});
+
 describe('captureCommand: stream capture invariants', () => {
   it('default mode hashes and counts stdout/stderr without a sample', async () => {
     const result = await captureCommand({
@@ -161,6 +196,55 @@ describe('captureCommand: stdin pump no-hang property', () => {
     expect(result.stdin.length).toBeUndefined();
     expect(result.stdin.sha256).toBeUndefined();
     neverEnding.destroy();
+  }, 15_000);
+});
+
+describe('captureCommand: stdin pump non-invasive abort', () => {
+  it('does not strip caller-owned data listeners from parent stdin on child close', async () => {
+    // Build a never-ending Readable that periodically emits chunks.
+    // Attach a caller-owned data listener BEFORE captureCommand sees
+    // the stream. After the child closes and the pump aborts, that
+    // listener must still be attached.
+    const neverEnding = new Readable({
+      read() {
+        setTimeout(() => {
+          if (!this.destroyed) this.push(Buffer.from('x'));
+        }, 20);
+      },
+    });
+    let callerListenerCalls = 0;
+    const callerListener = () => {
+      callerListenerCalls += 1;
+    };
+    neverEnding.on('data', callerListener);
+
+    const before = neverEnding.listenerCount('data');
+    const result = await captureCommand({
+      program: NODE,
+      args: ['-e', 'process.exit(0)'],
+      cwd: process.cwd(),
+      env: process.env,
+      stdinMode: 'hashed',
+      rawCaptureEnabled: false,
+      stdoutSampleBytes: 16384,
+      stderrSampleBytes: 16384,
+      timeoutMs: 5000,
+      killGraceMs: 1000,
+      parentStdin: neverEnding,
+    });
+    expect(result.exitCode).toBe(0);
+
+    // The caller-owned `data` listener must still be attached after
+    // the pump aborts. The pump may NOT call removeAllListeners on a
+    // stream it does not own.
+    const after = neverEnding.listenerCount('data');
+    expect(after).toBeGreaterThanOrEqual(before);
+    expect(neverEnding.listeners('data')).toContain(callerListener);
+
+    neverEnding.destroy();
+    // Avoid unused-binding warning for the caller listener counter;
+    // its existence proves the listener was wired up.
+    expect(callerListenerCalls).toBeGreaterThanOrEqual(0);
   }, 15_000);
 });
 
