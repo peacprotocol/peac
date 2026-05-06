@@ -2,8 +2,8 @@
 
 PEAC core defines reusable protocol primitives. External standards and
 ecosystem-specific semantics belong in thin profiles, mappings, adapters,
-fixtures, and examples. This document records the abstraction-boundary
-discipline that keeps PEAC vendor-neutral and reusable across ecosystems.
+fixtures, and examples. This document defines the abstraction boundaries
+that keep PEAC vendor-neutral and reusable across ecosystems.
 
 ## Core hierarchy
 
