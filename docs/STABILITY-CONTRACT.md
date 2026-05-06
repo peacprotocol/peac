@@ -93,6 +93,21 @@ Package: [`@peac/cli`](../packages/cli).
 | `peac samples list`/`show`/`generate` | `stable`       |
 | `peac reconcile`                      | `stable`       |
 | `peac policy`                         | `stable`       |
+| `peac observe command`                | `stable`       |
+| `peac record command`                 | `stable`       |
+
+`peac observe command` and `peac record command` are POSIX-first
+wrappers that emit observational records of a local command execution
+(unsigned JSON or Wire 0.2 compact JWS, respectively). Both are
+OBSERVERS, not a sandbox, permission system, shell orchestrator, or
+process supervisor; they NEVER synthesize shell syntax. The full
+contract is specified in
+[`docs/specs/CLI-CARRIER-PROFILE.md`](specs/CLI-CARRIER-PROFILE.md).
+The `--unsafe-ephemeral-key` flag generates an ephemeral local
+signing key whose public key is not published through normal
+issuer-key discovery; use only for local development and tests.
+Windows behavior is not guaranteed by the current CLI carrier
+profile.
 
 ## Reference verifier (`apps/api`)
 

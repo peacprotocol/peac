@@ -15,13 +15,14 @@ import {
 } from '../../src/_internal/test-helpers/corpus-loader';
 
 describe('parity-corpus loader', () => {
-  it('declares the expected five families (a2a-handoff added in v0.14.1)', () => {
+  it('declares the expected six families (a2a-handoff + cli-execution added)', () => {
     expect(PARITY_FAMILIES).toEqual([
       'default-flows',
       'jose-hardening',
       'runtime-governance',
       'commerce-bridges',
       'a2a-handoff',
+      'cli-execution',
     ]);
   });
 
@@ -32,18 +33,20 @@ describe('parity-corpus loader', () => {
       'runtime-governance': 7,
       'commerce-bridges': 4,
       'a2a-handoff': 15,
+      'cli-execution': 6,
     });
   });
 
-  it('loads all five families in declared order', () => {
+  it('loads all six families in declared order', () => {
     const families = loadAllFamilies();
-    expect(families).toHaveLength(5);
+    expect(families).toHaveLength(6);
     expect(families.map((f) => f.family)).toEqual([
       'default-flows',
       'jose-hardening',
       'runtime-governance',
       'commerce-bridges',
       'a2a-handoff',
+      'cli-execution',
     ]);
   });
 

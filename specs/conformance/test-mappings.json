@@ -331,6 +331,42 @@
       "test_file": "packages/mappings/a2a/tests/observation/handoff.test.ts",
       "test_description": "rejects malformed upstream_event_digest",
       "notes": "upstream_event_digest validated by canonical Sha256DigestSchema (sha256:<64 lowercase hex>); malformed values rejected by zod parse."
+    },
+    {
+      "requirement_id": "CLI-EXEC-001",
+      "test_file": "packages/schema/__tests__/extensions/cli-execution.test.ts",
+      "test_description": "minimal hashed observation accepted by CliExecutionSchema",
+      "notes": "type literal CLI_COMMAND_EXECUTION_TYPE and surface.kind = 'cli' enforced as zod literals; positive fixture round-trips through safeParse."
+    },
+    {
+      "requirement_id": "CLI-EXEC-002",
+      "test_file": "packages/schema/__tests__/extensions/cli-execution.test.ts",
+      "test_description": "command.program rejects path separators",
+      "notes": "Top-level superRefine rejects '/' and '\\\\' in command.program with cli.schema_rejection. Builder also reduces user tokens to basename via platform-agnostic helper."
+    },
+    {
+      "requirement_id": "CLI-EXEC-003",
+      "test_file": "packages/schema/__tests__/extensions/cli-execution.test.ts",
+      "test_description": "raw argv requires raw_capture_unsafely_allowed",
+      "notes": "Cross-field superRefine emits cli.unsafe_flag_required when command.argv_mode='raw' but capture_policy.raw_capture_unsafely_allowed=false."
+    },
+    {
+      "requirement_id": "CLI-EXEC-004",
+      "test_file": "packages/schema/__tests__/extensions/cli-execution.test.ts",
+      "test_description": "env entries must be subset of allowlist; mode/value discrimination",
+      "notes": "Top-level superRefine emits cli.env_not_in_allowlist; env-block superRefine emits cli.env_mode_inconsistent for shape mismatches."
+    },
+    {
+      "requirement_id": "CLI-EXEC-005",
+      "test_file": "packages/schema/__tests__/extensions/cli-execution.test.ts",
+      "test_description": "stream sample mutual exclusion + matched_pattern_category coupling + base64 canonical form + decoded length cap",
+      "notes": "StreamRefSchema superRefine + top-level superRefine emit cli.stream_ref_inconsistent / cli.unsafe_flag_required; sample_base64 regex rejects non-canonical forms (length-mod-4 + alphabet)."
+    },
+    {
+      "requirement_id": "CLI-EXEC-006",
+      "test_file": "packages/schema/__tests__/extensions/cli-execution.test.ts",
+      "test_description": "shell_mode <-> shell_ref biconditional + path_mode != none + hashed-mode digest equivalence",
+      "notes": "Top-level superRefine enforces all 4 invariants and emits cli.schema_rejection / cli.binary_path_mode_invalid."
     }
   ]
 }

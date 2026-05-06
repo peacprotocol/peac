@@ -2650,6 +2650,74 @@
           "last_reviewed_in": "0.14.1"
         }
       ]
+    },
+    {
+      "section_number": 29,
+      "section_title": "CLI Execution Records",
+      "section_anchor": "cli-execution-records",
+      "governing_spec": "docs/specs/CLI-CARRIER-PROFILE.md",
+      "requirements": [
+        {
+          "id": "CLI-EXEC-001",
+          "keyword": "MUST",
+          "summary": "CLI execution record has type org.peacprotocol/cli-command-execution and surface.kind = cli",
+          "source_fragment": "type: org.peacprotocol/cli-command-execution; surface: { kind: 'cli' }",
+          "source_fragment_hash": "sha256:e2e767c595976cd179d53796b0075b3bd8a904b6120ff0e1fbbb5eb283b7aa95",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.14.1",
+          "last_reviewed_in": "0.14.1"
+        },
+        {
+          "id": "CLI-EXEC-002",
+          "keyword": "MUST",
+          "summary": "command.program is basename-only (no path separators)",
+          "source_fragment": "command.program rejects '/' and '\\\\'; path disclosure lives only under binary.path_*",
+          "source_fragment_hash": "sha256:240ba4f3f4f7b05029faff8d99105f03dc6e67c34d9ed8ebc25de8a8b4b1e82a",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.14.1",
+          "last_reviewed_in": "0.14.1"
+        },
+        {
+          "id": "CLI-EXEC-003",
+          "keyword": "MUST",
+          "summary": "command.argv_mode = raw requires capture_policy.raw_capture_unsafely_allowed = true",
+          "source_fragment": "argv_mode raw requires --unsafe-allow-raw-capture",
+          "source_fragment_hash": "sha256:a66e34e33e21e49b0a9e688167563a8ce7056ff64663be98de60f6a3dda60252",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.14.1",
+          "last_reviewed_in": "0.14.1"
+        },
+        {
+          "id": "CLI-EXEC-004",
+          "keyword": "MUST",
+          "summary": "env.entries keys are a subset of capture_policy.env_allowlist",
+          "source_fragment": "env_allowlist subset constraint",
+          "source_fragment_hash": "sha256:7c987519b641f1d672348dc35951110238132a84897c6f3edbd0f8e5762e8e03",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.14.1",
+          "last_reviewed_in": "0.14.1"
+        },
+        {
+          "id": "CLI-EXEC-005",
+          "keyword": "MUST",
+          "summary": "stream sample_base64 and sample_suppressed_reason are mutually exclusive; matched_pattern_category is biconditional with sample_suppressed_reason",
+          "source_fragment": "sample/suppression mutual exclusion + matched_pattern_category coupling",
+          "source_fragment_hash": "sha256:77cddb0fa1a6d03a52468ed444f8e63e1fbf0535d5a8afe576b52a6c13186738",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.14.1",
+          "last_reviewed_in": "0.14.1"
+        },
+        {
+          "id": "CLI-EXEC-006",
+          "keyword": "MUST",
+          "summary": "shell_mode = true requires binary.shell_ref present, binary.path_mode != 'none'; under hashed mode shell_ref equals binary.path_sha256",
+          "source_fragment": "shell_mode <-> shell_ref biconditional + canonical-digest equivalence",
+          "source_fragment_hash": "sha256:0c7b1941e8ca7913bcf8902e2dcd2b094260544eeefbb3b0f4709d31c58ebaa1",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.14.1",
+          "last_reviewed_in": "0.14.1"
+        }
+      ]
     }
   ]
 }

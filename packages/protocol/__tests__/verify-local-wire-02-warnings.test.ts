@@ -44,7 +44,7 @@ const MINIMAL_EXT: Record<string, Record<string, unknown>> = {
   'org.peacprotocol/provenance': { source_type: 'original' },
   'org.peacprotocol/attribution': { creator_ref: 'acme-corp' },
   'org.peacprotocol/purpose': { external_purposes: ['ai_training'] },
-  // v0.14.1 a2a-handoff (uses Agent Card observation shape; sufficient for the
+  // a2a-handoff (uses Agent Card observation shape; sufficient for the
   // does-not-emit-type_unregistered iteration; type-specific shape is
   // exercised by the a2a-handoff parity corpus).
   'org.peacprotocol/a2a-handoff': {
@@ -53,6 +53,65 @@ const MINIMAL_EXT: Record<string, Record<string, unknown>> = {
     signature_observation: { present: true, caller_reported_verification: 'not_checked' },
     discovered_at: '2026-05-05T12:00:00Z',
     discovery_path: '/.well-known/agent-card.json',
+  },
+  // CLI execution observation (uses minimal hashed observation; sufficient
+  // for the does-not-emit-type_unregistered iteration; type-specific shape
+  // is exercised by the cli-execution parity corpus).
+  'org.peacprotocol/cli-execution': {
+    type: 'org.peacprotocol/cli-command-execution',
+    surface: { kind: 'cli' },
+    command: {
+      program: 'node',
+      argv_mode: 'hashed',
+      argv_sha256: 'sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+    },
+    cwd: {
+      cwd_mode: 'hashed',
+      cwd_sha256: 'sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+    },
+    binary: {
+      path_mode: 'hashed',
+      path_sha256: 'sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc',
+    },
+    stdin_ref: { mode: 'none' },
+    stdout_ref: {
+      length: 0,
+      sha256: 'sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd',
+      truncated: false,
+    },
+    stderr_ref: {
+      length: 0,
+      sha256: 'sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
+      truncated: false,
+    },
+    env: { mode: 'hashed', entries: {} },
+    started_at: '2026-01-01T00:00:00Z',
+    finished_at: '2026-01-01T00:00:01Z',
+    duration_ms: 1000,
+    exit_code: 0,
+    timed_out: false,
+    timeout_ms: 600000,
+    kill_grace_ms: 5000,
+    exit_code_mode: 'child',
+    shell_mode: false,
+    execution_mode: 'deterministic_script',
+    capture_policy: {
+      stdout_max_bytes: 16384,
+      stderr_max_bytes: 16384,
+      argv_max_bytes: 4096,
+      env_allowlist: [],
+      stdin_mode: 'none',
+      cwd_mode: 'hashed',
+      binary_path_mode: 'hashed',
+      secret_scan: true,
+      raw_capture_unsafely_allowed: false,
+      raw_env_unsafely_allowed: false,
+      secret_scan_disabled_unsafely: false,
+      timeout_ms: 600000,
+      kill_grace_ms: 5000,
+      exit_code_mode: 'child',
+    },
+    platform: { os: 'linux', arch: 'x64', peac_cli_version: '0.14.0' },
   },
 };
 

@@ -20,7 +20,7 @@
  *   - org.peacprotocol/a2a-human-approved
  *   - org.peacprotocol/a2a-human-rejected
  *
- * Schema invariants (per v0.14.1 plan brutal-honest review):
+ * Schema invariants:
  *   - `card_ref` (3 places: top-level, from_agent, to_agent) is a strict
  *     `sha256:<64 lowercase hex>` digest. Agent Cards are stable artifacts;
  *     digest references are portable across vendors.

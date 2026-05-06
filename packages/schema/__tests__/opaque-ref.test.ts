@@ -1,10 +1,9 @@
 /**
- * v0.14.1: OpaqueRefSchema grammar tests.
+ * OpaqueRefSchema grammar tests.
  *
- * Per the v0.14.1 plan amendments lock and the brutal-honest review's
- * grammar-based approach, OpaqueRefSchema rejects email shapes, raw human
- * names in any language, numeric strings, inline JSON, and free text without
- * language-specific or numeric-specific ad-hoc heuristics.
+ * The grammar-based opaque-reference validator rejects email shapes,
+ * raw human names in any language, numeric strings, inline JSON, and
+ * free text without language-specific or numeric-specific heuristics.
  */
 import { describe, it, expect } from 'vitest';
 

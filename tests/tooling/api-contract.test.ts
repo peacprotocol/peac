@@ -133,10 +133,11 @@ describe('API contract: @peac/schema', () => {
     expect(wire02Keys).toHaveLength(12);
   });
 
-  it('exports all extension key constants (Wire 0.1 + Wire 0.2 + v0.14.1)', () => {
+  it('exports all extension key constants (Wire 0.1 + Wire 0.2 + observation surfaces)', () => {
     const allKeys = exports.filter((k) => k.endsWith('_EXTENSION_KEY')).sort();
-    // 12 Wire 0.2 groups + 8 legacy extension keys + 1 v0.14.1 a2a-handoff = 21 total
-    expect(allKeys).toHaveLength(21);
+    // 12 Wire 0.2 groups + 8 legacy extension keys + 2 observation
+    // surfaces (a2a-handoff + cli-execution) = 22 total
+    expect(allKeys).toHaveLength(22);
   });
 
   it('exports all extension group schemas (Wire 0.2 + legacy)', () => {
