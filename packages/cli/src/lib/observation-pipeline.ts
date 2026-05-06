@@ -17,7 +17,7 @@
  * shell orchestrator / process supervisor / job scheduler.
  */
 
-import { closeSync, openSync, statSync, unlinkSync } from 'node:fs';
+import { closeSync, constants as fsConstants, openSync, statSync, unlinkSync } from 'node:fs';
 import { delimiter, dirname, join, resolve as pathResolve } from 'node:path';
 import { CliExecutionSchema, type CliExecutionObservation } from '@peac/schema';
 import { captureCommand, CliSpawnFailedError, type CaptureResult } from './capture.js';
@@ -127,18 +127,26 @@ export function preflightOutputWritable(output: string): string | null {
   } catch (err) {
     return `parent directory '${parent}' does not exist (${(err as NodeJS.ErrnoException)?.code ?? (err instanceof Error ? err.message : String(err))})`;
   }
-  let preexisted = false;
-  try {
-    statSync(absPath);
-    preexisted = true;
-  } catch {
-    preexisted = false;
-  }
+  // Race-free preflight: try atomic exclusive create first. If it
+  // succeeds, we know we created the file (own it; safe to unlink). If
+  // it fails with EEXIST, the file pre-existed (or another process
+  // created it concurrently); verify writability via append open
+  // without unlinking. There is no TOCTOU window because both branches
+  // make exactly one open() syscall and never act on prior stat data.
+  let createdByUs = false;
   let fd: number | undefined;
   try {
-    fd = openSync(absPath, 'a');
+    fd = openSync(absPath, fsConstants.O_WRONLY | fsConstants.O_CREAT | fsConstants.O_EXCL, 0o600);
+    createdByUs = true;
   } catch (err) {
-    return `cannot open '${absPath}' for write (${(err as NodeJS.ErrnoException)?.code ?? (err instanceof Error ? err.message : String(err))})`;
+    if ((err as NodeJS.ErrnoException)?.code !== 'EEXIST') {
+      return `cannot open '${absPath}' for write (${(err as NodeJS.ErrnoException)?.code ?? (err instanceof Error ? err.message : String(err))})`;
+    }
+    try {
+      fd = openSync(absPath, 'a');
+    } catch (err2) {
+      return `cannot open '${absPath}' for write (${(err2 as NodeJS.ErrnoException)?.code ?? (err2 instanceof Error ? err2.message : String(err2))})`;
+    }
   } finally {
     if (fd !== undefined) {
       try {
@@ -148,7 +156,7 @@ export function preflightOutputWritable(output: string): string | null {
       }
     }
   }
-  if (!preexisted) {
+  if (createdByUs) {
     try {
       unlinkSync(absPath);
     } catch {

@@ -295,15 +295,24 @@ export async function captureCommand(opts: CaptureOptions): Promise<CaptureResul
   const stdioConfig: ('ignore' | 'pipe')[] =
     opts.stdinMode === 'none' ? ['ignore', 'pipe', 'pipe'] : ['pipe', 'pipe', 'pipe'];
 
-  // shell: false ALWAYS. Spawn the program verbatim; never synthesize
-  // shell syntax. NEVER `child_process.exec()` (would buffer + use a shell).
-  const child = spawn(opts.program, opts.args, {
+  // The whole purpose of this wrapper is to spawn a caller-supplied
+  // child process and observe its execution. Classic command-injection
+  // is mitigated by `shell: false` (no shell metacharacter expansion);
+  // the program path is the value chosen by the operator running the
+  // CLI; per docs/specs/CLI-CARRIER-PROFILE.md the wrapper is an
+  // OBSERVER, not a sandbox / permission system. CodeQL's command-line
+  // and env-shell rules fire structurally on every spawn whose argv
+  // flows from external input; the lgtm suppression on the spawn line
+  // below acknowledges intentional behavior.
+  const spawnOpts = {
     cwd: opts.cwd,
     env: opts.env ?? process.env,
     stdio: stdioConfig,
-    shell: false,
+    shell: false as const,
     windowsHide: true,
-  }) as ChildProcessWithoutNullStreams;
+  };
+  // prettier-ignore
+  const child = spawn(opts.program, opts.args, spawnOpts) as ChildProcessWithoutNullStreams; // lgtm[js/indirect-command-line-injection] lgtm[js/shell-command-injection-from-environment]
 
   // Stream capture (always hashed and counted; sample only when raw enabled).
   child.stdout.on('data', (chunk: Buffer) => {
