@@ -42,6 +42,10 @@ async function extractJti(jws: string): Promise<string> {
 // ---------------------------------------------------------------------------
 
 describe('Property: jti sampled uniqueness via issueWire02', () => {
+  // 1,000 sequential issuance + verification round-trips. Local cost is
+  // ~3s on a warm cache; the rollback-path matrix lanes have observed
+  // ~5s+ on cold CI runners. Use a generous timeout to absorb cold-cache
+  // variance (matches the v0.12.14 #700 cold-CI timeout raise pattern).
   it('1,000 issuances produce 1,000 unique jti values', async () => {
     const count = 1_000;
     const jtis = new Set<string>();
@@ -59,7 +63,7 @@ describe('Property: jti sampled uniqueness via issueWire02', () => {
     }
 
     expect(jtis.size).toBe(count);
-  });
+  }, 30_000);
 
   it('jti values match UUIDv7 format', async () => {
     const count = 50;
