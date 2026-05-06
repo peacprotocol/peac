@@ -170,6 +170,42 @@ describe('captureCommand: stdin pump no-hang property', () => {
     neverEnding.destroy();
   }, 15_000);
 
+  it('hashed mode resolves when parent stays open and idle after child exits', async () => {
+    // Strict idle case: build a Readable that emits NOTHING. The child
+    // exits immediately. The pump must resolve on the abort signal,
+    // not wait for parent data that will never arrive.
+    const idleOpen = new Readable({
+      read() {
+        // never push, never end -- stays open and idle forever.
+      },
+    });
+
+    const start = Date.now();
+    const result = await captureCommand({
+      program: NODE,
+      args: ['-e', 'process.exit(0)'],
+      cwd: process.cwd(),
+      env: process.env,
+      stdinMode: 'hashed',
+      rawCaptureEnabled: false,
+      stdoutSampleBytes: 16384,
+      stderrSampleBytes: 16384,
+      timeoutMs: 5000,
+      killGraceMs: 1000,
+      parentStdin: idleOpen,
+    });
+    const elapsed = Date.now() - start;
+    // Wrapper must resolve well under the 5000ms timeout. If the pump
+    // hung on the idle stream it would only resolve after timeoutMs +
+    // killGraceMs, which is what this test guards against.
+    expect(elapsed).toBeLessThan(3_000);
+    expect(result.exitCode).toBe(0);
+    expect(result.stdin.mode).toBe('hashed');
+    expect(result.stdin.length).toBe(0);
+    expect(result.stdin.sha256).toMatch(/^sha256:[a-f0-9]{64}$/);
+    idleOpen.destroy();
+  }, 15_000);
+
   it('mode=none does not read parent stdin and returns mode-only stdin_ref', async () => {
     const neverEnding = new Readable({
       read() {

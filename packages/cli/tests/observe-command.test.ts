@@ -11,13 +11,14 @@
 
 import { describe, it, expect } from 'vitest';
 import { Readable } from 'node:stream';
-import { chmodSync, existsSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { chmodSync, existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import {
   runObserveCommand,
   validateObserveOptions,
   resolveProgramPath,
+  preflightOutputWritable,
   OBSERVE_COMMAND_ERROR_CODES,
   type ObserveCommandOptions,
 } from '../src/commands/observe-command';
@@ -506,6 +507,46 @@ describe('observe command: --output preflight blocks child execution', () => {
       rmSync(tmp, { recursive: true, force: true });
     }
   }, 15_000);
+});
+
+describe('observe command: preflight does not touch the final output path', () => {
+  it('preflight on a missing target does NOT create the final target file', async () => {
+    const tmp = mkdtempSync(join(tmpdir(), 'peac-preflight-'));
+    const target = join(tmp, 'final-record.json');
+    try {
+      // Sanity: the final target does not exist before preflight.
+      expect(existsSync(target)).toBe(false);
+      const err = preflightOutputWritable(target);
+      expect(err).toBeNull();
+      // After preflight, the final target STILL must not exist.
+      expect(existsSync(target)).toBe(false);
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  });
+
+  it('preflight on an existing target does NOT unlink or modify it', async () => {
+    const tmp = mkdtempSync(join(tmpdir(), 'peac-preflight-'));
+    const target = join(tmp, 'existing-record.json');
+    const sentinel = '{"sentinel":"keep-me"}';
+    try {
+      writeFileSync(target, sentinel);
+      const err = preflightOutputWritable(target);
+      expect(err).toBeNull();
+      // Existing target is unchanged.
+      expect(existsSync(target)).toBe(true);
+      const after = readFileSync(target, 'utf8');
+      expect(after).toBe(sentinel);
+    } finally {
+      rmSync(tmp, { recursive: true, force: true });
+    }
+  });
+
+  it('preflight surfaces a failure when the parent directory does not exist', () => {
+    const err = preflightOutputWritable('/peac-definitely-missing-dir/x.json');
+    expect(err).not.toBeNull();
+    expect(err!).toContain('does not exist');
+  });
 });
 
 describe('observe command: resolveProgramPath uses only the supplied childEnv', () => {

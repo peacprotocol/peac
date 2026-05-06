@@ -22,13 +22,16 @@
  *     is cleared on child close so it cannot keep the event loop alive.
  *   - Signal exit codes follow POSIX `128 + signal-num`: SIGINT=130,
  *     SIGTERM=143, SIGKILL=137; unknown signals fall back to 128.
- *   - Stdin pumping respects Writable backpressure via async iteration
- *     + `await once(childStdin, 'drain')`.
+ *   - Stdin pumping is listener-based (event handlers attached to the
+ *     parent stream and child stdin). Backpressure pauses the parent
+ *     until child stdin emits 'drain'. The pump is reliably abortable
+ *     via an external AbortSignal even if the parent stream stays
+ *     open and idle, and removes ONLY pump-owned listeners on cleanup
+ *     (the parent is caller-owned).
  */
 
 import { spawn, type ChildProcessWithoutNullStreams } from 'node:child_process';
 import { createHash, type Hash } from 'node:crypto';
-import { once } from 'node:events';
 import type { Readable, Writable } from 'node:stream';
 
 /**
@@ -243,12 +246,15 @@ function finalizeStreamRef(state: StreamHasher, rawEnabled: boolean): StreamCapt
 }
 
 /**
- * Pump parent stdin to child stdin, respecting Writable backpressure
- * via async iteration + `await once(stdin, 'drain')`. Optionally
- * hashing/counting per stdin mode. Resolves when the parent stream
- * ends, the child stdin closes, or the abort signal fires (the latter
- * lets the wrapper terminate the pump as soon as the child exits, even
- * if the parent stream is still open -- for example, on a TTY).
+ * Pump parent stdin to child stdin via explicit event listeners,
+ * optionally hashing/counting per stdin mode. Resolves when the
+ * parent emits 'end' / 'error', when child stdin emits 'error', or
+ * when the abort signal fires. The pump installs ONLY pump-owned
+ * listeners and removes ONLY those listeners on resolve / abort, so
+ * caller-owned listeners on the parent stream stay intact. An idle,
+ * never-ending parent stream never hangs the wrapper because the
+ * abort-signal path resolves immediately without waiting for parent
+ * data.
  */
 async function pumpStdin(
   parent: Readable,
@@ -260,65 +266,133 @@ async function pumpStdin(
   const truncated = false;
   const hasher = mode === 'hashed' ? createHash('sha256') : null;
 
-  // Abort path: when the abort signal fires, end the child's stdin
-  // and pause the parent stream. Ending child stdin breaks the
-  // for-await loop on the next pending write (EPIPE / writable close);
-  // pausing the parent stops further data delivery. The pump never
-  // calls `removeAllListeners()` on the parent because the parent
-  // stream (typically `process.stdin`) is owned by the caller, and
-  // removing listeners would clobber unrelated consumers.
-  const onAbort = () => {
-    try {
-      childStdin.end();
-    } catch {
-      // ignore
-    }
-    try {
-      parent.pause();
-    } catch {
-      // ignore
-    }
-  };
-  if (abortSignal.aborted) {
-    onAbort();
-  } else {
-    abortSignal.addEventListener('abort', onAbort, { once: true });
-  }
+  // Listener-based pump. We attach pump-owned listeners to the parent
+  // stream and remove ONLY those listeners on resolve / abort. The
+  // parent (typically process.stdin) is caller-owned; we never call
+  // removeAllListeners() and we never destroy or end the parent. The
+  // resolution conditions are explicit:
+  //   - abort signal fires (child exited; wrapper aborts the pump)
+  //   - parent emits 'end'
+  //   - parent emits 'error'
+  //   - child stdin emits 'error' (e.g., EPIPE)
+  // An idle, never-ending parent that emits no more data must NOT
+  // hang the wrapper: when the abort signal fires, the pump removes
+  // its listeners and resolves immediately even though the parent
+  // stream is still open.
+  return new Promise((resolve) => {
+    let settled = false;
+    let drainWaiter: ((reason?: unknown) => void) | null = null;
 
-  try {
-    for await (const chunk of parent as AsyncIterable<Buffer>) {
-      if (abortSignal.aborted) break;
+    const finalize = (): { length: number; sha256?: string; truncated: boolean } => {
+      const out: { length: number; sha256?: string; truncated: boolean } = { length, truncated };
+      if (hasher) out.sha256 = SHA256_PREFIX + hasher.digest('hex');
+      return out;
+    };
+
+    const cleanup = () => {
+      parent.off('data', onData);
+      parent.off('end', onEnd);
+      parent.off('error', onParentError);
+      childStdin.off('drain', onDrain);
+      childStdin.off('error', onChildError);
+      abortSignal.removeEventListener('abort', onAbort);
+    };
+
+    const settle = () => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      // End child stdin so the child sees EOF; ignore if already closed.
+      try {
+        childStdin.end();
+      } catch {
+        // ignore
+      }
+      // Reject any pending drain waiter so the data path unwinds.
+      if (drainWaiter) {
+        const reject = drainWaiter;
+        drainWaiter = null;
+        try {
+          reject(new Error('pump-aborted'));
+        } catch {
+          // ignore
+        }
+      }
+      resolve(finalize());
+    };
+
+    const onData = (chunk: Buffer | string) => {
+      if (settled) return;
       const buf = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
       length += buf.length;
       if (hasher) hasher.update(buf);
-      // Best-effort write; ignore EPIPE if child closed stdin early.
       let writable = false;
       try {
         writable = childStdin.write(buf);
       } catch {
-        break;
+        // child closed stdin early; abandon further forwarding.
+        settle();
+        return;
       }
       if (!writable) {
-        // Backpressure: wait for the writable to drain or for abort.
+        // Backpressure: pause parent until child drains, abort, or error.
         try {
-          await once(childStdin, 'drain', { signal: abortSignal });
+          parent.pause();
         } catch {
-          break;
+          // ignore
         }
+        const waiter = new Promise<void>((res, rej) => {
+          drainWaiter = rej;
+          childStdin.once('drain', () => {
+            drainWaiter = null;
+            res();
+          });
+        });
+        waiter
+          .then(() => {
+            if (settled) return;
+            try {
+              parent.resume();
+            } catch {
+              // ignore
+            }
+          })
+          .catch(() => {
+            // pump-aborted: settle() already cleaned up.
+          });
       }
+    };
+
+    const onEnd = () => settle();
+    const onParentError = () => settle();
+    const onChildError = () => settle();
+    const onDrain = () => {
+      // 'drain' is consumed by the once-handler installed above; this
+      // attached handler exists only so we can off() it on cleanup if
+      // it never fired. No-op body.
+    };
+    const onAbort = () => {
+      // Pause parent so no further data is delivered (best-effort);
+      // do not destroy or remove listeners belonging to other consumers.
+      try {
+        parent.pause();
+      } catch {
+        // ignore
+      }
+      settle();
+    };
+
+    parent.on('data', onData);
+    parent.on('end', onEnd);
+    parent.on('error', onParentError);
+    childStdin.on('drain', onDrain);
+    childStdin.on('error', onChildError);
+    if (abortSignal.aborted) {
+      onAbort();
+    } else {
+      abortSignal.addEventListener('abort', onAbort, { once: true });
     }
-  } catch {
-    // parent stream errored or pump aborted; fall through and finalize.
-  }
-  abortSignal.removeEventListener('abort', onAbort);
-  try {
-    childStdin.end();
-  } catch {
-    // child may have already closed
-  }
-  const result: { length: number; sha256?: string; truncated: boolean } = { length, truncated };
-  if (hasher) result.sha256 = SHA256_PREFIX + hasher.digest('hex');
-  return result;
+  });
 }
 
 function nowIso(): string {

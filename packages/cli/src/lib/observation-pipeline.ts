@@ -17,8 +17,16 @@
  * shell orchestrator / process supervisor / job scheduler.
  */
 
-import { closeSync, constants as fsConstants, openSync, statSync, unlinkSync } from 'node:fs';
+import {
+  closeSync,
+  constants as fsConstants,
+  existsSync,
+  openSync,
+  statSync,
+  unlinkSync,
+} from 'node:fs';
 import { delimiter, dirname, join, resolve as pathResolve } from 'node:path';
+import { randomBytes } from 'node:crypto';
 import { CliExecutionSchema, type CliExecutionObservation } from '@peac/schema';
 import { captureCommand, CliSpawnFailedError, type CaptureResult } from './capture.js';
 import {
@@ -111,6 +119,20 @@ export function resolveProgramPath(token: string, childEnv: NodeJS.ProcessEnv): 
  * pairing with `cli.output_write_failed`. A record-producing wrapper
  * must never run a child only to discover the record cannot be
  * persisted.
+ *
+ * The preflight is deliberately non-invasive on the final target
+ * path:
+ *   - if the final target exists, open it for append/write check and
+ *     close it; never unlink the existing target
+ *   - if the final target does NOT exist, create a uniquely-named
+ *     sibling temp file in the parent directory with O_EXCL and
+ *     immediately unlink that temp file; the final target path is
+ *     not created or touched until the actual write step
+ *
+ * Result: between preflight and the eventual write, the wrapper has
+ * NOT created or modified the final output path. Concurrent observers
+ * cannot race against a transient zero-byte target file produced by
+ * the preflight.
  */
 export function preflightOutputWritable(output: string): string | null {
   if (output === '-' || output === '') return null;
@@ -124,26 +146,37 @@ export function preflightOutputWritable(output: string): string | null {
   } catch (err) {
     return `parent directory '${parent}' does not exist (${(err as NodeJS.ErrnoException)?.code ?? (err instanceof Error ? err.message : String(err))})`;
   }
-  // Race-free preflight: try atomic exclusive create first. If it
-  // succeeds, we know we created the file (own it; safe to unlink). If
-  // it fails with EEXIST, the file pre-existed (or another process
-  // created it concurrently); verify writability via append open
-  // without unlinking. There is no TOCTOU window because both branches
-  // make exactly one open() syscall and never act on prior stat data.
-  let createdByUs = false;
-  let fd: number | undefined;
-  try {
-    fd = openSync(absPath, fsConstants.O_WRONLY | fsConstants.O_CREAT | fsConstants.O_EXCL, 0o600);
-    createdByUs = true;
-  } catch (err) {
-    if ((err as NodeJS.ErrnoException)?.code !== 'EEXIST') {
-      return `cannot open '${absPath}' for write (${(err as NodeJS.ErrnoException)?.code ?? (err instanceof Error ? err.message : String(err))})`;
-    }
+
+  if (existsSync(absPath)) {
+    // Existing target: open for append to verify writability, then
+    // close. Do NOT unlink or modify the existing target.
+    let fd: number | undefined;
     try {
       fd = openSync(absPath, 'a');
-    } catch (err2) {
-      return `cannot open '${absPath}' for write (${(err2 as NodeJS.ErrnoException)?.code ?? (err2 instanceof Error ? err2.message : String(err2))})`;
+    } catch (err) {
+      return `cannot open '${absPath}' for write (${(err as NodeJS.ErrnoException)?.code ?? (err instanceof Error ? err.message : String(err))})`;
+    } finally {
+      if (fd !== undefined) {
+        try {
+          closeSync(fd);
+        } catch {
+          // ignore
+        }
+      }
     }
+    return null;
+  }
+
+  // Missing target: probe writability via a uniquely-named sibling
+  // temp file, then immediately unlink the temp file. The final
+  // target path is NOT touched.
+  const tempName = `.peac-preflight-${randomBytes(8).toString('hex')}.tmp`;
+  const tempPath = join(parent, tempName);
+  let fd: number | undefined;
+  try {
+    fd = openSync(tempPath, fsConstants.O_WRONLY | fsConstants.O_CREAT | fsConstants.O_EXCL, 0o600);
+  } catch (err) {
+    return `parent directory '${parent}' is not writable (${(err as NodeJS.ErrnoException)?.code ?? (err instanceof Error ? err.message : String(err))})`;
   } finally {
     if (fd !== undefined) {
       try {
@@ -153,12 +186,11 @@ export function preflightOutputWritable(output: string): string | null {
       }
     }
   }
-  if (createdByUs) {
-    try {
-      unlinkSync(absPath);
-    } catch {
-      // not fatal; writeFileSync will overwrite anyway
-    }
+  try {
+    unlinkSync(tempPath);
+  } catch {
+    // not fatal; the temp file will linger but the final target was
+    // never touched and the eventual write will succeed.
   }
   return null;
 }
