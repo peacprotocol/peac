@@ -11,7 +11,6 @@ import { describe, it, expect } from 'vitest';
 
 import {
   A2A_AGENT_CARD_OBSERVATION_TYPE,
-  A2A_HANDOFF_ERROR_CODES,
   A2A_HANDOFF_TYPE_URIS,
   A2A_TASK_TYPE_URIS,
   A2AHandoffSchema,
