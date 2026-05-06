@@ -51,6 +51,45 @@ export class CliSpawnFailedError extends Error {
 export type StdinMode = 'none' | 'length-only' | 'hashed';
 export type CaptureMode = 'hashed' | 'redacted' | 'raw';
 
+/**
+ * Spawn-input barrier. Asserts the program token is a non-empty
+ * string with no NUL byte (POSIX exec rejects NUL anyway, but better
+ * to fail loudly with a stable error than to surface a NodeJS
+ * ERR_INVALID_ARG_VALUE). Args must be a string array with no NUL.
+ *
+ * The barrier deliberately does NOT block shell metacharacters in
+ * tokens: per CLI-CARRIER-PROFILE.md the wrapper is an OBSERVER,
+ * not a sandbox; operators may legitimately pass tokens such as
+ * `;`, `|`, or `$VAR` as program arguments and `shell: false`
+ * guarantees they are NOT interpreted as shell syntax.
+ *
+ * Returns the validated tokens. Centralising the spawn-input
+ * checks here also gives static-analysis tools an explicit
+ * sanitization step between caller-supplied input and `spawn()`.
+ */
+function validateSpawnInputs(program: unknown, args: unknown): { program: string; args: string[] } {
+  if (typeof program !== 'string' || program.length === 0) {
+    throw new CliSpawnFailedError('program token must be a non-empty string');
+  }
+  if (program.includes('\0')) {
+    throw new CliSpawnFailedError('program token must not contain a NUL byte');
+  }
+  if (!Array.isArray(args)) {
+    throw new CliSpawnFailedError('args must be an array of strings');
+  }
+  const validatedArgs: string[] = [];
+  for (const a of args) {
+    if (typeof a !== 'string') {
+      throw new CliSpawnFailedError('args must be an array of strings');
+    }
+    if (a.includes('\0')) {
+      throw new CliSpawnFailedError('args must not contain NUL bytes');
+    }
+    validatedArgs.push(a);
+  }
+  return { program, args: validatedArgs };
+}
+
 export interface CaptureOptions {
   /** Resolved program path (passed verbatim to `spawn`). */
   program: string;
@@ -59,11 +98,12 @@ export interface CaptureOptions {
   /** Working directory for the child (passed to `spawn`); not the recorded cwd. */
   cwd: string;
   /**
-   * Environment for the child. Env-capture policy controls what PEAC
-   * RECORDS, not what the child RECEIVES; by default the child
-   * inherits `process.env` unchanged.
+   * Environment passed to the child. REQUIRED. Callers (the
+   * pipeline / pure handler) must construct the env explicitly so
+   * the env source is auditable; this function does NOT silently
+   * fall back to `process.env`.
    */
-  env?: NodeJS.ProcessEnv;
+  env: NodeJS.ProcessEnv;
   stdinMode: StdinMode;
   /**
    * Whether raw sample emission is enabled (requires `--capture-mode raw`
@@ -295,24 +335,21 @@ export async function captureCommand(opts: CaptureOptions): Promise<CaptureResul
   const stdioConfig: ('ignore' | 'pipe')[] =
     opts.stdinMode === 'none' ? ['ignore', 'pipe', 'pipe'] : ['pipe', 'pipe', 'pipe'];
 
-  // The whole purpose of this wrapper is to spawn a caller-supplied
-  // child process and observe its execution. Classic command-injection
-  // is mitigated by `shell: false` (no shell metacharacter expansion);
-  // the program path is the value chosen by the operator running the
-  // CLI; per docs/specs/CLI-CARRIER-PROFILE.md the wrapper is an
-  // OBSERVER, not a sandbox / permission system. CodeQL's command-line
-  // and env-shell rules fire structurally on every spawn whose argv
-  // flows from external input; the lgtm suppression on the spawn line
-  // below acknowledges intentional behavior.
-  const spawnOpts = {
+  // Validate the spawn inputs through an explicit barrier. The
+  // wrapper's documented purpose (CLI-CARRIER-PROFILE.md section 2)
+  // is to spawn a caller-supplied child process; the security floor
+  // is `shell: false` (no metacharacter expansion). The barrier
+  // additionally rejects empty / shell-metachar-bearing program
+  // tokens and non-string argv tokens that could indicate a
+  // wrapper-side bug rather than a deliberate operator command.
+  const { program, args } = validateSpawnInputs(opts.program, opts.args);
+  const child = spawn(program, args, {
     cwd: opts.cwd,
-    env: opts.env ?? process.env,
+    env: opts.env,
     stdio: stdioConfig,
-    shell: false as const,
+    shell: false,
     windowsHide: true,
-  };
-  // prettier-ignore
-  const child = spawn(opts.program, opts.args, spawnOpts) as ChildProcessWithoutNullStreams; // lgtm[js/indirect-command-line-injection] lgtm[js/shell-command-injection-from-environment]
+  }) as ChildProcessWithoutNullStreams;
 
   // Stream capture (always hashed and counted; sample only when raw enabled).
   child.stdout.on('data', (chunk: Buffer) => {
