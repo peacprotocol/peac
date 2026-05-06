@@ -4,7 +4,7 @@ Carry signed receipts across A2A agent flows: declare PEAC support in your Agent
 
 ## Overview
 
-PEAC integrates with A2A at the metadata layer. Receipts travel as Evidence Carriers inside A2A TaskStatus metadata, using the reverse-DNS extension URI `org.peacprotocol`. No A2A protocol changes are required; PEAC uses the standard metadata extension mechanism.
+PEAC integrates with A2A at the metadata layer. Receipts travel as Evidence Carriers inside A2A TaskStatus metadata, declared in the Agent Card under the canonical extension URI `https://www.peacprotocol.org/ext/traceability/v1`. No A2A protocol changes are required; PEAC uses the standard metadata extension mechanism.
 
 **Compatibility:** `@peac/mappings-a2a` targets A2A v1.0.0 only (shipped in v0.12.3; deprecated v0.3.0 compat shim removed in v0.13.0 per DD-186).
 
@@ -79,11 +79,17 @@ Add the PEAC extension to your A2A Agent Card so peers know you support receipts
 ```json
 {
   "name": "My Agent",
-  "url": "https://agent.example.com",
+  "supportedInterfaces": [
+    {
+      "url": "https://agent.example.com",
+      "protocolBinding": "http+json",
+      "protocolVersion": "1.0"
+    }
+  ],
   "capabilities": {
     "extensions": [
       {
-        "uri": "org.peacprotocol",
+        "uri": "https://www.peacprotocol.org/ext/traceability/v1",
         "required": false,
         "description": "PEAC evidence receipts for verifiable interaction records"
       }
@@ -92,7 +98,7 @@ Add the PEAC extension to your A2A Agent Card so peers know you support receipts
 }
 ```
 
-Check for PEAC support: `hasPeacExtension(agentCard)` returns `true` if declared.
+Check for PEAC support: `hasPeacExtension(agentCard)` returns `true` if declared. The card MUST conform to A2A v1.0.0 shape (top-level `supportedInterfaces[]` array; the v0.3.0 top-level `url` field was removed in v0.13.0 per DD-186 and `normalizeAgentCard()` will reject cards lacking `supportedInterfaces[]`).
 
 ## Configuration
 
@@ -107,7 +113,7 @@ Transport size limit: 64 KB for MCP/A2A/UCP embed.
 ## Troubleshooting
 
 **No receipts found after extraction:**
-Verify the metadata key is `org.peacprotocol` (not `org.peacprotocol/receipt`). Check `hasPeacExtension()` on the agent card.
+Verify the Agent Card declares the canonical extension URI `https://www.peacprotocol.org/ext/traceability/v1` under `capabilities.extensions[]` (not the bare reverse-DNS prefix `org.peacprotocol`, which is not the extension URI). Check `hasPeacExtension()` on the normalized agent card.
 
 **Receipt ref mismatch:**
 The `receipt_ref` must equal `sha256(receipt_jws)`. Use `computeReceiptRef()` from `@peac/schema`.

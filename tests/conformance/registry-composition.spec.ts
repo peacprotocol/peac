@@ -37,13 +37,13 @@ describe('registry composition parity', () => {
     expect(extensionRegistry.sections).toHaveLength(7);
   });
 
-  it('main registry has 224 total requirements across 25 sections', () => {
+  it('main registry has 234 total requirements across 26 sections (Section 28 A2A Handoff Records added in v0.14.1)', () => {
     let total = 0;
     for (const section of registry.sections) {
       total += section.requirements.length;
     }
-    expect(total).toBe(224);
-    expect(registry.sections).toHaveLength(25);
+    expect(total).toBe(234);
+    expect(registry.sections).toHaveLength(26);
   });
 
   it('every extension section appears in main registry', () => {

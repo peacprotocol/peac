@@ -20,11 +20,11 @@
 /**
  * Canonical requirement ID pattern.
  * Accepts namespace-prefixed IDs: WIRE02, CARRIER, X402V2, DID-RES,
- * PKCE, GRPC-META, RURL, SC.
+ * PKCE, GRPC-META, RURL, SC, RTGOV, A2A-HANDOFF.
  * Section/transport part allows uppercase letters and digits (e.g., A2A).
  */
 export const REQUIREMENT_ID_PATTERN =
-  /^(WIRE02|CARRIER)-[A-Z0-9]+-[0-9]{3}$|^(X402V2|DID-RES|PKCE|GRPC-META|RURL|SC|RTGOV)-[0-9]{3}$/;
+  /^(WIRE02|CARRIER)-[A-Z0-9]+-[0-9]{3}$|^(X402V2|DID-RES|PKCE|GRPC-META|RURL|SC|RTGOV|A2A-HANDOFF)-[0-9]{3}$/;
 
 /**
  * Requirement ID namespaces.
@@ -39,6 +39,7 @@ export const NAMESPACES = /** @type {const} */ ([
   'RURL',
   'SC',
   'RTGOV',
+  'A2A-HANDOFF',
 ]);
 
 /**

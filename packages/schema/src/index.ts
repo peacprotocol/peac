@@ -175,6 +175,18 @@ export {
   // Fingerprint Reference Conversion
   stringToFingerprintRef,
   fingerprintRefToString,
+  // v0.14.1 A2A Handoff Observation
+  A2A_HANDOFF_EXTENSION_KEY,
+  A2A_AGENT_CARD_OBSERVATION_TYPE,
+  A2A_TASK_EVENT_TYPES,
+  A2A_TASK_TYPE_URIS,
+  A2A_HANDOFF_TYPE_URIS,
+  A2A_TASK_EVENT_SCHEMAS,
+  A2A_HANDOFF_ERROR_CODES,
+  A2AAgentCardObservationSchema,
+  A2ATaskObservationSchema,
+  A2AHandoffSchema,
+  validateA2AHandoff,
 } from './extensions/index';
 export type {
   CredentialEventType,
@@ -186,6 +198,13 @@ export type {
   CommitmentClass,
   Treaty,
   FingerprintRefObject,
+  // v0.14.1 A2A Handoff Observation
+  A2ATaskEvent,
+  A2AAgentCardObservation,
+  A2ATaskObservation,
+  A2AHandoffPayload,
+  A2AValidationError,
+  A2AValidationResult,
 } from './extensions/index';
 
 // Attribution validators (v0.9.26+)
@@ -659,3 +678,10 @@ export type {
   RevokedKeyEntryOutput,
   RevocationReason,
 } from './issuer-config';
+
+// v0.14.1 shared opaque-reference grammar (used by a2a-handoff,
+// cli-execution, and lifecycle-observation extension namespaces).
+// Sha256DigestSchema is the canonical one from wire-02-extensions/shared-validators.ts;
+// see comment in opaque-ref.ts for why it is not re-exported here.
+export { OPAQUE_REF_PREFIXES, OpaqueRefSchema, createOpaqueRefSchema } from './opaque-ref';
+export type { OpaqueRef, OpaqueRefSchemaOptions } from './opaque-ref';

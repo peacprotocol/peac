@@ -286,6 +286,79 @@ export const PROOF_TYPES: readonly ProofTypeEntry[] = [
 /** Receipt type registry (Wire 0.2, 10 pillar-aligned types) */
 export const RECEIPT_TYPES: readonly ReceiptTypeEntry[] = [
   {
+    id: 'org.peacprotocol/a2a-agent-card-observation',
+    pillar: 'provenance',
+    description:
+      'Observational record of an A2A v1.0 Agent Card discovery; signature_observation is caller-reported.',
+    extension_group: 'org.peacprotocol/a2a-handoff',
+    status: 'informational',
+  },
+  {
+    id: 'org.peacprotocol/a2a-human-approved',
+    pillar: 'provenance',
+    description:
+      'Observational record of an A2A v1.0 human approval; PEAC records what an external approver indicated.',
+    extension_group: 'org.peacprotocol/a2a-handoff',
+    status: 'informational',
+  },
+  {
+    id: 'org.peacprotocol/a2a-human-rejected',
+    pillar: 'provenance',
+    description:
+      'Observational record of an A2A v1.0 human rejection; PEAC records what an external approver indicated.',
+    extension_group: 'org.peacprotocol/a2a-handoff',
+    status: 'informational',
+  },
+  {
+    id: 'org.peacprotocol/a2a-human-review-requested',
+    pillar: 'provenance',
+    description: 'Observational record of an A2A v1.0 human review request.',
+    extension_group: 'org.peacprotocol/a2a-handoff',
+    status: 'informational',
+  },
+  {
+    id: 'org.peacprotocol/a2a-task-accepted',
+    pillar: 'provenance',
+    description: 'Observational record of an A2A v1.0 task.accepted handoff event.',
+    extension_group: 'org.peacprotocol/a2a-handoff',
+    status: 'informational',
+  },
+  {
+    id: 'org.peacprotocol/a2a-task-completed',
+    pillar: 'provenance',
+    description: 'Observational record of an A2A v1.0 task.completed handoff event.',
+    extension_group: 'org.peacprotocol/a2a-handoff',
+    status: 'informational',
+  },
+  {
+    id: 'org.peacprotocol/a2a-task-failed',
+    pillar: 'provenance',
+    description: 'Observational record of an A2A v1.0 task.failed handoff event.',
+    extension_group: 'org.peacprotocol/a2a-handoff',
+    status: 'informational',
+  },
+  {
+    id: 'org.peacprotocol/a2a-task-rejected',
+    pillar: 'provenance',
+    description: 'Observational record of an A2A v1.0 task.rejected handoff event.',
+    extension_group: 'org.peacprotocol/a2a-handoff',
+    status: 'informational',
+  },
+  {
+    id: 'org.peacprotocol/a2a-task-state-changed',
+    pillar: 'provenance',
+    description: 'Observational record of an A2A v1.0 task state transition.',
+    extension_group: 'org.peacprotocol/a2a-handoff',
+    status: 'informational',
+  },
+  {
+    id: 'org.peacprotocol/a2a-task-submitted',
+    pillar: 'provenance',
+    description: 'Observational record of an A2A v1.0 task.submitted handoff event.',
+    extension_group: 'org.peacprotocol/a2a-handoff',
+    status: 'informational',
+  },
+  {
     id: 'org.peacprotocol/access-decision',
     pillar: 'access',
     description: 'Access control decision evidence (allow, deny, review)',
@@ -359,6 +432,12 @@ export const RECEIPT_TYPES: readonly ReceiptTypeEntry[] = [
 
 /** Extension group registry (Wire 0.2) */
 export const EXTENSION_GROUPS: readonly ExtensionGroupEntry[] = [
+  {
+    id: 'org.peacprotocol/a2a-handoff',
+    description:
+      'A2A handoff observation extension: records observational events emitted alongside A2A v1.0 task lifecycle transitions (Agent Card observation + 9 task-lifecycle event types). Strictly observational; helpers do not verify Agent Card signatures or fetch upstream events. Introduced in v0.14.1.',
+    status: 'informational',
+  },
   {
     id: 'org.peacprotocol/access',
     description: 'Access extension: resource, action, decision (allow/deny/review)',
@@ -434,6 +513,16 @@ export const EXTENSION_GROUPS: readonly ExtensionGroupEntry[] = [
  * Entries with extension_group === null are excluded (no enforcement yet).
  */
 export const TYPE_TO_EXTENSION_MAP: ReadonlyMap<string, string> = new Map([
+  ['org.peacprotocol/a2a-agent-card-observation', 'org.peacprotocol/a2a-handoff'],
+  ['org.peacprotocol/a2a-human-approved', 'org.peacprotocol/a2a-handoff'],
+  ['org.peacprotocol/a2a-human-rejected', 'org.peacprotocol/a2a-handoff'],
+  ['org.peacprotocol/a2a-human-review-requested', 'org.peacprotocol/a2a-handoff'],
+  ['org.peacprotocol/a2a-task-accepted', 'org.peacprotocol/a2a-handoff'],
+  ['org.peacprotocol/a2a-task-completed', 'org.peacprotocol/a2a-handoff'],
+  ['org.peacprotocol/a2a-task-failed', 'org.peacprotocol/a2a-handoff'],
+  ['org.peacprotocol/a2a-task-rejected', 'org.peacprotocol/a2a-handoff'],
+  ['org.peacprotocol/a2a-task-state-changed', 'org.peacprotocol/a2a-handoff'],
+  ['org.peacprotocol/a2a-task-submitted', 'org.peacprotocol/a2a-handoff'],
   ['org.peacprotocol/access-decision', 'org.peacprotocol/access'],
   ['org.peacprotocol/attribution-event', 'org.peacprotocol/attribution'],
   ['org.peacprotocol/compliance-check', 'org.peacprotocol/compliance'],

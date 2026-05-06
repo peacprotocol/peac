@@ -1,0 +1,35 @@
+{
+  "name": "Example A2A Agent",
+  "description": "Reference Agent Card showing PEAC traceability extension declaration (A2A v1.0).",
+  "version": "1.0.0",
+  "supportedInterfaces": [
+    {
+      "url": "https://agent.example.com/a2a/v1",
+      "protocolBinding": "http+json",
+      "protocolVersion": "1.0"
+    }
+  ],
+  "capabilities": {
+    "streaming": false,
+    "pushNotifications": false,
+    "extensions": [
+      {
+        "uri": "https://www.peacprotocol.org/ext/traceability/v1",
+        "description": "PEAC evidence carrier for agent-to-agent traceability",
+        "required": false,
+        "params": {
+          "supported_kinds": ["interaction-record+jwt", "peac-receipt/0.1"],
+          "carrier_formats": ["embed", "reference"],
+          "issuer_config_url": "https://agent.example.com/.well-known/peac-issuer.json"
+        }
+      }
+    ]
+  },
+  "skills": [
+    {
+      "id": "example-skill",
+      "name": "Example Skill",
+      "description": "Reference skill for demonstrating receipt issuance per state transition"
+    }
+  ]
+}

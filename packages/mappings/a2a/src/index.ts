@@ -70,6 +70,19 @@ export {
   discoverPeacCapabilities,
 } from './discovery';
 
+// Observation helpers (v0.14.1; A2A handoff records)
+export { fromA2AAgentCardObservation, fromA2ATaskObservation } from './observation/index';
+
+export type {
+  AgentCardObservationInput,
+  CallerReportedVerification,
+  DiscoveryPath,
+  SignatureObservationInput,
+  A2ATaskEvent,
+  A2ATaskObservationInput,
+  AgentRefInput,
+} from './observation/index';
+
 // Auth (A2A v1.0 OAuth surface)
 export {
   generatePKCEChallenge,

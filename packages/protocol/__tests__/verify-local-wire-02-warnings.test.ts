@@ -44,6 +44,16 @@ const MINIMAL_EXT: Record<string, Record<string, unknown>> = {
   'org.peacprotocol/provenance': { source_type: 'original' },
   'org.peacprotocol/attribution': { creator_ref: 'acme-corp' },
   'org.peacprotocol/purpose': { external_purposes: ['ai_training'] },
+  // v0.14.1 a2a-handoff (uses Agent Card observation shape; sufficient for the
+  // does-not-emit-type_unregistered iteration; type-specific shape is
+  // exercised by the a2a-handoff parity corpus).
+  'org.peacprotocol/a2a-handoff': {
+    type: 'org.peacprotocol/a2a-agent-card-observation',
+    card_ref: 'sha256:0000000000000000000000000000000000000000000000000000000000000001',
+    signature_observation: { present: true, caller_reported_verification: 'not_checked' },
+    discovered_at: '2026-05-05T12:00:00Z',
+    discovery_path: '/.well-known/agent-card.json',
+  },
 };
 
 function extensionsForType(type: string): Record<string, Record<string, unknown>> | undefined {

@@ -35,11 +35,13 @@ import {
 } from '../../src/_internal/test-helpers/corpus-loader';
 
 const CORPUS_ROOT = resolveCorpusRoot();
-const SCHEMA_VALIDATED_TOTAL = 31;
+// Total: 12 + 8 + 7 + 4 + 15 = 46 (a2a-handoff added in v0.14.1; 10 positive + 5 negative).
+const SCHEMA_VALIDATED_TOTAL = 46;
 
 describe('parity-corpus accounting (schema-validated families)', () => {
-  it('PARITY_FAMILIES enrolls exactly 4 schema-validated families', () => {
+  it('PARITY_FAMILIES enrolls exactly 5 schema-validated families (a2a-handoff added in v0.14.1)', () => {
     expect([...PARITY_FAMILIES].sort()).toEqual([
+      'a2a-handoff',
       'commerce-bridges',
       'default-flows',
       'jose-hardening',
@@ -47,21 +49,23 @@ describe('parity-corpus accounting (schema-validated families)', () => {
     ]);
   });
 
-  it('PARITY_FLOOR_COUNTS matches per-family floor: 12 + 8 + 7 + 4 = 31', () => {
+  it('PARITY_FLOOR_COUNTS matches per-family floor: 12 + 8 + 7 + 4 + 15 = 46', () => {
     expect(PARITY_FLOOR_COUNTS['default-flows']).toBe(12);
     expect(PARITY_FLOOR_COUNTS['jose-hardening']).toBe(8);
     expect(PARITY_FLOOR_COUNTS['runtime-governance']).toBe(7);
     expect(PARITY_FLOOR_COUNTS['commerce-bridges']).toBe(4);
+    expect(PARITY_FLOOR_COUNTS['a2a-handoff']).toBe(15);
 
     const sum = Object.values(PARITY_FLOOR_COUNTS).reduce((a, b) => a + b, 0);
     expect(sum).toBe(SCHEMA_VALIDATED_TOTAL);
   });
 
-  it('loadAllFamilies() returns exactly 4 families', () => {
+  it('loadAllFamilies() returns exactly 5 families (a2a-handoff added in v0.14.1)', () => {
     const families = loadAllFamilies();
-    expect(families).toHaveLength(4);
+    expect(families).toHaveLength(5);
     const names = families.map((f) => f.family).sort();
     expect(names).toEqual([
+      'a2a-handoff',
       'commerce-bridges',
       'default-flows',
       'jose-hardening',
