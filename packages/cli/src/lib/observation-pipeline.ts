@@ -17,14 +17,7 @@
  * shell orchestrator / process supervisor / job scheduler.
  */
 
-import {
-  closeSync,
-  constants as fsConstants,
-  existsSync,
-  openSync,
-  statSync,
-  unlinkSync,
-} from 'node:fs';
+import { closeSync, constants as fsConstants, openSync, statSync, unlinkSync } from 'node:fs';
 import { delimiter, dirname, join, resolve as pathResolve } from 'node:path';
 import { randomBytes } from 'node:crypto';
 import { CliExecutionSchema, type CliExecutionObservation } from '@peac/schema';
@@ -147,22 +140,28 @@ export function preflightOutputWritable(output: string): string | null {
     return `parent directory '${parent}' does not exist (${(err as NodeJS.ErrnoException)?.code ?? (err instanceof Error ? err.message : String(err))})`;
   }
 
-  if (existsSync(absPath)) {
-    // Existing target: open for append to verify writability, then
-    // close. Do NOT unlink or modify the existing target.
-    let fd: number | undefined;
+  // Race-free target discrimination. We do NOT call existsSync()
+  // before open() because that introduces a TOCTOU window between the
+  // check and the use. Instead we open the path for append WITHOUT
+  // O_CREAT: a successful open proves the file exists and is
+  // writable; an ENOENT error proves the file does not exist; any
+  // other errno surfaces a real preflight failure. The single
+  // open() syscall makes the discrimination atomic.
+  let existingFd: number | undefined;
+  try {
+    existingFd = openSync(absPath, fsConstants.O_WRONLY | fsConstants.O_APPEND);
+  } catch (err) {
+    const code = (err as NodeJS.ErrnoException)?.code;
+    if (code !== 'ENOENT') {
+      return `cannot open '${absPath}' for write (${code ?? (err instanceof Error ? err.message : String(err))})`;
+    }
+    // ENOENT: target does not exist. Fall through to the temp-file probe.
+  }
+  if (existingFd !== undefined) {
     try {
-      fd = openSync(absPath, 'a');
-    } catch (err) {
-      return `cannot open '${absPath}' for write (${(err as NodeJS.ErrnoException)?.code ?? (err instanceof Error ? err.message : String(err))})`;
-    } finally {
-      if (fd !== undefined) {
-        try {
-          closeSync(fd);
-        } catch {
-          // ignore
-        }
-      }
+      closeSync(existingFd);
+    } catch {
+      // ignore
     }
     return null;
   }
