@@ -116,7 +116,12 @@ const regs = readJSON(join(ROOT, 'specs/kernel/registries.json'));
 if (!regs) {
   fail('specs/kernel/registries.json not found');
 } else {
-  const BASELINE_EXT_GROUPS = 13;
+  // v0.14.1: extension_groups gains org.peacprotocol/cli-execution
+  // (CLI execution observation namespace; backs `peac observe command`
+  // / `peac record command`). receipt_types gains the single
+  // org.peacprotocol/cli-command-execution type URI. Bump intentional;
+  // additive only.
+  const BASELINE_EXT_GROUPS = 14;
   const groups = regs.extension_groups ?? regs.registries?.extension_groups ?? [];
   const groupCount = Array.isArray(groups)
     ? groups.length

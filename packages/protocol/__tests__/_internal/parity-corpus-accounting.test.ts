@@ -35,13 +35,14 @@ import {
 } from '../../src/_internal/test-helpers/corpus-loader';
 
 const CORPUS_ROOT = resolveCorpusRoot();
-// Total: 12 + 8 + 7 + 4 + 15 = 46 (a2a-handoff added in v0.14.1; 10 positive + 5 negative).
-const SCHEMA_VALIDATED_TOTAL = 46;
+// Total: 12 + 8 + 7 + 4 + 15 + 6 = 52 (a2a-handoff: 10 positive + 5 negative; cli-execution: 6 positive).
+const SCHEMA_VALIDATED_TOTAL = 52;
 
 describe('parity-corpus accounting (schema-validated families)', () => {
-  it('PARITY_FAMILIES enrolls exactly 5 schema-validated families (a2a-handoff added in v0.14.1)', () => {
+  it('PARITY_FAMILIES enrolls exactly 6 schema-validated families (a2a-handoff + cli-execution added)', () => {
     expect([...PARITY_FAMILIES].sort()).toEqual([
       'a2a-handoff',
+      'cli-execution',
       'commerce-bridges',
       'default-flows',
       'jose-hardening',
@@ -49,23 +50,25 @@ describe('parity-corpus accounting (schema-validated families)', () => {
     ]);
   });
 
-  it('PARITY_FLOOR_COUNTS matches per-family floor: 12 + 8 + 7 + 4 + 15 = 46', () => {
+  it('PARITY_FLOOR_COUNTS matches per-family floor: 12 + 8 + 7 + 4 + 15 + 6 = 52', () => {
     expect(PARITY_FLOOR_COUNTS['default-flows']).toBe(12);
     expect(PARITY_FLOOR_COUNTS['jose-hardening']).toBe(8);
     expect(PARITY_FLOOR_COUNTS['runtime-governance']).toBe(7);
     expect(PARITY_FLOOR_COUNTS['commerce-bridges']).toBe(4);
     expect(PARITY_FLOOR_COUNTS['a2a-handoff']).toBe(15);
+    expect(PARITY_FLOOR_COUNTS['cli-execution']).toBe(6);
 
     const sum = Object.values(PARITY_FLOOR_COUNTS).reduce((a, b) => a + b, 0);
     expect(sum).toBe(SCHEMA_VALIDATED_TOTAL);
   });
 
-  it('loadAllFamilies() returns exactly 5 families (a2a-handoff added in v0.14.1)', () => {
+  it('loadAllFamilies() returns exactly 6 families (a2a-handoff + cli-execution added)', () => {
     const families = loadAllFamilies();
-    expect(families).toHaveLength(5);
+    expect(families).toHaveLength(6);
     const names = families.map((f) => f.family).sort();
     expect(names).toEqual([
       'a2a-handoff',
+      'cli-execution',
       'commerce-bridges',
       'default-flows',
       'jose-hardening',

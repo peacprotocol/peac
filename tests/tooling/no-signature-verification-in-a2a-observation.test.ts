@@ -1,15 +1,14 @@
 /**
- * v0.14.1: Artifact-shape import-graph test for A2A observation helpers.
+ * Artifact-shape import-graph test for A2A observation helpers.
  *
  * The A2A observation helpers in `packages/mappings/a2a/src/observation/` are
  * strictly observational. They MUST NOT verify Agent Card signatures and MUST
- * NOT import any signature-verification API. PR 1 of v0.14.1 enforces this
- * boundary at the import-graph level (NOT via source-grep, which is brittle):
- * a TypeScript AST walker reads each helper file's import statements and
- * rejects any import path that resolves to a signature/JWS/crypto module.
+ * NOT import any signature-verification API. This boundary is enforced at the
+ * import-graph level (NOT via source-grep, which is brittle): a TypeScript
+ * AST walker reads each helper file's import statements and rejects any
+ * import path that resolves to a signature/JWS/crypto module.
  *
- * Per the v0.14.1 plan amendments lock and brutal-honest review point 5,
- * artifact-shape and import-graph tests are preferred over source-grep
+ * Artifact-shape and import-graph tests are preferred over source-grep
  * tests for "no signature verification" / "no decision derivation" / etc.
  */
 import { describe, it, expect } from 'vitest';

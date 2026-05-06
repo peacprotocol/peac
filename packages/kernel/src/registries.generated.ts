@@ -373,6 +373,14 @@ export const RECEIPT_TYPES: readonly ReceiptTypeEntry[] = [
     status: 'informational',
   },
   {
+    id: 'org.peacprotocol/cli-command-execution',
+    pillar: 'provenance',
+    description:
+      'Observational record of a local CLI command execution; PEAC records what the wrapper observed (argv, stdin/stdout/stderr digests, exit code, signal, timing, capture policy). Field-level variants (exit_code, signal, timed_out, shell_mode, capture_policy, termination_signal, exit_code_mode) live as fields on this single record type, not as separate record types. Introduced in v0.14.1.',
+    extension_group: 'org.peacprotocol/cli-execution',
+    status: 'informational',
+  },
+  {
     id: 'org.peacprotocol/compliance-check',
     pillar: 'compliance',
     description: 'Regulatory compliance check evidence',
@@ -455,6 +463,12 @@ export const EXTENSION_GROUPS: readonly ExtensionGroupEntry[] = [
     status: 'informational',
   },
   {
+    id: 'org.peacprotocol/cli-execution',
+    description:
+      'CLI execution observation extension: records observational evidence of a local command execution wrapped by the peac observe command / record command subcommands. Hard security defaults (argv hashed; stdout/stderr length+sha256+truncated only; env deny-by-default; cwd hashed; binary path hashed; secret-scan on; shell-binary detected without --shell-mode hard-fails). The wrapper is an observer, not a sandbox / permission system / process supervisor / job scheduler / shell orchestrator. Introduced in v0.14.1.',
+    status: 'informational',
+  },
+  {
     id: 'org.peacprotocol/commerce',
     description: 'Commerce extension: payment_rail, amount_minor, currency, reference, asset, env',
     status: 'informational',
@@ -525,6 +539,7 @@ export const TYPE_TO_EXTENSION_MAP: ReadonlyMap<string, string> = new Map([
   ['org.peacprotocol/a2a-task-submitted', 'org.peacprotocol/a2a-handoff'],
   ['org.peacprotocol/access-decision', 'org.peacprotocol/access'],
   ['org.peacprotocol/attribution-event', 'org.peacprotocol/attribution'],
+  ['org.peacprotocol/cli-command-execution', 'org.peacprotocol/cli-execution'],
   ['org.peacprotocol/compliance-check', 'org.peacprotocol/compliance'],
   ['org.peacprotocol/consent-record', 'org.peacprotocol/consent'],
   ['org.peacprotocol/identity-attestation', 'org.peacprotocol/identity'],

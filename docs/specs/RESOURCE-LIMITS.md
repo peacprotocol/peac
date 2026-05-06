@@ -233,6 +233,37 @@ NOT skip any layer's cap.
   is the sized payload that PEAC enforces, capped at 256 KiB by
   `MAX_BODY_SIZE` in [`apps/api/src/verify-v1.ts`](../../apps/api/src/verify-v1.ts).
 
+## CLI capture limits
+
+The `peac observe command` and `peac record command` subcommands wrap
+a child process and emit a bounded observational record. The wrapper
+enforces these caps BEFORE the child runs and rejects oversized or
+NaN-valued flags with the stable code `cli.out_of_range`. Constants
+live in
+[`packages/cli/src/lib/cli-limits.ts`](../../packages/cli/src/lib/cli-limits.ts);
+mirrored by the Zod ranges in
+[`packages/schema/src/extensions/cli-execution.ts`](../../packages/schema/src/extensions/cli-execution.ts).
+A parity test in
+[`packages/cli/tests/cli-limits-schema-parity.test.ts`](../../packages/cli/tests/cli-limits-schema-parity.test.ts)
+asserts the two sides stay in sync.
+
+| Invariant                                     | Default           | Hard ceiling      | Constant                          |
+| --------------------------------------------- | ----------------- | ----------------- | --------------------------------- |
+| Captured stdout sample bytes (raw mode only)  | 16 384            | 65 536            | `CLI_LIMITS.maxStdoutSampleBytes` |
+| Captured stderr sample bytes (raw mode only)  | 16 384            | 65 536            | `CLI_LIMITS.maxStderrSampleBytes` |
+| Captured argv per-token bytes (raw mode only) | 4 096             | 16 384            | `CLI_LIMITS.maxArgvCaptureBytes`  |
+| `--env-allow` entries                         | (deny by default) | 32 entries        | `CLI_LIMITS.maxEnvEntries`        |
+| Wrapper timeout (`--timeout-ms`)              | 600 000 (10 min)  | 86 400 000 (24 h) | `CLI_LIMITS.maxTimeoutMs`         |
+| SIGTERM-to-SIGKILL grace (`--kill-grace-ms`)  | 5 000 (5 s)       | 60 000 (60 s)     | `CLI_LIMITS.maxKillGraceMs`       |
+
+Stream capture uses streaming `node:crypto.createHash('sha256')` and
+NEVER buffers the full stdout / stderr stream in memory. Only the
+bounded sample buffer is retained, and only when raw capture is
+double-opted-in (`--capture-mode raw` AND `--unsafe-allow-raw-capture`).
+
+The full CLI subcommand contract is specified in
+[`docs/specs/CLI-CARRIER-PROFILE.md`](./CLI-CARRIER-PROFILE.md).
+
 ## Tightening process
 
 A future release MAY tighten any limit in this document. Tightening is

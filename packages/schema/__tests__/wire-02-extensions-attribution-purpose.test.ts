@@ -574,8 +574,8 @@ describe('Registry derivation: attribution + purpose keys are known', () => {
     expect(REGISTERED_EXTENSION_GROUP_KEYS.has(PURPOSE_EXTENSION_KEY)).toBe(true);
   });
 
-  it('REGISTERED_EXTENSION_GROUP_KEYS has exactly 13 entries (12 pillars/cross-cutting + a2a-handoff added in v0.14.1)', () => {
-    expect(REGISTERED_EXTENSION_GROUP_KEYS.size).toBe(13);
+  it('REGISTERED_EXTENSION_GROUP_KEYS has exactly 14 entries (12 pillars/cross-cutting + a2a-handoff + cli-execution added in v0.14.1)', () => {
+    expect(REGISTERED_EXTENSION_GROUP_KEYS.size).toBe(14);
   });
 });
 
@@ -731,15 +731,15 @@ describe('Registry completion: all receipt types have extension_group mappings',
     expect(nullEntries).toHaveLength(0);
   });
 
-  it('all 20 receipt types have non-null extension_group (10 pillars + 10 a2a-handoff added in v0.14.1)', () => {
-    expect(registries.receipt_types.values).toHaveLength(20);
+  it('all 21 receipt types have non-null extension_group (10 pillars + 10 a2a-handoff + 1 cli-command-execution)', () => {
+    expect(registries.receipt_types.values).toHaveLength(21);
     for (const entry of registries.receipt_types.values) {
       expect(entry.extension_group).not.toBeNull();
       expect(typeof entry.extension_group).toBe('string');
     }
   });
 
-  it('extension_groups has exactly 13 entries (12 pillars/cross-cutting + a2a-handoff added in v0.14.1)', () => {
-    expect(registries.extension_groups.values).toHaveLength(13);
+  it('extension_groups has exactly 14 entries (12 pillars/cross-cutting + a2a-handoff + cli-execution added in v0.14.1)', () => {
+    expect(registries.extension_groups.values).toHaveLength(14);
   });
 });

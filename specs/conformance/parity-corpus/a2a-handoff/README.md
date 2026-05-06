@@ -37,4 +37,4 @@ Per the parity-corpus convention established by runtime-governance vector `rg-00
 
 ## Cross-language parity
 
-Go-side `parityFloorCounts` extension at `sdks/go/parity_corpus_loader_test.go` will add `a2a-handoff: 15` in PR 4 of the v0.14.1 ladder (per the plan); PR 1 ships the corpus only.
+The TypeScript parity loader (`packages/protocol/src/_internal/test-helpers/corpus-loader.ts`) carries `a2a-handoff: 15` as the floor count. Cross-language Go floor extension at `sdks/go/parity_corpus_loader_test.go` is a follow-up change.

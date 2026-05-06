@@ -16,6 +16,8 @@ import { samples } from './commands/samples.js';
 import { reconcileCommand } from './commands/reconcile.js';
 import { doctor } from './commands/doctor.js';
 import { DiscoverCommand } from './commands/discover.js';
+import { observeCommand } from './commands/observe-command.js';
+import { recordCommand } from './commands/record-command.js';
 import { formatOutput } from './utils.js';
 import { getVersion } from './lib/version.js';
 
@@ -222,6 +224,12 @@ program.addCommand(samples);
 
 // Reconcile evidence bundles (v0.11.3+)
 program.addCommand(reconcileCommand());
+
+// CLI execution observation
+program.addCommand(observeCommand());
+
+// CLI execution record (signed Wire 0.2 JWS)
+program.addCommand(recordCommand());
 
 // Installability diagnostics (v0.12.11+)
 doctor(program);

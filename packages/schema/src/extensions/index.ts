@@ -75,3 +75,18 @@ export type {
   A2AValidationError,
   A2AValidationResult,
 } from './a2a-handoff';
+
+// CLI Execution Observation (org.peacprotocol/cli-execution)
+export {
+  CLI_EXECUTION_EXTENSION_KEY,
+  CLI_COMMAND_EXECUTION_TYPE,
+  CLI_EXECUTION_ERROR_CODES,
+  CLI_SCHEMA_LIMITS,
+  CliExecutionSchema,
+  validateCliExecution,
+} from './cli-execution';
+export type {
+  CliExecutionObservation,
+  CliValidationError,
+  CliValidationResult,
+} from './cli-execution';

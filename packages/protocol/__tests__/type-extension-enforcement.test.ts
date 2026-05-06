@@ -38,8 +38,9 @@ const REGISTERED_KEYS = new Set([
   'org.peacprotocol/provenance',
   'org.peacprotocol/attribution',
   'org.peacprotocol/purpose',
-  // v0.14.1
+  // observation surfaces
   'org.peacprotocol/a2a-handoff',
+  'org.peacprotocol/cli-execution',
 ]);
 
 describe('checkTypeExtensionMapping(): pure helper', () => {
@@ -180,6 +181,62 @@ const MINIMAL_EXTENSIONS: Record<string, Record<string, unknown>> = {
     discovered_at: '2026-05-05T12:00:00Z',
     discovery_path: '/.well-known/agent-card.json',
   },
+  'org.peacprotocol/cli-execution': {
+    type: 'org.peacprotocol/cli-command-execution',
+    surface: { kind: 'cli' },
+    command: {
+      program: 'node',
+      argv_mode: 'hashed',
+      argv_sha256: 'sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+    },
+    cwd: {
+      cwd_mode: 'hashed',
+      cwd_sha256: 'sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb',
+    },
+    binary: {
+      path_mode: 'hashed',
+      path_sha256: 'sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc',
+    },
+    stdin_ref: { mode: 'none' },
+    stdout_ref: {
+      length: 0,
+      sha256: 'sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd',
+      truncated: false,
+    },
+    stderr_ref: {
+      length: 0,
+      sha256: 'sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
+      truncated: false,
+    },
+    env: { mode: 'hashed', entries: {} },
+    started_at: '2026-01-01T00:00:00Z',
+    finished_at: '2026-01-01T00:00:01Z',
+    duration_ms: 1000,
+    exit_code: 0,
+    timed_out: false,
+    timeout_ms: 600000,
+    kill_grace_ms: 5000,
+    exit_code_mode: 'child',
+    shell_mode: false,
+    execution_mode: 'deterministic_script',
+    capture_policy: {
+      stdout_max_bytes: 16384,
+      stderr_max_bytes: 16384,
+      argv_max_bytes: 4096,
+      env_allowlist: [],
+      stdin_mode: 'none',
+      cwd_mode: 'hashed',
+      binary_path_mode: 'hashed',
+      secret_scan: true,
+      raw_capture_unsafely_allowed: false,
+      raw_env_unsafely_allowed: false,
+      secret_scan_disabled_unsafely: false,
+      timeout_ms: 600000,
+      kill_grace_ms: 5000,
+      exit_code_mode: 'child',
+    },
+    platform: { os: 'linux', arch: 'x64', peac_cli_version: '0.14.0' },
+  },
 };
 
 /**
@@ -209,6 +266,8 @@ const TYPE_PILLARS: Record<string, string> = {
   'org.peacprotocol/a2a-human-review-requested': 'provenance',
   'org.peacprotocol/a2a-human-approved': 'provenance',
   'org.peacprotocol/a2a-human-rejected': 'provenance',
+  // CLI execution observation (single type URI; pillar=provenance)
+  'org.peacprotocol/cli-command-execution': 'provenance',
 };
 
 /** Get a different registered extension group (for mismatch testing) */
@@ -368,8 +427,8 @@ describe('verifyLocal(): type-to-extension edge cases', () => {
 // ---------------------------------------------------------------------------
 
 describe('Registry completion: type-to-extension surface', () => {
-  it('TYPE_TO_EXTENSION_MAP covers all 20 registered receipt types (10 pillars + 10 a2a-handoff added in v0.14.1)', () => {
-    expect(TYPE_TO_EXTENSION_MAP.size).toBe(20);
+  it('TYPE_TO_EXTENSION_MAP covers all 21 registered receipt types (10 pillars + 10 a2a-handoff + 1 cli-command-execution)', () => {
+    expect(TYPE_TO_EXTENSION_MAP.size).toBe(21);
   });
 
   it('every mapped extension group is in REGISTERED_EXTENSION_GROUP_KEYS', () => {
@@ -378,8 +437,8 @@ describe('Registry completion: type-to-extension surface', () => {
     }
   });
 
-  it('REGISTERED_EXTENSION_GROUP_KEYS has exactly 13 entries (12 pillars/cross-cutting + a2a-handoff added in v0.14.1)', () => {
-    expect(REGISTERED_KEYS.size).toBe(13);
+  it('REGISTERED_EXTENSION_GROUP_KEYS has exactly 14 entries (12 pillars/cross-cutting + a2a-handoff + cli-execution)', () => {
+    expect(REGISTERED_KEYS.size).toBe(14);
   });
 });
 

@@ -187,6 +187,13 @@ export {
   A2ATaskObservationSchema,
   A2AHandoffSchema,
   validateA2AHandoff,
+  // CLI Execution Observation
+  CLI_EXECUTION_EXTENSION_KEY,
+  CLI_COMMAND_EXECUTION_TYPE,
+  CLI_EXECUTION_ERROR_CODES,
+  CLI_SCHEMA_LIMITS,
+  CliExecutionSchema,
+  validateCliExecution,
 } from './extensions/index';
 export type {
   CredentialEventType,
@@ -205,6 +212,10 @@ export type {
   A2AHandoffPayload,
   A2AValidationError,
   A2AValidationResult,
+  // CLI Execution Observation
+  CliExecutionObservation,
+  CliValidationError,
+  CliValidationResult,
 } from './extensions/index';
 
 // Attribution validators (v0.9.26+)

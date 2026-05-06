@@ -1,0 +1,533 @@
+{
+  "family": "cli-execution",
+  "description": "CLI execution observation parity vectors. Six deterministic JSON observation payloads exercising CLI-EXEC-001..006 schema-shape semantics. Every vector is INTERNALLY VALID against CliExecutionSchema; semantic-rejection cases (path-leak, raw-without-unsafe, env-not-in-allowlist, stream-ref inconsistency, shell_mode without shell_ref, etc.) live in the schema validator tests at packages/schema/__tests__/extensions/cli-execution.test.ts. The corpus exists to pin a deterministic floor of canonical observation shapes for cross-language conformance.",
+  "version": "0.14.1",
+  "generator": "manual; cli-execution v0.1 floor",
+  "vectors": [
+    {
+      "id": "ce-001-minimal-hashed",
+      "description": "CLI-EXEC-001: minimal hashed observation; all required fields present; canonical type URI and surface.kind; child exit 0.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/cli-command-execution",
+          "iss": "https://gateway.example.com",
+          "iat": 1735689600,
+          "jti": "ce-001-minimal-hashed-jti-fixed-value",
+          "extensions": {
+            "org.peacprotocol/cli-execution": {
+              "type": "org.peacprotocol/cli-command-execution",
+              "surface": {
+                "kind": "cli"
+              },
+              "command": {
+                "program": "node",
+                "argv_mode": "hashed",
+                "argv_sha256": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              },
+              "cwd": {
+                "cwd_mode": "hashed",
+                "cwd_sha256": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+              },
+              "binary": {
+                "path_mode": "hashed",
+                "path_sha256": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+              },
+              "stdin_ref": {
+                "mode": "none"
+              },
+              "stdout_ref": {
+                "length": 0,
+                "sha256": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+                "truncated": false
+              },
+              "stderr_ref": {
+                "length": 0,
+                "sha256": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+                "truncated": false
+              },
+              "env": {
+                "mode": "hashed",
+                "entries": {}
+              },
+              "started_at": "2026-01-01T00:00:00Z",
+              "finished_at": "2026-01-01T00:00:01Z",
+              "duration_ms": 1000,
+              "exit_code": 0,
+              "timed_out": false,
+              "timeout_ms": 600000,
+              "kill_grace_ms": 5000,
+              "exit_code_mode": "child",
+              "shell_mode": false,
+              "execution_mode": "deterministic_script",
+              "capture_policy": {
+                "stdout_max_bytes": 16384,
+                "stderr_max_bytes": 16384,
+                "argv_max_bytes": 4096,
+                "env_allowlist": [],
+                "stdin_mode": "none",
+                "cwd_mode": "hashed",
+                "binary_path_mode": "hashed",
+                "secret_scan": true,
+                "raw_capture_unsafely_allowed": false,
+                "raw_env_unsafely_allowed": false,
+                "secret_scan_disabled_unsafely": false,
+                "timeout_ms": 600000,
+                "kill_grace_ms": 5000,
+                "exit_code_mode": "child"
+              },
+              "platform": {
+                "os": "linux",
+                "arch": "x64",
+                "peac_cli_version": "0.14.0"
+              }
+            }
+          }
+        }
+      },
+      "expected": {
+        "accepted": true
+      }
+    },
+    {
+      "id": "ce-002-non-zero-exit",
+      "description": "CLI-EXEC-002: child exits non-zero; record IS still emitted; exit_code_mode='child' mirrors the child exit.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/cli-command-execution",
+          "iss": "https://gateway.example.com",
+          "iat": 1735689600,
+          "jti": "ce-002-non-zero-exit-jti-fixed-value",
+          "extensions": {
+            "org.peacprotocol/cli-execution": {
+              "type": "org.peacprotocol/cli-command-execution",
+              "surface": {
+                "kind": "cli"
+              },
+              "command": {
+                "program": "node",
+                "argv_mode": "hashed",
+                "argv_sha256": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              },
+              "cwd": {
+                "cwd_mode": "hashed",
+                "cwd_sha256": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+              },
+              "binary": {
+                "path_mode": "hashed",
+                "path_sha256": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+              },
+              "stdin_ref": {
+                "mode": "none"
+              },
+              "stdout_ref": {
+                "length": 0,
+                "sha256": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+                "truncated": false
+              },
+              "stderr_ref": {
+                "length": 12,
+                "sha256": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+                "truncated": false
+              },
+              "env": {
+                "mode": "hashed",
+                "entries": {}
+              },
+              "started_at": "2026-01-01T00:00:00Z",
+              "finished_at": "2026-01-01T00:00:01Z",
+              "duration_ms": 1000,
+              "exit_code": 7,
+              "timed_out": false,
+              "timeout_ms": 600000,
+              "kill_grace_ms": 5000,
+              "exit_code_mode": "child",
+              "shell_mode": false,
+              "execution_mode": "deterministic_script",
+              "capture_policy": {
+                "stdout_max_bytes": 16384,
+                "stderr_max_bytes": 16384,
+                "argv_max_bytes": 4096,
+                "env_allowlist": [],
+                "stdin_mode": "none",
+                "cwd_mode": "hashed",
+                "binary_path_mode": "hashed",
+                "secret_scan": true,
+                "raw_capture_unsafely_allowed": false,
+                "raw_env_unsafely_allowed": false,
+                "secret_scan_disabled_unsafely": false,
+                "timeout_ms": 600000,
+                "kill_grace_ms": 5000,
+                "exit_code_mode": "child"
+              },
+              "platform": {
+                "os": "linux",
+                "arch": "x64",
+                "peac_cli_version": "0.14.0"
+              }
+            }
+          }
+        }
+      },
+      "expected": {
+        "accepted": true
+      }
+    },
+    {
+      "id": "ce-003-timeout-emitted",
+      "description": "CLI-EXEC-003: wrapper sent termination signals because --timeout-ms elapsed; record IS still emitted; timed_out=true; termination_signal recorded; exit_code synthesizes POSIX 128+SIGTERM=143.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/cli-command-execution",
+          "iss": "https://gateway.example.com",
+          "iat": 1735689600,
+          "jti": "ce-003-timeout-emitted-jti-fixed-value",
+          "extensions": {
+            "org.peacprotocol/cli-execution": {
+              "type": "org.peacprotocol/cli-command-execution",
+              "surface": {
+                "kind": "cli"
+              },
+              "command": {
+                "program": "node",
+                "argv_mode": "hashed",
+                "argv_sha256": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              },
+              "cwd": {
+                "cwd_mode": "hashed",
+                "cwd_sha256": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+              },
+              "binary": {
+                "path_mode": "hashed",
+                "path_sha256": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+              },
+              "stdin_ref": {
+                "mode": "none"
+              },
+              "stdout_ref": {
+                "length": 0,
+                "sha256": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+                "truncated": false
+              },
+              "stderr_ref": {
+                "length": 0,
+                "sha256": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+                "truncated": false
+              },
+              "env": {
+                "mode": "hashed",
+                "entries": {}
+              },
+              "started_at": "2026-01-01T00:00:00Z",
+              "finished_at": "2026-01-01T00:00:00Z",
+              "duration_ms": 200,
+              "exit_code": 143,
+              "signal": "SIGTERM",
+              "timed_out": true,
+              "timeout_ms": 200,
+              "kill_grace_ms": 200,
+              "termination_signal": "SIGTERM",
+              "exit_code_mode": "record",
+              "shell_mode": false,
+              "execution_mode": "deterministic_script",
+              "capture_policy": {
+                "stdout_max_bytes": 16384,
+                "stderr_max_bytes": 16384,
+                "argv_max_bytes": 4096,
+                "env_allowlist": [],
+                "stdin_mode": "none",
+                "cwd_mode": "hashed",
+                "binary_path_mode": "hashed",
+                "secret_scan": true,
+                "raw_capture_unsafely_allowed": false,
+                "raw_env_unsafely_allowed": false,
+                "secret_scan_disabled_unsafely": false,
+                "timeout_ms": 200,
+                "kill_grace_ms": 200,
+                "exit_code_mode": "record"
+              },
+              "platform": {
+                "os": "linux",
+                "arch": "x64",
+                "peac_cli_version": "0.14.0"
+              }
+            }
+          }
+        }
+      },
+      "expected": {
+        "accepted": true
+      }
+    },
+    {
+      "id": "ce-004-shell-mode-acknowledged",
+      "description": "CLI-EXEC-004: shell_mode=true with binary.shell_ref present and equal to binary.path_sha256 under hashed mode; binary.path_mode != none; biconditional and digest-equivalence invariants satisfied.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/cli-command-execution",
+          "iss": "https://gateway.example.com",
+          "iat": 1735689600,
+          "jti": "ce-004-shell-mode-acknowledged-jti-fixed-value",
+          "extensions": {
+            "org.peacprotocol/cli-execution": {
+              "type": "org.peacprotocol/cli-command-execution",
+              "surface": {
+                "kind": "cli"
+              },
+              "command": {
+                "program": "sh",
+                "argv_mode": "hashed",
+                "argv_sha256": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              },
+              "cwd": {
+                "cwd_mode": "hashed",
+                "cwd_sha256": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+              },
+              "binary": {
+                "path_mode": "hashed",
+                "path_sha256": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+                "shell_ref": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+              },
+              "stdin_ref": {
+                "mode": "none"
+              },
+              "stdout_ref": {
+                "length": 3,
+                "sha256": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+                "truncated": false
+              },
+              "stderr_ref": {
+                "length": 0,
+                "sha256": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+                "truncated": false
+              },
+              "env": {
+                "mode": "hashed",
+                "entries": {}
+              },
+              "started_at": "2026-01-01T00:00:00Z",
+              "finished_at": "2026-01-01T00:00:01Z",
+              "duration_ms": 1000,
+              "exit_code": 0,
+              "timed_out": false,
+              "timeout_ms": 600000,
+              "kill_grace_ms": 5000,
+              "exit_code_mode": "child",
+              "shell_mode": true,
+              "execution_mode": "deterministic_script",
+              "capture_policy": {
+                "stdout_max_bytes": 16384,
+                "stderr_max_bytes": 16384,
+                "argv_max_bytes": 4096,
+                "env_allowlist": [],
+                "stdin_mode": "none",
+                "cwd_mode": "hashed",
+                "binary_path_mode": "hashed",
+                "secret_scan": true,
+                "raw_capture_unsafely_allowed": false,
+                "raw_env_unsafely_allowed": false,
+                "secret_scan_disabled_unsafely": false,
+                "timeout_ms": 600000,
+                "kill_grace_ms": 5000,
+                "exit_code_mode": "child"
+              },
+              "platform": {
+                "os": "linux",
+                "arch": "x64",
+                "peac_cli_version": "0.14.0"
+              }
+            }
+          }
+        }
+      },
+      "expected": {
+        "accepted": true
+      }
+    },
+    {
+      "id": "ce-005-raw-capture-secret-suppressed",
+      "description": "CLI-EXEC-005: raw capture is double-opted-in; secret-scan suppressed the stdout sample; sample_suppressed_reason + matched_pattern_category recorded; sample_base64 absent (mutual exclusion); fully internally valid.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/cli-command-execution",
+          "iss": "https://gateway.example.com",
+          "iat": 1735689600,
+          "jti": "ce-005-raw-capture-secret-suppressed-jti-fixed-value",
+          "extensions": {
+            "org.peacprotocol/cli-execution": {
+              "type": "org.peacprotocol/cli-command-execution",
+              "surface": {
+                "kind": "cli"
+              },
+              "command": {
+                "program": "node",
+                "argv_mode": "raw",
+                "argv": ["node", "-e", "process.stdout.write(JWT)"]
+              },
+              "cwd": {
+                "cwd_mode": "hashed",
+                "cwd_sha256": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+              },
+              "binary": {
+                "path_mode": "hashed",
+                "path_sha256": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+              },
+              "stdin_ref": {
+                "mode": "none"
+              },
+              "stdout_ref": {
+                "length": 96,
+                "sha256": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+                "truncated": false,
+                "sample_suppressed_reason": "secret_pattern_detected",
+                "matched_pattern_category": "jwt"
+              },
+              "stderr_ref": {
+                "length": 0,
+                "sha256": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+                "truncated": false
+              },
+              "env": {
+                "mode": "hashed",
+                "entries": {}
+              },
+              "started_at": "2026-01-01T00:00:00Z",
+              "finished_at": "2026-01-01T00:00:01Z",
+              "duration_ms": 1000,
+              "exit_code": 0,
+              "timed_out": false,
+              "timeout_ms": 600000,
+              "kill_grace_ms": 5000,
+              "exit_code_mode": "child",
+              "shell_mode": false,
+              "execution_mode": "deterministic_script",
+              "capture_policy": {
+                "stdout_max_bytes": 16384,
+                "stderr_max_bytes": 16384,
+                "argv_max_bytes": 4096,
+                "env_allowlist": [],
+                "stdin_mode": "none",
+                "cwd_mode": "hashed",
+                "binary_path_mode": "hashed",
+                "secret_scan": true,
+                "raw_capture_unsafely_allowed": true,
+                "raw_env_unsafely_allowed": false,
+                "secret_scan_disabled_unsafely": false,
+                "timeout_ms": 600000,
+                "kill_grace_ms": 5000,
+                "exit_code_mode": "child"
+              },
+              "platform": {
+                "os": "linux",
+                "arch": "x64",
+                "peac_cli_version": "0.14.0"
+              }
+            }
+          }
+        }
+      },
+      "expected": {
+        "accepted": true
+      }
+    },
+    {
+      "id": "ce-006-env-allowlist-hashed",
+      "description": "CLI-EXEC-006: env.mode='hashed' with one allowlisted key carrying value_sha256 only (no value); env_allowlist contains the same key; subset constraint satisfied; env mode discrimination satisfied.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/cli-command-execution",
+          "iss": "https://gateway.example.com",
+          "iat": 1735689600,
+          "jti": "ce-006-env-allowlist-hashed-jti-fixed-value",
+          "extensions": {
+            "org.peacprotocol/cli-execution": {
+              "type": "org.peacprotocol/cli-command-execution",
+              "surface": {
+                "kind": "cli"
+              },
+              "command": {
+                "program": "node",
+                "argv_mode": "hashed",
+                "argv_sha256": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+              },
+              "cwd": {
+                "cwd_mode": "hashed",
+                "cwd_sha256": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+              },
+              "binary": {
+                "path_mode": "hashed",
+                "path_sha256": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+              },
+              "stdin_ref": {
+                "mode": "none"
+              },
+              "stdout_ref": {
+                "length": 0,
+                "sha256": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+                "truncated": false
+              },
+              "stderr_ref": {
+                "length": 0,
+                "sha256": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+                "truncated": false
+              },
+              "env": {
+                "mode": "hashed",
+                "entries": {
+                  "BUILD_ID": {
+                    "value_sha256": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+                  }
+                }
+              },
+              "started_at": "2026-01-01T00:00:00Z",
+              "finished_at": "2026-01-01T00:00:01Z",
+              "duration_ms": 1000,
+              "exit_code": 0,
+              "timed_out": false,
+              "timeout_ms": 600000,
+              "kill_grace_ms": 5000,
+              "exit_code_mode": "child",
+              "shell_mode": false,
+              "execution_mode": "deterministic_script",
+              "capture_policy": {
+                "stdout_max_bytes": 16384,
+                "stderr_max_bytes": 16384,
+                "argv_max_bytes": 4096,
+                "env_allowlist": ["BUILD_ID"],
+                "stdin_mode": "none",
+                "cwd_mode": "hashed",
+                "binary_path_mode": "hashed",
+                "secret_scan": true,
+                "raw_capture_unsafely_allowed": false,
+                "raw_env_unsafely_allowed": false,
+                "secret_scan_disabled_unsafely": false,
+                "timeout_ms": 600000,
+                "kill_grace_ms": 5000,
+                "exit_code_mode": "child"
+              },
+              "platform": {
+                "os": "linux",
+                "arch": "x64",
+                "peac_cli_version": "0.14.0"
+              }
+            }
+          }
+        }
+      },
+      "expected": {
+        "accepted": true
+      }
+    }
+  ]
+}

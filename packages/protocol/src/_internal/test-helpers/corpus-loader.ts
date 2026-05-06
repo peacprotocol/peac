@@ -15,24 +15,26 @@ import { dirname, resolve } from 'node:path';
 import Ajv2020 from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
 
-/** Canonical family identifiers (v0.13.1 floor + a2a-handoff added in v0.14.1). */
+/** Canonical family identifiers. */
 export const PARITY_FAMILIES = [
   'default-flows',
   'jose-hardening',
   'runtime-governance',
   'commerce-bridges',
   'a2a-handoff',
+  'cli-execution',
 ] as const;
 
 export type ParityFamily = (typeof PARITY_FAMILIES)[number];
 
-/** Floor vector counts per family (per plan amendment §0S.5; a2a-handoff added in v0.14.1). */
+/** Floor vector counts per family. */
 export const PARITY_FLOOR_COUNTS: Readonly<Record<ParityFamily, number>> = {
   'default-flows': 12,
   'jose-hardening': 8,
   'runtime-governance': 7,
   'commerce-bridges': 4,
   'a2a-handoff': 15,
+  'cli-execution': 6,
 };
 
 export interface ParityVectorInput {

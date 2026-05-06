@@ -393,6 +393,13 @@
         "description": "Observational record of an A2A v1.0 human rejection; PEAC records what an external approver indicated.",
         "extension_group": "org.peacprotocol/a2a-handoff",
         "status": "informational"
+      },
+      {
+        "id": "org.peacprotocol/cli-command-execution",
+        "pillar": "provenance",
+        "description": "Observational record of a local CLI command execution; PEAC records what the wrapper observed (argv, stdin/stdout/stderr digests, exit code, signal, timing, capture policy). Field-level variants (exit_code, signal, timed_out, shell_mode, capture_policy, termination_signal, exit_code_mode) live as fields on this single record type, not as separate record types. Introduced in v0.14.1.",
+        "extension_group": "org.peacprotocol/cli-execution",
+        "status": "informational"
       }
     ]
   },
@@ -462,6 +469,11 @@
       {
         "id": "org.peacprotocol/a2a-handoff",
         "description": "A2A handoff observation extension: records observational events emitted alongside A2A v1.0 task lifecycle transitions (Agent Card observation + 9 task-lifecycle event types). Strictly observational; helpers do not verify Agent Card signatures or fetch upstream events. Introduced in v0.14.1.",
+        "status": "informational"
+      },
+      {
+        "id": "org.peacprotocol/cli-execution",
+        "description": "CLI execution observation extension: records observational evidence of a local command execution wrapped by the peac observe command / record command subcommands. Hard security defaults (argv hashed; stdout/stderr length+sha256+truncated only; env deny-by-default; cwd hashed; binary path hashed; secret-scan on; shell-binary detected without --shell-mode hard-fails). The wrapper is an observer, not a sandbox / permission system / process supervisor / job scheduler / shell orchestrator. Introduced in v0.14.1.",
         "status": "informational"
       }
     ]
