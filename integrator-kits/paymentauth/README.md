@@ -96,5 +96,9 @@ PEAC `PEAC-Receipt` and paymentauth `Payment-Receipt` can appear on the same HTT
 ## Reference
 
 - `@peac/mappings-paymentauth`: envelope parsing, evidence mapping, carrier adapter
-- paymentauth spec: `draft-ryan-httpauth-payment` (active individual draft)
+- paymentauth spec: `draft-ryan-httpauth-payment-01` (active individual draft)
 - MPP ecosystem: https://mpp.dev/
+- MPP TypeScript SDK: https://github.com/wevm/mppx
+- MPP specs: https://github.com/tempoxyz/mpp-specs
+
+For TypeScript MPP clients, see the `mppx` SDK from the MPP ecosystem. PEAC does not depend on `mppx`; PEAC records paymentauth / MPP observations as portable records.

@@ -190,7 +190,7 @@ within v0.11.0.
 
 ### Current state
 
-- **SDK:** `@modelcontextprotocol/sdk@~1.27.0` (tilde pin)
+- **SDK:** `@modelcontextprotocol/sdk@~1.28.0` (tilde pin)
 - **Protocol:** `2025-11-25` (current stable)
 - **Zod peer dep:** SDK v1.x requires Zod 3.25+ (backward compatible with both Zod 3 and Zod 4)
 
