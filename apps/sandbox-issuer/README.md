@@ -2,8 +2,9 @@
 
 Test record issuer for local development and integration testing.
 
-Issues signed interaction records with Ed25519 stable keys. Supports `interaction-record+jwt` (Wire 0.2) and `peac-receipt/0.1` (Wire 0.1 legacy).
-Not for production use.
+Issues signed current Wire records (`interaction-record+jwt`) with Ed25519 stable keys via the validated `@peac/protocol.issue()` path. Wire 0.1 protocol compatibility remains available elsewhere in the protocol; the sandbox issuer no longer advertises or emits `peac-receipt/0.1`. Not for production use.
+
+Records use the example custom type URI `org.example/sandbox-test`. Registry-aware verification (e.g., `verifyLocal()` from `@peac/protocol`) will surface a `type_unregistered` warning, which is informational.
 
 ## Quick start
 
@@ -28,19 +29,28 @@ pnpm start
 ```bash
 curl -X POST http://127.0.0.1:3100/api/v1/issue \
   -H "Content-Type: application/json" \
-  -d '{"aud": "https://example.com"}'
+  -d '{"sub": "https://example.com"}'
 ```
 
 Request body (strict whitelist: no arbitrary claims):
 
-| Field        | Type         | Required | Description                                    |
-| ------------ | ------------ | -------- | ---------------------------------------------- |
-| `aud`        | string (URL) | yes      | Audience: who will verify                      |
-| `sub`        | string       | no       | Subject identifier                             |
-| `purpose`    | string       | no       | Declared purpose                               |
-| `expires_in` | number       | no       | Seconds until expiry (default 3600, max 86400) |
+| Field     | Type         | Required | Description                       |
+| --------- | ------------ | -------- | --------------------------------- |
+| `sub`     | string (URL) | yes      | Subject: what the record is about |
+| `purpose` | string       | no       | Declared purpose                  |
 
-The server sets `iss`, `iat`, `exp`, and `rid` automatically.
+The server sets `iss`, `iat`, `jti`, `kind`, and `type` automatically. `expires_in` is not supported for current Wire records; sending it returns a 422 with the detail `expires_in is not supported for current Wire records`. The legacy `aud` request field is also rejected by the strict schema.
+
+The response field `receipt_id` carries the Wire 0.2 `jti` of the issued record:
+
+```json
+{
+  "receipt": "<compact JWS>",
+  "receipt_id": "<jti>",
+  "issuer": "<iss>",
+  "key_id": "<kid>"
+}
+```
 
 ## Key stability
 

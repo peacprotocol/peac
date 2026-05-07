@@ -18,6 +18,7 @@
     "@hono/node-server": "^1.19.13",
     "@peac/crypto": "workspace:*",
     "@peac/middleware-core": "workspace:*",
+    "@peac/protocol": "workspace:*",
     "@peac/schema": "workspace:*",
     "hono": "^4.12.15",
     "zod": "^4.3.6"
