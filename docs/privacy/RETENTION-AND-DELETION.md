@@ -161,7 +161,7 @@ favor minimization. Operators override per-deployment.
   long-lived report index server-side; each request is computed and
   returned. Deployments that wrap the reference verifier in a report
   store MUST implement deletion against that store themselves, keyed
-  by `receipt_ref`. PEAC owns the contract (purge by `receipt_ref`
+  by `receipt_ref`. PEAC specifies the contract (purge by `receipt_ref`
   list, derived layer only, signed evidence untouched). Storage and
   access control are operator-owned. See §2 for the
   evidence-vs-derived deletion model.

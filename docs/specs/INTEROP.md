@@ -253,7 +253,7 @@ peac export robots peac-policy.yaml > robots-ai-snippet.txt
 
 PEAC works alongside existing systems:
 
-- AIPREF defines preferences; PEAC enforces them
+- AIPREF defines preferences; PEAC records preference-relevant evidence
 - Payment rails handle transactions; PEAC captures evidence
 - Agent protocols define communication; PEAC proves decisions
 

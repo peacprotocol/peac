@@ -423,7 +423,7 @@ For example, v0.9.29 would have tags:
 
 ## Requirements
 
-- Go 1.21 or later
+- Go 1.26 or later
 - `golang.org/x/crypto` for Ed25519
 
 ## License

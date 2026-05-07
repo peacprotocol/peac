@@ -14,7 +14,7 @@
 
 | Version  | Status      | Notes                                                                |
 | -------- | ----------- | -------------------------------------------------------------------- |
-| Go 1.22+ | **Partial** | `sdks/go/`: Wire 0.1 issue and verify only. Wire 0.2 parity planned. |
+| Go 1.26+ | **Partial** | `sdks/go/`: Wire 0.1 issue and verify only. Wire 0.2 parity planned. |
 
 ## Python
 
