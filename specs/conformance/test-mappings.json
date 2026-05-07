@@ -367,6 +367,66 @@
       "test_file": "packages/schema/__tests__/extensions/cli-execution.test.ts",
       "test_description": "shell_mode <-> shell_ref biconditional + path_mode != none + hashed-mode digest equivalence",
       "notes": "Top-level superRefine enforces all 4 invariants and emits cli.schema_rejection / cli.binary_path_mode_invalid."
+    },
+    {
+      "requirement_id": "LIFE-OBS-001",
+      "test_file": "packages/schema/__tests__/extensions/lifecycle-observation.test.ts",
+      "test_description": "rejects each of the 20 forbidden top-level keys with lifecycle.inline_value_blocked",
+      "notes": "FORBIDDEN_TOP_LEVEL_KEYS asserted to have length 20; per-key it() iterates each value and asserts emitted error code lifecycle.inline_value_blocked with the offending key path."
+    },
+    {
+      "requirement_id": "LIFE-OBS-002",
+      "test_file": "packages/schema/__tests__/extensions/lifecycle-observation.test.ts",
+      "test_description": "rejects opaque-ref grammar violations (whitespace, JSON-leading, no-prefix, numeric strings, multilingual names)",
+      "notes": "createOpaqueRefSchema with errorCode 'lifecycle.opaque_ref_grammar_violation' applied to every *_ref field; positive cases round-trip; negatives include numeric '0.92' result_ref, English/Devanagari/Han/Cyrillic name strings, JSON-opening payload, whitespace, and missing-prefix bare token."
+    },
+    {
+      "requirement_id": "LIFE-OBS-003",
+      "test_file": "packages/schema/__tests__/extensions/lifecycle-observation.test.ts",
+      "test_description": "approver_ref containing '@' rejects with lifecycle.approver_ref_pii_blocked (priority over general grammar code)",
+      "notes": "ApproverRef Zod chain runs '@'-detection before LifecycleRef pipe; email-shape values surface the PII-blocked subclass; non-string approver_ref surfaces lifecycle.ref_must_be_string; whitespace/no-prefix surface general grammar code."
+    },
+    {
+      "requirement_id": "LIFE-OBS-004",
+      "test_file": "packages/schema/__tests__/extensions/lifecycle-observation.test.ts",
+      "test_description": "non-string *_ref values reject with lifecycle.ref_must_be_string and never leak generic Zod string-error text",
+      "notes": "Number, object, array, boolean, null inputs emit only stable lifecycle.* codes; emitted message wraps the stable prefix; no Zod default 'Expected string' string surfaces as a public diagnostic."
+    },
+    {
+      "requirement_id": "LIFE-OBS-005",
+      "test_file": "packages/schema/__tests__/extensions/lifecycle-observation.test.ts",
+      "test_description": "per-event-kind required fields enforced via discriminated union (missing observed_at, missing approval_ref/approver_ref on approval-*, missing result_ref on evaluation_completed/experiment_result, etc.)",
+      "notes": "Pre-flight enumerates required fields per event_kind discriminator and surfaces lifecycle.missing_required_field with the offending field path; missing observed_at uses the same code as other missing required fields, distinct from lifecycle.invalid_observed_at."
+    },
+    {
+      "requirement_id": "LIFE-OBS-006",
+      "test_file": "packages/schema/__tests__/extensions/lifecycle-observation.test.ts",
+      "test_description": "unknown event_kind rejects with lifecycle.event_kind_unknown",
+      "notes": "Pre-flight resolves event_kind against EVENT_KINDS literal-set before Zod runs; foreign values surface lifecycle.event_kind_unknown rather than discriminated-union dispatch error."
+    },
+    {
+      "requirement_id": "LIFE-OBS-007",
+      "test_file": "packages/schema/__tests__/extensions/lifecycle-observation.test.ts",
+      "test_description": "malformed observed_at rejects with lifecycle.invalid_observed_at; missing observed_at uses lifecycle.missing_required_field (split confirmed)",
+      "notes": "RFC 3339 z.string().datetime({ offset: true }) emits invalid_format mapped to lifecycle.invalid_observed_at when observed_at is present-but-malformed; absence flows through pre-flight as missing_required_field."
+    },
+    {
+      "requirement_id": "LIFE-OBS-008",
+      "test_file": "packages/cli/tests/emit-lifecycle.test.ts",
+      "test_description": "lifecycle records round-trip through @peac/protocol.issue() under each event_kind and verify under the caller-provided issuer key",
+      "notes": "Positive case per event_kind asserts a 3-segment Wire 0.2 JWS; the JWS-payload-shape test decodes and asserts header.typ, payload.{peac_version,kind,type,iss}, the lifecycle extension key/value shape, and verify(jws, publicKey).valid === true."
+    },
+    {
+      "requirement_id": "LIFE-OBS-009",
+      "test_file": "packages/protocol/__tests__/type-extension-enforcement.test.ts",
+      "test_description": "every lifecycle type URI maps to org.peacprotocol/lifecycle-observation in TYPE_TO_EXTENSION_MAP",
+      "notes": "Type-extension matrix iterates TYPE_TO_EXTENSION_MAP.entries() and asserts strict-mode match/missing/mismatch behavior; the lifecycle family supplies 9 entries all mapped to the lifecycle-observation extension key, and TYPE_TO_EXTENSION_MAP.size === 30 covers full registry composition."
+    },
+    {
+      "requirement_id": "LIFE-OBS-010",
+      "test_file": "docs/specs/LIFECYCLE-OBSERVATION-PROFILE.md",
+      "test_description": "spec orchestrator-boundary text is normative and vendor-neutral",
+      "notes": "Section 8 of the profile spec carries the orchestrator boundary as normative prose with vendor-neutral nouns (orchestrators, workflow engines, evaluation systems, approval systems, agent runtimes); checked manually as part of spec review and pinned by repository search-and-replace discipline (no specific external project name appears in the normative §8 text)."
     }
   ]
 }

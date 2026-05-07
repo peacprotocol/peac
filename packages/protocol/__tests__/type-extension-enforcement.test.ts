@@ -14,7 +14,11 @@
 import { describe, it, expect } from 'vitest';
 import { generateKeypair } from '@peac/crypto';
 import { TYPE_TO_EXTENSION_MAP } from '@peac/kernel';
-import { WARNING_EXTENSION_GROUP_MISSING, WARNING_EXTENSION_GROUP_MISMATCH } from '@peac/schema';
+import {
+  REGISTERED_EXTENSION_GROUP_KEYS,
+  WARNING_EXTENSION_GROUP_MISSING,
+  WARNING_EXTENSION_GROUP_MISMATCH,
+} from '@peac/schema';
 import { issueWire02, verifyLocal } from '../src/index';
 import {
   checkTypeExtensionMapping,
@@ -25,27 +29,20 @@ import {
 // Pure helper unit tests (no crypto, no I/O)
 // ---------------------------------------------------------------------------
 
-// Intentionally hardcoded registry drift sentinel. When
-// specs/kernel/registries.json adds an extension group, update this
-// set and the count assertion together; the codegen-drift gate +
-// API-contract snapshot will catch a one-sided change.
-const REGISTERED_KEYS = new Set([
-  'org.peacprotocol/commerce',
-  'org.peacprotocol/access',
-  'org.peacprotocol/challenge',
-  'org.peacprotocol/identity',
-  'org.peacprotocol/correlation',
-  'org.peacprotocol/consent',
-  'org.peacprotocol/privacy',
-  'org.peacprotocol/safety',
-  'org.peacprotocol/compliance',
-  'org.peacprotocol/provenance',
-  'org.peacprotocol/attribution',
-  'org.peacprotocol/purpose',
-  // observation surfaces
-  'org.peacprotocol/a2a-handoff',
-  'org.peacprotocol/cli-execution',
-]);
+// REGISTERED_EXTENSION_GROUP_KEYS is the canonical runtime constant exported
+// from @peac/schema and verified to match specs/kernel/registries.json by
+// packages/schema/__tests__/wire-02-registry-parity.test.ts. Reusing it here
+// keeps this helper input aligned with production code (verify-local.ts and
+// _internal/record-core/validators/type-extension-mapping.ts both consume the
+// same constant) and prevents the test from drifting against the registry.
+const REGISTERED_KEYS = REGISTERED_EXTENSION_GROUP_KEYS;
+
+// Explicit drift sentinel: when specs/kernel/registries.json adds an extension
+// group, this expected count must move with it intentionally so reviewers see
+// the registry widening as a discrete decision.
+//   Wire 0.2 core groups: 12 (10 pillars + correlation + challenge).
+//   Profile groups:       3  (a2a-handoff, cli-execution, lifecycle-observation).
+const EXPECTED_REGISTERED_GROUP_COUNT = 15;
 
 describe('checkTypeExtensionMapping(): pure helper', () => {
   it('returns skip for unmapped custom type', () => {
@@ -241,6 +238,13 @@ const MINIMAL_EXTENSIONS: Record<string, Record<string, unknown>> = {
     },
     platform: { os: 'linux', arch: 'x64', peac_cli_version: '0.14.0' },
   },
+  'org.peacprotocol/lifecycle-observation': {
+    event_kind: 'lifecycle-workflow-transition',
+    subject_ref: 'urn:peac:task:enforcement-test',
+    observed_at: '2026-05-12T10:00:00Z',
+    from_state: 'pending',
+    to_state: 'running',
+  },
 };
 
 /**
@@ -272,6 +276,16 @@ const TYPE_PILLARS: Record<string, string> = {
   'org.peacprotocol/a2a-human-rejected': 'provenance',
   // CLI execution observation (single type URI; pillar=provenance)
   'org.peacprotocol/cli-command-execution': 'provenance',
+  // v0.14.1 lifecycle-observation family (9 type URIs, all pillar=provenance)
+  'org.peacprotocol/lifecycle-approval-requested': 'provenance',
+  'org.peacprotocol/lifecycle-approval-granted': 'provenance',
+  'org.peacprotocol/lifecycle-approval-denied': 'provenance',
+  'org.peacprotocol/lifecycle-evaluation-started': 'provenance',
+  'org.peacprotocol/lifecycle-evaluation-completed': 'provenance',
+  'org.peacprotocol/lifecycle-experiment-assigned': 'provenance',
+  'org.peacprotocol/lifecycle-experiment-result': 'provenance',
+  'org.peacprotocol/lifecycle-workflow-transition': 'provenance',
+  'org.peacprotocol/lifecycle-mode-observed': 'provenance',
 };
 
 /** Get a different registered extension group (for mismatch testing) */
@@ -431,8 +445,8 @@ describe('verifyLocal(): type-to-extension edge cases', () => {
 // ---------------------------------------------------------------------------
 
 describe('Registry completion: type-to-extension surface', () => {
-  it('TYPE_TO_EXTENSION_MAP covers all 21 registered receipt types (10 pillars + 10 a2a-handoff + 1 cli-command-execution)', () => {
-    expect(TYPE_TO_EXTENSION_MAP.size).toBe(21);
+  it('TYPE_TO_EXTENSION_MAP covers all 30 registered receipt types (10 pillars + 10 a2a-handoff + 1 cli-command-execution + 9 lifecycle event kinds)', () => {
+    expect(TYPE_TO_EXTENSION_MAP.size).toBe(30);
   });
 
   it('every mapped extension group is in REGISTERED_EXTENSION_GROUP_KEYS', () => {
@@ -441,8 +455,8 @@ describe('Registry completion: type-to-extension surface', () => {
     }
   });
 
-  it('REGISTERED_EXTENSION_GROUP_KEYS has exactly 14 entries (12 pillars/cross-cutting + a2a-handoff + cli-execution)', () => {
-    expect(REGISTERED_KEYS.size).toBe(14);
+  it('REGISTERED_EXTENSION_GROUP_KEYS has exactly 15 entries (12 pillars/cross-cutting + a2a-handoff + cli-execution + lifecycle-observation)', () => {
+    expect(REGISTERED_KEYS.size).toBe(EXPECTED_REGISTERED_GROUP_COUNT);
   });
 });
 

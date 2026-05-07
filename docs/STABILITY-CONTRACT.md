@@ -95,6 +95,7 @@ Package: [`@peac/cli`](../packages/cli).
 | `peac policy`                         | `stable`       |
 | `peac observe command`                | `stable`       |
 | `peac record command`                 | `stable`       |
+| `peac emit lifecycle`                 | `stable`       |
 
 `peac observe command` and `peac record command` are POSIX-first
 wrappers that emit observational records of a local command execution
@@ -108,6 +109,18 @@ signing key whose public key is not published through normal
 issuer-key discovery; use only for local development and tests.
 Windows behavior is not guaranteed by the current CLI carrier
 profile.
+
+`peac emit lifecycle` issues a Wire 0.2 compact JWS lifecycle
+observation record using the caller-provided issuer key. The caller
+observed the lifecycle event (an external approval, evaluation,
+experiment, workflow transition, or mode tag); the CLI is the
+issuance path; the caller's issuer is the signer-of-record. PEAC
+provides the record format, validation, and signing path. PEAC does
+not approve, evaluate, score, transition, orchestrate, schedule, or
+vouch for the truth of the event. The full contract is specified in
+[`docs/specs/LIFECYCLE-OBSERVATION-PROFILE.md`](specs/LIFECYCLE-OBSERVATION-PROFILE.md).
+`--observed-at` is REQUIRED; the wrapper does not silently default
+the external event time to wrapper-invocation time.
 
 ## Reference verifier (`apps/api`)
 
@@ -196,8 +209,6 @@ current behavior.
 
 | Surface                                               | Status      | Target                                                             |
 | ----------------------------------------------------- | ----------- | ------------------------------------------------------------------ |
-| CLI execution-evidence carrier profile                | Not shipped | v0.14.1                                                            |
-| Observational lifecycle-record carrier profile        | Not shipped | v0.14.1                                                            |
 | COSE/CBOR codec flag (`PEAC_EXPERIMENTAL_CODEC=cose`) | Not shipped | `experimental` once shipped; gated by an explicit roadmap decision |
 
 Security and semantic constraints pre-declared for these surfaces live in

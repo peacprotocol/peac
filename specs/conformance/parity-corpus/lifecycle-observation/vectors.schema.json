@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://peacprotocol.org/specs/conformance/parity-corpus/lifecycle-observation/vectors.schema.json",
+  "title": "Lifecycle observation parity corpus vectors",
+  "description": "Schema for lifecycle observation parity vectors. Eleven envelope-accepted deterministic JSON observation payloads covering all nine event_kind values (one per kind) plus two additional positive vectors that exercise the optional opaque-ref + digest fields. Per the parity-corpus convention established by runtime-governance vector rg-007 and reused by a2a-handoff and cli-execution, all vectors here assert envelope-level canonical agreement and set expected.accepted=true; semantic-rejection cases for forbidden top-level keys, opaque-ref grammar violations, approver_ref PII priority, missing/malformed observed_at, unknown event_kind, invalid_state, and invalid_observed_mode live in the schema validator tests at packages/schema/__tests__/extensions/lifecycle-observation.test.ts. The corpus pins a deterministic floor of canonical observation shapes for cross-language conformance.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["family", "description", "version", "vectors"],
+  "properties": {
+    "family": { "const": "lifecycle-observation" },
+    "description": { "type": "string", "minLength": 1 },
+    "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "generator": { "type": "string" },
+    "vectors": {
+      "type": "array",
+      "minItems": 11,
+      "items": { "$ref": "#/$defs/vector" }
+    }
+  },
+  "$defs": {
+    "vector": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "description", "input", "expected"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9-]+$", "minLength": 1, "maxLength": 96 },
+        "description": { "type": "string", "minLength": 1, "maxLength": 512 },
+        "input": { "$ref": "#/$defs/input" },
+        "expected": { "$ref": "#/$defs/expected" }
+      }
+    },
+    "input": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["payload"],
+      "properties": {
+        "payload": { "type": "object" },
+        "header": { "type": "object" }
+      }
+    },
+    "expected": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["accepted"],
+      "properties": {
+        "accepted": { "type": "boolean" },
+        "errors": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/diagnostic" }
+        },
+        "warnings": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/diagnostic" }
+        }
+      }
+    },
+    "diagnostic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code"],
+      "properties": {
+        "code": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "path": { "type": "string", "maxLength": 256 }
+      }
+    }
+  }
+}

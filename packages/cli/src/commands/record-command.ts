@@ -293,7 +293,7 @@ export function recordCommandSubcommand(): Command {
   const cmd = new Command('command');
   cmd
     .description(
-      'Wrap a command and emit a Wire 0.2 signed CLI execution record. ' +
+      'Wrap a command and emit a signed CLI execution record. ' +
         'record command is an OBSERVER, not a sandbox, permission system, ' +
         'shell orchestrator, or process supervisor. The command after `--` ' +
         'is spawned exactly as supplied (shell: false). Use --unsafe-ephemeral-key ' +
@@ -455,7 +455,7 @@ export function recordCommandSubcommand(): Command {
  */
 export function recordCommand(): Command {
   const record = new Command('record').description(
-    'Sign and emit Wire 0.2 records over locally observed activity.'
+    'Sign and emit signed records over locally observed activity.'
   );
   record.addCommand(recordCommandSubcommand());
   return record;

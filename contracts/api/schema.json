@@ -1,7 +1,7 @@
 {
   "package": "@peac/schema",
   "version": "0.14.0",
-  "extracted_at": "2026-05-06",
+  "extracted_at": "2026-05-07",
   "node_version": "v24.13.0",
   "value_exports": [
     {
@@ -529,6 +529,10 @@
       "typeof": "static"
     },
     {
+      "name": "FORBIDDEN_TOP_LEVEL_KEYS",
+      "typeof": "static"
+    },
+    {
       "name": "HashAlgorithmSchema",
       "typeof": "static"
     },
@@ -618,6 +622,22 @@
     },
     {
       "name": "KindSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "LIFECYCLE_OBSERVATION_ERROR_CODES",
+      "typeof": "static"
+    },
+    {
+      "name": "LIFECYCLE_OBSERVATION_EXTENSION_KEY",
+      "typeof": "static"
+    },
+    {
+      "name": "LIFECYCLE_OBSERVATION_TYPE_URIS",
+      "typeof": "static"
+    },
+    {
+      "name": "LifecycleObservationSchema",
       "typeof": "static"
     },
     {
@@ -1569,6 +1589,10 @@
       "typeof": "static"
     },
     {
+      "name": "validateLifecycleObservation",
+      "typeof": "static"
+    },
+    {
       "name": "validateMVIS",
       "typeof": "static"
     },
@@ -1730,6 +1754,11 @@
     "KernelConstraintKey",
     "LegacyMappingResult",
     "LegacyPurpose",
+    "LifecycleEventKind",
+    "LifecycleObservation",
+    "LifecycleObservationTypeUri",
+    "LifecycleValidationError",
+    "LifecycleValidationResult",
     "MVISFields",
     "MVISReplayProtection",
     "MVISTimeBounds",
@@ -1859,6 +1888,7 @@
     "CONTROL_ACTION_EXTENSION_KEY",
     "CREDENTIAL_EVENT_EXTENSION_KEY",
     "INTERACTION_EXTENSION_KEY",
+    "LIFECYCLE_OBSERVATION_EXTENSION_KEY",
     "OBLIGATIONS_EXTENSION_KEY",
     "TOOL_REGISTRY_EXTENSION_KEY",
     "TREATY_EXTENSION_KEY",
@@ -1879,6 +1909,6 @@
     "PurposeExtensionSchema",
     "SafetyExtensionSchema"
   ],
-  "total_value_exports": 404,
-  "total_type_exports": 200
+  "total_value_exports": 410,
+  "total_type_exports": 205
 }

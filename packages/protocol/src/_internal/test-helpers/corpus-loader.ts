@@ -23,6 +23,7 @@ export const PARITY_FAMILIES = [
   'commerce-bridges',
   'a2a-handoff',
   'cli-execution',
+  'lifecycle-observation',
 ] as const;
 
 export type ParityFamily = (typeof PARITY_FAMILIES)[number];
@@ -35,6 +36,7 @@ export const PARITY_FLOOR_COUNTS: Readonly<Record<ParityFamily, number>> = {
   'commerce-bridges': 4,
   'a2a-handoff': 15,
   'cli-execution': 6,
+  'lifecycle-observation': 11,
 };
 
 export interface ParityVectorInput {

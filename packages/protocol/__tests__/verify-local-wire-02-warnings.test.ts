@@ -113,6 +113,16 @@ const MINIMAL_EXT: Record<string, Record<string, unknown>> = {
     },
     platform: { os: 'linux', arch: 'x64', peac_cli_version: '0.14.0' },
   },
+  // Lifecycle observation (uses workflow-transition vector; sufficient for
+  // the does-not-emit-type_unregistered iteration; type-specific shape is
+  // exercised by the lifecycle-observation parity corpus and schema tests).
+  'org.peacprotocol/lifecycle-observation': {
+    event_kind: 'lifecycle-workflow-transition',
+    subject_ref: 'urn:peac:task:wire-warnings-test',
+    observed_at: '2026-05-12T10:00:00Z',
+    from_state: 'pending',
+    to_state: 'running',
+  },
 };
 
 function extensionsForType(type: string): Record<string, Record<string, unknown>> | undefined {
