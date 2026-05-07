@@ -13,9 +13,8 @@
  * For production, see: https://x402.peacprotocol.org
  */
 
-import { issueWire01 } from '@peac/protocol';
-import { generateKeypair, verify } from '@peac/crypto';
-import { PEACReceiptClaims } from '@peac/schema';
+import { issue, verifyLocal } from '@peac/protocol';
+import { generateKeypair } from '@peac/crypto';
 
 // x402 v2 network identifiers (CAIP-2 format)
 const X402_NETWORKS = {
@@ -132,26 +131,25 @@ async function simulateX402Payment(
   paymentRequest: X402PaymentRequest,
   keys: { privateKey: Uint8Array; publicKey: Uint8Array }
 ): Promise<string> {
-  // Simulate payment confirmation
-  const paymentTxHash = `0x${Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join('')}`;
-
-  // Issue PEAC receipt with x402 evidence
-  const result = await issueWire01({
+  // PEAC records normalized payment fields. The x402 chain context (network, tx hash,
+  // recipient address, x402 dialect) lives in the upstream x402 system; this demo
+  // simulates the payment locally and only carries normalized commerce fields in the
+  // signed record.
+  const result = await issue({
     iss: CONFIG.issuerUrl,
-    aud: paymentRequest.resource,
-    amt: parseInt(paymentRequest.amount),
-    cur: 'USD',
-    rail: 'x402',
-    reference: `x402_${Date.now()}`,
-    asset: paymentRequest.asset,
-    env: 'live',
-    evidence: {
-      // x402-specific evidence
-      network: paymentRequest.network,
-      tx_hash: paymentTxHash,
-      recipient: paymentRequest.recipient,
-      // v2 dialect marker
-      x402_version: 'v2',
+    kind: 'evidence',
+    type: 'org.peacprotocol/payment',
+    pillars: ['commerce'],
+    sub: paymentRequest.resource,
+    extensions: {
+      'org.peacprotocol/commerce': {
+        payment_rail: 'x402',
+        amount_minor: paymentRequest.amount,
+        currency: 'USD',
+        reference: `x402_${Date.now()}`,
+        asset: paymentRequest.asset,
+        env: 'live',
+      },
     },
     privateKey: keys.privateKey,
     kid: 'x402-demo-2025',
@@ -207,17 +205,33 @@ async function agent(keys: {
     }
 
     // Step 4: Demonstrate offline verification
-    console.log('\n4. Verify receipt offline...');
-    const { payload } = await verify<PEACReceiptClaims>(receipt, keys.publicKey);
-    // Evidence is opaque (unknown) in v0.9 - cast for display
-    const evidence = payload.payment?.evidence as Record<string, unknown> | undefined;
-    console.log('   -> Receipt claims:');
-    console.log(`      iss: ${payload.iss}`);
-    console.log(`      aud: ${payload.aud}`);
-    console.log(`      amt: ${payload.amt} ${payload.cur}`);
-    console.log(`      rail: ${payload.payment?.rail}`);
-    console.log(`      network: ${evidence?.network}`);
-    console.log(`      tx_hash: ${evidence?.tx_hash}`);
+    console.log('\n4. Verify record offline...');
+    const result = await verifyLocal(receipt, keys.publicKey, { issuer: CONFIG.issuerUrl });
+    if (result.valid) {
+      const commerce = (
+        result.claims.extensions as
+          | {
+              'org.peacprotocol/commerce'?: {
+                payment_rail?: string;
+                amount_minor?: string;
+                currency?: string;
+                asset?: string;
+              };
+            }
+          | undefined
+      )?.['org.peacprotocol/commerce'];
+      console.log('   -> Verified claims:');
+      console.log(`      iss: ${result.claims.iss}`);
+      console.log(`      sub: ${result.claims.sub ?? '(none)'}`);
+      console.log(
+        `      amount_minor: ${commerce?.amount_minor ?? '?'} ${commerce?.currency ?? '?'}`
+      );
+      console.log(`      payment_rail: ${commerce?.payment_rail ?? '?'}`);
+      console.log(`      asset: ${commerce?.asset ?? '?'}`);
+      console.log('   -> x402 chain context (network, tx_hash, recipient) lives upstream.');
+    } else {
+      console.error(`   -> Verification failed: ${result.code}`);
+    }
   }
 
   console.log('\n=== Demo Complete ===\n');
@@ -229,7 +243,7 @@ async function main() {
 
   const verifyReceipt = async (jws: string): Promise<boolean> => {
     try {
-      const result = await verify(jws, publicKey);
+      const result = await verifyLocal(jws, publicKey, { issuer: CONFIG.issuerUrl });
       return result.valid;
     } catch {
       return false;

@@ -1,19 +1,21 @@
 /**
  * Pay-Per-Inference Example
  *
- * Demonstrates the core PEAC receipt flow:
+ * Demonstrates the core PEAC record flow:
  * 1. Agent makes request to resource
  * 2. Resource returns 402 Payment Required
- * 3. Agent obtains receipt (simulated payment)
- * 4. Agent retries with receipt
- * 5. Resource verifies receipt and grants access
+ * 3. Agent obtains a signed record (simulated payment)
+ * 4. Agent retries with the record
+ * 5. Resource verifies the record and grants access
  *
  * This example uses local stubs - no external services required.
+ *
+ * Note: PEAC records normalized payment fields. Provider/chain context lives
+ * upstream in the payment system.
  */
 
-import { issueWire01 } from '@peac/protocol';
-import { generateKeypair, verify, canonicalize } from '@peac/crypto';
-import { toCoreClaims, PEACReceiptClaims } from '@peac/schema';
+import { issue, verifyLocal } from '@peac/protocol';
+import { generateKeypair, canonicalize } from '@peac/crypto';
 
 // Simulated resource server state
 const RESOURCE_URL = 'https://api.example.com/inference/gpt-4';
@@ -92,16 +94,22 @@ async function paymentService(params: {
   privateKey: Uint8Array;
   publicKey: Uint8Array;
 }): Promise<string> {
-  const result = await issueWire01({
+  const result = await issue({
     iss: ISSUER_URL,
-    aud: params.resource,
-    amt: params.amount,
-    cur: params.currency,
-    rail: 'demo',
-    reference: `demo_${Date.now()}`,
-    asset: params.currency,
-    env: 'test',
-    evidence: { demo: true },
+    kind: 'evidence',
+    type: 'org.peacprotocol/payment',
+    pillars: ['commerce'],
+    sub: params.resource,
+    extensions: {
+      'org.peacprotocol/commerce': {
+        payment_rail: 'demo',
+        amount_minor: String(params.amount),
+        currency: params.currency,
+        reference: `demo_${Date.now()}`,
+        asset: params.currency,
+        env: 'test',
+      },
+    },
     privateKey: params.privateKey,
     kid: 'demo-key-2025',
   });
@@ -156,17 +164,33 @@ async function agent(params: {
       console.log(`   -> Unexpected status: ${response2.status}`);
     }
 
-    // Step 4: Demonstrate toCoreClaims normalization
-    console.log('\n4. Demonstrating toCoreClaims() normalization...');
-    const { payload } = await verify<PEACReceiptClaims>(receipt, params.publicKey);
-    const core = toCoreClaims(payload);
-    const canonical = canonicalize(core);
-    console.log('   -> Core claims (normalized):');
-    console.log(`      iss: ${core.iss}`);
-    console.log(`      aud: ${core.aud}`);
-    console.log(`      amt: ${core.amt} ${core.cur}`);
-    console.log(`      payment.rail: ${core.payment?.rail}`);
-    console.log(`   -> Canonical JCS (${canonical.length} bytes)`);
+    // Step 4: Decode + canonicalize the verified claims
+    console.log('\n4. Inspecting verified record claims...');
+    const result = await verifyLocal(receipt, params.publicKey, { issuer: ISSUER_URL });
+    if (result.valid) {
+      const commerce = (
+        result.claims.extensions as
+          | {
+              'org.peacprotocol/commerce'?: {
+                payment_rail?: string;
+                amount_minor?: string;
+                currency?: string;
+              };
+            }
+          | undefined
+      )?.['org.peacprotocol/commerce'];
+      const canonical = canonicalize(result.claims as unknown as Record<string, unknown>);
+      console.log('   -> Verified claims:');
+      console.log(`      iss: ${result.claims.iss}`);
+      console.log(`      sub: ${result.claims.sub ?? '(none)'}`);
+      console.log(
+        `      amount_minor: ${commerce?.amount_minor ?? '?'} ${commerce?.currency ?? '?'}`
+      );
+      console.log(`      payment_rail: ${commerce?.payment_rail ?? '?'}`);
+      console.log(`   -> Canonical JCS (${canonical.length} bytes)`);
+    } else {
+      console.error(`   -> Verification failed: ${result.code}`);
+    }
   }
 
   console.log('\n=== Demo Complete ===\n');
@@ -180,7 +204,7 @@ async function main() {
   // Create verifier function
   const verifyReceipt = async (jws: string): Promise<boolean> => {
     try {
-      const result = await verify(jws, publicKey);
+      const result = await verifyLocal(jws, publicKey, { issuer: ISSUER_URL });
       return result.valid;
     } catch {
       return false;

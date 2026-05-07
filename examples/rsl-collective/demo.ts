@@ -1,6 +1,12 @@
 /**
  * RSL Collective Integration Example
  *
+ * Legacy Wire 0.1 compatibility example.
+ * This demo uses the Wire 0.1 ControlBlock shape. Current Wire does not define
+ * a canonical control or RSL extension profile, so this example remains a
+ * Wire 0.1 compatibility demonstration. The Wire 0.1 envelope and signing
+ * semantics it relies on are retained for backward compatibility.
+ *
  * Demonstrates:
  * 1. RSL signal/license mapping to PEAC ControlPurpose
  * 2. Receipt issuance with RSL-derived control blocks
