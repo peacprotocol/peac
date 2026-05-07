@@ -23,6 +23,10 @@ PEAC packages:
 
 Prerequisites: Node 22+, pnpm 8+. An MCP client to call the server (the shipped examples use the MCP SDK stdio transport).
 
+## Type URI used in this recipe
+
+`org.peacprotocol/mcp-tool-call` is an example custom type URI used by the MCP recipe. It is not a registered PEAC extension group or registered receipt type. The reference public verifier (`@peac/protocol.verifyLocal()`) emits a `type_unregistered` warning for unregistered type values, which downstream policy logic may treat as informational. Operators who want a registered MCP-specific receipt type should propose a dedicated PEAC profile and registry entry before relying on it as a registered type.
+
 ## Step-by-step
 
 1. Install dependencies:
