@@ -1,0 +1,279 @@
+{
+  "family": "lifecycle-observation",
+  "description": "Lifecycle observation parity vectors. Nine positive deterministic JSON observation payloads (one per event_kind) covering approval / evaluation / experiment / workflow_transition / mode_observed semantics. Per the parity-corpus convention established by runtime-governance vector rg-007 and reused by a2a-handoff and cli-execution, all vectors here assert envelope-level canonical agreement (LEFT/RIGHT verifier agreement on the wire envelope) and set expected.accepted=true; semantic rejection of extension content (forbidden top-level keys, opaque-ref grammar violations, approver_ref PII priority, missing/malformed observed_at, unknown event_kind) lives at the Layer 3 validator surface (validateLifecycleObservation exported from @peac/schema, exercised by packages/schema/__tests__/extensions/lifecycle-observation.test.ts).",
+  "version": "0.14.1",
+  "generator": "manual; lifecycle-observation v0.1 floor",
+  "vectors": [
+    {
+      "id": "lo-001-approval-requested",
+      "description": "LIFE-OBS-001 (positive): approval-requested event; subject_ref + approval_ref + approver_ref are opaque references; the caller observed the request and the CLI issues the record.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/lifecycle-approval-requested",
+          "iss": "https://gateway.example.com",
+          "iat": 1735689600,
+          "jti": "lo-001-approval-requested-jti",
+          "extensions": {
+            "org.peacprotocol/lifecycle-observation": {
+              "event_kind": "lifecycle-approval-requested",
+              "subject_ref": "urn:peac:task:approval-001",
+              "observed_at": "2026-05-12T10:00:00Z",
+              "approval_ref": "urn:peac:approval:req-001",
+              "approver_ref": "ref:approver-pseudonym-001"
+            }
+          }
+        }
+      },
+      "expected": { "accepted": true }
+    },
+    {
+      "id": "lo-002-approval-granted",
+      "description": "LIFE-OBS-002 (positive): approval-granted event; the caller observed an external approver granting; PEAC does not grant.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/lifecycle-approval-granted",
+          "iss": "https://gateway.example.com",
+          "iat": 1735689600,
+          "jti": "lo-002-approval-granted-jti",
+          "extensions": {
+            "org.peacprotocol/lifecycle-observation": {
+              "event_kind": "lifecycle-approval-granted",
+              "subject_ref": "urn:peac:task:approval-002",
+              "observed_at": "2026-05-12T10:05:00Z",
+              "approval_ref": "urn:peac:approval:req-001",
+              "approver_ref": "did:example:approver-002",
+              "policy_ref": "urn:peac:policy:approvals-v1"
+            }
+          }
+        }
+      },
+      "expected": { "accepted": true }
+    },
+    {
+      "id": "lo-003-approval-denied",
+      "description": "LIFE-OBS-003 (positive): approval-denied event; the caller observed an external approver denying; PEAC does not deny.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/lifecycle-approval-denied",
+          "iss": "https://gateway.example.com",
+          "iat": 1735689600,
+          "jti": "lo-003-approval-denied-jti",
+          "extensions": {
+            "org.peacprotocol/lifecycle-observation": {
+              "event_kind": "lifecycle-approval-denied",
+              "subject_ref": "urn:peac:task:approval-003",
+              "observed_at": "2026-05-12T10:10:00Z",
+              "approval_ref": "urn:peac:approval:req-003",
+              "approver_ref": "ref:approver-pseudonym-003"
+            }
+          }
+        }
+      },
+      "expected": { "accepted": true }
+    },
+    {
+      "id": "lo-004-evaluation-started",
+      "description": "LIFE-OBS-004 (positive): evaluation-started event; the caller observed an external evaluation system starting an evaluation.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/lifecycle-evaluation-started",
+          "iss": "https://gateway.example.com",
+          "iat": 1735689600,
+          "jti": "lo-004-evaluation-started-jti",
+          "extensions": {
+            "org.peacprotocol/lifecycle-observation": {
+              "event_kind": "lifecycle-evaluation-started",
+              "subject_ref": "urn:peac:eval:run-004",
+              "observed_at": "2026-05-12T11:00:00Z",
+              "rubric_ref": "urn:peac:rubric:correctness-v2"
+            }
+          }
+        }
+      },
+      "expected": { "accepted": true }
+    },
+    {
+      "id": "lo-005-evaluation-completed",
+      "description": "LIFE-OBS-005 (positive): evaluation-completed event; result_ref is a required opaque reference (never an inline score). Numeric-string result_ref values reject through the opaque-reference grammar; that semantic-rejection case is exercised in the schema validator tests, not in this corpus.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/lifecycle-evaluation-completed",
+          "iss": "https://gateway.example.com",
+          "iat": 1735689600,
+          "jti": "lo-005-evaluation-completed-jti",
+          "extensions": {
+            "org.peacprotocol/lifecycle-observation": {
+              "event_kind": "lifecycle-evaluation-completed",
+              "subject_ref": "urn:peac:eval:run-004",
+              "observed_at": "2026-05-12T11:10:00Z",
+              "result_ref": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+              "result_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111"
+            }
+          }
+        }
+      },
+      "expected": { "accepted": true }
+    },
+    {
+      "id": "lo-006-experiment-assigned",
+      "description": "LIFE-OBS-006 (positive): experiment-assigned event; cohort_ref and variant_ref are opaque references; PEAC does not run experiments.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/lifecycle-experiment-assigned",
+          "iss": "https://gateway.example.com",
+          "iat": 1735689600,
+          "jti": "lo-006-experiment-assigned-jti",
+          "extensions": {
+            "org.peacprotocol/lifecycle-observation": {
+              "event_kind": "lifecycle-experiment-assigned",
+              "subject_ref": "urn:peac:subject:user-006",
+              "observed_at": "2026-05-12T12:00:00Z",
+              "experiment_ref": "urn:peac:experiment:onboarding-flow-v3",
+              "cohort_ref": "ref:cohort-treatment",
+              "variant_ref": "ref:variant-a"
+            }
+          }
+        }
+      },
+      "expected": { "accepted": true }
+    },
+    {
+      "id": "lo-007-experiment-result",
+      "description": "LIFE-OBS-007 (positive): experiment-result event; experiment_ref + result_ref are required.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/lifecycle-experiment-result",
+          "iss": "https://gateway.example.com",
+          "iat": 1735689600,
+          "jti": "lo-007-experiment-result-jti",
+          "extensions": {
+            "org.peacprotocol/lifecycle-observation": {
+              "event_kind": "lifecycle-experiment-result",
+              "subject_ref": "urn:peac:subject:user-006",
+              "observed_at": "2026-05-12T12:30:00Z",
+              "experiment_ref": "urn:peac:experiment:onboarding-flow-v3",
+              "cohort_ref": "ref:cohort-treatment",
+              "variant_ref": "ref:variant-a",
+              "result_ref": "urn:peac:result:exp-007"
+            }
+          }
+        }
+      },
+      "expected": { "accepted": true }
+    },
+    {
+      "id": "lo-008-workflow-transition",
+      "description": "LIFE-OBS-008 (positive): workflow-transition event; from_state and to_state are free-form strings emitted by the upstream workflow engine; PEAC does not orchestrate.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/lifecycle-workflow-transition",
+          "iss": "https://gateway.example.com",
+          "iat": 1735689600,
+          "jti": "lo-008-workflow-transition-jti",
+          "extensions": {
+            "org.peacprotocol/lifecycle-observation": {
+              "event_kind": "lifecycle-workflow-transition",
+              "subject_ref": "urn:peac:task:wf-008",
+              "observed_at": "2026-05-12T13:00:00Z",
+              "from_state": "pending",
+              "to_state": "running"
+            }
+          }
+        }
+      },
+      "expected": { "accepted": true }
+    },
+    {
+      "id": "lo-009-mode-observed",
+      "description": "LIFE-OBS-009 (positive): mode-observed event; observed_mode is the only required additional field; the caller reported the runtime mode tag.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/lifecycle-mode-observed",
+          "iss": "https://gateway.example.com",
+          "iat": 1735689600,
+          "jti": "lo-009-mode-observed-jti",
+          "extensions": {
+            "org.peacprotocol/lifecycle-observation": {
+              "event_kind": "lifecycle-mode-observed",
+              "subject_ref": "urn:peac:run:mode-009",
+              "observed_at": "2026-05-12T14:00:00Z",
+              "observed_mode": "agent_loop"
+            }
+          }
+        }
+      },
+      "expected": { "accepted": true }
+    },
+    {
+      "id": "lo-010-approval-with-policy-and-rubric",
+      "description": "LIFE-OBS-010 (positive): approval-granted with policy_ref + rubric_ref + parent_ref to exercise the optional opaque-ref fields alongside the required ones.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/lifecycle-approval-granted",
+          "iss": "https://gateway.example.com",
+          "iat": 1735689600,
+          "jti": "lo-010-approval-with-policy-and-rubric-jti",
+          "extensions": {
+            "org.peacprotocol/lifecycle-observation": {
+              "event_kind": "lifecycle-approval-granted",
+              "subject_ref": "urn:peac:task:approval-010",
+              "observed_at": "2026-05-12T15:00:00Z",
+              "approval_ref": "urn:peac:approval:req-010",
+              "approver_ref": "did:example:approver-010",
+              "parent_ref": "urn:peac:task:parent-010",
+              "policy_ref": "urn:peac:policy:approvals-v2",
+              "policy_digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+              "rubric_ref": "urn:peac:rubric:approval-rubric-v1"
+            }
+          }
+        }
+      },
+      "expected": { "accepted": true }
+    },
+    {
+      "id": "lo-011-mode-observed-templated-flow",
+      "description": "LIFE-OBS-011 (positive): mode-observed with observed_mode=templated_flow, plus optional upstream_artifact_ref + upstream_artifact_digest to pin the upstream-artifact opaque-ref + digest pair shape.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/lifecycle-mode-observed",
+          "iss": "https://gateway.example.com",
+          "iat": 1735689600,
+          "jti": "lo-011-mode-observed-templated-flow-jti",
+          "extensions": {
+            "org.peacprotocol/lifecycle-observation": {
+              "event_kind": "lifecycle-mode-observed",
+              "subject_ref": "urn:peac:run:mode-011",
+              "observed_at": "2026-05-12T16:00:00Z",
+              "observed_mode": "templated_flow",
+              "upstream_artifact_ref": "urn:peac:artifact:run-011",
+              "upstream_artifact_digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333"
+            }
+          }
+        }
+      },
+      "expected": { "accepted": true }
+    }
+  ]
+}

@@ -402,6 +402,78 @@ export const RECEIPT_TYPES: readonly ReceiptTypeEntry[] = [
     status: 'informational',
   },
   {
+    id: 'org.peacprotocol/lifecycle-approval-denied',
+    pillar: 'provenance',
+    description:
+      'Observational record that an external approver denied; the caller observed the denial, the CLI issues the record using the caller-provided issuer key. PEAC does not deny. Introduced in v0.14.1.',
+    extension_group: 'org.peacprotocol/lifecycle-observation',
+    status: 'informational',
+  },
+  {
+    id: 'org.peacprotocol/lifecycle-approval-granted',
+    pillar: 'provenance',
+    description:
+      'Observational record that an external approver granted; the caller observed the grant, the CLI issues the record using the caller-provided issuer key. PEAC does not grant. Introduced in v0.14.1.',
+    extension_group: 'org.peacprotocol/lifecycle-observation',
+    status: 'informational',
+  },
+  {
+    id: 'org.peacprotocol/lifecycle-approval-requested',
+    pillar: 'provenance',
+    description:
+      'Observational record of an external lifecycle approval request; the caller observed the request, the CLI issues the record using the caller-provided issuer key. PEAC does not approve. Introduced in v0.14.1.',
+    extension_group: 'org.peacprotocol/lifecycle-observation',
+    status: 'informational',
+  },
+  {
+    id: 'org.peacprotocol/lifecycle-evaluation-completed',
+    pillar: 'provenance',
+    description:
+      'Observational record that an external evaluation system completed an evaluation; carries result_ref pointing to a stored result artifact. PEAC does not score. Introduced in v0.14.1.',
+    extension_group: 'org.peacprotocol/lifecycle-observation',
+    status: 'informational',
+  },
+  {
+    id: 'org.peacprotocol/lifecycle-evaluation-started',
+    pillar: 'provenance',
+    description:
+      'Observational record that an external evaluation system started an evaluation; the caller observed the start. PEAC does not evaluate. Introduced in v0.14.1.',
+    extension_group: 'org.peacprotocol/lifecycle-observation',
+    status: 'informational',
+  },
+  {
+    id: 'org.peacprotocol/lifecycle-experiment-assigned',
+    pillar: 'provenance',
+    description:
+      'Observational record that an external experimentation system assigned a subject to an experiment cohort/variant. PEAC does not run experiments. Introduced in v0.14.1.',
+    extension_group: 'org.peacprotocol/lifecycle-observation',
+    status: 'informational',
+  },
+  {
+    id: 'org.peacprotocol/lifecycle-experiment-result',
+    pillar: 'provenance',
+    description:
+      'Observational record of an external experiment result; carries experiment_ref and result_ref. PEAC does not score experiments. Introduced in v0.14.1.',
+    extension_group: 'org.peacprotocol/lifecycle-observation',
+    status: 'informational',
+  },
+  {
+    id: 'org.peacprotocol/lifecycle-mode-observed',
+    pillar: 'provenance',
+    description:
+      "Observational record of an external runtime's execution-mode tag (deterministic_script, templated_flow, agent_loop, human_step, hybrid). The caller observed the mode; the CLI records it. Introduced in v0.14.1.",
+    extension_group: 'org.peacprotocol/lifecycle-observation',
+    status: 'informational',
+  },
+  {
+    id: 'org.peacprotocol/lifecycle-workflow-transition',
+    pillar: 'provenance',
+    description:
+      'Observational record of a state transition emitted by an external workflow engine or orchestrator (from_state -> to_state). PEAC does not orchestrate, schedule, or assign work. Introduced in v0.14.1.',
+    extension_group: 'org.peacprotocol/lifecycle-observation',
+    status: 'informational',
+  },
+  {
     id: 'org.peacprotocol/payment',
     pillar: 'commerce',
     description: 'Commerce transaction evidence (payment, authorization, settlement)',
@@ -496,6 +568,12 @@ export const EXTENSION_GROUPS: readonly ExtensionGroupEntry[] = [
     status: 'informational',
   },
   {
+    id: 'org.peacprotocol/lifecycle-observation',
+    description:
+      "Lifecycle observation extension: records observations of lifecycle events emitted by external systems (orchestrators, workflow engines, evaluation systems, approval systems, agent runtimes). Backs the peac emit lifecycle subcommand. The caller observed the event; the CLI issues the record using the caller-provided issuer key; the caller's issuer is the signer-of-record. Per-event-kind discriminated union covers approval / evaluation / experiment / workflow_transition / mode_observed. Grammar-based no-inline-value invariant rejects 20 forbidden top-level keys (decision/verdict/score/result/passed/failed/policy_result/approval_result/outcome/judgment/rating/grade/pass/fail/allow/deny/authorized/denied/granted/rejected_reason); all *_ref fields validated by the OpaqueRefSchema grammar (approver_ref @-detection prioritized as a PII-blocked subclass). PEAC does not approve, evaluate, score, transition, orchestrate, schedule, or vouch for the truth of the event. Introduced in v0.14.1.",
+    status: 'informational',
+  },
+  {
     id: 'org.peacprotocol/privacy',
     description:
       'Privacy extension: data_classification, processing_basis, retention_period, retention_mode, recipient_scope, anonymization_method, data_subject_category, transfer_mechanism',
@@ -543,6 +621,15 @@ export const TYPE_TO_EXTENSION_MAP: ReadonlyMap<string, string> = new Map([
   ['org.peacprotocol/compliance-check', 'org.peacprotocol/compliance'],
   ['org.peacprotocol/consent-record', 'org.peacprotocol/consent'],
   ['org.peacprotocol/identity-attestation', 'org.peacprotocol/identity'],
+  ['org.peacprotocol/lifecycle-approval-denied', 'org.peacprotocol/lifecycle-observation'],
+  ['org.peacprotocol/lifecycle-approval-granted', 'org.peacprotocol/lifecycle-observation'],
+  ['org.peacprotocol/lifecycle-approval-requested', 'org.peacprotocol/lifecycle-observation'],
+  ['org.peacprotocol/lifecycle-evaluation-completed', 'org.peacprotocol/lifecycle-observation'],
+  ['org.peacprotocol/lifecycle-evaluation-started', 'org.peacprotocol/lifecycle-observation'],
+  ['org.peacprotocol/lifecycle-experiment-assigned', 'org.peacprotocol/lifecycle-observation'],
+  ['org.peacprotocol/lifecycle-experiment-result', 'org.peacprotocol/lifecycle-observation'],
+  ['org.peacprotocol/lifecycle-mode-observed', 'org.peacprotocol/lifecycle-observation'],
+  ['org.peacprotocol/lifecycle-workflow-transition', 'org.peacprotocol/lifecycle-observation'],
   ['org.peacprotocol/payment', 'org.peacprotocol/commerce'],
   ['org.peacprotocol/privacy-signal', 'org.peacprotocol/privacy'],
   ['org.peacprotocol/provenance-record', 'org.peacprotocol/provenance'],

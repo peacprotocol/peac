@@ -194,6 +194,13 @@ export {
   CLI_SCHEMA_LIMITS,
   CliExecutionSchema,
   validateCliExecution,
+  // Lifecycle Observation
+  LIFECYCLE_OBSERVATION_EXTENSION_KEY,
+  LIFECYCLE_OBSERVATION_TYPE_URIS,
+  LIFECYCLE_OBSERVATION_ERROR_CODES,
+  FORBIDDEN_TOP_LEVEL_KEYS,
+  LifecycleObservationSchema,
+  validateLifecycleObservation,
 } from './extensions/index';
 export type {
   CredentialEventType,
@@ -216,6 +223,12 @@ export type {
   CliExecutionObservation,
   CliValidationError,
   CliValidationResult,
+  // Lifecycle Observation
+  LifecycleEventKind,
+  LifecycleObservation,
+  LifecycleObservationTypeUri,
+  LifecycleValidationError,
+  LifecycleValidationResult,
 } from './extensions/index';
 
 // Attribution validators (v0.9.26+)

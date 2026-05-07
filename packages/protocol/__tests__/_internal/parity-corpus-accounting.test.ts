@@ -35,36 +35,38 @@ import {
 } from '../../src/_internal/test-helpers/corpus-loader';
 
 const CORPUS_ROOT = resolveCorpusRoot();
-// Total: 12 + 8 + 7 + 4 + 15 + 6 = 52 (a2a-handoff: 10 positive + 5 negative; cli-execution: 6 positive).
-const SCHEMA_VALIDATED_TOTAL = 52;
+// Total: 12 + 8 + 7 + 4 + 15 + 6 + 11 = 63 (a2a-handoff: 10 positive + 5 negative; cli-execution: 6 positive; lifecycle-observation: 11 envelope-accepted positives covering all 9 event kinds plus 2 optional-field shape vectors).
+const SCHEMA_VALIDATED_TOTAL = 63;
 
 describe('parity-corpus accounting (schema-validated families)', () => {
-  it('PARITY_FAMILIES enrolls exactly 6 schema-validated families (a2a-handoff + cli-execution added)', () => {
+  it('PARITY_FAMILIES enrolls exactly 7 schema-validated families (a2a-handoff + cli-execution + lifecycle-observation added)', () => {
     expect([...PARITY_FAMILIES].sort()).toEqual([
       'a2a-handoff',
       'cli-execution',
       'commerce-bridges',
       'default-flows',
       'jose-hardening',
+      'lifecycle-observation',
       'runtime-governance',
     ]);
   });
 
-  it('PARITY_FLOOR_COUNTS matches per-family floor: 12 + 8 + 7 + 4 + 15 + 6 = 52', () => {
+  it('PARITY_FLOOR_COUNTS matches per-family floor: 12 + 8 + 7 + 4 + 15 + 6 + 11 = 63', () => {
     expect(PARITY_FLOOR_COUNTS['default-flows']).toBe(12);
     expect(PARITY_FLOOR_COUNTS['jose-hardening']).toBe(8);
     expect(PARITY_FLOOR_COUNTS['runtime-governance']).toBe(7);
     expect(PARITY_FLOOR_COUNTS['commerce-bridges']).toBe(4);
     expect(PARITY_FLOOR_COUNTS['a2a-handoff']).toBe(15);
     expect(PARITY_FLOOR_COUNTS['cli-execution']).toBe(6);
+    expect(PARITY_FLOOR_COUNTS['lifecycle-observation']).toBe(11);
 
     const sum = Object.values(PARITY_FLOOR_COUNTS).reduce((a, b) => a + b, 0);
     expect(sum).toBe(SCHEMA_VALIDATED_TOTAL);
   });
 
-  it('loadAllFamilies() returns exactly 6 families (a2a-handoff + cli-execution added)', () => {
+  it('loadAllFamilies() returns exactly 7 families (a2a-handoff + cli-execution + lifecycle-observation added)', () => {
     const families = loadAllFamilies();
-    expect(families).toHaveLength(6);
+    expect(families).toHaveLength(7);
     const names = families.map((f) => f.family).sort();
     expect(names).toEqual([
       'a2a-handoff',
@@ -72,11 +74,12 @@ describe('parity-corpus accounting (schema-validated families)', () => {
       'commerce-bridges',
       'default-flows',
       'jose-hardening',
+      'lifecycle-observation',
       'runtime-governance',
     ]);
   });
 
-  it('loadAllFamilies() vector counts meet floor (>= 31 total)', () => {
+  it('loadAllFamilies() vector counts meet floor (>= 63 total)', () => {
     const families = loadAllFamilies();
     const total = families.reduce((acc, f) => acc + f.vectors.length, 0);
     expect(total).toBeGreaterThanOrEqual(SCHEMA_VALIDATED_TOTAL);

@@ -90,3 +90,20 @@ export type {
   CliValidationError,
   CliValidationResult,
 } from './cli-execution';
+
+// Lifecycle Observation (org.peacprotocol/lifecycle-observation): v0.14.1
+export {
+  LIFECYCLE_OBSERVATION_EXTENSION_KEY,
+  LIFECYCLE_OBSERVATION_TYPE_URIS,
+  LIFECYCLE_OBSERVATION_ERROR_CODES,
+  FORBIDDEN_TOP_LEVEL_KEYS,
+  LifecycleObservationSchema,
+  validateLifecycleObservation,
+} from './lifecycle-observation';
+export type {
+  LifecycleEventKind,
+  LifecycleObservation,
+  LifecycleObservationTypeUri,
+  LifecycleValidationError,
+  LifecycleValidationResult,
+} from './lifecycle-observation';

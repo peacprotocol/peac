@@ -55,7 +55,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..', '..');
 const OUTPUT_PATH = join(ROOT, 'specs/conformance/extension-requirement-ids.json');
 
-const VERSION = '0.12.9';
+const VERSION = '0.14.0';
 
 function hash(fragment) {
   return 'sha256:' + createHash('sha256').update(fragment, 'utf-8').digest('hex');
@@ -359,6 +359,237 @@ const EXTENSION_REQUIREMENTS = [
         keyword: 'MUST',
         summary: 'Compliance observations are observational, never authoritative determinations',
         source_fragment: 'PEAC never makes compliance determinations',
+        enforcement_class: 'hard_fail',
+      },
+    ],
+  },
+  {
+    section: 28,
+    title: 'A2A Handoff Records',
+    anchor: 'a2a-handoff-records',
+    governing_spec: 'docs/specs/A2A-HANDOFF-RECORDS.md',
+    requirements: [
+      {
+        id: 'A2A-HANDOFF-001',
+        keyword: 'MUST',
+        summary:
+          'Records carry exactly one of the 10 A2A handoff type URIs in the extension payload',
+        source_fragment: 'A record carries exactly one type URI',
+        enforcement_class: 'hard_fail',
+      },
+      {
+        id: 'A2A-HANDOFF-002',
+        keyword: 'MUST',
+        summary: 'Extension payload type field equals the wire-record type URI',
+        source_fragment:
+          "The payload's type field MUST equal the type URI declared at the wire-record level",
+        enforcement_class: 'hard_fail',
+      },
+      {
+        id: 'A2A-HANDOFF-003',
+        keyword: 'MUST',
+        summary: 'All *_ref fields use the OpaqueRefSchema grammar (no whitespace, no @, recognized prefix)',
+        source_fragment: 'All *_ref fields in this profile use the shared opaque-reference grammar',
+        enforcement_class: 'hard_fail',
+      },
+      {
+        id: 'A2A-HANDOFF-004',
+        keyword: 'MUST',
+        summary:
+          'Agent Card observation uses signature_observation.caller_reported_verification (not legacy signature.verified)',
+        source_fragment: 'The legacy shape signature: { verified: true, ... } was REJECTED in v0.14.1',
+        enforcement_class: 'hard_fail',
+      },
+      {
+        id: 'A2A-HANDOFF-005',
+        keyword: 'MUST NOT',
+        summary:
+          'Helper file does not import signature-verification APIs (artifact-shape import-graph test enforces)',
+        source_fragment: 'The Agent Card observation helper MUST NOT verify Agent Card signatures',
+        enforcement_class: 'hard_fail',
+      },
+      {
+        id: 'A2A-HANDOFF-006',
+        keyword: 'MUST NOT',
+        summary:
+          'Extension payload top-level keys do not include decision/verdict/score/result/etc.',
+        source_fragment:
+          "An emitted record's extension payload MUST NOT contain any of: decision, verdict, score, result, passed, failed, policy_result, approval_result, outcome, judgment, rating, grade, pass, fail, allow, deny, authorized, denied, granted, rejected_reason as top-level keys",
+        enforcement_class: 'hard_fail',
+      },
+      {
+        id: 'A2A-HANDOFF-007',
+        keyword: 'MUST',
+        summary: "Agent Card payload's discovery_path is one of the three recognized values",
+        source_fragment:
+          'discovery_path: enum (one of /.well-known/agent-card.json, /.well-known/peac.json, header-probe)',
+        enforcement_class: 'hard_fail',
+      },
+      {
+        id: 'A2A-HANDOFF-008',
+        keyword: 'MUST',
+        summary: 'Task observation event field matches the type URI',
+        source_fragment: 'event: enum (one of task.submitted, task.accepted, ...) MUST match type',
+        enforcement_class: 'hard_fail',
+      },
+      {
+        id: 'A2A-HANDOFF-009',
+        keyword: 'MUST',
+        summary: 'observed_at and discovered_at are RFC 3339 timestamps with offset',
+        source_fragment: 'RFC 3339 timestamp',
+        enforcement_class: 'hard_fail',
+      },
+      {
+        id: 'A2A-HANDOFF-010',
+        keyword: 'MUST',
+        summary: 'upstream_event_digest, when present, is sha256:<64 hex>',
+        source_fragment: 'sha256:<64 hex> digest of the upstream A2A event payload',
+        enforcement_class: 'hard_fail',
+      },
+    ],
+  },
+  {
+    section: 29,
+    title: 'CLI Execution Records',
+    anchor: 'cli-execution-records',
+    governing_spec: 'docs/specs/CLI-CARRIER-PROFILE.md',
+    requirements: [
+      {
+        id: 'CLI-EXEC-001',
+        keyword: 'MUST',
+        summary:
+          'CLI execution record has type org.peacprotocol/cli-command-execution and surface.kind = cli',
+        source_fragment: "type: org.peacprotocol/cli-command-execution; surface: { kind: 'cli' }",
+        enforcement_class: 'hard_fail',
+      },
+      {
+        id: 'CLI-EXEC-002',
+        keyword: 'MUST',
+        summary: 'command.program is basename-only (no path separators)',
+        source_fragment:
+          "command.program rejects '/' and '\\\\'; path disclosure lives only under binary.path_*",
+        enforcement_class: 'hard_fail',
+      },
+      {
+        id: 'CLI-EXEC-003',
+        keyword: 'MUST',
+        summary: 'command.argv_mode = raw requires capture_policy.raw_capture_unsafely_allowed = true',
+        source_fragment: 'argv_mode raw requires --unsafe-allow-raw-capture',
+        enforcement_class: 'hard_fail',
+      },
+      {
+        id: 'CLI-EXEC-004',
+        keyword: 'MUST',
+        summary: 'env.entries keys are a subset of capture_policy.env_allowlist',
+        source_fragment: 'env_allowlist subset constraint',
+        enforcement_class: 'hard_fail',
+      },
+      {
+        id: 'CLI-EXEC-005',
+        keyword: 'MUST',
+        summary:
+          'stream sample_base64 and sample_suppressed_reason are mutually exclusive; matched_pattern_category is biconditional with sample_suppressed_reason',
+        source_fragment: 'sample/suppression mutual exclusion + matched_pattern_category coupling',
+        enforcement_class: 'hard_fail',
+      },
+      {
+        id: 'CLI-EXEC-006',
+        keyword: 'MUST',
+        summary:
+          "shell_mode = true requires binary.shell_ref present, binary.path_mode != 'none'; under hashed mode shell_ref equals binary.path_sha256",
+        source_fragment: 'shell_mode <-> shell_ref biconditional + canonical-digest equivalence',
+        enforcement_class: 'hard_fail',
+      },
+    ],
+  },
+  {
+    section: 30,
+    title: 'Lifecycle Observation Records',
+    anchor: 'lifecycle-observation-records',
+    governing_spec: 'docs/specs/LIFECYCLE-OBSERVATION-PROFILE.md',
+    requirements: [
+      {
+        id: 'LIFE-OBS-001',
+        keyword: 'MUST',
+        summary: 'Validator rejects 20 forbidden top-level keys with lifecycle.inline_value_blocked',
+        source_fragment:
+          'lifecycle.inline_value_blocked rejects all 20 forbidden top-level keys at extension top level',
+        enforcement_class: 'hard_fail',
+      },
+      {
+        id: 'LIFE-OBS-002',
+        keyword: 'MUST',
+        summary:
+          'All *_ref fields validated by the OpaqueRefSchema grammar (no whitespace, no @, recognized prefix); numeric strings reject via no-prefix',
+        source_fragment: 'all *_ref fields validated by the OpaqueRefSchema grammar',
+        enforcement_class: 'hard_fail',
+      },
+      {
+        id: 'LIFE-OBS-003',
+        keyword: 'MUST',
+        summary:
+          'approver_ref containing @ rejects with lifecycle.approver_ref_pii_blocked (priority over general grammar code)',
+        source_fragment: 'approver_ref @-detection prioritized as a PII-blocked subclass',
+        enforcement_class: 'hard_fail',
+      },
+      {
+        id: 'LIFE-OBS-004',
+        keyword: 'MUST',
+        summary:
+          'Non-string *_ref values reject with lifecycle.ref_must_be_string; no generic Zod string error leaks as a public diagnostic',
+        source_fragment:
+          'non-string *_ref values reject with lifecycle.ref_must_be_string; no Zod-string error leaks as a public diagnostic',
+        enforcement_class: 'hard_fail',
+      },
+      {
+        id: 'LIFE-OBS-005',
+        keyword: 'MUST',
+        summary:
+          'Per-event-kind required fields enforced via discriminated union; missing observed_at and other missing required fields surface lifecycle.missing_required_field',
+        source_fragment:
+          'per-event-kind required fields enforced via discriminated union; missing observed_at uses lifecycle.missing_required_field',
+        enforcement_class: 'hard_fail',
+      },
+      {
+        id: 'LIFE-OBS-006',
+        keyword: 'MUST',
+        summary: 'Unknown event_kind rejects with lifecycle.event_kind_unknown',
+        source_fragment: 'unknown event_kind rejects with lifecycle.event_kind_unknown',
+        enforcement_class: 'hard_fail',
+      },
+      {
+        id: 'LIFE-OBS-007',
+        keyword: 'MUST',
+        summary:
+          'Malformed observed_at rejects with lifecycle.invalid_observed_at; missing observed_at is covered by missing_required_field',
+        source_fragment:
+          'malformed observed_at rejects with lifecycle.invalid_observed_at; missing observed_at is covered by lifecycle.missing_required_field',
+        enforcement_class: 'hard_fail',
+      },
+      {
+        id: 'LIFE-OBS-008',
+        keyword: 'MUST',
+        summary: 'Lifecycle records round-trip through @peac/protocol.issue() and verifyLocal()',
+        source_fragment:
+          'lifecycle records round-trip through @peac/protocol.issue() and verifyLocal()',
+        enforcement_class: 'hard_fail',
+      },
+      {
+        id: 'LIFE-OBS-009',
+        keyword: 'MUST',
+        summary:
+          'Every type URI in LIFECYCLE_OBSERVATION_TYPE_URIS maps to org.peacprotocol/lifecycle-observation in TYPE_TO_EXTENSION_MAP',
+        source_fragment:
+          'every URI in LIFECYCLE_OBSERVATION_TYPE_URIS maps to org.peacprotocol/lifecycle-observation in TYPE_TO_EXTENSION_MAP',
+        enforcement_class: 'hard_fail',
+      },
+      {
+        id: 'LIFE-OBS-010',
+        keyword: 'MUST',
+        summary:
+          'Spec orchestrator-boundary text is normative and vendor-neutral; PEAC does not assign work, run agents, schedule tasks, manage issue trackers, route approvals, decide step ordering, or enforce workflow policy',
+        source_fragment:
+          'the orchestrator-boundary text is normative and vendor-neutral; PEAC does not assign work, run agents, schedule tasks, manage issue trackers, route approvals, decide step ordering, or enforce workflow policy',
         enforcement_class: 'hard_fail',
       },
     ],

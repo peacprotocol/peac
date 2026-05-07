@@ -15,7 +15,7 @@ import {
 } from '../../src/_internal/test-helpers/corpus-loader';
 
 describe('parity-corpus loader', () => {
-  it('declares the expected six families (a2a-handoff + cli-execution added)', () => {
+  it('declares the expected seven families (a2a-handoff + cli-execution + lifecycle-observation added)', () => {
     expect(PARITY_FAMILIES).toEqual([
       'default-flows',
       'jose-hardening',
@@ -23,6 +23,7 @@ describe('parity-corpus loader', () => {
       'commerce-bridges',
       'a2a-handoff',
       'cli-execution',
+      'lifecycle-observation',
     ]);
   });
 
@@ -34,12 +35,13 @@ describe('parity-corpus loader', () => {
       'commerce-bridges': 4,
       'a2a-handoff': 15,
       'cli-execution': 6,
+      'lifecycle-observation': 11,
     });
   });
 
-  it('loads all six families in declared order', () => {
+  it('loads all seven families in declared order', () => {
     const families = loadAllFamilies();
-    expect(families).toHaveLength(6);
+    expect(families).toHaveLength(7);
     expect(families.map((f) => f.family)).toEqual([
       'default-flows',
       'jose-hardening',
@@ -47,6 +49,7 @@ describe('parity-corpus loader', () => {
       'commerce-bridges',
       'a2a-handoff',
       'cli-execution',
+      'lifecycle-observation',
     ]);
   });
 

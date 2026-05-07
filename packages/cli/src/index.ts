@@ -18,6 +18,7 @@ import { doctor } from './commands/doctor.js';
 import { DiscoverCommand } from './commands/discover.js';
 import { observeCommand } from './commands/observe-command.js';
 import { recordCommand } from './commands/record-command.js';
+import { emitCommand } from './commands/emit-lifecycle.js';
 import { formatOutput } from './utils.js';
 import { getVersion } from './lib/version.js';
 
@@ -230,6 +231,9 @@ program.addCommand(observeCommand());
 
 // CLI execution record (signed Wire 0.2 JWS)
 program.addCommand(recordCommand());
+
+// Lifecycle observation emission (signed Wire 0.2 JWS for external lifecycle events)
+program.addCommand(emitCommand());
 
 // Installability diagnostics (v0.12.11+)
 doctor(program);
