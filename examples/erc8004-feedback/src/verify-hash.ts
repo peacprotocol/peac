@@ -1,6 +1,11 @@
 /**
  * Hash Verification Smoke Test (CI-Safe)
  *
+ * Legacy Wire 0.1 exact-byte mapping example.
+ * This example keeps a Wire 0.1 receipt fixture because its canonical bytes are
+ * bound to the ERC-8004 mapping hashes and conformance wrapper. Migrating it to
+ * current Wire requires updating the ERC-8004 mapping fixture in a dedicated PR.
+ *
  * Verifies both Mode A (direct receipt) and Mode B (wrapper) conformance vectors.
  * This test is deterministic and does not depend on generated files.
  *

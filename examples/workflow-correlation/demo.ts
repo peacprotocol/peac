@@ -1,34 +1,47 @@
 /**
  * PEAC Workflow Correlation Demo
  *
- * Demonstrates linking receipts into a multi-step workflow DAG.
- * Pattern: root -> fork (2 branches) -> join
+ * Demonstrates linking receipts via canonical correlation metadata.
+ * Pattern: root -> fork (2 branches) -> join, using `parent_jti` and `depends_on`.
  *
  * Run with: pnpm demo
+ *
+ * Note: PEAC records correlation metadata. Step indexing, tool naming, framework
+ * tagging, and orchestrator identity are properties of the upstream orchestrator,
+ * not of the PEAC record. This demo links receipts by their JTIs to show causal
+ * structure; richer orchestrator state lives in the orchestration system itself.
  */
 
-import { issueWire01, verifyLocal, generateKeypair } from '@peac/protocol';
-import {
-  type WorkflowContext,
-  type WorkflowId,
-  type StepId,
-  WORKFLOW_EXTENSION_KEY,
-  type PEACReceiptClaims,
-  createWorkflowId,
-  createStepId,
-} from '@peac/schema';
+import { issue, verifyLocal, generateKeypair } from '@peac/protocol';
 import { decode } from '@peac/crypto';
 
+interface DecodedClaims {
+  jti: string;
+  iss: string;
+  iat: number;
+  kind: string;
+  type: string;
+  extensions?: {
+    'org.peacprotocol/commerce'?: {
+      payment_rail?: string;
+      amount_minor?: string;
+      currency?: string;
+    };
+    'org.peacprotocol/correlation'?: {
+      workflow_id?: string;
+      parent_jti?: string;
+      depends_on?: string[];
+    };
+  };
+}
+
 /**
- * Generate a ULID-like identifier for demo purposes.
+ * Generate a ULID-like identifier for the workflow id.
  *
  * In production, use a proper ULID library (e.g., 'ulid' or 'ulidx' npm package)
  * for cryptographic randomness and correct Crockford Base32 encoding.
- *
- * IDs must be 20-48 chars to pass schema validation.
  */
-function generateUlidLike(): string {
-  // 10 chars timestamp (Crockford Base32-ish) + 16 chars random
+function generateWorkflowId(): string {
   const timestamp = Date.now().toString(36).toUpperCase().padStart(10, '0');
   const random = Array.from({ length: 16 }, () =>
     '0123456789ABCDEFGHJKMNPQRSTVWXYZ'.charAt(Math.floor(Math.random() * 32))
@@ -39,139 +52,135 @@ function generateUlidLike(): string {
 async function main() {
   console.log('PEAC Workflow Correlation Demo\n');
   console.log('Pattern: root -> fork (2 parallel branches) -> join\n');
+  console.log(
+    'PEAC records correlation metadata; orchestrator step index, tool name,\n' +
+      'framework, and orchestrator identity remain in the upstream orchestrator.\n'
+  );
 
-  // Generate a signing keypair
   const { privateKey, publicKey } = await generateKeypair();
-
-  // Create workflow and step IDs using schema constructors
-  // In production, use a proper ULID library instead of generateUlidLike()
-  const workflowId = createWorkflowId(generateUlidLike());
-  const rootStepId = createStepId(generateUlidLike());
-  const branchAStepId = createStepId(generateUlidLike());
-  const branchBStepId = createStepId(generateUlidLike());
-  const joinStepId = createStepId(generateUlidLike());
+  const workflowId = generateWorkflowId();
 
   console.log('Workflow ID:', workflowId);
   console.log('');
 
-  // Step 1: Root step (no parents)
-  console.log('Step 1: Root step (orchestrator initialization)');
-  const rootContext: WorkflowContext = {
-    workflow_id: workflowId,
-    step_id: rootStepId,
-    parent_step_ids: [],
-    step_index: 0,
-    step_total: 4,
-    framework: 'custom',
-    orchestrator_id: 'agent:demo-orchestrator',
-  };
-
-  const rootReceipt = await issueWire01({
+  // Step 1: Root step (no parent)
+  console.log('Step 1: Root step (workflow initialization)');
+  const rootReceipt = await issue({
     iss: 'https://orchestrator.example.com',
-    aud: 'https://workflow.example.com',
-    amt: 100,
-    cur: 'USD',
-    rail: 'internal',
-    reference: 'init-001',
-    subject: 'https://workflow.example.com/tasks/init',
+    kind: 'evidence',
+    type: 'org.peacprotocol/payment',
+    pillars: ['commerce'],
+    sub: 'https://workflow.example.com/tasks/init',
+    extensions: {
+      'org.peacprotocol/commerce': {
+        payment_rail: 'internal',
+        amount_minor: '100',
+        currency: 'USD',
+        reference: 'init-001',
+      },
+      'org.peacprotocol/correlation': {
+        workflow_id: workflowId,
+      },
+    },
     privateKey,
     kid: 'key-2026-01',
-    workflow_context: rootContext,
   });
+  const rootJti = (decode(rootReceipt.jws).payload as DecodedClaims).jti;
 
-  console.log('   Step ID:', rootStepId);
-  console.log('   Parents: [] (root step)');
+  console.log('   JTI:', rootJti);
+  console.log('   Parent JTI: (none; root step)');
   console.log('   Receipt:', rootReceipt.jws.slice(0, 50) + '...\n');
 
-  // Step 2a: Branch A (depends on root)
-  console.log('Step 2a: Branch A (parallel research task)');
-  const branchAContext: WorkflowContext = {
-    workflow_id: workflowId,
-    step_id: branchAStepId,
-    parent_step_ids: [rootStepId],
-    step_index: 1,
-    step_total: 4,
-    tool_name: 'mcp:research/deep-search',
-    framework: 'mcp',
-  };
-
-  const branchAReceipt = await issueWire01({
+  // Step 2a: Branch A (parent_jti = root)
+  console.log('Step 2a: Branch A (parallel research)');
+  const branchAReceipt = await issue({
     iss: 'https://research-agent.example.com',
-    aud: 'https://workflow.example.com',
-    amt: 500,
-    cur: 'USD',
-    rail: 'internal',
-    reference: 'research-001',
-    subject: 'https://workflow.example.com/tasks/research',
+    kind: 'evidence',
+    type: 'org.peacprotocol/payment',
+    pillars: ['commerce'],
+    sub: 'https://workflow.example.com/tasks/research',
+    extensions: {
+      'org.peacprotocol/commerce': {
+        payment_rail: 'internal',
+        amount_minor: '500',
+        currency: 'USD',
+        reference: 'research-001',
+      },
+      'org.peacprotocol/correlation': {
+        workflow_id: workflowId,
+        parent_jti: rootJti,
+      },
+    },
     privateKey,
     kid: 'key-2026-01',
-    workflow_context: branchAContext,
   });
+  const branchAJti = (decode(branchAReceipt.jws).payload as DecodedClaims).jti;
 
-  console.log('   Step ID:', branchAStepId);
-  console.log('   Parents:', [rootStepId]);
-  console.log('   Tool: mcp:research/deep-search');
+  console.log('   JTI:', branchAJti);
+  console.log('   Parent JTI:', rootJti);
   console.log('   Receipt:', branchAReceipt.jws.slice(0, 50) + '...\n');
 
-  // Step 2b: Branch B (depends on root, parallel to Branch A)
-  console.log('Step 2b: Branch B (parallel analysis task)');
-  const branchBContext: WorkflowContext = {
-    workflow_id: workflowId,
-    step_id: branchBStepId,
-    parent_step_ids: [rootStepId],
-    step_index: 2,
-    step_total: 4,
-    tool_name: 'a2a:analysis/sentiment',
-    framework: 'a2a',
-  };
-
-  const branchBReceipt = await issueWire01({
+  // Step 2b: Branch B (parent_jti = root, parallel to Branch A)
+  console.log('Step 2b: Branch B (parallel analysis)');
+  const branchBReceipt = await issue({
     iss: 'https://analysis-agent.example.com',
-    aud: 'https://workflow.example.com',
-    amt: 300,
-    cur: 'USD',
-    rail: 'internal',
-    reference: 'analysis-001',
-    subject: 'https://workflow.example.com/tasks/analysis',
+    kind: 'evidence',
+    type: 'org.peacprotocol/payment',
+    pillars: ['commerce'],
+    sub: 'https://workflow.example.com/tasks/analysis',
+    extensions: {
+      'org.peacprotocol/commerce': {
+        payment_rail: 'internal',
+        amount_minor: '300',
+        currency: 'USD',
+        reference: 'analysis-001',
+      },
+      'org.peacprotocol/correlation': {
+        workflow_id: workflowId,
+        parent_jti: rootJti,
+      },
+    },
     privateKey,
     kid: 'key-2026-01',
-    workflow_context: branchBContext,
   });
+  const branchBJti = (decode(branchBReceipt.jws).payload as DecodedClaims).jti;
 
-  console.log('   Step ID:', branchBStepId);
-  console.log('   Parents:', [rootStepId]);
-  console.log('   Tool: a2a:analysis/sentiment');
+  console.log('   JTI:', branchBJti);
+  console.log('   Parent JTI:', rootJti);
   console.log('   Receipt:', branchBReceipt.jws.slice(0, 50) + '...\n');
 
-  // Step 3: Join step (depends on both branches)
-  console.log('Step 3: Join step (merge results from both branches)');
-  const joinContext: WorkflowContext = {
-    workflow_id: workflowId,
-    step_id: joinStepId,
-    parent_step_ids: [branchAStepId, branchBStepId], // Fork-join pattern
-    step_index: 3,
-    step_total: 4,
-    orchestrator_id: 'agent:demo-orchestrator',
-  };
-
-  const joinReceipt = await issueWire01({
+  // Step 3: Join step (depends_on captures both ancestor branches)
+  console.log('Step 3: Join step (fan-in: depends on both branches)');
+  const joinReceipt = await issue({
     iss: 'https://orchestrator.example.com',
-    aud: 'https://workflow.example.com',
-    amt: 200,
-    cur: 'USD',
-    rail: 'internal',
-    reference: 'merge-001',
-    subject: 'https://workflow.example.com/tasks/merge',
+    kind: 'evidence',
+    type: 'org.peacprotocol/payment',
+    pillars: ['commerce'],
+    sub: 'https://workflow.example.com/tasks/merge',
+    extensions: {
+      'org.peacprotocol/commerce': {
+        payment_rail: 'internal',
+        amount_minor: '200',
+        currency: 'USD',
+        reference: 'merge-001',
+      },
+      'org.peacprotocol/correlation': {
+        workflow_id: workflowId,
+        parent_jti: branchAJti,
+        depends_on: [branchBJti],
+      },
+    },
     privateKey,
     kid: 'key-2026-01',
-    workflow_context: joinContext,
   });
+  const joinJti = (decode(joinReceipt.jws).payload as DecodedClaims).jti;
 
-  console.log('   Step ID:', joinStepId);
-  console.log('   Parents:', [branchAStepId, branchBStepId]);
+  console.log('   JTI:', joinJti);
+  console.log('   Parent JTI:', branchAJti);
+  console.log('   Depends on:', [branchBJti]);
   console.log('   Receipt:', joinReceipt.jws.slice(0, 50) + '...\n');
 
-  // Verify all receipts and show workflow context
+  // Verify all receipts and show correlation metadata
   console.log('--- Verification ---\n');
 
   const receipts = [
@@ -181,33 +190,33 @@ async function main() {
     { name: 'Join', jws: joinReceipt.jws },
   ];
 
-  let totalAmount = 0;
+  let totalAmountMinor = 0n;
 
   for (const { name, jws } of receipts) {
     const result = await verifyLocal(jws, publicKey, {
-      issuer: undefined, // Allow any issuer for demo
-      audience: 'https://workflow.example.com',
+      issuer: undefined,
     });
 
     if (result.valid) {
-      const decoded = decode<PEACReceiptClaims>(jws);
-      const workflowCtx = decoded.payload.ext?.[WORKFLOW_EXTENSION_KEY] as
-        | WorkflowContext
-        | undefined;
+      const claims = result.claims as unknown as DecodedClaims;
+      const commerce = claims.extensions?.['org.peacprotocol/commerce'];
+      const correlation = claims.extensions?.['org.peacprotocol/correlation'];
 
       console.log(`${name}:`);
       console.log('   Valid: true');
-      console.log('   Amount:', decoded.payload.amt, decoded.payload.cur);
-      if (workflowCtx) {
-        console.log('   Workflow ID:', workflowCtx.workflow_id);
-        console.log('   Step ID:', workflowCtx.step_id);
-        console.log('   Is Root:', workflowCtx.parent_step_ids.length === 0 ? 'yes' : 'no');
-        if (workflowCtx.tool_name) {
-          console.log('   Tool:', workflowCtx.tool_name);
+      if (commerce?.amount_minor && commerce?.currency) {
+        console.log('   Amount:', commerce.amount_minor, commerce.currency);
+        totalAmountMinor += BigInt(commerce.amount_minor);
+      }
+      if (correlation) {
+        console.log('   Workflow ID:', correlation.workflow_id);
+        console.log('   JTI:', claims.jti);
+        console.log('   Parent JTI:', correlation.parent_jti ?? '(none)');
+        if (correlation.depends_on && correlation.depends_on.length > 0) {
+          console.log('   Depends on:', correlation.depends_on);
         }
       }
       console.log('');
-      totalAmount += decoded.payload.amt;
     } else {
       console.error(`${name}: Verification FAILED -`, result.code);
     }
@@ -216,10 +225,10 @@ async function main() {
   // Summary
   console.log('--- Workflow Summary ---\n');
   console.log('Workflow ID:', workflowId);
-  console.log('Total Steps:', 4);
-  console.log('Total Amount:', totalAmount, 'USD');
+  console.log('Total Receipts:', 4);
+  console.log('Total Amount (minor units):', totalAmountMinor.toString(), 'USD');
   console.log('');
-  console.log('DAG Structure:');
+  console.log('Causal structure (linked by JTI):');
   console.log('');
   console.log('   [Root]');
   console.log('     |');
@@ -230,6 +239,12 @@ async function main() {
   console.log('     +----+----+');
   console.log('          |');
   console.log('       [Join]');
+  console.log('');
+  console.log(
+    'Each receipt above links to its parent via `parent_jti` and to fan-in\n' +
+      'ancestors via `depends_on`. PEAC records the link; the orchestrator owns\n' +
+      'the rest of the workflow state.'
+  );
   console.log('');
 
   console.log('Done.');

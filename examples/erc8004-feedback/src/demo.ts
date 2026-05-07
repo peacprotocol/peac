@@ -1,6 +1,11 @@
 /**
  * ERC-8004 Feedback Demo
  *
+ * Legacy Wire 0.1 exact-byte mapping example.
+ * This example keeps a Wire 0.1 receipt fixture because its canonical bytes are
+ * bound to the ERC-8004 mapping hashes and conformance wrapper. Migrating it to
+ * current Wire requires updating the ERC-8004 mapping fixture in a dedicated PR.
+ *
  * Demonstrates how to use PEAC records as evidence behind
  * ERC-8004 reputation signals.
  *

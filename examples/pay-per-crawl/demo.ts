@@ -19,9 +19,8 @@ import {
   type PolicyDocument,
   type EvaluationContext,
 } from '@peac/policy-kit';
-import { issueWire01 } from '@peac/protocol';
-import { generateKeypair, verify } from '@peac/crypto';
-import { toCoreClaims, PEACReceiptClaims } from '@peac/schema';
+import { issue, verifyLocal } from '@peac/protocol';
+import { generateKeypair } from '@peac/crypto';
 
 console.log('\n=== PEAC Pay-Per-Crawl Demo ===\n');
 
@@ -176,39 +175,58 @@ console.log('\n5. Crawler obtains and presents receipt\n');
 async function demonstrateReceiptFlow() {
   const { privateKey, publicKey } = await generateKeypair();
 
-  // Crawler issues receipt (in real scenario, this comes from payment provider)
-  const receiptResult = await issueWire01({
+  // Crawler issues record (in real scenario, this comes from payment provider)
+  const receiptResult = await issue({
     iss: 'https://payment.example.com',
-    aud: 'https://publisher.example.com/content/article-123',
-    amt: 100, // $1.00
-    cur: 'USD',
-    rail: 'stripe',
-    reference: 'cs_crawl_demo_123',
-    asset: 'USD',
-    env: 'test',
-    evidence: { purpose: 'crawl' },
+    kind: 'evidence',
+    type: 'org.peacprotocol/payment',
+    pillars: ['commerce'],
+    sub: 'https://publisher.example.com/content/article-123',
+    extensions: {
+      'org.peacprotocol/commerce': {
+        payment_rail: 'stripe',
+        amount_minor: '100', // $1.00
+        currency: 'USD',
+        reference: 'cs_crawl_demo_123',
+        asset: 'USD',
+        env: 'test',
+      },
+    },
     privateKey,
     kid: 'demo-key-2025',
   });
 
-  console.log(`   Receipt issued (${receiptResult.jws.length} chars)`);
+  console.log(`   Record issued (${receiptResult.jws.length} chars)`);
 
-  // Publisher verifies receipt
-  const { valid, payload } = await verify<PEACReceiptClaims>(receiptResult.jws, publicKey);
-  if (!valid) {
-    throw new Error('Receipt verification failed');
+  // Publisher verifies record
+  const result = await verifyLocal(receiptResult.jws, publicKey, {
+    issuer: 'https://payment.example.com',
+  });
+  if (!result.valid) {
+    throw new Error(`Record verification failed: ${result.code}`);
   }
-  console.log('   Receipt verified successfully');
+  console.log('   Record verified successfully');
 
-  // Extract core claims for logging/audit
-  const core = toCoreClaims(payload);
-  console.log('   Core claims:');
-  console.log(`     iss: ${core.iss}`);
-  console.log(`     aud: ${core.aud}`);
-  console.log(`     amt: ${core.amt} ${core.cur}`);
+  // Extract claim fields for logging/audit
+  const commerce = (
+    result.claims.extensions as
+      | {
+          'org.peacprotocol/commerce'?: {
+            amount_minor?: string;
+            currency?: string;
+            payment_rail?: string;
+          };
+        }
+      | undefined
+  )?.['org.peacprotocol/commerce'];
+  console.log('   Verified claims:');
+  console.log(`     iss: ${result.claims.iss}`);
+  console.log(`     sub: ${result.claims.sub ?? '(none)'}`);
+  console.log(`     amount_minor: ${commerce?.amount_minor ?? '?'} ${commerce?.currency ?? '?'}`);
+  console.log(`     payment_rail: ${commerce?.payment_rail ?? '?'}`);
 
   // Decision: allow access
-  console.log('\n   -> Access granted with valid receipt');
+  console.log('\n   -> Access granted with valid record');
 }
 
 await demonstrateReceiptFlow();

@@ -18,7 +18,7 @@
         "description": "PEAC evidence carrier for agent-to-agent traceability",
         "required": false,
         "params": {
-          "supported_kinds": ["interaction-record+jwt", "peac-receipt/0.1"],
+          "supported_kinds": ["interaction-record+jwt"],
           "carrier_formats": ["embed", "reference"],
           "issuer_config_url": "https://agent.example.com/.well-known/peac-issuer.json"
         }

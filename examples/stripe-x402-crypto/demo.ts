@@ -1,26 +1,21 @@
 /**
- * Stripe x402 Crypto Payment -> PEAC Receipt -> Offline Verify
+ * Stripe x402 Crypto Payment -> PEAC Record -> Offline Verify
  *
  * Run: pnpm --filter @peac/example-stripe-x402-crypto demo
  *
  * This demo shows the full flow:
  * 1. Normalize a Stripe crypto payment intent to PEAC PaymentEvidence
- * 2. Issue a signed PEAC receipt embedding the payment evidence
- * 3. Verify the receipt offline (no network, no Stripe API)
+ * 2. Issue a signed PEAC record carrying normalized commerce fields
+ * 3. Verify the record offline (no network, no Stripe API)
+ *
+ * Note: PEAC records normalized commerce fields. The Stripe crypto chain context
+ * (tx hash, network, recipient) lives upstream in Stripe and the underlying
+ * blockchain; the signed PEAC record carries only normalized payment fields.
  */
 
 import { fromCryptoPaymentIntent } from '@peac/rails-stripe';
-import { issueWire01, verify } from '@peac/protocol';
+import { issue, verifyLocal } from '@peac/protocol';
 import { generateKeypair, derivePublicKey } from '@peac/crypto';
-
-interface ReceiptPayload {
-  iss: string;
-  aud: string;
-  amt: number;
-  cur: string;
-  rid: string;
-  iat: number;
-}
 
 async function main(): Promise<void> {
   console.log('='.repeat(60));
@@ -63,19 +58,27 @@ async function main(): Promise<void> {
   console.log('    Reference:', payment.reference);
   console.log();
 
-  // --- Step 2: Issue a signed PEAC receipt ---
-  console.log('[2] Issuing signed PEAC receipt...');
+  // --- Step 2: Issue a signed PEAC record ---
+  console.log('[2] Issuing signed PEAC record...');
 
   const { privateKey } = await generateKeypair();
   const publicKey = await derivePublicKey(privateKey);
+  const issuerUrl = 'https://api.weather.example.com';
 
-  const result = await issueWire01({
-    iss: 'https://api.weather.example.com',
-    aud: 'https://agent.example.com',
-    amt: payment.amount,
-    cur: payment.currency,
-    rail: payment.rail,
-    reference: payment.reference,
+  const result = await issue({
+    iss: issuerUrl,
+    kind: 'evidence',
+    type: 'org.peacprotocol/payment',
+    pillars: ['commerce'],
+    sub: 'https://agent.example.com',
+    extensions: {
+      'org.peacprotocol/commerce': {
+        payment_rail: payment.rail,
+        amount_minor: String(payment.amount),
+        currency: payment.currency,
+        reference: payment.reference,
+      },
+    },
     privateKey,
     kid: '2026-02-13',
   });
@@ -85,33 +88,48 @@ async function main(): Promise<void> {
   console.log();
 
   // --- Step 3: Verify offline ---
-  console.log('[3] Verifying receipt offline (no network)...');
+  console.log('[3] Verifying record offline (no network)...');
 
-  const verification = await verify<ReceiptPayload>(result.jws, publicKey);
+  const verification = await verifyLocal(result.jws, publicKey, { issuer: issuerUrl });
 
   console.log('    Valid:    ', verification.valid);
-  console.log('    Issuer:   ', verification.payload.iss);
-  console.log('    Audience: ', verification.payload.aud);
-  console.log('    Amount:   ', verification.payload.amt, verification.payload.cur);
+  if (verification.valid) {
+    const commerce = (
+      verification.claims.extensions as
+        | {
+            'org.peacprotocol/commerce'?: {
+              payment_rail?: string;
+              amount_minor?: string;
+              currency?: string;
+            };
+          }
+        | undefined
+    )?.['org.peacprotocol/commerce'];
+    console.log('    Issuer:   ', verification.claims.iss);
+    console.log('    Subject:  ', verification.claims.sub ?? '(none)');
+    console.log('    Amount:   ', commerce?.amount_minor ?? '?', commerce?.currency ?? '?');
+    console.log('    Rail:     ', commerce?.payment_rail ?? '?');
+  }
   console.log();
 
   // --- Summary ---
   console.log('='.repeat(60));
   if (verification.valid) {
-    console.log('SUCCESS: Receipt issued and verified offline.');
+    console.log('SUCCESS: Record issued and verified offline.');
     console.log();
     console.log('What just happened:');
-    console.log('  1. Stripe crypto payment (USDC on Base) -> PaymentEvidence');
-    console.log('  2. PaymentEvidence -> signed JWS receipt (Ed25519)');
-    console.log('  3. JWS receipt -> verified with public key (no network)');
+    console.log('  1. Stripe crypto payment (USDC on Base) -> normalized payment fields');
+    console.log('  2. Normalized fields -> signed JWS record (Ed25519)');
+    console.log('  3. JWS record -> verified with public key (no network)');
     console.log();
     console.log('Verification meaning:');
-    console.log('  - The receipt is a signed issuer attestation of payment.');
+    console.log('  - The record is a signed issuer attestation of payment.');
     console.log('  - Offline verify confirms integrity + origin (Ed25519).');
     console.log('  - It does NOT confirm on-chain settlement.');
-    console.log('  - Use tx_hash + network with an RPC endpoint for that.');
+    console.log('  - Provider/chain context (tx hash, network, recipient) lives upstream');
+    console.log('    in Stripe and the underlying blockchain.');
   } else {
-    console.log('FAILURE: Receipt verification failed.');
+    console.log('FAILURE: Record verification failed.');
     process.exit(1);
   }
   console.log('='.repeat(60));

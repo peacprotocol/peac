@@ -1,17 +1,23 @@
 /**
  * MCP Tool Call Example
  *
- * Demonstrates MCP tool integration with PEAC receipts:
+ * Demonstrates MCP tool integration with PEAC records:
  * 1. MCP server exposes a paid tool
- * 2. Receipt is attached to tool response
- * 3. Client extracts and verifies receipt
+ * 2. A signed record is attached to the tool response via the _meta carrier
+ * 3. Client extracts and verifies the record
+ *
+ * The record uses `type: 'org.peacprotocol/mcp-tool-call'`. This is an example
+ * custom type URI used by the MCP recipe. It is not a registered PEAC extension
+ * group or registered receipt type. The reference public verifier
+ * (`@peac/protocol.verifyLocal()`) emits a `type_unregistered` warning for
+ * unregistered type values, which downstream policy logic may treat as
+ * informational.
  *
  * This example uses local stubs - no external services required.
  */
 
-import { issueWire01 } from '@peac/protocol';
-import { generateKeypair, verify } from '@peac/crypto';
-import { type PEACReceiptClaims } from '@peac/schema';
+import { issue, verifyLocal } from '@peac/protocol';
+import { generateKeypair } from '@peac/crypto';
 import {
   extractReceipt,
   hasReceipt,
@@ -47,19 +53,23 @@ async function mcpToolHandler(params: {
   const query = params.args.query as string;
   const toolResult = await webSearchTool(query);
 
-  // Issue receipt
-  const receiptResult = await issueWire01({
+  // Issue a signed record. The `type` value is an example custom URI used by
+  // this MCP recipe; it is not a registered PEAC receipt type, so verification
+  // will surface a `type_unregistered` warning.
+  const receiptResult = await issue({
     iss: ISSUER_URL,
-    aud: `mcp:${params.tool}`,
-    amt: COST_PER_CALL_CENTS,
-    cur: CURRENCY,
-    rail: 'mcp',
-    reference: `mcp_${Date.now()}`,
-    asset: CURRENCY,
-    env: 'test',
-    evidence: {
-      tool: params.tool,
-      query,
+    kind: 'evidence',
+    type: 'org.peacprotocol/mcp-tool-call',
+    pillars: ['attribution', 'commerce'],
+    extensions: {
+      'org.peacprotocol/commerce': {
+        payment_rail: 'mcp',
+        amount_minor: String(COST_PER_CALL_CENTS),
+        currency: CURRENCY,
+        reference: `mcp_${Date.now()}`,
+        asset: CURRENCY,
+        env: 'test',
+      },
     },
     privateKey: params.privateKey,
     kid: 'mcp-key-2025',
@@ -92,15 +102,27 @@ async function mcpClient(params: { privateKey: Uint8Array; publicKey: Uint8Array
       privateKey: params.privateKey,
     });
 
-    // Check for receipt
+    // Check for record
     if (hasReceipt(response)) {
       const receipt = extractReceipt(response);
-      console.log(`  Receipt attached: ${receipt!.length} chars`);
+      console.log(`  Record attached: ${receipt!.length} chars`);
 
-      // Verify receipt
-      const { valid, payload } = await verify<PEACReceiptClaims>(receipt!, params.publicKey);
-      console.log(`  Receipt valid: ${valid}`);
-      console.log(`  Amount: ${payload.amt} ${payload.cur}`);
+      // Verify record. Expect a `type_unregistered` warning because
+      // org.peacprotocol/mcp-tool-call is intentionally unregistered.
+      const result = await verifyLocal(receipt!, params.publicKey, { issuer: ISSUER_URL });
+      if (result.valid) {
+        const commerce = (
+          result.claims.extensions as
+            | { 'org.peacprotocol/commerce'?: { amount_minor?: string; currency?: string } }
+            | undefined
+        )?.['org.peacprotocol/commerce'];
+        const typeUnregistered = result.warnings.some((w) => w.code === 'type_unregistered');
+        console.log(`  Record valid: true`);
+        console.log(`  Amount: ${commerce?.amount_minor ?? '?'} ${commerce?.currency ?? '?'}`);
+        console.log(`  Warning type_unregistered (expected): ${typeUnregistered}`);
+      } else {
+        console.error(`  Record invalid: ${result.code} ${result.message}`);
+      }
     }
 
     // Show results
