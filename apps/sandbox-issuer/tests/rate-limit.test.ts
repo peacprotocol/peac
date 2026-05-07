@@ -9,11 +9,13 @@ import { app } from '../src/app.js';
 import { resetRateLimitStore } from '../src/middleware/rate-limit.js';
 import { resetKeyCache } from '../src/keys.js';
 
+const TEST_ISSUER_URL = 'https://test-issuer.example.com';
+
 function issueReq(headers?: Record<string, string>) {
   return new Request('http://localhost/api/v1/issue', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...headers },
-    body: JSON.stringify({ aud: 'https://example.com' }),
+    body: JSON.stringify({ sub: 'https://example.com' }),
   });
 }
 
@@ -21,10 +23,12 @@ describe('Rate limiting', () => {
   beforeEach(() => {
     resetRateLimitStore();
     resetKeyCache();
+    process.env.PEAC_ISSUER_URL = TEST_ISSUER_URL;
   });
 
   afterEach(() => {
     delete process.env.PEAC_TRUST_PROXY;
+    delete process.env.PEAC_ISSUER_URL;
   });
 
   it('should allow requests within the limit', async () => {

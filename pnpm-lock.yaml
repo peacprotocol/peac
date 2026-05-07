@@ -175,6 +175,9 @@ importers:
       '@peac/middleware-core':
         specifier: workspace:*
         version: link:../../packages/middleware-core
+      '@peac/protocol':
+        specifier: workspace:*
+        version: link:../../packages/protocol
       '@peac/schema':
         specifier: workspace:*
         version: link:../../packages/schema

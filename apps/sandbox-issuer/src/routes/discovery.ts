@@ -18,7 +18,7 @@ export async function issuerConfigHandler(c: Context) {
     version: 'peac-issuer/0.1',
     issuer: issuerUrl,
     jwks_uri: `${issuerUrl}/.well-known/jwks.json`,
-    receipt_versions: ['interaction-record+jwt', 'peac-receipt/0.1'],
+    receipt_versions: ['interaction-record+jwt'],
     algorithms: ['EdDSA'],
     ...(isEphemeral ? { sandbox_mode: 'ephemeral' } : {}),
   };
