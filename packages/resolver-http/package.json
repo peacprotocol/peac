@@ -1,6 +1,6 @@
 {
   "name": "@peac/resolver-http",
-  "version": "0.14.0",
+  "version": "0.14.1",
   "private": true,
   "description": "PEAC Protocol - workspace-private resolver-http composition layer introduced in v0.13.2 PR A per Revision 4 §7. Composes published primitives (@peac/net-node, @peac/jwks-cache, @peac/kernel, @peac/crypto, @peac/schema) behind a private verifier-oriented interface for parity testing against @peac/protocol's existing self-contained resolver path on shared local fixtures. NEVER published. NEVER referenced by published packages. P0 invariants: @peac/protocol must NOT import / depend on / re-export from / emit reference to this package; @peac/resolver-http runtime source must NOT import @peac/protocol (parity test files MAY). @peac/jwks-cache and @peac/net-node are reused as published primitives, not modified, not merged, not renamed in v0.13.2 (denylist seeded by v0.13.1 PR A in tests/tooling/protocol-private-imports.test.ts and friends).",
   "type": "module",

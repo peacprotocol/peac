@@ -5,6 +5,93 @@ All notable changes to PEAC Protocol will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.14.1] - 2026-05-07
+
+Execution Surfaces + Observational Lifecycle Records.
+
+PEAC gives APIs, agents, MCP tools, A2A handoffs, and CLI workflows a
+portable signed record that can be verified outside the system that
+produced it. This release adds three new record surfaces (A2A handoff
+observation records, CLI command execution records, and observational
+lifecycle records) plus a small set of cleanup and consistency
+improvements.
+
+Public API: extended (additive only).
+Wire format: unchanged.
+Package surface: unchanged published-package count (36).
+Extension keys: 12 → 15 extension groups; 10 → 30 receipt types
+(additive). New stable error codes for the new namespaces.
+Default observable behavior: unchanged for existing surfaces.
+
+### Added
+
+- **A2A handoff observation records.** New `org.peacprotocol/a2a-handoff`
+  extension namespace with 10 receipt-type URIs covering A2A v1.0 task,
+  message, and artifact handoffs. New normative spec
+  `docs/specs/A2A-HANDOFF-RECORDS.md`. Conformance Section 28
+  `A2A-HOBS-001..010`. The signature-observation field shape is
+  caller-reported; the helper does not import signature-verification
+  APIs.
+- **CLI command execution records.** New `peac observe command`
+  (unsigned JSON observation) and `peac record command` (compact JWS,
+  signed) verb-group surfaces in `@peac/cli`. New
+  `org.peacprotocol/cli-execution` extension namespace +
+  `org.peacprotocol/cli-command-execution` receipt-type URI. New
+  normative spec `docs/specs/CLI-CARRIER-PROFILE.md`. Conformance
+  Section 29 `CLI-EXEC-001..006`. Hard security defaults: double
+  opt-in for raw capture and raw env modes; secret-scan on by
+  default; shell-binary detected without `--shell-mode` is a hard
+  fail.
+- **Observational lifecycle records.** New `peac emit lifecycle` CLI
+  surface for signed lifecycle observation records. New
+  `org.peacprotocol/lifecycle-observation` extension namespace with
+  9 receipt-type URIs covering approval, evaluation, experiment,
+  workflow-transition, and mode-observed events. Grammar-based
+  no-inline-value invariant (20 forbidden top-level keys;
+  opaque-reference grammar covering `ref:`, `urn:`, `did:`,
+  `sha256:`, `peac:`, `https:` prefixes). New normative spec
+  `docs/specs/LIFECYCLE-OBSERVATION-PROFILE.md`. Conformance
+  Section 30 `LIFE-OBS-001..010`. OBSERVER scope; vendor-neutral
+  orchestrator boundary; OTel composition split into normative and
+  informative subsections.
+- **Architecture and interoperability guidance.** New
+  `docs/architecture/` documents the generic-core, profile,
+  adapter, and example boundary doctrine for OSS-neutral protocol
+  abstraction.
+
+### Changed
+
+- **Sandbox issuer issues current Wire records.** The sandbox issuer
+  now emits records via the validated `@peac/protocol.issue()` path.
+  Request body uses `sub` (subject URL); legacy `aud` and
+  `expires_in` are rejected with stable detail messages. Discovery
+  advertises the current Wire only.
+- **Public examples migrated to current Wire.** Seven canonical
+  examples (`mcp-tool-call`, `pay-per-crawl`, `pay-per-inference`,
+  `stripe-x402-crypto`, `telemetry-otel`, `workflow-correlation`,
+  `x402-node-server`) now demonstrate current Wire issuance and
+  verification. Two examples (`rsl-collective`, `erc8004-feedback`)
+  remain Wire 0.1 with explicit legacy markers preserving their
+  conformance binding intent.
+- **Public docs and adapter wording cleanup.** Aligned the Go floor
+  to `Go 1.26+` across all public docs. Aligned the active
+  paymentauth draft revision (`draft-ryan-httpauth-payment-01`) in
+  the integrator-kit README. Refined adapter and mapping wording
+  away from PEAC-control-plane verbs toward records-layer and
+  adapter-scoped wording.
+- **`@deprecated` JSDoc on `issueWire01()`** for new code paths.
+  Wire 0.1 envelope, schemas, and internal `verifyLocalWire01()`
+  remain available for backward compatibility; new issuance is
+  discouraged.
+
+### Notes
+
+- npm `next` only. No `latest` promotion in this release.
+- Compatibility: existing Wire 0.2 verification, issuance, and
+  carrier flows unchanged.
+- See `docs/release-notes/v0.14.1.md` for the per-surface
+  walkthrough.
+
 ## [0.14.0] - 2026-05-02
 
 Bounded Validation Gate.
