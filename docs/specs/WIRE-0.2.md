@@ -1056,6 +1056,8 @@ A mismatch produces `E_WIRE_VERSION_MISMATCH`.
 
 Wire 0.1 (`peac-receipt/0.1`) is FROZEN. All Wire 0.1 schemas, test fixtures, and verification behavior remain unchanged. Wire 0.1 receipts do not gain Wire 0.2 fields or constraints. No new fields, constraints, or semantics will be added to Wire 0.1.
 
+For the Wire 0.1 compatibility and issuance-deprecation policy, see [`docs/STABILITY-CONTRACT.md`](../STABILITY-CONTRACT.md).
+
 ### 15.5 Receipt Reference
 
 The receipt reference (`receipt_ref`) computation is unchanged across wire versions:

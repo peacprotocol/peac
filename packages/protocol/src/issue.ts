@@ -174,10 +174,11 @@ export class IssueError extends Error {
 }
 
 /**
- * Issue a Wire 0.1 PEAC record.
+ * Issues a legacy Wire 0.1 receipt.
  *
- * @deprecated Wire 0.1 issuance is frozen legacy. Use {@link issue} (current stable format)
- * or {@link issueWire02} (explicit wire-pinned API) for Wire 0.2 records.
+ * @deprecated Use {@link issue} for current stable issuance. Wire 0.1
+ * issuance is retained for backward compatibility but discouraged for new
+ * applications.
  *
  * @param options - Wire 0.1 record options
  * @returns Issue result with JWS and optional subject_snapshot

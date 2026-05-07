@@ -113,6 +113,8 @@ Records travel in several carriers depending on the surface:
 
 A record's `kind` is one of two fixed structural values — `evidence` (records what happened) or `challenge` (requests proof from a peer). A record's `type` is an open reverse-DNS or URI identifier for **what** the record represents (for example `org.peacprotocol/payment`, `org.peacprotocol/mcp-tool-call`, `org.peacprotocol/api-receipt`). Extensions are typed data groups organized by pillar (access, attribution, commerce, consent, compliance, privacy, provenance, safety, identity, purpose).
 
+`org.peacprotocol/mcp-tool-call` is an example custom type URI used by the MCP recipe. It is not a registered PEAC extension group or registered receipt type. The reference public verifier (`@peac/protocol.verifyLocal()`) emits a `type_unregistered` warning for unregistered type values, which downstream policy logic may treat as informational. Operators who want a registered MCP-specific receipt type should propose a dedicated PEAC profile and registry entry before relying on it as a registered type.
+
 Normative detail: [`docs/specs/WIRE-0.2.md`](specs/WIRE-0.2.md) and [`docs/specs/PROTOCOL-BEHAVIOR.md`](specs/PROTOCOL-BEHAVIOR.md).
 
 ## What PEAC does not do in this loop

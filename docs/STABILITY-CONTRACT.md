@@ -29,6 +29,8 @@ maintenance (security and correctness fixes apply to every active line per
 | Canonical JSON             | JCS (RFC 8785)                                            | `stable`       | Cross-language parity fixtures in `specs/conformance/`                                                                                              |
 | Verifier response bodies   | `application/json` (RFC 8259)                             | `stable`       | Error bodies: `application/problem+json` (RFC 9457)                                                                                                 |
 
+**Wire 0.1 compatibility.** `issueWire01()` and `IssueWire01Options` in `@peac/protocol`, plus `Wire01JWSHeader` / `Wire01JWSHeaderSchema` in `@peac/crypto` and `@peac/schema`, remain stable for backward compatibility with existing downstream issuers. Wire 0.1 issuance is deprecated and discouraged for new integrations; new applications should use `issue()`. The public default verifier `verifyLocal()` is current-Wire only and returns `E_UNSUPPORTED_WIRE_VERSION` for Wire 0.1 input. The reference implementation retains `verifyLocalWire01()` as an internal legacy verification path for archival and replay use cases. No new protocol features are added to Wire 0.1.
+
 ## Public TypeScript APIs
 
 | Surface (package)                                                                           | Classification  | Notes                                                                                                                      |
