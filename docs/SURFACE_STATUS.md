@@ -88,7 +88,6 @@ Do not edit manually. Source: `REPO_SURFACE_STATUS.json`. Rebuild via `node scri
 | Surface                        | npm                 | State        | Wire |
 | ------------------------------ | ------------------- | ------------ | ---- |
 | `apps/api`                     | -                   | default      | 0.2  |
-| `apps/sandbox-issuer`          | -                   | compat-only  | 0.1  |
 | `apps/verifier`                | -                   | default      | 0.2  |
 | `packages/cli`                 | `@peac/cli`         | default      | 0.2  |
 | `packages/conformance-harness` | -                   | supported    | 0.2  |

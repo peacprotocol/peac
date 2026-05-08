@@ -12,15 +12,15 @@
 
 ## Go
 
-| Version  | Status      | Notes                                                                |
-| -------- | ----------- | -------------------------------------------------------------------- |
-| Go 1.26+ | **Partial** | `sdks/go/`: Wire 0.1 issue and verify only. Wire 0.2 parity planned. |
+| Version  | Status        | Notes                                                                                                                                                            |
+| -------- | ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Go 1.26+ | **Supported** | `sdks/go/`: Interaction Record (`interaction-record+jwt`) `Issue()` and `VerifyLocal()` with Ed25519, RFC 8785 JCS, and JOSE hardening. Middleware experimental. |
 
 ## Python
 
-| Version      | Status          | Notes                                                           |
-| ------------ | --------------- | --------------------------------------------------------------- |
-| Python 3.10+ | **Not started** | API-first support via Hosted Verify OpenAPI. No native SDK yet. |
+| Version      | Status            | Notes                                                                                                                              |
+| ------------ | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Python 3.12+ | **Examples only** | API-first examples using Hosted Verify / reference verifier (`examples/python/`, `requires-python = ">=3.12"`). No native SDK yet. |
 
 ## Browser and Edge Runtimes
 
@@ -42,6 +42,6 @@
 ## Language Strategy
 
 - **TypeScript/Node.js** is the canonical OSS implementation path
-- **Go** receives minimum viable Wire 0.2 parity next
+- **Go** has core Wire 0.2 parity for Interaction Record issue/verify; middleware remains experimental
 - **Hosted Verify and Hosted Issue** serve as the language-agnostic entry point via OpenAPI
 - **Python** receives API-first support before any full SDK commitment

@@ -40,21 +40,21 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for full design rationale.
 
 ## Integration paths
 
-### Commerce evidence integrations (v0.12.4+)
+### Commerce evidence integrations
 
-PEAC records evidence from commerce protocols without executing payments:
+PEAC records evidence from commerce protocols without executing payments. `paymentauth` is the PEAC code and registry term for the active `draft-ryan-httpauth-payment-01` HTTP Payment authentication scheme; MPP (Machine Payments Protocol) is the ecosystem prose name.
 
-| Protocol          | Package                      | What it records                                    |
-| ----------------- | ---------------------------- | -------------------------------------------------- |
-| paymentauth / MPP | `@peac/mappings-paymentauth` | HTTP 402 challenges, receipts, carrier coexistence |
-| ACP               | `@peac/mappings-acp`         | Session lifecycle, payment observations            |
-| Stripe SPT        | `@peac/rails-stripe`         | Delegation grants, PI observations                 |
-| x402              | `@peac/adapter-x402`         | Offer/receipt verification, v1/v2 read             |
-| UCP               | `@peac/mappings-ucp`         | Order-vs-payment separation                        |
+| Protocol                                      | Package                      | What it records                                    |
+| --------------------------------------------- | ---------------------------- | -------------------------------------------------- |
+| paymentauth / MPP (Machine Payments Protocol) | `@peac/mappings-paymentauth` | HTTP 402 challenges, receipts, carrier coexistence |
+| ACP                                           | `@peac/mappings-acp`         | Session lifecycle, payment observations            |
+| Stripe SPT                                    | `@peac/rails-stripe`         | Delegation grants, PI observations                 |
+| x402                                          | `@peac/adapter-x402`         | Offer/receipt verification, v1/v2 read             |
+| UCP                                           | `@peac/mappings-ucp`         | Order-vs-payment separation                        |
 
 See [Commerce Evidence Spec](specs/COMMERCE-EVIDENCE.md) and [Commerce Semantics](specs/COMMERCE-SEMANTICS.md) for boundary rules.
 
-### Identity and transport integrations (v0.12.6+)
+### Identity and transport integrations
 
 | Integration    | Package                                        | What it provides                                  |
 | -------------- | ---------------------------------------------- | ------------------------------------------------- |
@@ -63,6 +63,18 @@ See [Commerce Evidence Spec](specs/COMMERCE-EVIDENCE.md) and [Commerce Semantics
 | A2A OAuth      | `@peac/mappings-a2a`                           | PKCE S256, Device Code types, auth evidence       |
 | in-toto / SLSA | `@peac/mappings-intoto`, `@peac/mappings-slsa` | Supply-chain provenance mapping                   |
 | receipt_url    | `@peac/net-node`                               | Carrier-shaped receipt URL resolution middleware  |
+
+### Agent execution and lifecycle records
+
+v0.14.1 adds three record surfaces for agent and operator workflows:
+
+| Surface               | Entry point                                                                                                            | What it records                                                                                                                                                |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A2A handoff records   | [`docs/specs/A2A-HANDOFF-RECORDS.md`](specs/A2A-HANDOFF-RECORDS.md), [`integrator-kits/a2a/`](../integrator-kits/a2a/) | Agent-card discovery, task lifecycle, and human-review handoff events reported by A2A-adjacent systems                                                         |
+| CLI command execution | `peac observe command`, `peac record command`                                                                          | Command, working directory, binary, redacted argv/stdin/stdout/stderr metadata, and execution outcome. Signed records require caller-provided issuer material. |
+| Lifecycle observation | `peac emit lifecycle`                                                                                                  | Caller-reported evaluation, approval, experiment, mode, and workflow-transition events                                                                         |
+
+These are record/export surfaces. The CLI wrapper may spawn a caller-supplied child process to produce an observation; PEAC does not choose the command, schedule it, supervise it as a long-running process, authorize it, or orchestrate workflows. PEAC does not approve the action, score the runtime, or vouch for the truth of caller-reported lifecycle events.
 
 ### Settlement fields
 
@@ -148,12 +160,12 @@ See [packages/middleware-core/README.md](../packages/middleware-core/README.md) 
 
 ### x402 integration
 
-PEAC works as the receipts and verification layer for [x402](https://x402.org) payment flows. x402 handles the payment; PEAC proves it happened.
+PEAC works as the receipts and verification layer for [x402](https://x402.org) payment flows. x402 handles the payment; PEAC records verifiable evidence of the payment flow.
 
 1. Client requests a protected resource
 2. Server returns `402 Payment Required` with x402 payment details
 3. Client pays via x402 (Base/USDC or other supported networks)
-4. Server issues a signed `PEAC-Receipt` header proving payment
+4. Server issues a signed `PEAC-Receipt` header carrying payment evidence
 5. Client verifies the receipt offline
 
 **Package:** `@peac/rails-x402` (payment rail) and `@peac/adapter-x402` (evidence carrier).
@@ -264,12 +276,12 @@ See [docs/specs/PEAC-ISSUER.md](specs/PEAC-ISSUER.md).
 
 ### Wire formats
 
-**Interaction Record format** (`interaction-record+jwt`, stable on `latest`, v0.12.0+):
+**Interaction Record format** (`interaction-record+jwt`): current default format.
 
 - Two structural kinds: `evidence` and `challenge`
 - Open semantic `type` (reverse-DNS or absolute URI)
-- Multi-valued `pillars` from 10-value closed taxonomy
-- 12 typed extension groups with type-to-extension enforcement
+- Multi-valued `pillars` from the closed pillar taxonomy
+- 15 extension groups, each typed with type-to-extension enforcement
 - Policy binding: JCS (RFC 8785) + SHA-256 digest comparison
 - JOSE hardening: embedded keys rejected, `kid` required
 
@@ -287,15 +299,16 @@ Single `PEAC-Receipt` response header carries the signed JWS for both wire versi
 
 PEAC is transport-agnostic. Receipts travel via the binding appropriate to each protocol:
 
-| Binding                | How receipts travel                          | Status      |
-| ---------------------- | -------------------------------------------- | ----------- |
-| HTTP/REST              | Response header `PEAC-Receipt: <jws>`        | Implemented |
-| MCP                    | Tool result `_meta` (carrier format)         | Implemented |
-| A2A                    | Task/message metadata (extension URI)        | Implemented |
-| ACP (Agentic Commerce) | State transition metadata                    | Implemented |
-| UCP                    | Webhook verification metadata                | Implemented |
-| x402                   | Settlement response evidence                 | Implemented |
-| Queues/batches         | NDJSON receipts verified offline via bundles | Implemented |
+| Binding                | How receipts travel                                | Status      |
+| ---------------------- | -------------------------------------------------- | ----------- |
+| HTTP/REST              | Response header `PEAC-Receipt: <jws>`              | Implemented |
+| MCP                    | Tool result `_meta` (carrier format)               | Implemented |
+| A2A                    | Task/message metadata (extension URI)              | Implemented |
+| ACP (Agentic Commerce) | State transition metadata                          | Implemented |
+| UCP                    | Webhook verification metadata                      | Implemented |
+| x402                   | Settlement response evidence                       | Implemented |
+| Queues/batches         | NDJSON receipts verified offline via bundles       | Implemented |
+| CLI execution          | Local command observation and signed record output | Implemented |
 
 **Mapping packages:**
 
@@ -379,14 +392,15 @@ peac policy generate peac-policy.yaml --out dist --well-known
 
 **Adapters:**
 
-| Package                            | Description                                                                     |
-| ---------------------------------- | ------------------------------------------------------------------------------- |
-| `@peac/adapter-runtime-governance` | Runtime governance records (AGT first mapper, 6 observation-specific type URIs) |
-| `@peac/adapter-managed-agents`     | Managed agent session lifecycle records (6 event families)                      |
-| `@peac/adapter-x402`               | x402 record carrier (V1 + V2)                                                   |
-| `@peac/adapter-did`                | DID resolution (did:key, did:web, caching)                                      |
-| `@peac/adapter-openclaw`           | OpenClaw agent framework                                                        |
-| `@peac/adapter-openai-compatible`  | Hash-first inference receipt adapter                                            |
+| Package                            | Description                                          |
+| ---------------------------------- | ---------------------------------------------------- |
+| `@peac/adapter-runtime-governance` | Runtime governance observation records               |
+| `@peac/adapter-managed-agents`     | Managed agent session lifecycle records              |
+| `@peac/adapter-x402`               | x402 record carrier (V1 + V2)                        |
+| `@peac/adapter-did`                | DID resolution (did:key, did:web, caching)           |
+| `@peac/adapter-eat`                | Entity Attestation Token (RFC 9711) evidence adapter |
+| `@peac/adapter-openclaw`           | OpenClaw agent framework                             |
+| `@peac/adapter-openai-compatible`  | Hash-first inference receipt adapter                 |
 
 **Mappings:**
 
@@ -396,9 +410,13 @@ peac policy generate peac-policy.yaml --out dist --well-known
 | `@peac/mappings-mcp`             | MCP metadata carrier and budget management          |
 | `@peac/mappings-intoto`          | in-toto v1.0 attestation provenance mapping         |
 | `@peac/mappings-slsa`            | SLSA v1.2 provenance predicate mapping              |
-| `@peac/mappings-paymentauth`     | HTTP Payment auth evidence mapping                  |
+| `@peac/mappings-paymentauth`     | paymentauth / MPP payment evidence mapping          |
 | `@peac/mappings-acp`             | Agentic Commerce Protocol session mapping           |
+| `@peac/mappings-ucp`             | Google Universal Commerce Protocol mapping          |
 | `@peac/mappings-content-signals` | Content signal observation mapping                  |
+| `@peac/mappings-aipref`          | IETF AIPREF preference vocabulary mapping           |
+| `@peac/mappings-rsl`             | RSL usage token mapping                             |
+| `@peac/mappings-tap`             | Visa Trusted Agent Protocol mapping                 |
 
 **Infrastructure:** `@peac/contracts`, `@peac/http-signatures`, `@peac/jwks-cache`, `@peac/net-node`, `@peac/adapter-core`, `@peac/privacy`, `@peac/telemetry`, `@peac/telemetry-otel`, `@peac/transport-grpc`, `@peac/capture-core`, `@peac/capture-node`, `@peac/attribution`, `@peac/audit`, `@peac/policy-kit`.
 
@@ -411,7 +429,11 @@ peac policy generate peac-policy.yaml --out dist --well-known
 - [Spec Index](SPEC_INDEX.md): full normative spec set.
 - [Resource limits](specs/RESOURCE-LIMITS.md): normative invariant table for size, time, cache, SSRF, redirect, and timeout ceilings; each row cites the constant in source and a test.
 - [Standards ledger](STANDARDS_LEDGER.md): every external standard PEAC cites or implements, by category and status (Standards Track / Informational / IRTF Informational / BCP / FIPS / W3C Recommendation / International Standard / Regulatory / Draft / Watchlist).
-- [Release-line baselines](baselines/): invariant snapshot for the v0.13.0 release line (released-package surface, wire-format invariants, error-taxonomy inventory, mutation-testing posture).
+- [A2A handoff records](specs/A2A-HANDOFF-RECORDS.md): handoff observation profile with type URIs and signature-observation grammar.
+- [CLI carrier profile](specs/CLI-CARRIER-PROFILE.md): command-execution record carrier and security defaults.
+- [Lifecycle observation profile](specs/LIFECYCLE-OBSERVATION-PROFILE.md): caller-reported lifecycle events with opaque-reference grammar.
+- [Abstraction boundaries](architecture/ABSTRACTION-BOUNDARIES.md): generic-core, profile, adapter, and example boundary doctrine.
+- [Release-line baselines](baselines/): historical invariant snapshots and release-line references.
 - [Stability contract](STABILITY-CONTRACT.md): classification of every public surface PEAC publishes.
 - [Threat model](THREAT_MODEL.md): per-threat mitigation table with test coverage.
 - [Trust artifacts](TRUST-ARTIFACTS.md): index of security and stability artifacts.

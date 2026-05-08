@@ -17,6 +17,9 @@ Portable signed records for agent, API, MCP, and cross-runtime interactions.
 - **I run an MCP server.** Attach signed records to tool calls. [MCP Integration Kit](integrator-kits/mcp/README.md) or `npx -y @peac/mcp-server`.
 - **I want to verify a receipt.** Verify offline with the issuer's public key. [Agent Operator Quickstart](docs/guides/quickstart-agent-operator.md).
 - **I want to prove my runtime decisions.** Record governance observations from managed runtimes. [`@peac/adapter-runtime-governance`](packages/adapters/runtime-governance/).
+- **I run agent-to-agent workflows.** Record A2A handoff events across agent-card discovery, task lifecycle, and human-review boundaries. [A2A Handoff Records](docs/specs/A2A-HANDOFF-RECORDS.md).
+- **I want to record command execution.** Use `peac observe command` for unsigned observations or `peac record command` for signed command-execution records. [CLI Carrier Profile](docs/specs/CLI-CARRIER-PROFILE.md).
+- **I need lifecycle records from another system.** Use `peac emit lifecycle` to issue records for caller-reported evaluation, approval, experiment, and workflow events. [Lifecycle Observation Profile](docs/specs/LIFECYCLE-OBSERVATION-PROFILE.md).
 
 Full path-by-role tree: [`docs/START_HERE.md`](docs/START_HERE.md).
 
@@ -60,6 +63,7 @@ Outcome-led recipes under [`docs/SOLUTIONS/`](docs/SOLUTIONS/):
 - [MCP tool-call records](docs/SOLUTIONS/mcp-tool-call-receipts.md)
 - [Commerce evidence bundle](docs/SOLUTIONS/commerce-evidence-bundle.md)
 - [Regulatory audit trail](docs/SOLUTIONS/regulatory-audit-trail.md)
+- [Cloudflare x402 + PEAC](docs/SOLUTIONS/cloudflare-x402-peac.md)
 
 ## Why PEAC
 
@@ -72,6 +76,7 @@ Outcome-led recipes under [`docs/SOLUTIONS/`](docs/SOLUTIONS/):
 - Verify a receipt locally with `verifyLocal()` or `pnpm dlx @peac/cli verify`.
 - Start the MCP server: `npx -y @peac/mcp-server`.
 - Run the x402 settlement mapping demo: `pnpm install && pnpm build && pnpm --filter @peac/example-x402-upto-evidence demo`.
+- Record a command execution observation: `pnpm dlx @peac/cli@next observe command -- echo hello`. For signed command records, use `peac record command` with an issuer key; see the [CLI Carrier Profile](docs/specs/CLI-CARRIER-PROFILE.md).
 - Open an editor plugin-pack under [`surfaces/plugin-pack/`](surfaces/plugin-pack/) (Cursor, Codex, Claude Code, VS Code, Continue, Windsurf, OpenCode).
 - Run the minimal example: `pnpm --filter @peac/example-minimal demo`.
 - Self-host the reference verifier: [`surfaces/reference-verifier/`](surfaces/reference-verifier/).
@@ -83,8 +88,11 @@ Outcome-led recipes under [`docs/SOLUTIONS/`](docs/SOLUTIONS/):
 - **MCP tools** — [`packages/mcp-server/`](packages/mcp-server/) evidence tools.
 - **Editor and plugin-pack surfaces** — Cursor, Codex, Claude Code, VS Code, Continue, Windsurf, OpenCode under [`surfaces/plugin-pack/`](surfaces/plugin-pack/); canonical [Smithery config](packages/mcp-server/smithery.yaml).
 - **Express middleware** — [`packages/middleware-express/`](packages/middleware-express/).
-- **Commerce mappings** — [`packages/adapters/x402/`](packages/adapters/x402/) (v1 + v2), [`packages/mappings/paymentauth/`](packages/mappings/paymentauth/) (paymentauth and MPP), [`packages/mappings/acp/`](packages/mappings/acp/) (ACP delegated payment).
+- **Commerce mappings** — [`packages/adapters/x402/`](packages/adapters/x402/) (v1 + v2), [`packages/mappings/paymentauth/`](packages/mappings/paymentauth/) (paymentauth / MPP), [`packages/mappings/acp/`](packages/mappings/acp/) (ACP delegated payment).
 - **Runtime governance** — [`packages/adapters/runtime-governance/`](packages/adapters/runtime-governance/) records observations from managed runtimes including Microsoft Agent Governance Toolkit.
+- **A2A handoff records** — [`docs/specs/A2A-HANDOFF-RECORDS.md`](docs/specs/A2A-HANDOFF-RECORDS.md) and [`integrator-kits/a2a/`](integrator-kits/a2a/).
+- **CLI execution records** — `peac observe command`, `peac record command`, and [`docs/specs/CLI-CARRIER-PROFILE.md`](docs/specs/CLI-CARRIER-PROFILE.md).
+- **Lifecycle observation records** — `peac emit lifecycle` and [`docs/specs/LIFECYCLE-OBSERVATION-PROFILE.md`](docs/specs/LIFECYCLE-OBSERVATION-PROFILE.md).
 - **Supply-chain mappings** — [`packages/mappings/intoto/`](packages/mappings/intoto/) and [`packages/mappings/slsa/`](packages/mappings/slsa/).
 - **Reference verifier (self-hostable)** — [`apps/api/`](apps/api/) with deployment recipes under [`surfaces/reference-verifier/`](surfaces/reference-verifier/).
 
@@ -92,12 +100,12 @@ Long tail (A2A, gRPC, DID, managed agents, and more): [`docs/README_LONG.md`](do
 
 ## Artifacts
 
-| Artifact                | Role                                                |
-| ----------------------- | --------------------------------------------------- |
-| `/.well-known/peac.txt` | Machine-readable terms                              |
-| `PEAC-Receipt`          | Signed interaction record on governed responses     |
-| `verifyLocal()`         | Offline verification once issuer keys are available |
-| `peac-bundle/0.1`       | Portable audit and dispute package                  |
+| Artifact                | Role                                                      |
+| ----------------------- | --------------------------------------------------------- |
+| `/.well-known/peac.txt` | Machine-readable terms                                    |
+| `PEAC-Receipt`          | HTTP response header carrying a signed interaction record |
+| `verifyLocal()`         | Offline verification once issuer keys are available       |
+| `peac-bundle/0.1`       | Portable audit and dispute package                        |
 
 ## CLI
 
@@ -110,7 +118,7 @@ pnpm add -D @peac/cli
 pnpm exec peac verify 'eyJhbGc...'
 ```
 
-Other commands: `peac conformance run`, `peac reconcile a.bundle b.bundle`, `peac policy init|validate|generate`, `peac doctor`. Reference: [`packages/cli/README.md`](packages/cli/README.md).
+Other commands: `peac observe command`, `peac record command`, `peac emit lifecycle`, `peac conformance run`, `peac reconcile a.bundle b.bundle`, `peac policy init|validate|generate`, `peac doctor`. Reference: [`packages/cli/README.md`](packages/cli/README.md).
 
 ## Protocol boundary
 
@@ -141,10 +149,10 @@ Full doctrine: [`docs/specs/VERSIONING.md`](docs/specs/VERSIONING.md).
 
 - [Start Here](docs/START_HERE.md) — path by role.
 - [How it works](docs/HOW-IT-WORKS.md), [Artifacts](docs/ARTIFACTS.md), [Where it fits](docs/WHERE-IT-FITS.md), [What PEAC standardizes](docs/WHAT-PEAC-STANDARDIZES.md).
-- [Solutions](docs/SOLUTIONS/) — five outcome-led recipes.
+- [Solutions](docs/SOLUTIONS/) — outcome-led recipes.
 - [Spec Index](docs/SPEC_INDEX.md) — normative specifications, including [Resource limits](docs/specs/RESOURCE-LIMITS.md).
 - [Standards ledger](docs/STANDARDS_LEDGER.md) — every external standard PEAC cites or implements, by status.
-- [Release-line baselines](docs/baselines/) — invariant snapshot for the current release line.
+- [Release-line baselines](docs/baselines/) — historical invariant snapshots and release-line references.
 - [Developer Guide](docs/README_LONG.md) — package catalog and extended examples.
 
 ## Contributing and license

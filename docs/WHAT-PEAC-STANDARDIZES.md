@@ -17,9 +17,9 @@ Evidence you can point at:
 - The JOSE hardening test suite at [`packages/protocol/__tests__/`](../packages/protocol/__tests__/) enforces the stability-contract rules (no embedded keys, no `crit`, no `zip`, Ed25519 only).
 - Cross-language parity: the Go SDK ([`sdks/go/`](../sdks/go/)) emits byte-equivalent JCS output against 22 shared fixtures.
 
-## 2. Cross-protocol record normalization across MCP, A2A, x402, ACP, paymentauth, and runtime-governance ecosystems
+## 2. Cross-protocol record normalization across MCP, A2A, CLI, lifecycle, x402, paymentauth / MPP, ACP, and runtime-governance ecosystems
 
-PEAC defines a single record shape that composes with every major agent, commerce, and runtime ecosystem PEAC integrates with. The adapter and mapping layer translates each ecosystem's native attestations into a Wire record, preserves the upstream artifact verbatim, and never synthesizes semantics the upstream did not claim.
+PEAC defines a single record shape that composes with the agent, commerce, and runtime ecosystems PEAC integrates with. The adapter and mapping layer translates each ecosystem's native attestations into a Wire record, preserves the upstream artifact verbatim, and never synthesizes semantics the upstream did not claim.
 
 Evidence you can point at:
 
@@ -33,7 +33,7 @@ PEAC records double as audit-trail entries suitable for the interaction-logging 
 
 Evidence you can point at:
 
-- [`docs/governance/`](governance/) carries the in-progress mapping from PEAC record fields to the relevant clauses and controls. The formal compliance mappings (ISO 42001 Clause 8, EU AI Act Annex IV) publish in a near-term release; the mapping directory is the forward link.
+- Governance and compliance mappings live under [`docs/governance/`](governance/) and [`docs/compliance/`](compliance/); their current status is documented in those directories.
 - The policy-binding three-state result (`verified` / `failed` / `unavailable`) is normatively specified at [`docs/specs/PROTOCOL-BEHAVIOR.md`](specs/PROTOCOL-BEHAVIOR.md) and preserves policy-digest traceability.
 - Records are portable in a bundle format (`peac-bundle/0.1`, spec at [`docs/specs/EVIDENCE-CARRIER-CONTRACT.md`](specs/EVIDENCE-CARRIER-CONTRACT.md)) so audit packages can be verified offline months or years after issuance.
 
@@ -45,7 +45,7 @@ PEAC is the records layer. It defines issuance, carriage, verification, and pres
 
 - **Decision logic.** Auth systems, policy engines, runtime-governance toolkits, and approval systems define the decision. PEAC records what they attested.
 - **Enforcement.** Runtime control planes define enforcement. PEAC records what was enforced.
-- **Execution.** Shell runners, task runners, and orchestration engines define execution. PEAC records what was executed where another system emits that observation; PEAC does not execute commands itself.
+- **Execution.** Shell runners, task runners, and orchestration engines define execution. The PEAC CLI wrapper may spawn a caller-supplied child process to produce an observation, but PEAC does not choose, schedule, supervise, authorize, or orchestrate command execution.
 - **Evaluation.** Eval platforms, experiment frameworks, and rubric managers define evaluation. PEAC records eval observations emitted by another system; PEAC does not run evaluations itself.
 - **Approval workflows.** Approval systems and reviewer queues define approval logic. PEAC records approval observations emitted by another system; PEAC does not route or decide approvals itself.
 - **Orchestration.** Workflow engines define orchestration. PEAC records workflow observations emitted by another system; PEAC does not orchestrate workflows itself.

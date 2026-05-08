@@ -1,6 +1,5 @@
 # PEAC Protocol Architecture
 
-**Version:** 0.12.9
 **Status:** Authoritative
 
 This document describes the kernel-first architecture of the PEAC Protocol monorepo.
@@ -62,7 +61,7 @@ CI runs the full test suite on Node 24 (primary) and Node 22 + 25 (compatibility
 
 - Wire format `peac-receipt/0.1` is the frozen legacy wire format identifier (v0.10.0+); the Interaction Record format (`interaction-record+jwt`) is current
 - JSON Schema at `specs/wire/peac-receipt-0.1.schema.json` is normative for Wire 0.1
-- Go SDK provides Wire 0.1 issuance, verification, and policy evaluation; additional implementations can follow the same specs
+- Go SDK provides Interaction Record (`interaction-record+jwt`) `Issue()` and `VerifyLocal()` with Ed25519, RFC 8785 JCS, and JOSE hardening; additional implementations can follow the same specs
 
 ---
 
@@ -136,7 +135,7 @@ peac/
 │   ├── middleware-core/    # Layer 3.5: Framework-agnostic receipt middleware
 │   ├── middleware-express/  # Layer 3.5: Express.js receipt middleware
 │   ├── server/             # Layer 5: HTTP verification server
-│   ├── mcp-server/         # Layer 5: MCP server (8 tools, stdio + HTTP)
+│   ├── mcp-server/         # Layer 5: MCP server (default + opt-in privileged tools, stdio + HTTP)
 │   ├── cli/                # Layer 5: Command-line tools
 │   ├── adapters/           # Layer 4: Evidence adapters
 │   │   ├── x402/           # x402 v1+v2 (Linux Foundation)
@@ -147,7 +146,7 @@ peac/
 │   ├── mappings/           # Layer 4: Protocol mappings
 │   │   ├── a2a/            # A2A v1.0.0 (Linux Foundation)
 │   │   ├── acp/            # Agentic Commerce Protocol (OpenAI/Stripe)
-│   │   ├── paymentauth/    # MPP/paymentauth (Stripe/Tempo)
+│   │   ├── paymentauth/    # paymentauth / MPP (Stripe/Tempo)
 │   │   ├── ucp/            # Unified Commerce Protocol (Google)
 │   │   ├── content-signals/ # Content signals observation
 │   │   ├── intoto/         # in-toto v1.0 provenance
@@ -179,17 +178,27 @@ peac/
 
 ---
 
-## Package Inventory (36 published packages as of v0.12.9)
+## Package Inventory
+
+The active package and surface inventory is generated from
+[`REPO_SURFACE_STATUS.json`](../REPO_SURFACE_STATUS.json) and summarized
+in [`docs/PACKAGE_STATUS.md`](PACKAGE_STATUS.md). Architecture-relevant
+surfaces are listed below; counts are intentionally not pinned in this
+doc to avoid release-pinned drift.
+
+For the OSS-neutral generic-core / profile / adapter / example boundary
+doctrine, see
+[`docs/architecture/ABSTRACTION-BOUNDARIES.md`](architecture/ABSTRACTION-BOUNDARIES.md).
 
 ### Core (Normative, Layers 0-3)
 
-| Package          | Layer | Description                                                                          |
-| ---------------- | ----- | ------------------------------------------------------------------------------------ |
-| `@peac/kernel`   | 0     | Zero-dependency constants, types, errors                                             |
-| `@peac/schema`   | 1     | Zod validators, Wire 0.2 extension groups (12 groups), type-to-extension enforcement |
-| `@peac/crypto`   | 2     | Ed25519 JWS, JCS canonicalization (RFC 8785), JOSE hardening                         |
-| `@peac/protocol` | 3     | `issue()`, `issueWire02()`, `verifyLocal()` with strict/interop profiles             |
-| `@peac/control`  | 3     | Constraint types and kernel constraint enforcement                                   |
+| Package          | Layer | Description                                                                                    |
+| ---------------- | ----- | ---------------------------------------------------------------------------------------------- |
+| `@peac/kernel`   | 0     | Zero-dependency constants, types, errors                                                       |
+| `@peac/schema`   | 1     | Zod validators, Wire 0.2 extension groups (15 extension groups), type-to-extension enforcement |
+| `@peac/crypto`   | 2     | Ed25519 JWS, JCS canonicalization (RFC 8785), JOSE hardening                                   |
+| `@peac/protocol` | 3     | `issue()`, `issueWire02()`, `verifyLocal()` with strict/interop profiles                       |
+| `@peac/control`  | 3     | Constraint types and kernel constraint enforcement                                             |
 
 ### Middleware (Layer 3.5)
 
@@ -215,7 +224,7 @@ peac/
 | -------------------------------- | ----- | ----------------------------------------------------------------- |
 | `@peac/mappings-a2a`             | 4     | A2A v1.0.0 artifact embedding + Agent Card discovery              |
 | `@peac/mappings-acp`             | 4     | Agentic Commerce Protocol session lifecycle + payment observation |
-| `@peac/mappings-paymentauth`     | 4     | MPP/paymentauth envelope-first HTTP Payment scheme parsing        |
+| `@peac/mappings-paymentauth`     | 4     | paymentauth / MPP envelope-first HTTP Payment scheme parsing      |
 | `@peac/mappings-ucp`             | 4     | Unified Commerce Protocol order-vs-payment separation             |
 | `@peac/mappings-content-signals` | 4     | Content signals observation (3-state, source precedence)          |
 | `@peac/mappings-intoto`          | 4     | in-toto v1.0 provenance mapping                                   |
@@ -232,11 +241,11 @@ peac/
 
 ### Applications (Layer 5)
 
-| Package            | Layer | Description                                                 |
-| ------------------ | ----- | ----------------------------------------------------------- |
-| `@peac/server`     | 5     | HTTP verification server                                    |
-| `@peac/mcp-server` | 5     | MCP server (8 tools, stdio + Streamable HTTP, RFC 9728 PRM) |
-| `@peac/cli`        | 5     | Command-line tools for receipts, policy, reconciliation     |
+| Package            | Layer | Description                                                                                                                                                        |
+| ------------------ | ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `@peac/server`     | 5     | HTTP verification server                                                                                                                                           |
+| `@peac/mcp-server` | 5     | MCP server (default tools `peac_verify`/`peac_inspect`/`peac_decode` + opt-in privileged `peac_issue`/`peac_create_bundle`; stdio + Streamable HTTP, RFC 9728 PRM) |
+| `@peac/cli`        | 5     | Command-line tools for receipts, policy, reconciliation                                                                                                            |
 
 See `scripts/publish-manifest.json` and `REPO_SURFACE_STATUS.json` for the full authoritative package list. Additional published packages (rails, telemetry, audit, pillar-specific) are listed there.
 

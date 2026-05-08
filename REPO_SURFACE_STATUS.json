@@ -481,11 +481,11 @@
     },
     "apps/sandbox-issuer": {
       "npm": null,
-      "state": "compat-only",
-      "wire": "0.1",
+      "state": "internal",
+      "wire": "0.2",
       "layer": 5,
       "published": false,
-      "note": "Wire 0.1 test fixture generator. Kept for legacy integration tests."
+      "note": "Workspace-internal current-Wire sandbox issuer for integration tests and local demos."
     },
     "apps/bridge": {
       "npm": null,

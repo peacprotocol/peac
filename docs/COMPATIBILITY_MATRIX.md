@@ -1,6 +1,6 @@
 # Compatibility Matrix
 
-Current as of v0.12.13.
+Current as of v0.14.1.
 
 ## Wire Format Support
 
@@ -57,7 +57,7 @@ The **Adapter Readiness** column classifies each surface using the rubric below.
 | `@peac/mappings-mcp`               | MCP tool-call receipt attachment                                                 | v0.11.x  | **Shipped** | `conformance-fixture-only` [e1] |
 | `@peac/mappings-a2a`               | A2A v1.0 normalizer                                                              | v0.12.3  | **Shipped** | `conformance-fixture-only` [e1] |
 | `@peac/mappings-acp`               | ACP delegated-payment observation mapper                                         | v0.12.11 | **Shipped** | `conformance-fixture-only` [e4] |
-| `@peac/mappings-paymentauth`       | MPP / paymentauth payment-attempt and settlement mappers                         | v0.12.11 | **Shipped** | `conformance-fixture-only` [e4] |
+| `@peac/mappings-paymentauth`       | paymentauth / MPP payment-attempt and settlement mappers                         | v0.12.11 | **Shipped** | `conformance-fixture-only` [e4] |
 | `@peac/mappings-ucp`               | UCP / AP2 envelope mapping                                                       | v0.12.4  | **Shipped** | `conformance-fixture-only` [e1] |
 | `@peac/mappings-content-signals`   | Content signals observation mapping                                              | v0.11.2  | **Shipped** | `conformance-fixture-only` [e1] |
 | `@peac/mappings-aipref`            | AI preferences mapping                                                           | v0.12.4  | **Shipped** | `types-only` [e5]               |
@@ -83,7 +83,7 @@ One classification per Layer 4 surface. Under ambiguity between two defensible c
 | `experimental`             | Public but explicitly subject to change; `@experimental` JSDoc; breaking changes allowed with CHANGELOG note.                                                                | JSDoc tag.                                                                            |
 | `paused`                   | Intentionally not maintained in this release cycle; `paused_reason` and `resumption_target` recorded in the row.                                                             | Row-level rationale documented in the matrix.                                         |
 
-No Layer 4 surface in v0.12.13 is `live-upstream-tested`: no CI step exercises a live upstream endpoint today. Promotion from `conformance-fixture-only` to `live-upstream-tested` requires committing a recorded round-trip fixture stamped with the upstream release and wiring it into CI.
+No Layer 4 surface in v0.14.1 is `live-upstream-tested`: no CI step exercises a live upstream endpoint today. Promotion from `conformance-fixture-only` to `live-upstream-tested` requires committing a recorded round-trip fixture stamped with the upstream release and wiring it into CI.
 
 ### Evidence
 

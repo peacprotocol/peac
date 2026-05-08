@@ -213,8 +213,9 @@ current behavior.
 | ----------------------------------------------------- | ----------- | ------------------------------------------------------------------ |
 | COSE/CBOR codec flag (`PEAC_EXPERIMENTAL_CODEC=cose`) | Not shipped | `experimental` once shipped; gated by an explicit roadmap decision |
 
-Security and semantic constraints pre-declared for these surfaces live in
-the [Threat model](THREAT_MODEL.md) forward-looking subsection.
+No public COSE/CBOR codec ships in this release. Security and semantic
+constraints for future codec surfaces are documented when public code
+lands.
 
 ## Internal-only flags
 

@@ -130,37 +130,26 @@ shipped behavior.
 - Resource-limit invariant table with per-row implementation, test, and
   baseline references.
 
-## Future carrier surfaces (pre-doctrine)
+## CLI execution and lifecycle observation surfaces
 
-The forthcoming public surfaces listed in the
-[Stability contract](STABILITY-CONTRACT.md) pre-doctrine section have not
-shipped. Their security contract is pre-declared here so that future
-implementation MUST honor the rules on day one.
+The CLI command-execution and observational lifecycle record surfaces
+have shipped. Their security contract is enforced by the rules below.
 
-- **No raw secret capture by default.** Any future CLI or lifecycle record
-  carrier defaults to redaction or hashing for `argv`, `stdin`, `stdout`,
-  and `stderr`. Raw capture is opt-in and declared by a documented
-  `capture_policy` entry.
-- **Hash-only default for stream captures.** `stdin` / `stdout` / `stderr`
-  are hashed, not stored verbatim, unless the caller explicitly enables
-  raw capture under a documented policy.
-- **Environment-variable allowlist plus value hashing.** No blanket
-  environment dump. Only explicitly-listed variables enter the record,
-  and even those are hashed by default.
-- **Explicit `argv_mode`.** A shell-string invocation must be recorded as
-  such. Hidden shell-expansion ambiguity is rejected.
-- **Bounded byte ceilings on command capture.** `argv` bytes, stream
-  bytes, and environment-variable reference counts all carry documented
-  upper bounds. Exceeding a bound truncates or hashes; it never silently
-  drops.
-- **Lifecycle records are observational-only.** Approval, evaluation,
-  experiment, and workflow records describe what another system
-  attested. They never imply PEAC made the decision, scored the runtime,
-  enforced the policy, or determined payment finality.
+| ID        | Threat                                            | Mitigation                                                                                                                                               | Test coverage                                                                                                                                                                                                                                                                                            |
+| --------- | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| T-CLI-01  | Raw command, stream, or argument secret capture   | Hash/redact defaults for `argv`/`stdin`/`stdout`/`stderr`; explicit raw-capture acknowledgement; bounded byte ceilings; secret-scan guard on raw samples | [`packages/cli/tests/secret-scan.test.ts`](../packages/cli/tests/secret-scan.test.ts), [`packages/cli/tests/capture.test.ts`](../packages/cli/tests/capture.test.ts)                                                                                                                                     |
+| T-CLI-02  | Shell ambiguity or hidden shell expansion         | `shell: false` default; `--shell-mode` required to acknowledge a shell binary; command after `--` spawned as supplied                                    | [`packages/cli/tests/observe-command.test.ts`](../packages/cli/tests/observe-command.test.ts), [`packages/cli/tests/record-command.test.ts`](../packages/cli/tests/record-command.test.ts)                                                                                                               |
+| T-CLI-03  | Environment-variable leakage                      | Deny-by-default env capture; explicit `--env-allow` allowlist; hashed values by default; raw env requires double opt-in                                  | [`packages/cli/tests/observe-command.test.ts`](../packages/cli/tests/observe-command.test.ts), [`packages/cli/tests/capture.test.ts`](../packages/cli/tests/capture.test.ts)                                                                                                                             |
+| T-LIFE-01 | Lifecycle record overclaims decision truth        | Caller-reported event model; opaque-reference grammar; no inline scoring/finality synthesis; closed enum of forbidden top-level keys                     | [`packages/schema/__tests__/extensions/lifecycle-observation.test.ts`](../packages/schema/__tests__/extensions/lifecycle-observation.test.ts), [`packages/schema/__tests__/extensions/lifecycle-observation-shape.test.ts`](../packages/schema/__tests__/extensions/lifecycle-observation-shape.test.ts) |
+| T-LIFE-02 | PEAC mistaken for evaluator/approver/orchestrator | Profile boundary: PEAC issues records; upstream systems evaluate, approve, schedule, transition, or orchestrate                                          | [`docs/specs/LIFECYCLE-OBSERVATION-PROFILE.md`](specs/LIFECYCLE-OBSERVATION-PROFILE.md) §8 (orchestrator boundary, normative)                                                                                                                                                                            |
 
-Each rule above becomes a named threat ID with a concrete test file at the
-time the corresponding surface is implemented. No public CLI or lifecycle
-code ships ahead of this contract.
+Security defaults summary:
+
+- **No raw secret capture by default.** `argv`, `stdin`, `stdout`, `stderr` default to hash/redact modes; raw capture requires `--capture-mode raw` AND `--unsafe-allow-raw-capture` (double opt-in).
+- **Environment-variable allowlist plus value hashing.** No blanket environment dump. Only explicitly-listed variables enter the record, and even those are hashed by default. Raw env requires `--env-mode raw` AND `--unsafe-allow-raw-env`.
+- **Explicit shell mode.** Shell-binary detected without `--shell-mode` is a hard fail. Hidden shell-expansion ambiguity is rejected.
+- **Bounded byte ceilings on command capture.** `argv` bytes, stream bytes, and environment-variable reference counts all carry documented upper bounds. Exceeding a bound truncates or hashes; it never silently drops.
+- **Lifecycle records are observational-only.** Approval, evaluation, experiment, and workflow records describe what another system attested. They never imply PEAC made the decision, scored the runtime, enforced the policy, or determined payment finality.
 
 ## Related documents
 
