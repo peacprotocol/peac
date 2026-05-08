@@ -1,6 +1,6 @@
 # Supported Environments
 
-**Last verified:** v0.12.7 release cycle. Environment claims are substantiated by CI lanes in `.github/workflows/ci.yml` (Node 22/24/25 matrix, Go SDK lane).
+**Last verified:** v0.14.1 release cycle. Environment claims are substantiated by CI lanes in `.github/workflows/ci.yml` (Node 22/24/25 matrix, Go SDK lane).
 
 ## Node.js
 
