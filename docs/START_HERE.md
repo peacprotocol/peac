@@ -53,19 +53,39 @@ Key packages: `@peac/adapter-runtime-governance`, `@peac/adapter-managed-agents`
 
 ## I build A2A agents
 
-You want to carry receipts across Agent-to-Agent Protocol flows.
+You want to carry records across Agent-to-Agent Protocol flows, including handoff observations for agent-card discovery, task lifecycle, and human-review boundaries.
 
 1. Install: `pnpm add @peac/mappings-a2a @peac/protocol @peac/crypto`
-2. Read the [A2A Integration Kit](../integrator-kits/a2a/README.md)
+2. Read the [A2A Integration Kit](../integrator-kits/a2a/README.md) and the [A2A Handoff Records spec](specs/A2A-HANDOFF-RECORDS.md)
 3. See [examples/a2a-gateway-pattern](../examples/a2a-gateway-pattern/) for the gateway pattern
 
 Key packages: `@peac/mappings-a2a`, `@peac/protocol`.
+
+## I record command execution
+
+You want to create an observational record of a local command execution without turning PEAC into a shell runner or automation framework.
+
+1. Use `peac observe command` for unsigned local observations.
+2. Use `peac record command` with issuer material for signed command-execution records.
+3. Read the [CLI Carrier Profile](specs/CLI-CARRIER-PROFILE.md) for capture modes, redaction defaults, and signing requirements.
+
+Key package: `@peac/cli`.
+
+## I emit lifecycle events from another system
+
+You want to issue records for lifecycle events reported by another system, such as evaluation completion, approval, experiment result, mode change, or workflow transition.
+
+1. Use `peac emit lifecycle` with caller-provided issuer material.
+2. Read the [Lifecycle Observation Profile](specs/LIFECYCLE-OBSERVATION-PROFILE.md).
+3. Keep lifecycle records observational: PEAC records what another system reported; it does not approve, evaluate, score, schedule, transition, or orchestrate.
+
+Key package: `@peac/cli`.
 
 ## Integration areas
 
 ### Commerce and payment evidence
 
-You want verifiable evidence from commerce and payment flows across paymentauth / MPP, ACP, Stripe SPT, x402, or UCP. Prove what was offered, challenged, paid, or settled across organizational boundaries.
+You want verifiable evidence from commerce and payment flows across x402, paymentauth / MPP (Machine Payments Protocol), ACP, Stripe SPT, or UCP. Prove what was offered, challenged, paid, or settled across organizational boundaries.
 
 1. Choose your protocol:
    - **paymentauth / MPP**: [paymentauth Integration Kit](../integrator-kits/paymentauth/README.md)
@@ -119,7 +139,7 @@ PEAC is the records layer beneath runtime governance. It does not try to be the 
 - **PEAC is not a payment protocol.** x402, paymentauth / MPP, ACP, and Stripe SPT authorize and settle. PEAC carries verifiable observational evidence across them and never synthesizes payment finality from non-payment artifacts.
 - **PEAC is not an identity protocol or trust-score system.** DIDs, VCs, ERC-8004, and reputation layers own those functions. PEAC accepts `iss` in `https://` or `did:` form and never computes trust.
 - **PEAC is not an observability dashboard.** PEAC records are exportable to any observability system via `receipt_ref` as an OTel span attribute.
-- **PEAC will not become a CLI automation framework, eval platform, approval system, or orchestration / workflow engine.** Future releases extend PEAC to carry CLI execution evidence and observational lifecycle records (eval, approval, experiment, or workflow event exports emitted by other systems). Those are carrier extensions, not new PEAC categories; PEAC records what the upstream system attested and never evaluates, approves, experiments, or orchestrates itself.
+- **PEAC is not a CLI automation framework, eval platform, approval system, or orchestration / workflow engine.** PEAC now carries CLI command-execution records and caller-reported lifecycle observation records as record/export surfaces. PEAC records what the caller or upstream system reported; it does not choose commands, schedule work, run evaluations, decide approvals, transition workflows, or orchestrate systems.
 
 Full protocol scope and boundary: [`docs/WHAT-PEAC-STANDARDIZES.md`](WHAT-PEAC-STANDARDIZES.md) and [`docs/WHERE-IT-FITS.md`](WHERE-IT-FITS.md).
 

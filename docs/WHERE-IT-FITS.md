@@ -46,7 +46,7 @@ Payment rails authorize, settle, refund, and dispute. They carry the money.
 | Custody                      | Holds funds, manages refunds                                            | Never custodies funds                               |
 | Synthesizes payment finality | Yes (the rail is the source of truth)                                   | **No** — PEAC preserves upstream artifacts verbatim |
 
-PEAC's adapter layer (`@peac/adapter-x402`, `@peac/mappings-paymentauth`, `@peac/mappings-acp`, `@peac/rails-stripe`) preserves each rail's attestations verbatim and never synthesizes payment finality from non-payment artifacts. A mapper-boundary guard (`assertExplicitFinality` in `@peac/adapter-core`) blocks commerce records that attempt to imply a settled state the upstream did not claim.
+PEAC's adapter layer (`@peac/adapter-x402`, `@peac/mappings-paymentauth` for paymentauth / MPP, `@peac/mappings-acp`, `@peac/rails-stripe`) preserves each rail's attestations verbatim and never synthesizes payment finality from non-payment artifacts. A mapper-boundary guard (`assertExplicitFinality` in `@peac/adapter-core`) blocks commerce records that attempt to imply a settled state the upstream did not claim.
 
 **Boundary:** PEAC is not a payment protocol. It does not authorize, settle, custody, refund, or enforce scheme-specific invariants.
 
@@ -79,17 +79,17 @@ Where a native attestation exists, PEAC records its output as portable signed ev
 
 **Boundary:** PEAC does not replace native attestations. It makes them portable.
 
-## PEAC vs future CLI execution and lifecycle systems (planning context)
+## PEAC vs CLI execution and lifecycle systems
 
-Carrier breadth is planned to extend to CLI execution evidence and observational lifecycle records (eval completions, approvals, experiment results, workflow transitions) emitted by other systems. This is carrier breadth, not a new category.
+PEAC carries CLI command-execution records and caller-reported lifecycle observation records. These are record/export surfaces, not execution, evaluation, approval, scheduling, or orchestration systems.
 
-| Property           | CLI / lifecycle systems (Temporal, Airflow, OpenAI Evals, approval queues, shell runners, task runners) | PEAC records (future carrier breadth)                                       |
+| Property           | CLI / lifecycle systems (Temporal, Airflow, OpenAI Evals, approval queues, shell runners, task runners) | PEAC records                                                                |
 | ------------------ | ------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
 | Role               | Execute, schedule, orchestrate, evaluate, approve                                                       | Carry portable signed records of what the system attested                   |
 | Decision authority | The system                                                                                              | **Never PEAC**                                                              |
-| PEAC response      | Integrate as a future carrier extension                                                                 | Lifecycle records are observational-only; CLI evidence is non-orchestrating |
+| PEAC response      | Carry signed observational records from those systems                                                   | Lifecycle records are observational-only; CLI evidence is non-orchestrating |
 
-**Boundary (locked):** PEAC will not become a CLI automation framework, eval platform, approval system, or orchestration / workflow engine. Those categories stay occupied by their existing players. PEAC plans to carry signed records from those surfaces in a future release; the carrier work does not change the boundary.
+**Boundary (locked):** PEAC is not a CLI automation framework, eval platform, approval system, or orchestration / workflow engine. Those categories stay occupied by their existing players. The carrier work does not change the boundary.
 
 ## Reference
 

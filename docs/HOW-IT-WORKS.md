@@ -56,16 +56,21 @@ When something happens that another party will need to verify, the issuer create
 ```typescript
 import { issue } from '@peac/protocol';
 
-const jws = await issue(
-  {
-    iss: 'https://api.example.com',
-    kind: 'evidence',
-    type: 'org.peacprotocol/api-receipt',
-    pillars: ['access'],
-    ext: { access: { path: '/api/v1/resource', method: 'GET', status: 200 } },
+const { jws } = await issue({
+  iss: 'https://api.example.com',
+  kind: 'evidence',
+  type: 'org.peacprotocol/api-receipt',
+  pillars: ['access'],
+  extensions: {
+    'org.peacprotocol/access': {
+      resource: '/api/v1/resource',
+      action: 'read',
+      decision: 'allow',
+    },
   },
-  privateKey
-);
+  privateKey,
+  kid: 'key-2026-01',
+});
 ```
 
 The output is a compact JWS string (three base64url parts separated by dots). The JOSE header carries `typ: interaction-record+jwt`, `alg: EdDSA`, and `kid` pointing at the key in the issuer's JWKS. The payload carries the claims: `iss`, `kind`, `type`, `pillars`, `iat`, `jti`, optional extensions, optional policy binding.
@@ -84,7 +89,7 @@ const result = await verifyLocal(jws, publicKey, {
 });
 
 if (result.valid) {
-  console.log(result.claims.type, result.claims.ext);
+  console.log(result.claims.type, result.claims.extensions);
 }
 ```
 
@@ -97,7 +102,7 @@ Under the hood, `verifyLocal()` checks:
 5. Policy binding (if `peac.policy` is present, three-state: `verified` / `failed` / `unavailable`).
 6. Timing bounds (`iat` / `nbf` / `exp` within configured clock skew).
 
-For the hosted path, `POST /v1/verify` on the reference verifier returns the same deterministic report (DD-210 shape). See [`packages/schema/openapi/verify.yaml`](../packages/schema/openapi/verify.yaml).
+For the hosted path, `POST /v1/verify` on the reference verifier returns the same deterministic verification report. See [`packages/schema/openapi/verify.yaml`](../packages/schema/openapi/verify.yaml).
 
 ## 4. Export and share
 
@@ -105,9 +110,13 @@ Records travel in several carriers depending on the surface:
 
 - **HTTP**: the `PEAC-Receipt` response header carries a compact JWS (up to 8 KiB in the header; larger records use `PEAC-Receipt-Ref` pointing at a fetchable resource).
 - **MCP**: the tool-call response `_meta` field carries `org.peacprotocol/receipt_jws` and `org.peacprotocol/receipt_ref` (up to 64 KiB embed).
-- **A2A**: the `metadata[extensionURI].carriers[]` array carries receipt records across Agent-to-Agent flows.
+- **A2A**: the `metadata[extensionURI].carriers[]` array carries receipt records across Agent-to-Agent flows; handoff observation records are described in [`docs/specs/A2A-HANDOFF-RECORDS.md`](specs/A2A-HANDOFF-RECORDS.md).
+- **CLI execution**: `peac observe command` emits an unsigned observation; `peac record command` issues a signed command-execution record using caller-provided issuer material. See [`docs/specs/CLI-CARRIER-PROFILE.md`](specs/CLI-CARRIER-PROFILE.md).
+- **Lifecycle observation**: `peac emit lifecycle` issues signed records for caller-reported lifecycle events. See [`docs/specs/LIFECYCLE-OBSERVATION-PROFILE.md`](specs/LIFECYCLE-OBSERVATION-PROFILE.md).
 - **Bundles**: `peac-bundle/0.1` packages multiple receipts, JWKS snapshots, and policy artifacts into a portable audit file. See [`docs/specs/EVIDENCE-CARRIER-CONTRACT.md`](specs/EVIDENCE-CARRIER-CONTRACT.md).
-- **Reports**: the reference verifier returns the deterministic DD-210 verification report; the extended `application/peac-report+json` shape adds timing, report ID, and failure reasons.
+- **Reports**: the reference verifier returns a deterministic verification report; the extended `application/peac-report+json` shape adds timing, report ID, and failure reasons.
+
+PEAC records observations across these carriers; it is not a shell framework, scheduler, eval platform, approval system, or orchestrator.
 
 ## Kinds and types
 
