@@ -4,7 +4,15 @@
 
 import { Command } from 'commander';
 import { spawn } from 'child_process';
-import { writeFileSync, mkdirSync, accessSync, openSync, readFileSync } from 'fs';
+import {
+  writeFileSync,
+  mkdirSync,
+  accessSync,
+  openSync,
+  closeSync,
+  readFileSync,
+  constants as fsConstants,
+} from 'fs';
 import { join } from 'path';
 import { homedir } from 'os';
 
@@ -70,17 +78,32 @@ export function startCommand() {
           process.exit(code || 0);
         });
       } else {
-        // Run in background
+        // Run in background. Open the log file once with explicit POSIX flags and
+        // pass the same descriptor for both stdout and stderr; spawn(2) duplicates
+        // the fd into the child, so the parent can release its copy after the
+        // child process has been created.
         const logFile = join(logsDir, 'bridge.log');
-        const out = openSync(logFile, 'a');
-        const err = openSync(logFile, 'a');
+        const logFd = openSync(
+          logFile,
+          fsConstants.O_WRONLY | fsConstants.O_APPEND | fsConstants.O_CREAT,
+          0o640
+        );
 
         const args = ['node', bridgePath];
-        const bridge = spawn(args[0], args.slice(1), {
-          detached: true,
-          stdio: ['ignore', out, err],
-          env,
-        });
+        let bridge: ReturnType<typeof spawn>;
+        try {
+          bridge = spawn(args[0], args.slice(1), {
+            detached: true,
+            stdio: ['ignore', logFd, logFd],
+            env,
+          });
+        } finally {
+          try {
+            closeSync(logFd);
+          } catch {
+            // ignore close-on-cleanup errors
+          }
+        }
 
         bridge.unref();
 
