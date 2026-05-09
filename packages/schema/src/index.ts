@@ -201,6 +201,12 @@ export {
   FORBIDDEN_TOP_LEVEL_KEYS,
   LifecycleObservationSchema,
   validateLifecycleObservation,
+  // Provisioning Lifecycle (v0.14.2)
+  PROVISIONING_LIFECYCLE_EXTENSION_KEY,
+  PROVISIONING_LIFECYCLE_TYPE_URIS,
+  PROVISIONING_LIFECYCLE_ERROR_CODES,
+  ProvisioningLifecycleSchema,
+  validateProvisioningLifecycle,
 } from './extensions/index';
 export type {
   CredentialEventType,
@@ -229,6 +235,12 @@ export type {
   LifecycleObservationTypeUri,
   LifecycleValidationError,
   LifecycleValidationResult,
+  // Provisioning Lifecycle (v0.14.2)
+  ProvisioningEventKind,
+  ProvisioningLifecycle,
+  ProvisioningLifecycleTypeUri,
+  ProvisioningLifecycleValidationError,
+  ProvisioningLifecycleValidationResult,
 } from './extensions/index';
 
 // Attribution validators (v0.9.26+)

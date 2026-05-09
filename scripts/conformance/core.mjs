@@ -20,11 +20,12 @@
 /**
  * Canonical requirement ID pattern.
  * Accepts namespace-prefixed IDs: WIRE02, CARRIER, X402V2, DID-RES,
- * PKCE, GRPC-META, RURL, SC, RTGOV, A2A-HANDOFF, CLI-EXEC, LIFE-OBS.
+ * PKCE, GRPC-META, RURL, SC, RTGOV, A2A-HANDOFF, CLI-EXEC, LIFE-OBS,
+ * PROV-LIFE.
  * Section/transport part allows uppercase letters and digits (e.g., A2A).
  */
 export const REQUIREMENT_ID_PATTERN =
-  /^(WIRE02|CARRIER)-[A-Z0-9]+-[0-9]{3}$|^(X402V2|DID-RES|PKCE|GRPC-META|RURL|SC|RTGOV|A2A-HANDOFF|CLI-EXEC|LIFE-OBS)-[0-9]{3}$/;
+  /^(WIRE02|CARRIER)-[A-Z0-9]+-[0-9]{3}$|^(X402V2|DID-RES|PKCE|GRPC-META|RURL|SC|RTGOV|A2A-HANDOFF|CLI-EXEC|LIFE-OBS|PROV-LIFE)-[0-9]{3}$/;
 
 /**
  * Requirement ID namespaces.
@@ -42,17 +43,36 @@ export const NAMESPACES = /** @type {const} */ ([
   'A2A-HANDOFF',
   'CLI-EXEC',
   'LIFE-OBS',
+  'PROV-LIFE',
 ]);
 
 /**
  * Parse a requirement ID into its components.
+ *
+ * Two ID shapes are supported:
+ *
+ *   1. WIRE02 / CARRIER: namespace-section-number
+ *      (e.g. WIRE02-JOSE-009, CARRIER-MCP-001): three segments, with a
+ *      separate section identifier.
+ *   2. Extension namespaces: namespace-number
+ *      (e.g. X402V2-001, DID-RES-002, A2A-HANDOFF-010, CLI-EXEC-006,
+ *      LIFE-OBS-010, PROV-LIFE-001): two segments. The namespace
+ *      encodes the section; `section` is returned as an empty string so
+ *      downstream tooling can sort by namespace.
+ *
  * @param {string} id
  * @returns {{ namespace: string, section: string, number: string } | null}
  */
 export function parseRequirementId(id) {
-  const m = id.match(/^(WIRE02|CARRIER)-([A-Z0-9]+)-([0-9]{3})$/);
-  if (!m) return null;
-  return { namespace: m[1], section: m[2], number: m[3] };
+  let m = id.match(/^(WIRE02|CARRIER)-([A-Z0-9]+)-([0-9]{3})$/);
+  if (m) return { namespace: m[1], section: m[2], number: m[3] };
+
+  m = id.match(
+    /^(X402V2|DID-RES|PKCE|GRPC-META|RURL|SC|RTGOV|A2A-HANDOFF|CLI-EXEC|LIFE-OBS|PROV-LIFE)-([0-9]{3})$/
+  );
+  if (m) return { namespace: m[1], section: '', number: m[2] };
+
+  return null;
 }
 
 /**

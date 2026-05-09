@@ -227,8 +227,7 @@ export const PROOF_TYPES: readonly ProofTypeEntry[] = [
   {
     id: 'eat-background-check',
     category: 'rats',
-    description:
-      'Verifier fetches attestation result from registry in RATS Background-Check model (RFC 9711)',
+    description: 'Verifier fetches attestation result from registry in RATS Background-Check model (RFC 9711)',
     reference: 'https://www.rfc-editor.org/rfc/rfc9711',
     status: 'informational',
   },
@@ -288,24 +287,21 @@ export const RECEIPT_TYPES: readonly ReceiptTypeEntry[] = [
   {
     id: 'org.peacprotocol/a2a-agent-card-observation',
     pillar: 'provenance',
-    description:
-      'Observational record of an A2A v1.0 Agent Card discovery; signature_observation is caller-reported.',
+    description: 'Observational record of an A2A v1.0 Agent Card discovery; signature_observation is caller-reported.',
     extension_group: 'org.peacprotocol/a2a-handoff',
     status: 'informational',
   },
   {
     id: 'org.peacprotocol/a2a-human-approved',
     pillar: 'provenance',
-    description:
-      'Observational record of an A2A v1.0 human approval; PEAC records what an external approver indicated.',
+    description: 'Observational record of an A2A v1.0 human approval; PEAC records what an external approver indicated.',
     extension_group: 'org.peacprotocol/a2a-handoff',
     status: 'informational',
   },
   {
     id: 'org.peacprotocol/a2a-human-rejected',
     pillar: 'provenance',
-    description:
-      'Observational record of an A2A v1.0 human rejection; PEAC records what an external approver indicated.',
+    description: 'Observational record of an A2A v1.0 human rejection; PEAC records what an external approver indicated.',
     extension_group: 'org.peacprotocol/a2a-handoff',
     status: 'informational',
   },
@@ -375,8 +371,7 @@ export const RECEIPT_TYPES: readonly ReceiptTypeEntry[] = [
   {
     id: 'org.peacprotocol/cli-command-execution',
     pillar: 'provenance',
-    description:
-      'Observational record of a local CLI command execution; PEAC records what the wrapper observed (argv, stdin/stdout/stderr digests, exit code, signal, timing, capture policy). Field-level variants (exit_code, signal, timed_out, shell_mode, capture_policy, termination_signal, exit_code_mode) live as fields on this single record type, not as separate record types. Introduced in v0.14.1.',
+    description: 'Observational record of a local CLI command execution; PEAC records what the wrapper observed (argv, stdin/stdout/stderr digests, exit code, signal, timing, capture policy). Field-level variants (exit_code, signal, timed_out, shell_mode, capture_policy, termination_signal, exit_code_mode) live as fields on this single record type, not as separate record types. Introduced in v0.14.1.',
     extension_group: 'org.peacprotocol/cli-execution',
     status: 'informational',
   },
@@ -404,72 +399,63 @@ export const RECEIPT_TYPES: readonly ReceiptTypeEntry[] = [
   {
     id: 'org.peacprotocol/lifecycle-approval-denied',
     pillar: 'provenance',
-    description:
-      'Observational record that an external approver denied; the caller observed the denial, the CLI issues the record using the caller-provided issuer key. PEAC does not deny. Introduced in v0.14.1.',
+    description: 'Observational record that an external approver denied; the caller observed the denial, the CLI issues the record using the caller-provided issuer key. PEAC does not deny. Introduced in v0.14.1.',
     extension_group: 'org.peacprotocol/lifecycle-observation',
     status: 'informational',
   },
   {
     id: 'org.peacprotocol/lifecycle-approval-granted',
     pillar: 'provenance',
-    description:
-      'Observational record that an external approver granted; the caller observed the grant, the CLI issues the record using the caller-provided issuer key. PEAC does not grant. Introduced in v0.14.1.',
+    description: 'Observational record that an external approver granted; the caller observed the grant, the CLI issues the record using the caller-provided issuer key. PEAC does not grant. Introduced in v0.14.1.',
     extension_group: 'org.peacprotocol/lifecycle-observation',
     status: 'informational',
   },
   {
     id: 'org.peacprotocol/lifecycle-approval-requested',
     pillar: 'provenance',
-    description:
-      'Observational record of an external lifecycle approval request; the caller observed the request, the CLI issues the record using the caller-provided issuer key. PEAC does not approve. Introduced in v0.14.1.',
+    description: 'Observational record of an external lifecycle approval request; the caller observed the request, the CLI issues the record using the caller-provided issuer key. PEAC does not approve. Introduced in v0.14.1.',
     extension_group: 'org.peacprotocol/lifecycle-observation',
     status: 'informational',
   },
   {
     id: 'org.peacprotocol/lifecycle-evaluation-completed',
     pillar: 'provenance',
-    description:
-      'Observational record that an external evaluation system completed an evaluation; carries result_ref pointing to a stored result artifact. PEAC does not score. Introduced in v0.14.1.',
+    description: 'Observational record that an external evaluation system completed an evaluation; carries result_ref pointing to a stored result artifact. PEAC does not score. Introduced in v0.14.1.',
     extension_group: 'org.peacprotocol/lifecycle-observation',
     status: 'informational',
   },
   {
     id: 'org.peacprotocol/lifecycle-evaluation-started',
     pillar: 'provenance',
-    description:
-      'Observational record that an external evaluation system started an evaluation; the caller observed the start. PEAC does not evaluate. Introduced in v0.14.1.',
+    description: 'Observational record that an external evaluation system started an evaluation; the caller observed the start. PEAC does not evaluate. Introduced in v0.14.1.',
     extension_group: 'org.peacprotocol/lifecycle-observation',
     status: 'informational',
   },
   {
     id: 'org.peacprotocol/lifecycle-experiment-assigned',
     pillar: 'provenance',
-    description:
-      'Observational record that an external experimentation system assigned a subject to an experiment cohort/variant. PEAC does not run experiments. Introduced in v0.14.1.',
+    description: 'Observational record that an external experimentation system assigned a subject to an experiment cohort/variant. PEAC does not run experiments. Introduced in v0.14.1.',
     extension_group: 'org.peacprotocol/lifecycle-observation',
     status: 'informational',
   },
   {
     id: 'org.peacprotocol/lifecycle-experiment-result',
     pillar: 'provenance',
-    description:
-      'Observational record of an external experiment result; carries experiment_ref and result_ref. PEAC does not score experiments. Introduced in v0.14.1.',
+    description: 'Observational record of an external experiment result; carries experiment_ref and result_ref. PEAC does not score experiments. Introduced in v0.14.1.',
     extension_group: 'org.peacprotocol/lifecycle-observation',
     status: 'informational',
   },
   {
     id: 'org.peacprotocol/lifecycle-mode-observed',
     pillar: 'provenance',
-    description:
-      "Observational record of an external runtime's execution-mode tag (deterministic_script, templated_flow, agent_loop, human_step, hybrid). The caller observed the mode; the CLI records it. Introduced in v0.14.1.",
+    description: 'Observational record of an external runtime\'s execution-mode tag (deterministic_script, templated_flow, agent_loop, human_step, hybrid). The caller observed the mode; the CLI records it. Introduced in v0.14.1.',
     extension_group: 'org.peacprotocol/lifecycle-observation',
     status: 'informational',
   },
   {
     id: 'org.peacprotocol/lifecycle-workflow-transition',
     pillar: 'provenance',
-    description:
-      'Observational record of a state transition emitted by an external workflow engine or orchestrator (from_state -> to_state). PEAC does not orchestrate, schedule, or assign work. Introduced in v0.14.1.',
+    description: 'Observational record of a state transition emitted by an external workflow engine or orchestrator (from_state -> to_state). PEAC does not orchestrate, schedule, or assign work. Introduced in v0.14.1.',
     extension_group: 'org.peacprotocol/lifecycle-observation',
     status: 'informational',
   },
@@ -495,6 +481,76 @@ export const RECEIPT_TYPES: readonly ReceiptTypeEntry[] = [
     status: 'informational',
   },
   {
+    id: 'org.peacprotocol/provisioning-account-observed',
+    pillar: 'provenance',
+    description: 'Observational record of an account-scope sub_event (created / linked / authorized / updated). Caller-reported state; PEAC records what the issuer attests. Introduced in v0.14.2.',
+    extension_group: 'org.peacprotocol/provisioning-lifecycle',
+    status: 'informational',
+  },
+  {
+    id: 'org.peacprotocol/provisioning-budget-observed',
+    pillar: 'provenance',
+    description: 'Observational record of a budget reference and limits digest. PEAC does not enforce budgets; it records caller-reported budget state. Introduced in v0.14.2.',
+    extension_group: 'org.peacprotocol/provisioning-lifecycle',
+    status: 'informational',
+  },
+  {
+    id: 'org.peacprotocol/provisioning-catalog-observed',
+    pillar: 'provenance',
+    description: 'Observational record of catalog discovery: an agent retrieved a service catalog entry, terms, or pricing manifest from a provider. PEAC carries the retrieval timestamp and digests of the upstream artifacts; it does not validate the catalog or vouch for terms. Introduced in v0.14.2.',
+    extension_group: 'org.peacprotocol/provisioning-lifecycle',
+    status: 'informational',
+  },
+  {
+    id: 'org.peacprotocol/provisioning-credential-observed',
+    pillar: 'provenance',
+    description: 'Observational record of a credential-scope sub_event (issued / rotated / revoked / synced) with a generic storage_surface object describing where credential material is held. PEAC never captures credential material; the schema enforces no-inline-credential and no-token-material invariants recursively. Introduced in v0.14.2.',
+    extension_group: 'org.peacprotocol/provisioning-lifecycle',
+    status: 'informational',
+  },
+  {
+    id: 'org.peacprotocol/provisioning-deployment-observed',
+    pillar: 'provenance',
+    description: 'Observational record of a deployment-scope sub_event (started / completed / failed / rolled_back). Caller-reported deployment outcome; PEAC does not deploy or supervise runtime state. Introduced in v0.14.2.',
+    extension_group: 'org.peacprotocol/provisioning-lifecycle',
+    status: 'informational',
+  },
+  {
+    id: 'org.peacprotocol/provisioning-domain-observed',
+    pillar: 'provenance',
+    description: 'Observational record of a domain-scope sub_event (registered / transferred / released). Caller-reported registry interaction; PEAC does not perform domain operations. Introduced in v0.14.2.',
+    extension_group: 'org.peacprotocol/provisioning-lifecycle',
+    status: 'informational',
+  },
+  {
+    id: 'org.peacprotocol/provisioning-payment-authorization-observed',
+    pillar: 'provenance',
+    description: 'Observational record of a payment-authorization sub_event (observed / granted / revoked / expired / consumed). Carries bounded scheme_id (or opaque scheme_ref), authorization_ref, optional non-negative max_amount_minor, optional expires_at, and material_redaction policy. PEAC does not implement payment schemes or vouch for authorization correctness. Introduced in v0.14.2.',
+    extension_group: 'org.peacprotocol/provisioning-lifecycle',
+    status: 'informational',
+  },
+  {
+    id: 'org.peacprotocol/provisioning-provider-link-observed',
+    pillar: 'provenance',
+    description: 'Observational record of a provider link being established or refreshed (account / scheme / token surface). Carries opaque provider account_ref and scheme identity; PEAC does not link, authenticate, or authorize. Introduced in v0.14.2.',
+    extension_group: 'org.peacprotocol/provisioning-lifecycle',
+    status: 'informational',
+  },
+  {
+    id: 'org.peacprotocol/provisioning-resource-observed',
+    pillar: 'provenance',
+    description: 'Observational record of a resource-scope sub_event (requested / provisioned / updated / removed). PEAC does not provision resources; it records caller-reported provisioning outcomes. Introduced in v0.14.2.',
+    extension_group: 'org.peacprotocol/provisioning-lifecycle',
+    status: 'informational',
+  },
+  {
+    id: 'org.peacprotocol/provisioning-subscription-observed',
+    pillar: 'provenance',
+    description: 'Observational record of a subscription-scope sub_event (started / updated / cancelled). Caller-reported lifecycle; PEAC does not manage subscription billing. Introduced in v0.14.2.',
+    extension_group: 'org.peacprotocol/provisioning-lifecycle',
+    status: 'informational',
+  },
+  {
     id: 'org.peacprotocol/purpose-declaration',
     pillar: 'purpose',
     description: 'Purpose declaration or limitation evidence',
@@ -514,8 +570,7 @@ export const RECEIPT_TYPES: readonly ReceiptTypeEntry[] = [
 export const EXTENSION_GROUPS: readonly ExtensionGroupEntry[] = [
   {
     id: 'org.peacprotocol/a2a-handoff',
-    description:
-      'A2A handoff observation extension: records observational events emitted alongside A2A v1.0 task lifecycle transitions (Agent Card observation + 9 task-lifecycle event types). Strictly observational; helpers do not verify Agent Card signatures or fetch upstream events. Introduced in v0.14.1.',
+    description: 'A2A handoff observation extension: records observational events emitted alongside A2A v1.0 task lifecycle transitions (Agent Card observation + 9 task-lifecycle event types). Strictly observational; helpers do not verify Agent Card signatures or fetch upstream events. Introduced in v0.14.1.',
     status: 'informational',
   },
   {
@@ -525,8 +580,7 @@ export const EXTENSION_GROUPS: readonly ExtensionGroupEntry[] = [
   },
   {
     id: 'org.peacprotocol/attribution',
-    description:
-      'Attribution extension: creator_ref, license_spdx, obligation_type, attribution_text, content_signal_source, content_digest',
+    description: 'Attribution extension: creator_ref, license_spdx, obligation_type, attribution_text, content_signal_source, content_digest',
     status: 'informational',
   },
   {
@@ -536,8 +590,7 @@ export const EXTENSION_GROUPS: readonly ExtensionGroupEntry[] = [
   },
   {
     id: 'org.peacprotocol/cli-execution',
-    description:
-      'CLI execution observation extension: records observational evidence of a local command execution wrapped by the peac observe command / record command subcommands. Hard security defaults (argv hashed; stdout/stderr length+sha256+truncated only; env deny-by-default; cwd hashed; binary path hashed; secret-scan on; shell-binary detected without --shell-mode hard-fails). The wrapper is an observer, not a sandbox / permission system / process supervisor / job scheduler / shell orchestrator. Introduced in v0.14.1.',
+    description: 'CLI execution observation extension: records observational evidence of a local command execution wrapped by the peac observe command / record command subcommands. Hard security defaults (argv hashed; stdout/stderr length+sha256+truncated only; env deny-by-default; cwd hashed; binary path hashed; secret-scan on; shell-binary detected without --shell-mode hard-fails). The wrapper is an observer, not a sandbox / permission system / process supervisor / job scheduler / shell orchestrator. Introduced in v0.14.1.',
     status: 'informational',
   },
   {
@@ -547,14 +600,12 @@ export const EXTENSION_GROUPS: readonly ExtensionGroupEntry[] = [
   },
   {
     id: 'org.peacprotocol/compliance',
-    description:
-      'Compliance extension: framework, compliance_status, audit_ref, auditor, audit_date, scope, validity_period, evidence_ref',
+    description: 'Compliance extension: framework, compliance_status, audit_ref, auditor, audit_date, scope, validity_period, evidence_ref',
     status: 'informational',
   },
   {
     id: 'org.peacprotocol/consent',
-    description:
-      'Consent extension: consent_basis, consent_status, data_categories, retention_period, consent_method, withdrawal_uri, scope, jurisdiction',
+    description: 'Consent extension: consent_basis, consent_status, data_categories, retention_period, consent_method, withdrawal_uri, scope, jurisdiction',
     status: 'informational',
   },
   {
@@ -569,32 +620,32 @@ export const EXTENSION_GROUPS: readonly ExtensionGroupEntry[] = [
   },
   {
     id: 'org.peacprotocol/lifecycle-observation',
-    description:
-      "Lifecycle observation extension: records observations of lifecycle events emitted by external systems (orchestrators, workflow engines, evaluation systems, approval systems, agent runtimes). Backs the peac emit lifecycle subcommand. The caller observed the event; the CLI issues the record using the caller-provided issuer key; the caller's issuer is the signer-of-record. Per-event-kind discriminated union covers approval / evaluation / experiment / workflow_transition / mode_observed. Grammar-based no-inline-value invariant rejects 20 forbidden top-level keys (decision/verdict/score/result/passed/failed/policy_result/approval_result/outcome/judgment/rating/grade/pass/fail/allow/deny/authorized/denied/granted/rejected_reason); all *_ref fields validated by the OpaqueRefSchema grammar (approver_ref @-detection prioritized as a PII-blocked subclass). PEAC does not approve, evaluate, score, transition, orchestrate, schedule, or vouch for the truth of the event. Introduced in v0.14.1.",
+    description: 'Lifecycle observation extension: records observations of lifecycle events emitted by external systems (orchestrators, workflow engines, evaluation systems, approval systems, agent runtimes). Backs the peac emit lifecycle subcommand. The caller observed the event; the CLI issues the record using the caller-provided issuer key; the caller\'s issuer is the signer-of-record. Per-event-kind discriminated union covers approval / evaluation / experiment / workflow_transition / mode_observed. Grammar-based no-inline-value invariant rejects 20 forbidden top-level keys (decision/verdict/score/result/passed/failed/policy_result/approval_result/outcome/judgment/rating/grade/pass/fail/allow/deny/authorized/denied/granted/rejected_reason); all *_ref fields validated by the OpaqueRefSchema grammar (approver_ref @-detection prioritized as a PII-blocked subclass). PEAC does not approve, evaluate, score, transition, orchestrate, schedule, or vouch for the truth of the event. Introduced in v0.14.1.',
     status: 'informational',
   },
   {
     id: 'org.peacprotocol/privacy',
-    description:
-      'Privacy extension: data_classification, processing_basis, retention_period, retention_mode, recipient_scope, anonymization_method, data_subject_category, transfer_mechanism',
+    description: 'Privacy extension: data_classification, processing_basis, retention_period, retention_mode, recipient_scope, anonymization_method, data_subject_category, transfer_mechanism',
     status: 'informational',
   },
   {
     id: 'org.peacprotocol/provenance',
-    description:
-      'Provenance extension: source_type, source_ref, source_uri, build_provenance_uri, verification_method, custody_chain, slsa',
+    description: 'Provenance extension: source_type, source_ref, source_uri, build_provenance_uri, verification_method, custody_chain, slsa',
+    status: 'informational',
+  },
+  {
+    id: 'org.peacprotocol/provisioning-lifecycle',
+    description: 'Provisioning lifecycle observation extension: records observations of lifecycle events emitted when an agent or agent-driven workflow provisions services, accounts, resources, credentials, payment authorizations, budgets, subscriptions, domains, or deployments through external providers. Per-event-kind discriminated union covers ten *-observed event families (catalog / provider-link / account / resource / credential / payment-authorization / budget / subscription / domain / deployment). Granular sub-states (created/linked/granted/revoked/issued/rotated/etc.) live as <scope>.sub_event fields inside each scope object, NOT as separate type URIs. No-credential-leak invariant rejects 20 forbidden top-level credential-bearing keys with provisioning.inline_credential_blocked; a recursive secret-scanner walker rejects credential-shaped values and forbidden key names at any depth with provisioning.token_material_blocked / provisioning.forbidden_key_name. Generic storage_surface object with abstract kind enum (no vendor-specific values). Bounded scheme_id grammar with opaque scheme_ref alternative. PEAC does not authorize the action, verify legal acceptance, provision resources, validate credentials, process payments, vouch for provider state, settle transactions, manage credential vaults, or operate the runtime. PEAC does not implement OAuth, DPoP, OAuth Protected Resource Metadata, or Shared Payment Tokens. Introduced in v0.14.2.',
     status: 'informational',
   },
   {
     id: 'org.peacprotocol/purpose',
-    description:
-      'Purpose extension: external_purposes, purpose_basis, purpose_limitation, data_minimization, compatible_purposes, peac_purpose_mapping',
+    description: 'Purpose extension: external_purposes, purpose_basis, purpose_limitation, data_minimization, compatible_purposes, peac_purpose_mapping',
     status: 'informational',
   },
   {
     id: 'org.peacprotocol/safety',
-    description:
-      'Safety extension: review_status, risk_level, assessment_method, safety_measures, incident_ref, model_ref, category',
+    description: 'Safety extension: review_status, risk_level, assessment_method, safety_measures, incident_ref, model_ref, category',
     status: 'informational',
   },
 ];
@@ -633,6 +684,16 @@ export const TYPE_TO_EXTENSION_MAP: ReadonlyMap<string, string> = new Map([
   ['org.peacprotocol/payment', 'org.peacprotocol/commerce'],
   ['org.peacprotocol/privacy-signal', 'org.peacprotocol/privacy'],
   ['org.peacprotocol/provenance-record', 'org.peacprotocol/provenance'],
+  ['org.peacprotocol/provisioning-account-observed', 'org.peacprotocol/provisioning-lifecycle'],
+  ['org.peacprotocol/provisioning-budget-observed', 'org.peacprotocol/provisioning-lifecycle'],
+  ['org.peacprotocol/provisioning-catalog-observed', 'org.peacprotocol/provisioning-lifecycle'],
+  ['org.peacprotocol/provisioning-credential-observed', 'org.peacprotocol/provisioning-lifecycle'],
+  ['org.peacprotocol/provisioning-deployment-observed', 'org.peacprotocol/provisioning-lifecycle'],
+  ['org.peacprotocol/provisioning-domain-observed', 'org.peacprotocol/provisioning-lifecycle'],
+  ['org.peacprotocol/provisioning-payment-authorization-observed', 'org.peacprotocol/provisioning-lifecycle'],
+  ['org.peacprotocol/provisioning-provider-link-observed', 'org.peacprotocol/provisioning-lifecycle'],
+  ['org.peacprotocol/provisioning-resource-observed', 'org.peacprotocol/provisioning-lifecycle'],
+  ['org.peacprotocol/provisioning-subscription-observed', 'org.peacprotocol/provisioning-lifecycle'],
   ['org.peacprotocol/purpose-declaration', 'org.peacprotocol/purpose'],
   ['org.peacprotocol/safety-review', 'org.peacprotocol/safety'],
 ]);

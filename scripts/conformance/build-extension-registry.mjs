@@ -55,7 +55,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..', '..');
 const OUTPUT_PATH = join(ROOT, 'specs/conformance/extension-requirement-ids.json');
 
-const VERSION = '0.14.0';
+const VERSION = '0.14.2';
 
 function hash(fragment) {
   return 'sha256:' + createHash('sha256').update(fragment, 'utf-8').digest('hex');
@@ -590,6 +590,105 @@ const EXTENSION_REQUIREMENTS = [
           'Spec orchestrator-boundary text is normative and vendor-neutral; PEAC does not assign work, run agents, schedule tasks, manage issue trackers, route approvals, decide step ordering, or enforce workflow policy',
         source_fragment:
           'the orchestrator-boundary text is normative and vendor-neutral; PEAC does not assign work, run agents, schedule tasks, manage issue trackers, route approvals, decide step ordering, or enforce workflow policy',
+        enforcement_class: 'hard_fail',
+      },
+    ],
+  },
+  // --- Section 31: Provisioning Lifecycle Records ---
+  {
+    section: 31,
+    title: 'Provisioning Lifecycle Records',
+    anchor: 'provisioning-lifecycle-records',
+    governing_spec: 'docs/specs/PROVISIONING-LIFECYCLE-PROFILE.md',
+    requirements: [
+      {
+        id: 'PROV-LIFE-001',
+        keyword: 'MUST',
+        summary:
+          'Validator rejects 20 forbidden top-level credential-bearing keys with provisioning.inline_credential_blocked',
+        source_fragment:
+          'provisioning.inline_credential_blocked rejects 20 forbidden top-level credential-bearing keys at extension top level',
+        enforcement_class: 'hard_fail',
+      },
+      {
+        id: 'PROV-LIFE-002',
+        keyword: 'MUST',
+        summary:
+          'Recursive secret-scanner walker rejects forbidden key names at any depth with provisioning.forbidden_key_name and credential-shaped value strings with provisioning.token_material_blocked',
+        source_fragment:
+          'recursive walker inspects key names AND value strings at every depth; forbidden key names reject with provisioning.forbidden_key_name; credential-shaped value strings reject with provisioning.token_material_blocked',
+        enforcement_class: 'hard_fail',
+      },
+      {
+        id: 'PROV-LIFE-003',
+        keyword: 'MUST',
+        summary:
+          'All *_ref fields validated by the OpaqueRefSchema grammar; all *_digest fields validated by the Sha256DigestSchema grammar',
+        source_fragment:
+          'all *_ref fields validated by the OpaqueRefSchema grammar; all *_digest fields validated by the Sha256DigestSchema grammar',
+        enforcement_class: 'hard_fail',
+      },
+      {
+        id: 'PROV-LIFE-004',
+        keyword: 'MUST',
+        summary:
+          'storage_surface object uses abstract kind enum (external_secret_store, local_encrypted_file, local_plaintext_file, environment_file, runtime_secret_binding, none, unknown); no vendor-specific values',
+        source_fragment:
+          'storage_surface kind is one of external_secret_store, local_encrypted_file, local_plaintext_file, environment_file, runtime_secret_binding, none, unknown',
+        enforcement_class: 'hard_fail',
+      },
+      {
+        id: 'PROV-LIFE-005',
+        keyword: 'MUST',
+        summary:
+          'scheme_id follows a bounded ASCII grammar (max 128 UTF-8 bytes; allowed characters [a-z0-9._:/+-]); scheme_id and scheme_ref are mutually exclusive',
+        source_fragment:
+          'scheme_id is a bounded ASCII token (max 128 UTF-8 bytes; allowed [a-z0-9._:/+-]); mutually exclusive with scheme_ref',
+        enforcement_class: 'hard_fail',
+      },
+      {
+        id: 'PROV-LIFE-006',
+        keyword: 'MUST',
+        summary:
+          'payment_authorization_observation.max_amount_minor is a non-negative bounded decimal-integer string; negative values reject with provisioning.invalid_amount_minor',
+        source_fragment:
+          'max_amount_minor is non-negative bounded decimal string; negative values reject with provisioning.invalid_amount_minor',
+        enforcement_class: 'hard_fail',
+      },
+      {
+        id: 'PROV-LIFE-007',
+        keyword: 'MUST',
+        summary:
+          'Per-event-kind required fields enforced via discriminated union; missing observed_at and other missing required fields surface provisioning.missing_required_field',
+        source_fragment:
+          'per-event-kind required fields enforced via discriminated union; missing required fields surface provisioning.missing_required_field',
+        enforcement_class: 'hard_fail',
+      },
+      {
+        id: 'PROV-LIFE-008',
+        keyword: 'MUST',
+        summary:
+          'Unknown event_kind rejects with provisioning.invalid_event_kind; the discriminator is closed over the 10 *-observed event families',
+        source_fragment:
+          'unknown event_kind rejects with provisioning.invalid_event_kind; closed-enum discriminator over 10 -observed event families',
+        enforcement_class: 'hard_fail',
+      },
+      {
+        id: 'PROV-LIFE-009',
+        keyword: 'MUST',
+        summary:
+          'Every type URI in PROVISIONING_LIFECYCLE_TYPE_URIS maps to org.peacprotocol/provisioning-lifecycle in TYPE_TO_EXTENSION_MAP',
+        source_fragment:
+          'every URI in PROVISIONING_LIFECYCLE_TYPE_URIS maps to org.peacprotocol/provisioning-lifecycle in TYPE_TO_EXTENSION_MAP',
+        enforcement_class: 'hard_fail',
+      },
+      {
+        id: 'PROV-LIFE-010',
+        keyword: 'MUST',
+        summary:
+          'Spec boundary text is normative and vendor-neutral; PEAC does not authorize the action, verify legal acceptance, provision resources, validate credentials, process payments, vouch for provider state, settle transactions, manage credential vaults, or operate the runtime',
+        source_fragment:
+          'PEAC does not authorize the action, verify legal acceptance, provision resources, validate credentials, process payments, vouch for provider state, settle transactions, manage credential vaults, or operate the runtime',
         enforcement_class: 'hard_fail',
       },
     ],

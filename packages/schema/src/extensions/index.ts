@@ -107,3 +107,24 @@ export type {
   LifecycleValidationError,
   LifecycleValidationResult,
 } from './lifecycle-observation';
+
+// Provisioning Lifecycle (org.peacprotocol/provisioning-lifecycle): v0.14.2
+//
+// The recursive credential-material walker and the forbidden-top-level
+// key list are package-internal; only the canonical schema, the
+// structured validator, the namespace key, the type URI list, and the
+// stable error-code object are part of the public surface.
+export {
+  PROVISIONING_LIFECYCLE_EXTENSION_KEY,
+  PROVISIONING_LIFECYCLE_TYPE_URIS,
+  PROVISIONING_LIFECYCLE_ERROR_CODES,
+  ProvisioningLifecycleSchema,
+  validateProvisioningLifecycle,
+} from './provisioning-lifecycle';
+export type {
+  ProvisioningEventKind,
+  ProvisioningLifecycle,
+  ProvisioningLifecycleTypeUri,
+  ProvisioningLifecycleValidationError,
+  ProvisioningLifecycleValidationResult,
+} from './provisioning-lifecycle';

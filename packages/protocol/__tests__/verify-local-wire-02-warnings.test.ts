@@ -113,6 +113,19 @@ const MINIMAL_EXT: Record<string, Record<string, unknown>> = {
     },
     platform: { os: 'linux', arch: 'x64', peac_cli_version: '0.14.0' },
   },
+  // Provisioning lifecycle (uses resource-observed vector; sufficient for
+  // the does-not-emit-type_unregistered iteration; per-event-kind shape is
+  // exercised by the provisioning-lifecycle parity corpus and schema tests).
+  'org.peacprotocol/provisioning-lifecycle': {
+    event_kind: 'provisioning-resource-observed',
+    observed_at: '2026-05-12T10:00:00Z',
+    provider: { provider_ref: 'urn:peac:provider:provider-x' },
+    resource: {
+      kind: 'edge_compute_unit',
+      resource_ref: 'urn:peac:resource:r1',
+      sub_event: 'provisioned',
+    },
+  },
   // Lifecycle observation (uses workflow-transition vector; sufficient for
   // the does-not-emit-type_unregistered iteration; type-specific shape is
   // exercised by the lifecycle-observation parity corpus and schema tests).

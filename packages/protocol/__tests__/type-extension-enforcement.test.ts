@@ -42,7 +42,7 @@ const REGISTERED_KEYS = REGISTERED_EXTENSION_GROUP_KEYS;
 // the registry widening as a discrete decision.
 //   Wire 0.2 core groups: 12 (10 pillars + correlation + challenge).
 //   Profile groups:       3  (a2a-handoff, cli-execution, lifecycle-observation).
-const EXPECTED_REGISTERED_GROUP_COUNT = 15;
+const EXPECTED_REGISTERED_GROUP_COUNT = 16;
 
 describe('checkTypeExtensionMapping(): pure helper', () => {
   it('returns skip for unmapped custom type', () => {
@@ -245,6 +245,16 @@ const MINIMAL_EXTENSIONS: Record<string, Record<string, unknown>> = {
     from_state: 'pending',
     to_state: 'running',
   },
+  'org.peacprotocol/provisioning-lifecycle': {
+    event_kind: 'provisioning-resource-observed',
+    observed_at: '2026-05-12T10:00:00Z',
+    provider: { provider_ref: 'urn:peac:provider:provider-x' },
+    resource: {
+      kind: 'edge_compute_unit',
+      resource_ref: 'urn:peac:resource:r1',
+      sub_event: 'provisioned',
+    },
+  },
 };
 
 /**
@@ -286,6 +296,17 @@ const TYPE_PILLARS: Record<string, string> = {
   'org.peacprotocol/lifecycle-experiment-result': 'provenance',
   'org.peacprotocol/lifecycle-workflow-transition': 'provenance',
   'org.peacprotocol/lifecycle-mode-observed': 'provenance',
+  // v0.14.2 provisioning-lifecycle family (10 type URIs, all pillar=provenance)
+  'org.peacprotocol/provisioning-catalog-observed': 'provenance',
+  'org.peacprotocol/provisioning-provider-link-observed': 'provenance',
+  'org.peacprotocol/provisioning-account-observed': 'provenance',
+  'org.peacprotocol/provisioning-resource-observed': 'provenance',
+  'org.peacprotocol/provisioning-credential-observed': 'provenance',
+  'org.peacprotocol/provisioning-payment-authorization-observed': 'provenance',
+  'org.peacprotocol/provisioning-budget-observed': 'provenance',
+  'org.peacprotocol/provisioning-subscription-observed': 'provenance',
+  'org.peacprotocol/provisioning-domain-observed': 'provenance',
+  'org.peacprotocol/provisioning-deployment-observed': 'provenance',
 };
 
 /** Get a different registered extension group (for mismatch testing) */
@@ -445,8 +466,8 @@ describe('verifyLocal(): type-to-extension edge cases', () => {
 // ---------------------------------------------------------------------------
 
 describe('Registry completion: type-to-extension surface', () => {
-  it('TYPE_TO_EXTENSION_MAP covers all 30 registered receipt types (10 pillars + 10 a2a-handoff + 1 cli-command-execution + 9 lifecycle event kinds)', () => {
-    expect(TYPE_TO_EXTENSION_MAP.size).toBe(30);
+  it('TYPE_TO_EXTENSION_MAP covers all 40 registered receipt types (10 pillars + 10 a2a-handoff + 1 cli-command-execution + 9 lifecycle event kinds + 10 provisioning-lifecycle event families)', () => {
+    expect(TYPE_TO_EXTENSION_MAP.size).toBe(40);
   });
 
   it('every mapped extension group is in REGISTERED_EXTENSION_GROUP_KEYS', () => {
@@ -455,7 +476,7 @@ describe('Registry completion: type-to-extension surface', () => {
     }
   });
 
-  it('REGISTERED_EXTENSION_GROUP_KEYS has exactly 15 entries (12 pillars/cross-cutting + a2a-handoff + cli-execution + lifecycle-observation)', () => {
+  it('REGISTERED_EXTENSION_GROUP_KEYS has exactly 16 entries (12 pillars/cross-cutting + a2a-handoff + cli-execution + lifecycle-observation + provisioning-lifecycle)', () => {
     expect(REGISTERED_KEYS.size).toBe(EXPECTED_REGISTERED_GROUP_COUNT);
   });
 });
