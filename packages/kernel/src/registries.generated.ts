@@ -495,6 +495,86 @@ export const RECEIPT_TYPES: readonly ReceiptTypeEntry[] = [
     status: 'informational',
   },
   {
+    id: 'org.peacprotocol/provisioning-account-observed',
+    pillar: 'provenance',
+    description:
+      'Observational record of an account-scope sub_event (created / linked / authorized / updated). Caller-reported state; PEAC records what the issuer attests. Introduced in v0.14.2.',
+    extension_group: 'org.peacprotocol/provisioning-lifecycle',
+    status: 'informational',
+  },
+  {
+    id: 'org.peacprotocol/provisioning-budget-observed',
+    pillar: 'provenance',
+    description:
+      'Observational record of a budget reference and limits digest. PEAC does not enforce budgets; it records caller-reported budget state. Introduced in v0.14.2.',
+    extension_group: 'org.peacprotocol/provisioning-lifecycle',
+    status: 'informational',
+  },
+  {
+    id: 'org.peacprotocol/provisioning-catalog-observed',
+    pillar: 'provenance',
+    description:
+      'Observational record of catalog discovery: an agent retrieved a service catalog entry, terms, or pricing manifest from a provider. PEAC carries the retrieval timestamp and digests of the upstream artifacts; it does not validate the catalog or vouch for terms. Introduced in v0.14.2.',
+    extension_group: 'org.peacprotocol/provisioning-lifecycle',
+    status: 'informational',
+  },
+  {
+    id: 'org.peacprotocol/provisioning-credential-observed',
+    pillar: 'provenance',
+    description:
+      'Observational record of a credential-scope sub_event (issued / rotated / revoked / synced) with a generic storage_surface object describing where credential material is held. PEAC never captures credential material; the schema enforces no-inline-credential and no-token-material invariants recursively. Introduced in v0.14.2.',
+    extension_group: 'org.peacprotocol/provisioning-lifecycle',
+    status: 'informational',
+  },
+  {
+    id: 'org.peacprotocol/provisioning-deployment-observed',
+    pillar: 'provenance',
+    description:
+      'Observational record of a deployment-scope sub_event (started / completed / failed / rolled_back). Caller-reported deployment outcome; PEAC does not deploy or supervise runtime state. Introduced in v0.14.2.',
+    extension_group: 'org.peacprotocol/provisioning-lifecycle',
+    status: 'informational',
+  },
+  {
+    id: 'org.peacprotocol/provisioning-domain-observed',
+    pillar: 'provenance',
+    description:
+      'Observational record of a domain-scope sub_event (registered / transferred / released). Caller-reported registry interaction; PEAC does not perform domain operations. Introduced in v0.14.2.',
+    extension_group: 'org.peacprotocol/provisioning-lifecycle',
+    status: 'informational',
+  },
+  {
+    id: 'org.peacprotocol/provisioning-payment-authorization-observed',
+    pillar: 'provenance',
+    description:
+      'Observational record of a payment-authorization sub_event (observed / granted / revoked / expired / consumed). Carries bounded scheme_id (or opaque scheme_ref), authorization_ref, optional non-negative max_amount_minor, optional expires_at, and material_redaction policy. PEAC does not implement payment schemes or vouch for authorization correctness. Introduced in v0.14.2.',
+    extension_group: 'org.peacprotocol/provisioning-lifecycle',
+    status: 'informational',
+  },
+  {
+    id: 'org.peacprotocol/provisioning-provider-link-observed',
+    pillar: 'provenance',
+    description:
+      'Observational record of a provider link being established or refreshed (account / scheme / token surface). Carries opaque provider account_ref and scheme identity; PEAC does not link, authenticate, or authorize. Introduced in v0.14.2.',
+    extension_group: 'org.peacprotocol/provisioning-lifecycle',
+    status: 'informational',
+  },
+  {
+    id: 'org.peacprotocol/provisioning-resource-observed',
+    pillar: 'provenance',
+    description:
+      'Observational record of a resource-scope sub_event (requested / provisioned / updated / removed). PEAC does not provision resources; it records caller-reported provisioning outcomes. Introduced in v0.14.2.',
+    extension_group: 'org.peacprotocol/provisioning-lifecycle',
+    status: 'informational',
+  },
+  {
+    id: 'org.peacprotocol/provisioning-subscription-observed',
+    pillar: 'provenance',
+    description:
+      'Observational record of a subscription-scope sub_event (started / updated / cancelled). Caller-reported lifecycle; PEAC does not manage subscription billing. Introduced in v0.14.2.',
+    extension_group: 'org.peacprotocol/provisioning-lifecycle',
+    status: 'informational',
+  },
+  {
     id: 'org.peacprotocol/purpose-declaration',
     pillar: 'purpose',
     description: 'Purpose declaration or limitation evidence',
@@ -586,6 +666,12 @@ export const EXTENSION_GROUPS: readonly ExtensionGroupEntry[] = [
     status: 'informational',
   },
   {
+    id: 'org.peacprotocol/provisioning-lifecycle',
+    description:
+      'Provisioning lifecycle observation extension: records observations of lifecycle events emitted when an agent or agent-driven workflow provisions services, accounts, resources, credentials, payment authorizations, budgets, subscriptions, domains, or deployments through external providers. Per-event-kind discriminated union covers ten *-observed event families (catalog / provider-link / account / resource / credential / payment-authorization / budget / subscription / domain / deployment). Granular sub-states (created/linked/granted/revoked/issued/rotated/etc.) live as <scope>.sub_event fields inside each scope object, NOT as separate type URIs. No-credential-leak invariant rejects 20 forbidden top-level credential-bearing keys with provisioning.inline_credential_blocked; a recursive secret-scanner walker rejects credential-shaped values and forbidden key names at any depth with provisioning.token_material_blocked / provisioning.forbidden_key_name. Generic storage_surface object with abstract kind enum (no vendor-specific values). Bounded scheme_id grammar with opaque scheme_ref alternative. PEAC does not authorize the action, verify legal acceptance, provision resources, validate credentials, process payments, vouch for provider state, settle transactions, manage credential vaults, or operate the runtime. PEAC does not implement OAuth, DPoP, OAuth Protected Resource Metadata, or Shared Payment Tokens. Introduced in v0.14.2.',
+    status: 'informational',
+  },
+  {
     id: 'org.peacprotocol/purpose',
     description:
       'Purpose extension: external_purposes, purpose_basis, purpose_limitation, data_minimization, compatible_purposes, peac_purpose_mapping',
@@ -633,6 +719,25 @@ export const TYPE_TO_EXTENSION_MAP: ReadonlyMap<string, string> = new Map([
   ['org.peacprotocol/payment', 'org.peacprotocol/commerce'],
   ['org.peacprotocol/privacy-signal', 'org.peacprotocol/privacy'],
   ['org.peacprotocol/provenance-record', 'org.peacprotocol/provenance'],
+  ['org.peacprotocol/provisioning-account-observed', 'org.peacprotocol/provisioning-lifecycle'],
+  ['org.peacprotocol/provisioning-budget-observed', 'org.peacprotocol/provisioning-lifecycle'],
+  ['org.peacprotocol/provisioning-catalog-observed', 'org.peacprotocol/provisioning-lifecycle'],
+  ['org.peacprotocol/provisioning-credential-observed', 'org.peacprotocol/provisioning-lifecycle'],
+  ['org.peacprotocol/provisioning-deployment-observed', 'org.peacprotocol/provisioning-lifecycle'],
+  ['org.peacprotocol/provisioning-domain-observed', 'org.peacprotocol/provisioning-lifecycle'],
+  [
+    'org.peacprotocol/provisioning-payment-authorization-observed',
+    'org.peacprotocol/provisioning-lifecycle',
+  ],
+  [
+    'org.peacprotocol/provisioning-provider-link-observed',
+    'org.peacprotocol/provisioning-lifecycle',
+  ],
+  ['org.peacprotocol/provisioning-resource-observed', 'org.peacprotocol/provisioning-lifecycle'],
+  [
+    'org.peacprotocol/provisioning-subscription-observed',
+    'org.peacprotocol/provisioning-lifecycle',
+  ],
   ['org.peacprotocol/purpose-declaration', 'org.peacprotocol/purpose'],
   ['org.peacprotocol/safety-review', 'org.peacprotocol/safety'],
 ]);

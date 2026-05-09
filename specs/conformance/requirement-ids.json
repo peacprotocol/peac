@@ -2180,8 +2180,8 @@
           "source_fragment": "maxTimeoutSeconds: must be a positive number (duration, not epoch)",
           "source_fragment_hash": "sha256:41664ac39ee87a9673a5c40bce4e9e8451906a1537fd2df4405da8412d73ccd5",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.14.0",
-          "last_reviewed_in": "0.14.0"
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
         },
         {
           "id": "X402V2-002",
@@ -2190,8 +2190,8 @@
           "source_fragment": "V2 offers require supportedVersions to include 2",
           "source_fragment_hash": "sha256:0a0ba267065f46dfd7403bd2f25a091fdea1fe4942a5720bb4ba8ddba15d9488",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.14.0",
-          "last_reviewed_in": "0.14.0"
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
         },
         {
           "id": "X402V2-003",
@@ -2200,8 +2200,8 @@
           "source_fragment": "Unknown V2 shapes are rejected in strict mode (fail-closed)",
           "source_fragment_hash": "sha256:d670f693c84d4ae7b680a8c30d3ce8426611fcf729f3f5d1fb3be8b037d2ab4e",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.14.0",
-          "last_reviewed_in": "0.14.0"
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
         },
         {
           "id": "X402V2-004",
@@ -2210,8 +2210,8 @@
           "source_fragment": "Default: [1] (V2 rejected unless explicitly enabled)",
           "source_fragment_hash": "sha256:cad723f65f1128a1444d551ad2c290419b7dacb8b315bb6cfa57a9432b6531bc",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.14.0",
-          "last_reviewed_in": "0.14.0"
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
         }
       ]
     },
@@ -2228,8 +2228,8 @@
           "source_fragment": "Supports both multibase forms: z (base58btc) and u (base64url)",
           "source_fragment_hash": "sha256:4db96bbc44ae26a61f19d6200c043166512dd922e77aea1721c5f15cb4a8ef38",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.14.0",
-          "last_reviewed_in": "0.14.0"
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
         },
         {
           "id": "DID-RES-002",
@@ -2238,8 +2238,8 @@
           "source_fragment": "u prefix: base64url encoding (multibase)",
           "source_fragment_hash": "sha256:cd3bcc42a44bac82ef1dc06d492f33ef731c1a957ddf9378090206a62f6127b7",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.14.0",
-          "last_reviewed_in": "0.14.0"
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
         },
         {
           "id": "DID-RES-003",
@@ -2248,8 +2248,8 @@
           "source_fragment": "Non-Ed25519 keys are rejected without oracle (no early-return, prevents timing side-channels)",
           "source_fragment_hash": "sha256:4347a0d7736d8e7d209cf6b5512433ae6495c10431ad0f4f455ee5cea552d23a",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.14.0",
-          "last_reviewed_in": "0.14.0"
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
         },
         {
           "id": "DID-RES-004",
@@ -2258,8 +2258,8 @@
           "source_fragment": "URL transformation: did:web:example.com:path:to transforms to https://example.com/path/to/did.json",
           "source_fragment_hash": "sha256:72b34d5684525bcef1f6f9cb8ee22981b03a089753163f2669e29bb5c0273212",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.14.0",
-          "last_reviewed_in": "0.14.0"
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
         },
         {
           "id": "DID-RES-005",
@@ -2268,8 +2268,8 @@
           "source_fragment": "Percent-encoded port: did:web:example.com%3A8443 transforms to https://example.com:8443/.well-known/did.json",
           "source_fragment_hash": "sha256:1ae86b0ec77975dad92cf03ace04dc48c46419fc1b7c538da9bc0fb51dbb5149",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.14.0",
-          "last_reviewed_in": "0.14.0"
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
         },
         {
           "id": "DID-RES-006",
@@ -2278,8 +2278,8 @@
           "source_fragment": "IP literal rejection: did:web with IP literal hostname is rejected",
           "source_fragment_hash": "sha256:3a3a2c112066356c8f455d5af72b2ca89f73078b1f956971e9398bdf22692654",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.14.0",
-          "last_reviewed_in": "0.14.0"
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
         },
         {
           "id": "DID-RES-007",
@@ -2288,8 +2288,8 @@
           "source_fragment": "Exact id match: resolved document id must match the input DID",
           "source_fragment_hash": "sha256:90d10d838e8b5cfd918a9694e3935f571953e1db5f3937de51451733b199d322",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.14.0",
-          "last_reviewed_in": "0.14.0"
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
         }
       ]
     },
@@ -2306,8 +2306,8 @@
           "source_fragment": "extract(): reads receipt from metadata, computes real SHA-256 receipt_ref via node:crypto",
           "source_fragment_hash": "sha256:344ada379533227cc3b8dd2e1f53d4bf1f7c939cb40816ea5f0429a5d94adb5d",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.14.0",
-          "last_reviewed_in": "0.14.0"
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
         },
         {
           "id": "GRPC-META-002",
@@ -2316,8 +2316,8 @@
           "source_fragment": "Binary metadata (gRPC -bin suffix convention) is rejected for PEAC receipt data",
           "source_fragment_hash": "sha256:1eb320a0b73c27eb7959f31a5095816499c6e790f3d1018b5f6ceee45a9b4b7b",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.14.0",
-          "last_reviewed_in": "0.14.0"
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
         },
         {
           "id": "GRPC-META-003",
@@ -2326,8 +2326,8 @@
           "source_fragment": "Default receipt type: interaction-record+jwt (Wire 0.2)",
           "source_fragment_hash": "sha256:4213d777ca4f7c330f8bc35cbfdaa46bf21f3627847a1291f57df0d657b0b50e",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.14.0",
-          "last_reviewed_in": "0.14.0"
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
         }
       ]
     },
@@ -2344,8 +2344,8 @@
           "source_fragment": "Verifier: 43-128 chars from RFC 7636 unreserved set",
           "source_fragment_hash": "sha256:c20dd7dabd6abb7961e83ff8bc9eac9f8fee7e83bb82192f80cf0091c096c5c7",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.14.0",
-          "last_reviewed_in": "0.14.0"
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
         },
         {
           "id": "PKCE-002",
@@ -2354,8 +2354,8 @@
           "source_fragment": "S256 only; plain method is rejected",
           "source_fragment_hash": "sha256:2fed9e07548af196b9708d14d1acd6870a1043137af413539e8877e909804e3f",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.14.0",
-          "last_reviewed_in": "0.14.0"
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
         },
         {
           "id": "PKCE-003",
@@ -2364,8 +2364,8 @@
           "source_fragment": "decision: always review (never allow or deny)",
           "source_fragment_hash": "sha256:9361ae3cb6b92bc449cfec893d6a4a067e6c46fcf9a08e121457fd72cab2c2cf",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.14.0",
-          "last_reviewed_in": "0.14.0"
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
         },
         {
           "id": "PKCE-004",
@@ -2374,8 +2374,8 @@
           "source_fragment": "Token material never included in evidence output",
           "source_fragment_hash": "sha256:2e2342b40685efa0525afb14414f4521b4908922978a1cd590972b4279dcad33",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.14.0",
-          "last_reviewed_in": "0.14.0"
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
         }
       ]
     },
@@ -2392,8 +2392,8 @@
           "source_fragment": "Caller MUST verify: sha256(fetched_jws) == carrier.receipt_ref",
           "source_fragment_hash": "sha256:2ac217c8a7952343a9ed21781c4f6c4673f0183595491eb0c4dd4054eacbbe0f",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.14.0",
-          "last_reviewed_in": "0.14.0"
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
         },
         {
           "id": "RURL-002",
@@ -2402,8 +2402,8 @@
           "source_fragment": "The returned carrier is always a pure PeacEvidenceCarrier",
           "source_fragment_hash": "sha256:d5966c3934192a96dacfe30564c1bc5a6f3afae8157cb4da9c577e75e73a0518",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.14.0",
-          "last_reviewed_in": "0.14.0"
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
         },
         {
           "id": "RURL-003",
@@ -2412,8 +2412,8 @@
           "source_fragment": "No negative caching: failed resolutions are never cached",
           "source_fragment_hash": "sha256:e8cbfaae6b27fcff756f16048f7e202b18402edcaa09f0b6af7137012ff812e2",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.14.0",
-          "last_reviewed_in": "0.14.0"
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
         },
         {
           "id": "RURL-004",
@@ -2422,8 +2422,8 @@
           "source_fragment": "Resolution fails or ref mismatch: strict false (default) returned unchanged",
           "source_fragment_hash": "sha256:ba985e828fd53fd2cee305e9d2177a9acfbae5399cc2881c142cca170a95ada3",
           "enforcement_class": "advisory",
-          "introduced_in": "0.14.0",
-          "last_reviewed_in": "0.14.0"
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
         }
       ]
     },
@@ -2440,8 +2440,8 @@
           "source_fragment": "subject[0].uri -> source_ref (first subject; multi-subject uses first)",
           "source_fragment_hash": "sha256:080ac059dca90ac0d21a258ffe20d45c5c4a5e4abaf79c373964645f7db5df17",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.14.0",
-          "last_reviewed_in": "0.14.0"
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
         },
         {
           "id": "SC-003",
@@ -2450,8 +2450,8 @@
           "source_fragment": "Maps SLSA v1.2 provenance: slsa track/level/version fields",
           "source_fragment_hash": "sha256:bbd925c511ec996102f68d3baeeba6b991dd12c9c7580d9ac24bc34a6c4201d6",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.14.0",
-          "last_reviewed_in": "0.14.0"
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
         },
         {
           "id": "SC-004",
@@ -2460,8 +2460,8 @@
           "source_fragment": "Throws Error if statement._type is not in-toto v1.0",
           "source_fragment_hash": "sha256:8ddd2f35a1ef2b12461f0ef488aea6e74a3d0e1aa7fc4d8ec87fd269dd3ccb42",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.14.0",
-          "last_reviewed_in": "0.14.0"
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
         }
       ]
     },
@@ -2478,8 +2478,8 @@
           "source_fragment": "All categories produce Interaction Records with kind: \"evidence\"",
           "source_fragment_hash": "sha256:f53bbaec8fca10cd86ef0393d51970b9e3a947364e6d7e78fab27087945ce191",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.14.0",
-          "last_reviewed_in": "0.14.0"
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
         },
         {
           "id": "RTGOV-002",
@@ -2488,8 +2488,8 @@
           "source_fragment": "org.peacprotocol/runtime-governance-{observation-type}",
           "source_fragment_hash": "sha256:47d504c176560c80d381de2c89b685b74269c4b839cad188761c0b6515229b6a",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.14.0",
-          "last_reviewed_in": "0.14.0"
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
         },
         {
           "id": "RTGOV-003",
@@ -2498,8 +2498,8 @@
           "source_fragment": "All runtime-governance adapters share a single extension namespace",
           "source_fragment_hash": "sha256:e2b9c0aab53e691902084e1f6d05e04527cd95e922fbb4130a6d1a765f066bab",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.14.0",
-          "last_reviewed_in": "0.14.0"
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
         },
         {
           "id": "RTGOV-004",
@@ -2508,8 +2508,8 @@
           "source_fragment": "Provider name. Caller-supplied; never hardcoded",
           "source_fragment_hash": "sha256:2b262a126742544c10aeb3b4891136df872c205a4eb9ce26952d5526be4bcb07",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.14.0",
-          "last_reviewed_in": "0.14.0"
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
         },
         {
           "id": "RTGOV-005",
@@ -2518,8 +2518,8 @@
           "source_fragment": "Adapters SHOULD preserve raw upstream artifacts as opaque blobs",
           "source_fragment_hash": "sha256:a1a08a1822b3bf305b8c9fc465bbe310aa06a964f5888668e92bbcb378810056",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.14.0",
-          "last_reviewed_in": "0.14.0"
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
         },
         {
           "id": "RTGOV-006",
@@ -2528,8 +2528,8 @@
           "source_fragment": "PEAC never computes, validates, or weights trust scores",
           "source_fragment_hash": "sha256:56903c0883f5235afee60282409081ad09f77d9591d8b165234f8ce4ebdf1e2f",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.14.0",
-          "last_reviewed_in": "0.14.0"
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
         },
         {
           "id": "RTGOV-007",
@@ -2538,8 +2538,8 @@
           "source_fragment": "PEAC never makes compliance determinations",
           "source_fragment_hash": "sha256:3e51e0eb183809ae754f6d72eadf808faf36772bfd7c191380d6fc92598f7ac0",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.14.0",
-          "last_reviewed_in": "0.14.0"
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
         }
       ]
     },
@@ -2556,8 +2556,8 @@
           "source_fragment": "A record carries exactly one type URI",
           "source_fragment_hash": "sha256:c3bf9d9259f9cb83a7c288fbdaca07d7e8855e7108c4a192b3073c6e10849559",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.14.0",
-          "last_reviewed_in": "0.14.0"
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
         },
         {
           "id": "A2A-HANDOFF-002",
@@ -2566,8 +2566,8 @@
           "source_fragment": "The payload's type field MUST equal the type URI declared at the wire-record level",
           "source_fragment_hash": "sha256:26b1b28a35368e365a34a377b9412079e9286b0e55af8365777c00a3cda0239d",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.14.0",
-          "last_reviewed_in": "0.14.0"
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
         },
         {
           "id": "A2A-HANDOFF-003",
@@ -2576,8 +2576,8 @@
           "source_fragment": "All *_ref fields in this profile use the shared opaque-reference grammar",
           "source_fragment_hash": "sha256:aedad82587ee8156f9a7b170acbf5a3acf0cf7dcc9b9953b4efd108da77a0100",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.14.0",
-          "last_reviewed_in": "0.14.0"
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
         },
         {
           "id": "A2A-HANDOFF-004",
@@ -2586,8 +2586,8 @@
           "source_fragment": "The legacy shape signature: { verified: true, ... } was REJECTED in v0.14.1",
           "source_fragment_hash": "sha256:9dc5dcc649f2cffbb23b3f1c2cb83a930a7e6c3a177959c6b0bbf7da841b4a14",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.14.0",
-          "last_reviewed_in": "0.14.0"
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
         },
         {
           "id": "A2A-HANDOFF-005",
@@ -2596,8 +2596,8 @@
           "source_fragment": "The Agent Card observation helper MUST NOT verify Agent Card signatures",
           "source_fragment_hash": "sha256:6b4a2e27b05ca185fbe7cadd395139db773866e130a068b914584832d097c7df",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.14.0",
-          "last_reviewed_in": "0.14.0"
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
         },
         {
           "id": "A2A-HANDOFF-006",
@@ -2606,8 +2606,8 @@
           "source_fragment": "An emitted record's extension payload MUST NOT contain any of: decision, verdict, score, result, passed, failed, policy_result, approval_result, outcome, judgment, rating, grade, pass, fail, allow, deny, authorized, denied, granted, rejected_reason as top-level keys",
           "source_fragment_hash": "sha256:c43b21fd2db052460e0d7116e460e6b25cfe6999b2ffd97e8fe188395da65566",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.14.0",
-          "last_reviewed_in": "0.14.0"
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
         },
         {
           "id": "A2A-HANDOFF-007",
@@ -2616,8 +2616,8 @@
           "source_fragment": "discovery_path: enum (one of /.well-known/agent-card.json, /.well-known/peac.json, header-probe)",
           "source_fragment_hash": "sha256:4b22e7ae81a9090d69b65824afdba0a2b4efc530a3e798e7bfa4252382a162b9",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.14.0",
-          "last_reviewed_in": "0.14.0"
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
         },
         {
           "id": "A2A-HANDOFF-008",
@@ -2626,8 +2626,8 @@
           "source_fragment": "event: enum (one of task.submitted, task.accepted, ...) MUST match type",
           "source_fragment_hash": "sha256:3074afe8827a87a229ef245eb0012baee11ca8e41db4dcb014ffdd9a57da75a3",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.14.0",
-          "last_reviewed_in": "0.14.0"
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
         },
         {
           "id": "A2A-HANDOFF-009",
@@ -2636,8 +2636,8 @@
           "source_fragment": "RFC 3339 timestamp",
           "source_fragment_hash": "sha256:0b8f89f8215448e2398a812caf0a68af3409828a087dd125e78bd77278c10ca8",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.14.0",
-          "last_reviewed_in": "0.14.0"
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
         },
         {
           "id": "A2A-HANDOFF-010",
@@ -2646,8 +2646,8 @@
           "source_fragment": "sha256:<64 hex> digest of the upstream A2A event payload",
           "source_fragment_hash": "sha256:2d1c1bcbdec95b963cacbc6ada0a8733064d0e31ed609011d449627a489bebaa",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.14.0",
-          "last_reviewed_in": "0.14.0"
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
         }
       ]
     },
@@ -2664,8 +2664,8 @@
           "source_fragment": "type: org.peacprotocol/cli-command-execution; surface: { kind: 'cli' }",
           "source_fragment_hash": "sha256:e2e767c595976cd179d53796b0075b3bd8a904b6120ff0e1fbbb5eb283b7aa95",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.14.0",
-          "last_reviewed_in": "0.14.0"
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
         },
         {
           "id": "CLI-EXEC-002",
@@ -2674,8 +2674,8 @@
           "source_fragment": "command.program rejects '/' and '\\\\'; path disclosure lives only under binary.path_*",
           "source_fragment_hash": "sha256:240ba4f3f4f7b05029faff8d99105f03dc6e67c34d9ed8ebc25de8a8b4b1e82a",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.14.0",
-          "last_reviewed_in": "0.14.0"
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
         },
         {
           "id": "CLI-EXEC-003",
@@ -2684,8 +2684,8 @@
           "source_fragment": "argv_mode raw requires --unsafe-allow-raw-capture",
           "source_fragment_hash": "sha256:a66e34e33e21e49b0a9e688167563a8ce7056ff64663be98de60f6a3dda60252",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.14.0",
-          "last_reviewed_in": "0.14.0"
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
         },
         {
           "id": "CLI-EXEC-004",
@@ -2694,8 +2694,8 @@
           "source_fragment": "env_allowlist subset constraint",
           "source_fragment_hash": "sha256:7c987519b641f1d672348dc35951110238132a84897c6f3edbd0f8e5762e8e03",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.14.0",
-          "last_reviewed_in": "0.14.0"
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
         },
         {
           "id": "CLI-EXEC-005",
@@ -2704,8 +2704,8 @@
           "source_fragment": "sample/suppression mutual exclusion + matched_pattern_category coupling",
           "source_fragment_hash": "sha256:77cddb0fa1a6d03a52468ed444f8e63e1fbf0535d5a8afe576b52a6c13186738",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.14.0",
-          "last_reviewed_in": "0.14.0"
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
         },
         {
           "id": "CLI-EXEC-006",
@@ -2714,8 +2714,8 @@
           "source_fragment": "shell_mode <-> shell_ref biconditional + canonical-digest equivalence",
           "source_fragment_hash": "sha256:0c7b1941e8ca7913bcf8902e2dcd2b094260544eeefbb3b0f4709d31c58ebaa1",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.14.0",
-          "last_reviewed_in": "0.14.0"
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
         }
       ]
     },
@@ -2732,8 +2732,8 @@
           "source_fragment": "lifecycle.inline_value_blocked rejects all 20 forbidden top-level keys at extension top level",
           "source_fragment_hash": "sha256:0450683ceb81d9b371615a61b18f345516cbb4fa0c48aee329070f0373e9f2d1",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.14.0",
-          "last_reviewed_in": "0.14.0"
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
         },
         {
           "id": "LIFE-OBS-002",
@@ -2742,8 +2742,8 @@
           "source_fragment": "all *_ref fields validated by the OpaqueRefSchema grammar",
           "source_fragment_hash": "sha256:f4663b06882d3e43b5139ad7016e7950c16fbeee57f128e24cad596b934e31b1",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.14.0",
-          "last_reviewed_in": "0.14.0"
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
         },
         {
           "id": "LIFE-OBS-003",
@@ -2752,8 +2752,8 @@
           "source_fragment": "approver_ref @-detection prioritized as a PII-blocked subclass",
           "source_fragment_hash": "sha256:1f394c0f4a99736d21812a2c521bd31024d921312e5170e4a83d4d99f9560389",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.14.0",
-          "last_reviewed_in": "0.14.0"
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
         },
         {
           "id": "LIFE-OBS-004",
@@ -2762,8 +2762,8 @@
           "source_fragment": "non-string *_ref values reject with lifecycle.ref_must_be_string; no Zod-string error leaks as a public diagnostic",
           "source_fragment_hash": "sha256:9c403837f90769cd5ee62b5b61081f98faffbadb2a7246aa03124ee1d39da8b5",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.14.0",
-          "last_reviewed_in": "0.14.0"
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
         },
         {
           "id": "LIFE-OBS-005",
@@ -2772,8 +2772,8 @@
           "source_fragment": "per-event-kind required fields enforced via discriminated union; missing observed_at uses lifecycle.missing_required_field",
           "source_fragment_hash": "sha256:4b9b0f3d2075aa544072240c7518511117f2075e50fc6b3e3df3d713bfb51d6b",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.14.0",
-          "last_reviewed_in": "0.14.0"
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
         },
         {
           "id": "LIFE-OBS-006",
@@ -2782,8 +2782,8 @@
           "source_fragment": "unknown event_kind rejects with lifecycle.event_kind_unknown",
           "source_fragment_hash": "sha256:7a1cf3b30a50ef229278c0fae94e100fc945a4d4058514c2a1b6bb51af07072c",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.14.0",
-          "last_reviewed_in": "0.14.0"
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
         },
         {
           "id": "LIFE-OBS-007",
@@ -2792,8 +2792,8 @@
           "source_fragment": "malformed observed_at rejects with lifecycle.invalid_observed_at; missing observed_at is covered by lifecycle.missing_required_field",
           "source_fragment_hash": "sha256:633f11f10086e00e187ee720680ff1e69489fd7a058fbbfdedb17fed8f87fec9",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.14.0",
-          "last_reviewed_in": "0.14.0"
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
         },
         {
           "id": "LIFE-OBS-008",
@@ -2802,8 +2802,8 @@
           "source_fragment": "lifecycle records round-trip through @peac/protocol.issue() and verifyLocal()",
           "source_fragment_hash": "sha256:4494114b34b626943aaaeb1c5942266ac8c3fdcd6301dc641b11217e91e1fda2",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.14.0",
-          "last_reviewed_in": "0.14.0"
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
         },
         {
           "id": "LIFE-OBS-009",
@@ -2812,8 +2812,8 @@
           "source_fragment": "every URI in LIFECYCLE_OBSERVATION_TYPE_URIS maps to org.peacprotocol/lifecycle-observation in TYPE_TO_EXTENSION_MAP",
           "source_fragment_hash": "sha256:a037a9fc0fe8e1a9c12619218506400b68a405ea6a454a11cb8fc839e6c7fb90",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.14.0",
-          "last_reviewed_in": "0.14.0"
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
         },
         {
           "id": "LIFE-OBS-010",
@@ -2822,8 +2822,116 @@
           "source_fragment": "the orchestrator-boundary text is normative and vendor-neutral; PEAC does not assign work, run agents, schedule tasks, manage issue trackers, route approvals, decide step ordering, or enforce workflow policy",
           "source_fragment_hash": "sha256:8dd6425923ee5f7ac24b287f5fa669d492d68b20b5e4fd637b269e4bc1f4edac",
           "enforcement_class": "hard_fail",
-          "introduced_in": "0.14.0",
-          "last_reviewed_in": "0.14.0"
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
+        }
+      ]
+    },
+    {
+      "section_number": 31,
+      "section_title": "Provisioning Lifecycle Records",
+      "section_anchor": "provisioning-lifecycle-records",
+      "governing_spec": "docs/specs/PROVISIONING-LIFECYCLE-PROFILE.md",
+      "requirements": [
+        {
+          "id": "PROV-LIFE-001",
+          "keyword": "MUST",
+          "summary": "Validator rejects 20 forbidden top-level credential-bearing keys with provisioning.inline_credential_blocked",
+          "source_fragment": "provisioning.inline_credential_blocked rejects 20 forbidden top-level credential-bearing keys at extension top level",
+          "source_fragment_hash": "sha256:d41ba6e72e24bc46d55113cf097749c0798ab0e5086e0702c8afd6be862b24ba",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
+        },
+        {
+          "id": "PROV-LIFE-002",
+          "keyword": "MUST",
+          "summary": "Recursive secret-scanner walker rejects forbidden key names at any depth with provisioning.forbidden_key_name and credential-shaped value strings with provisioning.token_material_blocked",
+          "source_fragment": "recursive walker inspects key names AND value strings at every depth; forbidden key names reject with provisioning.forbidden_key_name; credential-shaped value strings reject with provisioning.token_material_blocked",
+          "source_fragment_hash": "sha256:007ac67a8d54efe0c8b1ce7d1e301f322717e14fdd5f962cf0a2393d1148dd69",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
+        },
+        {
+          "id": "PROV-LIFE-003",
+          "keyword": "MUST",
+          "summary": "All *_ref fields validated by the OpaqueRefSchema grammar; all *_digest fields validated by the Sha256DigestSchema grammar",
+          "source_fragment": "all *_ref fields validated by the OpaqueRefSchema grammar; all *_digest fields validated by the Sha256DigestSchema grammar",
+          "source_fragment_hash": "sha256:caf686caa52b8085413011e9919ff56f2a833eafc46f61666771246712418e0a",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
+        },
+        {
+          "id": "PROV-LIFE-004",
+          "keyword": "MUST",
+          "summary": "storage_surface object uses abstract kind enum (external_secret_store, local_encrypted_file, local_plaintext_file, environment_file, runtime_secret_binding, none, unknown); no vendor-specific values",
+          "source_fragment": "storage_surface kind is one of external_secret_store, local_encrypted_file, local_plaintext_file, environment_file, runtime_secret_binding, none, unknown",
+          "source_fragment_hash": "sha256:fd7f6aec07aefbe4f65497b98dfd272d689a11c03b6f2ef5fbda8e6fb72e38d2",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
+        },
+        {
+          "id": "PROV-LIFE-005",
+          "keyword": "MUST",
+          "summary": "scheme_id follows a bounded ASCII grammar (max 128 UTF-8 bytes; allowed characters [a-z0-9._:/+-]); scheme_id and scheme_ref are mutually exclusive",
+          "source_fragment": "scheme_id is a bounded ASCII token (max 128 UTF-8 bytes; allowed [a-z0-9._:/+-]); mutually exclusive with scheme_ref",
+          "source_fragment_hash": "sha256:4e8b41fb3ff493d6441de42b4173e114ae28cfed80d522770ee89691720cda4a",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
+        },
+        {
+          "id": "PROV-LIFE-006",
+          "keyword": "MUST",
+          "summary": "payment_authorization_observation.max_amount_minor is a non-negative bounded decimal-integer string; negative values reject with provisioning.invalid_amount_minor",
+          "source_fragment": "max_amount_minor is non-negative bounded decimal string; negative values reject with provisioning.invalid_amount_minor",
+          "source_fragment_hash": "sha256:8799914f34c81abb2fb8a1e7a9b9c876ece7318e0363c608d00b2555852ce9d1",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
+        },
+        {
+          "id": "PROV-LIFE-007",
+          "keyword": "MUST",
+          "summary": "Per-event-kind required fields enforced via discriminated union; missing observed_at and other missing required fields surface provisioning.missing_required_field",
+          "source_fragment": "per-event-kind required fields enforced via discriminated union; missing required fields surface provisioning.missing_required_field",
+          "source_fragment_hash": "sha256:00117e4fd3aed424310e04b3a8b94b82dacded3517d6b8b33a5823534f59f1bd",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
+        },
+        {
+          "id": "PROV-LIFE-008",
+          "keyword": "MUST",
+          "summary": "Unknown event_kind rejects with provisioning.invalid_event_kind; the discriminator is closed over the 10 *-observed event families",
+          "source_fragment": "unknown event_kind rejects with provisioning.invalid_event_kind; closed-enum discriminator over 10 -observed event families",
+          "source_fragment_hash": "sha256:1121d5220689a6e3cbb922b9327a647e68f355e2ad5ab1d24c48962a33c1389f",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
+        },
+        {
+          "id": "PROV-LIFE-009",
+          "keyword": "MUST",
+          "summary": "Every type URI in PROVISIONING_LIFECYCLE_TYPE_URIS maps to org.peacprotocol/provisioning-lifecycle in TYPE_TO_EXTENSION_MAP",
+          "source_fragment": "every URI in PROVISIONING_LIFECYCLE_TYPE_URIS maps to org.peacprotocol/provisioning-lifecycle in TYPE_TO_EXTENSION_MAP",
+          "source_fragment_hash": "sha256:59278da5b050d429343c62b4cabaf9695ab70348a56cedaaabfec83ebeb7b274",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
+        },
+        {
+          "id": "PROV-LIFE-010",
+          "keyword": "MUST",
+          "summary": "Spec boundary text is normative and vendor-neutral; PEAC does not authorize the action, verify legal acceptance, provision resources, validate credentials, process payments, vouch for provider state, settle transactions, manage credential vaults, or operate the runtime",
+          "source_fragment": "PEAC does not authorize the action, verify legal acceptance, provision resources, validate credentials, process payments, vouch for provider state, settle transactions, manage credential vaults, or operate the runtime",
+          "source_fragment_hash": "sha256:f32bb4bdb884fedbbcb555d0b82c8e9c321c272c21ed41fea7e9170f5c759c6e",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.14.2",
+          "last_reviewed_in": "0.14.2"
         }
       ]
     }

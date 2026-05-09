@@ -426,7 +426,67 @@
       "requirement_id": "LIFE-OBS-010",
       "test_file": "docs/specs/LIFECYCLE-OBSERVATION-PROFILE.md",
       "test_description": "spec orchestrator-boundary text is normative and vendor-neutral",
-      "notes": "Section 8 of the profile spec carries the orchestrator boundary as normative prose with vendor-neutral nouns (orchestrators, workflow engines, evaluation systems, approval systems, agent runtimes); checked manually as part of spec review and pinned by repository search-and-replace discipline (no specific external project name appears in the normative §8 text)."
+      "notes": "Section 8 of the profile spec carries the orchestrator boundary as normative prose with vendor-neutral nouns (orchestrators, workflow engines, evaluation systems, approval systems, agent runtimes); checked manually as part of spec review and pinned by repository search-and-replace discipline (no specific external project name appears in the normative \u00a78 text)."
+    },
+    {
+      "requirement_id": "PROV-LIFE-001",
+      "test_file": "packages/schema/__tests__/extensions/provisioning-lifecycle.test.ts",
+      "test_description": "rejects each of the 20 forbidden top-level credential-bearing keys with provisioning.inline_credential_blocked",
+      "notes": "Uses internal PROVISIONING_FORBIDDEN_TOP_LEVEL_KEYS_INTERNAL to iterate every key; for each splices the key into a happy-path record and asserts the structured validator emits provisioning.inline_credential_blocked at the offending top-level path. The walker is depth-aware so the same key never emits both inline_credential_blocked and forbidden_key_name."
+    },
+    {
+      "requirement_id": "PROV-LIFE-002",
+      "test_file": "packages/schema/__tests__/extensions/provisioning-lifecycle.test.ts",
+      "test_description": "recursive walker rejects forbidden key names at any nesting depth past the top level, credential-shaped value strings, oversized strings, replacement characters, and structure caps; safeParse on the canonical schema enforces the same invariant",
+      "notes": "Direct walker tests cover Bearer token values (token_material_blocked), env-assignment values (inline_credential_blocked), oversized strings (field_too_large), U+FFFD replacement characters (replacement_character_in_string), nested forbidden keys (forbidden_key_name), structure_too_deep on >32-level nesting, structure_too_large on >10K nodes. Generic regex categories only (jwt_compact / bearer_token / pem_private_key / env_assignment / connection_string_with_credentials); no vendor-shaped prefixes in the normative panel."
+    },
+    {
+      "requirement_id": "PROV-LIFE-003",
+      "test_file": "packages/schema/__tests__/extensions/provisioning-lifecycle.test.ts",
+      "test_description": "all *_ref fields use OpaqueRefSchema grammar; all *_digest fields use Sha256DigestSchema grammar",
+      "notes": "Provider_ref / authorization_ref / issuer_ref / resource_ref / etc. are constructed via createOpaqueRefSchema with errorCode provisioning.opaque_ref_grammar_violation; positive shape tests use sha256:/urn:peac: forms; negatives ride through the *_ref Zod pipeline alongside the scheme_id grammar test (which exercises the same allow/reject grammar shape)."
+    },
+    {
+      "requirement_id": "PROV-LIFE-004",
+      "test_file": "packages/schema/__tests__/extensions/provisioning-lifecycle.test.ts",
+      "test_description": "storage_surface object uses an abstract kind enum; vendor-specific values reject with provisioning.invalid_storage_surface",
+      "notes": "StorageSurfaceKindSchema is a closed enum over external_secret_store / local_encrypted_file / local_plaintext_file / environment_file / runtime_secret_binding / none / unknown. The made_up_vault_kind negative case asserts provisioning.invalid_storage_surface. Vendor identity is carried via opaque provider_ref, never as a registered enum value."
+    },
+    {
+      "requirement_id": "PROV-LIFE-005",
+      "test_file": "packages/schema/__tests__/extensions/provisioning-lifecycle.test.ts",
+      "test_description": "scheme_id matches the bounded ASCII grammar (max 128 UTF-8 bytes; allowed [a-z0-9._:/+-]); scheme_id and scheme_ref are mutually exclusive",
+      "notes": "SchemeIdSchema rejects whitespace via the grammar regex; tests assert provisioning.invalid_scheme_id on whitespace and on co-presence of scheme_id and scheme_ref."
+    },
+    {
+      "requirement_id": "PROV-LIFE-006",
+      "test_file": "packages/schema/__tests__/extensions/provisioning-lifecycle.test.ts",
+      "test_description": "max_amount_minor is a canonical non-negative bounded decimal-integer string: accepts `0` or `[1-9][0-9]*`; rejects leading-zero forms, decimals, exponent notation, signs/negative values, and empty strings, all with provisioning.invalid_amount_minor",
+      "notes": "NonNegativeAmountMinorStringSchema wraps the existing AmountMinorStringSchema (byte cap + base-10 grammar) with a canonical-form refine() that accepts only `0` or `[1-9][0-9]*`. The canonical form prevents cross-language normalization ambiguity at this ceiling field. Tests cover `0` accept, `100` accept, `0001` reject (leading zero), `1.00` reject (decimal), `1e6` reject (exponent), `` reject (empty), `-100` reject (sign). All rejections surface provisioning.invalid_amount_minor via either the inner AmountMinorStringSchema regex/min(1) failure (path-dispatched in the validator) or the canonical-form refine() message."
+    },
+    {
+      "requirement_id": "PROV-LIFE-007",
+      "test_file": "packages/schema/__tests__/extensions/provisioning-lifecycle.test.ts",
+      "test_description": "per-event-kind required fields enforced via discriminated union; missing observed_at and other missing required fields surface provisioning.missing_required_field",
+      "notes": "Pre-flight enumerates required fields per event_kind (catalog -> {catalog}; provider-link -> {provider}; account -> {provider, account}; resource -> {provider, resource}; credential -> {provider, credential}; payment-authorization -> {payment_authorization_observation}; budget -> {budget}; subscription -> {provider, subscription}; domain -> {domain}; deployment -> {deployment}); test asserts provisioning.missing_required_field on missing observed_at."
+    },
+    {
+      "requirement_id": "PROV-LIFE-008",
+      "test_file": "packages/schema/__tests__/extensions/provisioning-lifecycle.test.ts",
+      "test_description": "unknown top-level event_kind rejects with provisioning.invalid_event_kind; per-scope sub_event values reject with provisioning.invalid_sub_event; malformed observed_at/retrieved_at/expires_at/currency each surface their own stable codes (provisioning.invalid_observed_at / invalid_retrieved_at / invalid_expires_at / invalid_currency); benign unknown fields reject with provisioning.unrecognized_field rather than provisioning.inline_credential_blocked",
+      "notes": "Pre-flight resolves the top-level event_kind against the closed 10-family literal-set before Zod runs; values not in the set surface provisioning.invalid_event_kind. Per-scope sub_event closed enums (account/resource/credential/subscription/domain/deployment/payment_authorization_observation) dispatch through path.endsWith('sub_event') -> provisioning.invalid_sub_event. Path-based dispatch on RFC-3339 fields ensures malformed observed_at -> invalid_observed_at, malformed catalog.retrieved_at -> invalid_retrieved_at, malformed expires_at -> invalid_expires_at, malformed currency -> invalid_currency, instead of collapsing into a single generic code. The unrecognized_keys Zod issue maps to provisioning.unrecognized_field so benign unknown top-level/nested fields do not get misclassified as credential leakage."
+    },
+    {
+      "requirement_id": "PROV-LIFE-009",
+      "test_file": "packages/schema/__tests__/extensions/provisioning-lifecycle-registry.test.ts",
+      "test_description": "every PROVISIONING_LIFECYCLE_TYPE_URIS entry maps to org.peacprotocol/provisioning-lifecycle in TYPE_TO_EXTENSION_MAP; REGISTERED_EXTENSION_GROUP_KEYS includes the new namespace and size is 16",
+      "notes": "The 10 type URIs and 1 extension group key are added to specs/kernel/registries.json; pnpm codegen:registries regenerates @peac/kernel/registries.generated.ts; the registry test asserts each URI maps to the new namespace and that the group set size is 16."
+    },
+    {
+      "requirement_id": "PROV-LIFE-010",
+      "test_file": "tests/tooling/provisioning-lifecycle-profile-doc-truth.test.ts",
+      "test_description": "spec boundary text is normative and vendor-neutral; PEAC does not authorize the action, verify legal acceptance, provision resources, validate credentials, process payments, vouch for provider state, settle transactions, manage credential vaults, or operate the runtime; stale public-surface names from earlier revisions remain absent from the profile spec",
+      "notes": "Section 3 of the profile spec carries the boundary paragraph as normative prose with vendor-neutral nouns. The tests/tooling/provisioning-lifecycle-profile-doc-truth.test.ts gate reads the spec at test time and asserts the boundary phrases are present (PEAC does not authorize the action; process payments; PEAC does not implement OAuth, DPoP, OAuth Protected Resource Metadata, or Shared Payment Tokens) and that older public-surface names (the prior recursive-walker name, the prior vendor-shaped pattern name, the legacy provider identity field) are absent. The literal stale strings are constructed at runtime via array .join() so they do not appear contiguously in the test source."
     }
   ]
 }

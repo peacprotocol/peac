@@ -10,8 +10,8 @@
     "test_files": 422,
     "published_packages": 36,
     "build_targets": 102,
-    "conformance_requirement_ids": 250,
-    "conformance_sections": 28
+    "conformance_requirement_ids": 260,
+    "conformance_sections": 29
   },
   "runtime": {
     "node_canonical": "24.14.1",
