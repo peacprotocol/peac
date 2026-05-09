@@ -18,6 +18,7 @@ import * as fs from 'fs';
 import { readDisputeBundle, type DisputeBundleContents } from '@peac/audit';
 import { computeReceiptRef } from '@peac/schema';
 import { decode } from '@peac/crypto';
+import { readFileBufferSnapshot } from '../lib/safe-file.js';
 
 // =============================================================================
 // TYPES
@@ -163,25 +164,47 @@ async function readBundle(
   bundlePath: string,
   label: string
 ): Promise<{ ok: true; value: DisputeBundleContents } | { ok: false; error: string }> {
-  if (!fs.existsSync(bundlePath)) {
-    return { ok: false, error: `Bundle file not found: ${bundlePath}` };
-  }
-
-  const stat = fs.statSync(bundlePath);
-  if (stat.size > MAX_BUNDLE_SIZE) {
-    return { ok: false, error: `Bundle ${label} exceeds 16 MB size limit (${stat.size} bytes)` };
-  }
-
-  // Path traversal prevention: resolve to absolute and check it stays within expected directory
-  const resolved = fs.realpathSync(bundlePath);
-  if (resolved !== bundlePath && !resolved.startsWith(process.cwd())) {
-    // Allow if the path is a valid absolute path
-    if (!fs.existsSync(resolved)) {
-      return { ok: false, error: `Path traversal detected for ${label}` };
+  // Path traversal prevention: resolve to absolute and check it stays within expected directory.
+  // Preserve the historical behavior verbatim: the realpath check below mirrors the v0.11.3+
+  // intent and is intentionally non-strict for absolute paths whose realpath equals the input.
+  let resolved: string;
+  try {
+    resolved = fs.realpathSync(bundlePath);
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException).code === 'ENOENT') {
+      return { ok: false, error: `Bundle file not found: ${bundlePath}` };
     }
+    return { ok: false, error: `Failed to read ${label}: ${(err as Error).message}` };
+  }
+  if (resolved !== bundlePath && !resolved.startsWith(process.cwd())) {
+    // If the realpath escapes cwd and the input was not already absolute,
+    // surface it as a path-traversal error. realpathSync raises ENOENT for a
+    // missing file, so the resolved path here is known to exist.
+    return { ok: false, error: `Path traversal detected for ${label}` };
   }
 
-  const zipBuffer = fs.readFileSync(bundlePath);
+  // fd-bound read with size validation. Errno discrimination handles the
+  // missing/wrong-type/oversize failure surfaces the caller observes.
+  let zipBuffer: Buffer;
+  try {
+    zipBuffer = readFileBufferSnapshot(bundlePath, { maxBytes: MAX_BUNDLE_SIZE });
+  } catch (err) {
+    const e = err as NodeJS.ErrnoException & { actualSize?: number };
+    if (e.code === 'ENOENT') {
+      return { ok: false, error: `Bundle file not found: ${bundlePath}` };
+    }
+    if (e.code === 'EISDIR') {
+      return { ok: false, error: `Bundle ${label} is not a regular file: ${bundlePath}` };
+    }
+    if (e.code === 'E_PEAC_FILE_TOO_LARGE') {
+      return {
+        ok: false,
+        error: `Bundle ${label} exceeds 16 MB size limit (${e.actualSize ?? 'unknown'} bytes)`,
+      };
+    }
+    return { ok: false, error: `Failed to read ${label}: ${(err as Error).message}` };
+  }
+
   const result = await readDisputeBundle(zipBuffer);
   if (!result.ok) {
     return { ok: false, error: `Failed to read ${label}: ${result.error.message}` };

@@ -23,6 +23,7 @@ import {
   type JsonWebKeySet,
   type CreateDisputeBundleOptions,
 } from '@peac/audit';
+import { readFileBufferSnapshot, readFileUtf8Snapshot } from '../lib/safe-file.js';
 
 /**
  * Global options for bundle commands
@@ -74,35 +75,42 @@ function outputError(
 }
 
 /**
- * Read receipts from a directory or files
+ * Read receipts from a directory or files. Uses fd-bound read for the
+ * single-file case so existence and content read happen atomically; on
+ * EISDIR the helper signals a directory path and we fall back to
+ * readdirSync + per-file fd-bound reads. The directory listing path is
+ * not subject to a check-then-read race because each per-file read is
+ * itself fd-bound via readFileUtf8Snapshot.
  */
 function readReceipts(receiptsPath: string): string[] {
   const receipts: string[] = [];
-  const stat = fs.statSync(receiptsPath);
 
-  if (stat.isDirectory()) {
-    // Read all .jws files in directory
-    const files = fs.readdirSync(receiptsPath);
-    for (const file of files) {
-      if (file.endsWith('.jws')) {
-        const content = fs.readFileSync(path.join(receiptsPath, file), 'utf8').trim();
-        receipts.push(content);
+  let singleFile: string | undefined;
+  try {
+    singleFile = readFileUtf8Snapshot(receiptsPath);
+  } catch (err) {
+    const e = err as NodeJS.ErrnoException;
+    if (e.code === 'EISDIR') {
+      const files = fs.readdirSync(receiptsPath);
+      for (const file of files) {
+        if (file.endsWith('.jws')) {
+          receipts.push(readFileUtf8Snapshot(path.join(receiptsPath, file)).trim());
+        }
       }
+      return receipts;
     }
-  } else {
-    // Single file - read it
-    const content = fs.readFileSync(receiptsPath, 'utf8').trim();
-    receipts.push(content);
+    throw err;
   }
 
+  receipts.push(singleFile.trim());
   return receipts;
 }
 
 /**
- * Read JWKS from file
+ * Read JWKS from file via a single fd-bound read.
  */
 function readJwks(keysPath: string): JsonWebKeySet {
-  const content = fs.readFileSync(keysPath, 'utf8');
+  const content = readFileUtf8Snapshot(keysPath);
   return JSON.parse(content) as JsonWebKeySet;
 }
 
@@ -125,20 +133,30 @@ bundle
     const globalOpts = getGlobalOptions(cmd);
 
     try {
-      // Validate input paths exist
-      if (!fs.existsSync(options.receipts)) {
-        outputError('Receipts path not found', { path: options.receipts }, globalOpts);
-        process.exit(1);
+      // Read inputs via fd-bound helpers; existence and content read happen atomically.
+      // ENOENT is translated to a user-facing not-found error per input path; other
+      // errno values fall through to the outer error path.
+      let receipts: string[];
+      try {
+        receipts = readReceipts(options.receipts);
+      } catch (err) {
+        if ((err as NodeJS.ErrnoException).code === 'ENOENT') {
+          outputError('Receipts path not found', { path: options.receipts }, globalOpts);
+          process.exit(1);
+        }
+        throw err;
       }
 
-      if (!fs.existsSync(options.keys)) {
-        outputError('JWKS file not found', { path: options.keys }, globalOpts);
-        process.exit(1);
+      let keys: JsonWebKeySet;
+      try {
+        keys = readJwks(options.keys);
+      } catch (err) {
+        if ((err as NodeJS.ErrnoException).code === 'ENOENT') {
+          outputError('JWKS file not found', { path: options.keys }, globalOpts);
+          process.exit(1);
+        }
+        throw err;
       }
-
-      // Read inputs
-      const receipts = readReceipts(options.receipts);
-      const keys = readJwks(options.keys);
 
       if (receipts.length === 0) {
         outputError('No receipts found', { path: options.receipts }, globalOpts);
@@ -148,11 +166,15 @@ bundle
       // Read policy if provided
       let policy: string | undefined;
       if (options.policy) {
-        if (!fs.existsSync(options.policy)) {
-          outputError('Policy file not found', { path: options.policy }, globalOpts);
-          process.exit(1);
+        try {
+          policy = readFileUtf8Snapshot(options.policy);
+        } catch (err) {
+          if ((err as NodeJS.ErrnoException).code === 'ENOENT') {
+            outputError('Policy file not found', { path: options.policy }, globalOpts);
+            process.exit(1);
+          }
+          throw err;
         }
-        policy = fs.readFileSync(options.policy, 'utf8');
       }
 
       // Create bundle
@@ -228,14 +250,17 @@ bundle
     const globalOpts = getGlobalOptions(cmd);
 
     try {
-      // Validate bundle exists
-      if (!fs.existsSync(bundlePath)) {
-        outputError('Bundle file not found', { path: bundlePath }, globalOpts);
-        process.exit(1);
+      // Read bundle via fd-bound snapshot; existence and content read happen atomically.
+      let zipBuffer: Buffer;
+      try {
+        zipBuffer = readFileBufferSnapshot(bundlePath);
+      } catch (err) {
+        if ((err as NodeJS.ErrnoException).code === 'ENOENT') {
+          outputError('Bundle file not found', { path: bundlePath }, globalOpts);
+          process.exit(1);
+        }
+        throw err;
       }
-
-      // Read bundle
-      const zipBuffer = fs.readFileSync(bundlePath);
 
       // Verify bundle - offline by default, online if explicitly requested
       const offline = !options.online;
@@ -302,14 +327,17 @@ bundle
     const globalOpts = getGlobalOptions(cmd);
 
     try {
-      // Validate bundle exists
-      if (!fs.existsSync(bundlePath)) {
-        outputError('Bundle file not found', { path: bundlePath }, globalOpts);
-        process.exit(1);
+      // Read bundle via fd-bound snapshot; existence and content read happen atomically.
+      let zipBuffer: Buffer;
+      try {
+        zipBuffer = readFileBufferSnapshot(bundlePath);
+      } catch (err) {
+        if ((err as NodeJS.ErrnoException).code === 'ENOENT') {
+          outputError('Bundle file not found', { path: bundlePath }, globalOpts);
+          process.exit(1);
+        }
+        throw err;
       }
-
-      // Read bundle
-      const zipBuffer = fs.readFileSync(bundlePath);
       const result = await readDisputeBundle(zipBuffer);
 
       if (!result.ok) {

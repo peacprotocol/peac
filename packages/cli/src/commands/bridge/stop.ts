@@ -3,10 +3,14 @@
  */
 
 import { Command } from 'commander';
-import { readFileSync, unlinkSync, existsSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { homedir } from 'os';
 import { spawn } from 'child_process';
+import {
+  readFileUtf8Snapshot,
+  rewriteJsonFileAtomic,
+  unlinkIfExists,
+} from '../../lib/safe-file.js';
 
 // Windows-safe process termination
 async function killProcess(pid: number, signal?: string): Promise<void> {
@@ -44,20 +48,27 @@ export function stopCommand() {
     const pidFile = join(peacDir, 'bridge.pid');
     const configFile = join(peacDir, 'bridge.json');
 
-    // Check if PID file exists
-    if (!existsSync(pidFile)) {
-      console.log('Bridge is not running (no PID file found)');
+    // Read PID from file via fd-bound snapshot. Errno discrimination is the
+    // single source of truth for the missing-file path: ENOENT means the
+    // bridge is not running.
+    let pidStr: string;
+    try {
+      pidStr = readFileUtf8Snapshot(pidFile).trim();
+    } catch (err) {
+      if ((err as NodeJS.ErrnoException).code === 'ENOENT') {
+        console.log('Bridge is not running (no PID file found)');
+        return;
+      }
+      console.error('Failed to stop bridge:', (err as Error).message);
       return;
     }
 
     try {
-      // Read PID from file
-      const pidStr = readFileSync(pidFile, 'utf-8').trim();
       const pid = parseInt(pidStr, 10);
 
       if (isNaN(pid)) {
         console.error('Invalid PID in bridge.pid file');
-        unlinkSync(pidFile);
+        unlinkIfExists(pidFile);
         return;
       }
 
@@ -67,7 +78,7 @@ export function stopCommand() {
       } catch (error: any) {
         if (error.code === 'ESRCH') {
           console.log('Bridge process not found (cleaning up stale PID file)');
-          unlinkSync(pidFile);
+          unlinkIfExists(pidFile);
           return;
         }
         throw error;
@@ -104,31 +115,28 @@ export function stopCommand() {
         }
       }
 
-      // Clean up PID file
-      unlinkSync(pidFile);
+      // Clean up PID file (ENOENT-tolerant)
+      unlinkIfExists(pidFile);
 
-      // Update config file
-      if (existsSync(configFile)) {
-        try {
-          const config = JSON.parse(readFileSync(configFile, 'utf-8'));
+      // Update config file via atomic temp+rename. Returns silently if the
+      // config file does not exist; partial writes cannot corrupt the existing
+      // config because rename(2) is atomic on the same filesystem.
+      try {
+        rewriteJsonFileAtomic(configFile, (config) => {
           delete config.pid;
           delete config.started_at;
           delete config.log_file;
           config.stopped_at = new Date().toISOString();
-
-          writeFileSync(configFile, JSON.stringify(config, null, 2));
-        } catch (error) {
-          // Config update failed, but bridge was stopped
-          console.warn('Failed to update config file, but bridge was stopped');
-        }
+        });
+      } catch {
+        // Config update failed, but bridge was stopped
+        console.warn('Failed to update config file, but bridge was stopped');
       }
     } catch (error: any) {
       console.error('Failed to stop bridge:', error.message);
 
-      // Clean up potentially stale PID file
-      if (existsSync(pidFile)) {
-        unlinkSync(pidFile);
-      }
+      // Clean up potentially stale PID file (ENOENT-tolerant)
+      unlinkIfExists(pidFile);
     }
   });
 }

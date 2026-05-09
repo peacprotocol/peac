@@ -47,6 +47,7 @@ import {
   ProfileError,
   type ProfileId,
 } from '@peac/policy-kit';
+import { writeFileNoOverwrite } from '../lib/safe-file.js';
 
 /**
  * Global options for policy commands
@@ -126,16 +127,6 @@ policy
         const outputPath =
           options.output || (format === 'json' ? 'peac-policy.json' : 'peac-policy.yaml');
 
-        // Check if file exists and --force/--yes not set
-        if (fs.existsSync(outputPath) && !options.force && !globalOpts.yes) {
-          outputError(
-            `File already exists: ${outputPath}`,
-            { path: outputPath, hint: 'Use --force or --yes to overwrite' },
-            globalOpts
-          );
-          process.exit(1);
-        }
-
         let content: string;
         let policyName: string;
 
@@ -160,7 +151,28 @@ policy
           policyName = 'Example Policy';
         }
 
-        fs.writeFileSync(outputPath, content, 'utf-8');
+        // Atomic write: refuse to overwrite an existing target unless --force or
+        // --yes is set. The no-overwrite path uses POSIX O_CREAT | O_EXCL via
+        // writeFileNoOverwrite, which surfaces EEXIST without ever inspecting
+        // the target with a separate existence probe.
+        const allowOverwrite = options.force === true || globalOpts.yes === true;
+        try {
+          if (allowOverwrite) {
+            fs.writeFileSync(outputPath, content, { encoding: 'utf-8', flag: 'w' });
+          } else {
+            writeFileNoOverwrite(outputPath, content, { encoding: 'utf-8' });
+          }
+        } catch (err) {
+          if ((err as NodeJS.ErrnoException).code === 'EEXIST') {
+            outputError(
+              `File already exists: ${outputPath}`,
+              { path: outputPath, hint: 'Use --force or --yes to overwrite' },
+              globalOpts
+            );
+            process.exit(1);
+          }
+          throw err;
+        }
 
         if (globalOpts.json) {
           output(
