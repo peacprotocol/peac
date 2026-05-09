@@ -615,7 +615,7 @@ interface WalkerViolation {
  * size-bounded; depth-aware key-name dispatch).
  *
  * Top-level forbidden credential-bearing keys are NOT emitted by the
- * walker — they are surfaced by the preflight in
+ * walker; they are surfaced by the preflight in
  * `validateProvisioningLifecycle`. This avoids duplicate codes for the
  * same offending top-level key.
  */
