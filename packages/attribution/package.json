@@ -1,6 +1,7 @@
 {
   "name": "@peac/attribution",
   "version": "0.14.1",
+  "private": true,
   "description": "PEAC attribution attestation - content derivation and usage proofs",
   "type": "module",
   "main": "./dist/index.js",
@@ -26,9 +27,6 @@
   },
   "author": "PEAC Protocol Contributors",
   "license": "Apache-2.0",
-  "publishConfig": {
-    "access": "public"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/peacprotocol/peac.git",

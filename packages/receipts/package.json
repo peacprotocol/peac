@@ -1,6 +1,7 @@
 {
   "name": "@peac/receipts",
   "version": "0.14.1",
+  "private": true,
   "description": "PEAC Protocol receipt builders, parsers, and validators with CBOR support",
   "type": "module",
   "main": "dist/index.js",
@@ -21,10 +22,6 @@
     "README.md",
     "LICENSE"
   ],
-  "publishConfig": {
-    "access": "public",
-    "tag": "dev"
-  },
   "scripts": {
     "prebuild": "rm -rf dist",
     "build": "tsup",

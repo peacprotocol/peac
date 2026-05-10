@@ -1,6 +1,7 @@
 {
   "name": "@peac/telemetry-otel",
   "version": "0.14.1",
+  "private": true,
   "description": "OpenTelemetry adapter for PEAC telemetry",
   "keywords": [
     "peac",
@@ -52,9 +53,6 @@
     "@opentelemetry/sdk-metrics": "^2.0.0",
     "@opentelemetry/sdk-trace-base": "^2.0.0",
     "vitest": "^4.0.0"
-  },
-  "publishConfig": {
-    "access": "public"
   },
   "repository": {
     "type": "git",
