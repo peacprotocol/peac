@@ -62,7 +62,7 @@ pnpm build
 
 ## Running
 
-Each example exposes `pnpm demo`:
+Most examples expose `pnpm demo`:
 
 ```bash
 cd examples/hello-world && pnpm demo
@@ -72,6 +72,13 @@ Or run from the workspace root with a filter:
 
 ```bash
 pnpm --filter @peac/example-hello-world demo
+```
+
+Profile examples may expose profile-specific commands instead. For example:
+
+```bash
+pnpm --filter @peac/example-provisioning-lifecycle run issue
+pnpm --filter @peac/example-provisioning-lifecycle run verify
 ```
 
 ## CI
