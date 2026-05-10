@@ -21,9 +21,38 @@ const ROOT_VERSION = root.version;
 console.log(`  Root version: ${ROOT_VERSION}`);
 
 const manifest = JSON.parse(fs.readFileSync('scripts/publish-manifest.json', 'utf8'));
-const publishable = new Set(manifest.packages || []);
+if (!Array.isArray(manifest.packages)) {
+  console.log('  FAIL: scripts/publish-manifest.json packages[] must be an array');
+  process.exit(1);
+}
+const publishable = new Set(manifest.packages);
 
 const found = new Map(); // name -> { version, file, private }
+const parseErrors = [];
+const duplicates = [];
+
+function recordPackageManifest(file) {
+  let pkg;
+  try {
+    pkg = JSON.parse(fs.readFileSync(file, 'utf8'));
+  } catch (err) {
+    parseErrors.push(`${file}: ${err instanceof Error ? err.message : String(err)}`);
+    return;
+  }
+
+  if (!pkg.name) return;
+
+  if (found.has(pkg.name)) {
+    duplicates.push(`${pkg.name}: ${found.get(pkg.name).file} and ${file}`);
+    return;
+  }
+
+  found.set(pkg.name, {
+    version: pkg.version || '',
+    file,
+    private: pkg.private === true,
+  });
+}
 
 function walk(dir) {
   let entries;
@@ -38,18 +67,7 @@ function walk(dir) {
     if (e.isDirectory()) {
       walk(p);
     } else if (e.isFile() && e.name === 'package.json') {
-      try {
-        const pkg = JSON.parse(fs.readFileSync(p, 'utf8'));
-        if (pkg.name) {
-          found.set(pkg.name, {
-            version: pkg.version || '',
-            file: p,
-            private: pkg.private === true,
-          });
-        }
-      } catch {
-        // ignore malformed manifests
-      }
+      recordPackageManifest(p);
     }
   }
 }
@@ -60,6 +78,16 @@ for (const base of ['packages', 'apps', 'surfaces']) {
 
 let bad = 0;
 let ok = 0;
+
+for (const error of parseErrors) {
+  console.log(`  FAIL: malformed package.json: ${error}`);
+  bad = 1;
+}
+
+for (const duplicate of duplicates) {
+  console.log(`  FAIL: duplicate package name: ${duplicate}`);
+  bad = 1;
+}
 
 for (const name of publishable) {
   const entry = found.get(name);
