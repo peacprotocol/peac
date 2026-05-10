@@ -7,7 +7,6 @@
 
 import {
   SignatureVerifier,
-  KeyResolver,
   SignatureRequest,
   VerifyOptions,
   VerificationResult,

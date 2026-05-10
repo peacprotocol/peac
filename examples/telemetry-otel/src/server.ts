@@ -7,7 +7,7 @@
  * - Receipt issuance with automatic span events
  */
 
-import { trace, context } from '@opentelemetry/api';
+import { trace } from '@opentelemetry/api';
 import {
   BasicTracerProvider,
   SimpleSpanProcessor,

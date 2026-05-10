@@ -24,7 +24,6 @@ import {
   CANONICAL_STATUS_MAPPINGS,
   ERROR_CATALOG,
   problemTypeFor,
-  getStatusForCode as getCanonicalStatus,
   type PeacErrorCode,
   type ErrorCatalogEntry,
 } from '@peac/contracts';

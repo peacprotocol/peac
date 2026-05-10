@@ -13,7 +13,7 @@
  * @packageDocumentation
  */
 
-import { PolicyDocument, ControlPurpose, POLICY_VERSION } from './types';
+import { PolicyDocument, ControlPurpose } from './types';
 
 /**
  * Default PEAC protocol version for generated peac.txt

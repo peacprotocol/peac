@@ -7,12 +7,7 @@
  * @packageDocumentation
  */
 
-import {
-  verifyTapProof,
-  headersToRecord,
-  TAP_CONSTANTS,
-  type TapRequest,
-} from '@peac/mappings-tap';
+import { verifyTapProof, TAP_CONSTANTS, type TapRequest } from '@peac/mappings-tap';
 import type {
   WorkerConfig,
   RequestLike,

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { validateUrl, isMetadataIp } from '../src/security.js';
-import { JwksError, ErrorCodes } from '../src/errors.js';
+import { JwksError } from '../src/errors.js';
 
 describe('validateUrl', () => {
   it('accepts valid HTTPS URLs', () => {

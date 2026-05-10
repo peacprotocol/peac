@@ -18,10 +18,9 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { writeFileSync, readFileSync, renameSync } from 'node:fs';
+import { mkdtempSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { tmpdir } from 'node:os';
 import { performance } from 'node:perf_hooks';
 import { validateKernelConstraints } from '@peac/schema';
 import { assertJsonSafeIterative } from '@peac/schema';
@@ -81,13 +80,23 @@ function makeRealisticClaims(): Record<string, unknown> {
 }
 
 /**
- * Atomic write: write to temp file then rename.
- * Prevents partial writes from corrupting baseline-results.json.
+ * Atomic write: write to a uniquely-named tmp file inside a freshly-created
+ * tmp directory that is a sibling of the target file, then rename to the
+ * final path. Prevents partial writes from corrupting baseline-results.json.
+ * Uses mkdtempSync so the tmp directory name is not predictable. Putting
+ * the tmp directory next to the target keeps the rename on the same
+ * filesystem so cross-device EXDEV cannot fire. Cleans the tmp directory
+ * in finally regardless of rename outcome.
  */
 function atomicWriteFileSync(path: string, content: string): void {
-  const tmpPath = join(tmpdir(), `peac-baseline-${Date.now()}.json`);
-  writeFileSync(tmpPath, content);
-  renameSync(tmpPath, path);
+  const tmpDir = mkdtempSync(join(dirname(path), '.peac-perf-baseline-'));
+  try {
+    const tmpPath = join(tmpDir, 'baseline.json');
+    writeFileSync(tmpPath, content);
+    renameSync(tmpPath, path);
+  } finally {
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
 }
 
 describe('Performance baseline', () => {

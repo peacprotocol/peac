@@ -6,6 +6,7 @@
 import { readFile } from 'fs/promises';
 import type { CLIOptions, CommandResult, VerifyResult } from '../types.js';
 import { handleError, timing } from '../utils.js';
+import { parseBridgeBaseUrl, joinBridgePath } from '../lib/bridge-url.js';
 
 export interface VerifyOptions extends CLIOptions {
   resource?: string;
@@ -20,8 +21,9 @@ export class VerifyCommand {
       const receiptContent = await readFile(receiptPath, 'utf-8');
       const receiptJws = receiptContent.trim();
 
-      const base = process.env.PEAC_BRIDGE_URL?.trim() || 'http://127.0.0.1:3000';
-      const url = new URL('/verify', base).toString();
+      const baseRaw = process.env.PEAC_BRIDGE_URL?.trim() || 'http://127.0.0.1:3000';
+      const baseUrl = parseBridgeBaseUrl(baseRaw);
+      const url = joinBridgePath(baseUrl, '/verify');
 
       const res = await fetch(url, {
         method: 'POST',

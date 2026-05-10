@@ -95,4 +95,4 @@ PEAC carries CLI command-execution records and caller-reported lifecycle observa
 
 - Protocol scope: [`docs/WHAT-PEAC-STANDARDIZES.md`](WHAT-PEAC-STANDARDIZES.md).
 - Compatibility table with evidence-backed adapter readiness: [`docs/COMPATIBILITY_MATRIX.md`](COMPATIBILITY_MATRIX.md).
-- Normative threat model and security boundaries: [`docs/THREAT_MODEL.md`](THREAT_MODEL.md) once published.
+- Normative threat model and security boundaries: [`docs/THREAT_MODEL.md`](THREAT_MODEL.md).

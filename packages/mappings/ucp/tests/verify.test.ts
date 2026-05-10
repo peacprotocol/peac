@@ -4,7 +4,6 @@
 
 import { describe, it, expect } from 'vitest';
 import { parseDetachedJws, findSigningKey } from '../src/verify.js';
-import { ErrorCodes } from '../src/errors.js';
 import type { UcpProfile } from '../src/types.js';
 
 describe('parseDetachedJws', () => {

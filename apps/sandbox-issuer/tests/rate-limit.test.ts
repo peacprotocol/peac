@@ -19,6 +19,19 @@ function issueReq(headers?: Record<string, string>) {
   });
 }
 
+/**
+ * Sequentially exhaust the in-memory rate-limit window without parallelizing
+ * requests. The sliding-window limiter is timing-sensitive, so callers that
+ * exhaust the window or assert ordering must keep using sequential awaits;
+ * Promise.all-style parallelism would race the bucket bookkeeping and
+ * produce non-deterministic results.
+ */
+async function exhaustLimit(headers?: Record<string, string>, count = 1000): Promise<void> {
+  for (let i = 0; i < count; i++) {
+    await app.fetch(issueReq(headers));
+  }
+}
+
 describe('Rate limiting', () => {
   beforeEach(() => {
     resetRateLimitStore();
@@ -51,10 +64,7 @@ describe('Rate limiting', () => {
   });
 
   it('should include Retry-After header on 429', async () => {
-    // Exhaust the limit
-    for (let i = 0; i < 1000; i++) {
-      await app.fetch(issueReq());
-    }
+    await exhaustLimit();
 
     const res = await app.fetch(issueReq());
     expect(res.status).toBe(429);
@@ -66,9 +76,7 @@ describe('Rate limiting', () => {
   });
 
   it('should use RFC 9457 Problem Details format for 429', async () => {
-    for (let i = 0; i < 1000; i++) {
-      await app.fetch(issueReq());
-    }
+    await exhaustLimit();
 
     const res = await app.fetch(issueReq());
     const body = await res.json();
@@ -79,9 +87,7 @@ describe('Rate limiting', () => {
   });
 
   it('should reset after resetRateLimitStore()', async () => {
-    for (let i = 0; i < 1000; i++) {
-      await app.fetch(issueReq());
-    }
+    await exhaustLimit();
 
     const blocked = await app.fetch(issueReq());
     expect(blocked.status).toBe(429);
@@ -95,9 +101,7 @@ describe('Rate limiting', () => {
   it('should ignore x-forwarded-for when PEAC_TRUST_PROXY is not set', async () => {
     // Without PEAC_TRUST_PROXY, two different x-forwarded-for IPs should
     // share the same rate limit bucket (both map to 127.0.0.1)
-    for (let i = 0; i < 1000; i++) {
-      await app.fetch(issueReq({ 'x-forwarded-for': '10.0.0.1' }));
-    }
+    await exhaustLimit({ 'x-forwarded-for': '10.0.0.1' });
 
     // Even with a different forwarded IP, should be rate-limited (same bucket)
     const res = await app.fetch(issueReq({ 'x-forwarded-for': '10.0.0.2' }));
@@ -108,9 +112,7 @@ describe('Rate limiting', () => {
     process.env.PEAC_TRUST_PROXY = '1';
 
     // Exhaust limit for IP 10.0.0.1
-    for (let i = 0; i < 1000; i++) {
-      await app.fetch(issueReq({ 'x-forwarded-for': '10.0.0.1' }));
-    }
+    await exhaustLimit({ 'x-forwarded-for': '10.0.0.1' });
 
     // 10.0.0.1 is now rate-limited
     const blockedRes = await app.fetch(issueReq({ 'x-forwarded-for': '10.0.0.1' }));

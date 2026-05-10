@@ -275,12 +275,11 @@ describe('Dispute Conformance', () => {
         const result = validateDisputeAttestation(fixture.input);
         expect(result.ok, `${fixture.name} should be invalid but passed validation`).toBe(false);
 
-        // Verify error contains expected category/path when error_code hints at it
+        // Verify error contains expected category/path when error_code hints at it.
+        // The validator does not yet return structured error codes, so we only
+        // assert that an error string is produced; specific category matching
+        // would require the validator to expose the structured-error contract.
         if (!result.ok && fixture.expected.error_code) {
-          // Extract category from error code (e.g., E_DISPUTE_INVALID_FORMAT -> DISPUTE)
-          const errorCategory = fixture.expected.error_code.split('_')[1]?.toLowerCase();
-          // Just verify we got an error - specific error code matching would require
-          // the validator to return structured errors with codes
           expect(result.error).toBeDefined();
           expect(typeof result.error).toBe('string');
           expect(result.error.length).toBeGreaterThan(0);

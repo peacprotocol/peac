@@ -49,13 +49,29 @@ function deriveOrderStatus(order: UcpOrder): 'completed' | 'partial' | 'processi
 }
 
 /**
- * Extract totals by type from UCP order.
+ * Extract totals by type from a UCP order. The combined-guard `if` block
+ * immediately before the property write is the documented data-flow
+ * barrier for prototype-chain pollution from a remote-controlled
+ * `total.type`: the assignment is reached only when the key is a non-empty
+ * string and is not equal to any of the three built-in property names that
+ * could pollute the prototype chain or shadow built-in slots. The returned
+ * bag is a normal object (Object.prototype) so downstream consumers see no
+ * behavioral change.
  */
 function extractTotals(order: UcpOrder): Record<string, MinorUnits> {
   const result: Record<string, MinorUnits> = {};
 
   for (const total of order.totals) {
-    result[total.type] = total.amount;
+    const key = total.type;
+    if (
+      typeof key === 'string' &&
+      key.length > 0 &&
+      key !== '__proto__' &&
+      key !== 'constructor' &&
+      key !== 'prototype'
+    ) {
+      result[key] = total.amount;
+    }
   }
 
   return result;

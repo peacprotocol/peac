@@ -25,7 +25,6 @@ import type {
   CreateDisputeBundleOptions,
   DisputeBundleContents,
   DisputeBundleManifest,
-  JsonWebKey,
   JsonWebKeySet,
   ManifestFileEntry,
   ManifestKeyEntry,
@@ -231,14 +230,6 @@ function isPathSafe(entryPath: string): boolean {
 
   // Only allow explicitly whitelisted paths
   return ALLOWED_PATHS.some((prefix) => normalized === prefix || normalized.startsWith(prefix));
-}
-
-/** Convert JWK to raw Ed25519 public key bytes */
-function jwkToEd25519PublicKey(jwk: JsonWebKey): Buffer | null {
-  if (jwk.kty !== 'OKP' || jwk.crv !== 'Ed25519' || !jwk.x) {
-    return null;
-  }
-  return base64urlDecode(jwk.x);
 }
 
 // ============================================================================
@@ -671,7 +662,6 @@ export async function readDisputeBundle(
 
           const chunks: Buffer[] = [];
           let actualBytes = 0;
-          const entryBudget = entry.uncompressedSize > 0 ? entry.uncompressedSize : MAX_ENTRY_SIZE;
 
           readStream.on('data', (chunk: Buffer) => {
             actualBytes += chunk.length;

@@ -28,7 +28,6 @@ describe('providerRef', () => {
   });
 
   it('should allow setting to undefined', () => {
-    providerRef.current = noopProvider;
     providerRef.current = undefined;
     expect(providerRef.current).toBeUndefined();
   });

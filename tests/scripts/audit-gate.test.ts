@@ -16,7 +16,6 @@ import {
   classifyAdvisories,
   MAX_EXPIRY_DAYS,
   MAX_EXPIRY_DAYS_PROD,
-  EXPIRY_WARNING_DAYS,
   REVIEW_WINDOW_DAYS,
   VALID_SCOPES,
 } from '../../scripts/audit-gate-lib.mjs';

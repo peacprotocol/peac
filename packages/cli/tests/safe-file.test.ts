@@ -178,8 +178,8 @@ describe('unlinkIfExists', () => {
     expect(existsSync(target)).toBe(false);
   });
 
-  it('propagates errors other than ENOENT', () => {
-    if (process.platform === 'win32') return; // chmod semantics differ on Windows
+  // chmod semantics differ on Windows; the unlink-EACCES path is POSIX-only.
+  it.skipIf(process.platform === 'win32')('propagates errors other than ENOENT', () => {
     const subdir = join(dir, 'locked');
     mkdirSync(subdir);
     const target = join(subdir, 'inside.txt');

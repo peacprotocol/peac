@@ -345,7 +345,7 @@ bundle
         process.exit(1);
       }
 
-      const { manifest, receipts, keys, policy } = result.value;
+      const { manifest, keys, policy } = result.value;
 
       if (globalOpts.json) {
         console.log(

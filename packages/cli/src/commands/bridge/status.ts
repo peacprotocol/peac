@@ -6,6 +6,7 @@ import { Command } from 'commander';
 import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
 import { homedir } from 'os';
+import { parseBridgeBaseUrl, joinBridgePath } from '../../lib/bridge-url.js';
 
 export function statusCommand() {
   return new Command('status')
@@ -53,7 +54,8 @@ export function statusCommand() {
               // Try to check health endpoint
               if (status.config?.url) {
                 try {
-                  const healthUrl = status.config.url.replace(/\/$/, '') + '/health';
+                  const baseUrl = parseBridgeBaseUrl(status.config.url);
+                  const healthUrl = joinBridgePath(baseUrl, '/health');
                   const response = await fetch(healthUrl, {
                     method: 'GET',
                     headers: { Accept: 'application/json' },
@@ -172,7 +174,8 @@ export function statusCommand() {
       // Show readiness if we have health info
       if (status.health?.status === 'healthy' && status.config?.url) {
         try {
-          const readyUrl = status.config.url.replace(/\/$/, '') + '/ready';
+          const baseUrl = parseBridgeBaseUrl(status.config.url);
+          const readyUrl = joinBridgePath(baseUrl, '/ready');
           const response = await fetch(readyUrl, {
             method: 'GET',
             headers: { Accept: 'application/peac+json' },

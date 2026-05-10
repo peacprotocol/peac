@@ -2,7 +2,7 @@
  * @peac/telemetry - No-op provider tests
  */
 
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { noopProvider } from '../src/noop.js';
 import type { TelemetryProvider } from '../src/types.js';
 

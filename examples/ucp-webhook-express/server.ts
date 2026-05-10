@@ -13,15 +13,37 @@
 import express from 'express';
 import type { Request, Response } from 'express';
 import {
-  verifyUcpWebhookSignature,
   mapUcpOrderToReceipt,
   createUcpDisputeEvidence,
-  parseWebhookEvent,
-  determineReceiptRelationship,
   ErrorHttpStatus,
 } from '@peac/mappings-ucp';
 import type { UcpOrder, UcpProfile } from '@peac/mappings-ucp';
 import { generateKeypair, sign } from '@peac/crypto';
+
+/**
+ * Sanitize a value for safe console logging. Webhook payloads are caller-
+ * controlled, so any value emitted verbatim into a log line could let a
+ * caller forge new log records by embedding CR/LF, or visually corrupt a
+ * log stream by embedding ANSI escape sequences. The first sanitization
+ * step is the explicit `/[\r\n]/g` removal pattern that recognized
+ * static-analysis sanitizer models look for; subsequent steps strip ANSI
+ * CSI escapes and other C0 controls, then cap output length.
+ */
+function sanitizeForLog(value: unknown): string {
+  let raw: string;
+  if (typeof value === 'string') {
+    raw = value;
+  } else {
+    const json = JSON.stringify(value);
+    raw = json !== undefined ? json : String(value);
+  }
+  // First: explicit CR/LF removal (the canonical log-injection sanitizer).
+  raw = raw.replace(/[\r\n]/g, '');
+  // Then: ANSI CSI escapes and remaining C0 controls.
+  // eslint-disable-next-line no-control-regex
+  raw = raw.replace(/\x1b\[[0-9;]*[A-Za-z]/g, '').replace(/[\x00-\x1f\x7f]/g, '');
+  return raw.length > 256 ? `${raw.slice(0, 253)}...` : raw;
+}
 
 // Configuration
 const PORT = process.env.PORT || 3000;
@@ -104,7 +126,7 @@ app.post('/webhooks/ucp/orders', async (req: Request, res: Response) => {
   const contentLength = bodyBytes.byteLength;
 
   console.log('Received UCP webhook');
-  console.log('  Content-Length:', contentLength);
+  console.log('  Content-Length:', sanitizeForLog(contentLength));
   console.log('  Request-Signature:', signatureHeader ? 'present' : 'missing');
 
   // Check for signature header
@@ -156,8 +178,8 @@ app.post('/webhooks/ucp/orders', async (req: Request, res: Response) => {
       order: UcpOrder;
     };
 
-    console.log('  Event type:', payload.event_type);
-    console.log('  Order ID:', payload.order.id);
+    console.log('  Event type:', sanitizeForLog(payload.event_type));
+    console.log('  Order ID:', sanitizeForLog(payload.order.id));
 
     // Map UCP order to PEAC receipt claims
     const claims = mapUcpOrderToReceipt({
@@ -169,7 +191,11 @@ app.post('/webhooks/ucp/orders', async (req: Request, res: Response) => {
     });
 
     console.log('  Receipt claims mapped');
-    console.log('    Amount:', claims.payment.amount, claims.payment.currency);
+    console.log(
+      '    Amount:',
+      sanitizeForLog(claims.payment.amount),
+      sanitizeForLog(claims.payment.currency)
+    );
     console.log('    Status:', claims.payment.status);
 
     // Sign the receipt (in production, use secure key storage)

@@ -96,7 +96,7 @@ export class ReplayDurableObject {
   }
 
   async fetch(request: Request): Promise<Response> {
-    const { hashedKey, ttlSeconds } = (await request.json()) as {
+    const { ttlSeconds } = (await request.json()) as {
       hashedKey: string;
       ttlSeconds: number;
     };
