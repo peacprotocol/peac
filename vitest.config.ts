@@ -101,6 +101,7 @@ export default defineConfig({
       'tests/security/**/*.test.ts',
       'tests/release/**/*.test.ts',
       'tests/tooling/**/*.test.ts',
+      'tests/solutions/**/*.test.ts',
       // apps/api new .test.ts files (vitest); legacy .test.js files use node --test
       'apps/api/tests/**/*.test.ts',
     ],

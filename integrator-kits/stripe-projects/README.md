@@ -2,7 +2,7 @@
 
 Integration guide for recording PEAC evidence from Stripe Projects provisioning workflows.
 
-Stripe Projects is in public preview. This kit and its example are grounded in real CLI captures, but shapes may drift with Stripe CLI or plugin updates.
+Stripe Projects is a Stripe CLI plugin documented by Stripe for provisioning and managing third-party services from the terminal. This kit is grounded in CLI captures, but shapes may drift with Stripe CLI or plugin updates.
 
 ## What Stripe Projects Exposes
 
@@ -32,12 +32,12 @@ The CLI JSON envelope observed in tested commands:
 
 ### Provider Variance
 
-Not all providers behave identically. Observed differences (Neon, PostHog):
+Not all providers behave identically. Observed differences across two providers tested during reconnaissance:
 
-- **Config requirements**: some providers require `--provider-config` (e.g., PostHog requires `{"region":"US"}`); others need no config (e.g., Neon)
-- **Remove support**: provider-dependent (Neon supports remove; PostHog does not)
-- **LLM context**: not all providers supply LLM context URLs or agent skills (Neon does; PostHog does not)
-- **Env var names**: differ per provider (e.g., `NEON_CONNECTION_STRING` vs `POSTHOG_API_KEY`)
+- **Config requirements**: some providers require `--provider-config`; others need no config
+- **Remove support**: provider-dependent
+- **LLM context**: not all providers supply LLM context URLs or agent skills
+- **Env var names**: differ per provider
 - **JSON envelope**: consistent across providers despite per-provider field differences
 
 ### Automation Constraints
@@ -49,70 +49,82 @@ Not all providers behave identically. Observed differences (Neon, PostHog):
 
 ## What PEAC Records Here
 
-PEAC is the evidence and audit layer for Stripe Projects workflows: signed, portable, offline-verifiable records of observed provisioning, delegation, and credential lifecycle events. This kit records provisioning and credential workflow observations; it does not infer settlement or provider-side finality from CLI artifacts.
+PEAC is the records layer for Stripe Projects workflows: signed, portable, offline-verifiable records of observed provisioning, account, resource, and credential lifecycle events. This kit records provisioning workflow observations through the canonical `org.peacprotocol/provisioning-lifecycle` extension namespace registered in v0.14.2; it does not infer settlement or provider-side finality from CLI artifacts.
 
-Four observation classes are demonstrated in the example:
+The four CLI commands map to the canonical `*-observed` type URIs as follows:
 
-| Observation            | Type                                                 | Pillars                | Source Artifact             |
-| ---------------------- | ---------------------------------------------------- | ---------------------- | --------------------------- |
-| Project init           | `org.peacprotocol.stripe-projects/provisioning.init` | `provenance`           | `state.json`                |
-| Service add            | `org.peacprotocol.stripe-projects/provisioning.add`  | `access`, `provenance` | `add --json` + `state.json` |
-| Credential rotate      | `org.peacprotocol.stripe-projects/credential.rotate` | `provenance`           | `rotate --json`             |
-| LLM context generation | `org.peacprotocol.stripe-projects/context.generate`  | `provenance`           | `llm-context --json`        |
+| CLI command       | PEAC type URI                                       | Pillars                | Source artifact             | Sub-event     |
+| ----------------- | --------------------------------------------------- | ---------------------- | --------------------------- | ------------- |
+| `projects init`   | `org.peacprotocol/provisioning-catalog-observed`    | `provenance`           | `state.json`                | n/a           |
+| `projects add`    | `org.peacprotocol/provisioning-resource-observed`   | `access`, `provenance` | `add --json` + `state.json` | `provisioned` |
+| `projects add`    | `org.peacprotocol/provisioning-credential-observed` | `provenance`           | `add --json` + vault layout | `issued`      |
+| `projects rotate` | `org.peacprotocol/provisioning-credential-observed` | `provenance`           | `rotate --json`             | `rotated`     |
 
-Type strings are experimental and subject to change if formally registered. Type names and the custom extension key in this example are illustrative and not registry commitments.
+`projects llm-context` is informational and is not emitted as a provisioning lifecycle record in the canonical demo. The canonical extension namespace and ten `*-observed` type URIs are registered in `specs/kernel/registries.json`; see [`docs/specs/PROVISIONING-LIFECYCLE-PROFILE.md`](../../docs/specs/PROVISIONING-LIFECYCLE-PROFILE.md) for the full profile.
 
 ## What PEAC Does Not Claim
 
-- Provisioning receipts are **observed CLI evidence**, not provider-side ground truth
+- Provisioning records are **observed CLI evidence**, not provider-side ground truth
 - `billing add` is setup state, not payment settlement: no commerce extension
 - `upgrade` via Stripe Projects uses Shared Payment Tokens (SPT); the SPT `amount_limit` is a delegation ceiling, not a settled or captured charge: no `event` field
 - PEAC does not manage or control Stripe Projects provisioning; it records what the CLI reported
-- Provider behavior varies; evidence shapes reflect observed captures, not a universal contract
+- Provider behavior varies; record shapes reflect observed captures, not a universal contract
 
 ## CLI Observer Pattern
 
-Wrap `stripe projects` commands with `--json`, hash state and artifacts, issue typed receipts:
+Wrap `stripe projects` commands with `--json`, hash state and artifacts, validate the extension content, and issue records under the canonical extension namespace:
 
 ```typescript
 import { generateKeypair, jcsHash } from '@peac/crypto';
 import { issue, verifyLocal } from '@peac/protocol';
+import { PROVISIONING_LIFECYCLE_EXTENSION_KEY, validateProvisioningLifecycle } from '@peac/schema';
 
-// Run the CLI command and capture JSON output
-// const result = JSON.parse(execFileSync('stripe', ['projects', 'add', 'neon/postgres', '--json']).toString());
+// Run the CLI command and capture JSON output.
+// const result = JSON.parse(execFileSync('stripe', ['projects', 'add', '<provider>/<service>', '--json']).toString());
 
-// Hash the CLI response data (RFC 8785 JCS canonical JSON + SHA-256)
-const artifactHash = await jcsHash(result.data);
+// Hash the CLI response data (RFC 8785 JCS canonical JSON + SHA-256).
+const upstreamArtifactDigest = `sha256:${await jcsHash(result.data)}`;
 
-// Hash the project state after the command
-const stateAfterAdd = JSON.parse(readFileSync('.projects/state.json', 'utf8'));
-const stateHash = await jcsHash(stateAfterAdd);
-
-// Issue evidence receipt
 const { privateKey, publicKey } = await generateKeypair();
+
+// Caller observed a managed-database resource being provisioned.
+const extension = {
+  event_kind: 'provisioning-resource-observed',
+  observed_at: new Date().toISOString(),
+  observed_by_ref: 'urn:peac:agent:my-issuer',
+  upstream_artifact_digest: upstreamArtifactDigest,
+  provider: {
+    provider_ref: 'urn:peac:provider:my-marketplace',
+    account_ref: 'urn:peac:account:my-tenant',
+  },
+  resource: {
+    kind: 'managed-database',
+    resource_ref: 'urn:peac:resource:primary-db',
+    sub_event: 'provisioned',
+  },
+};
+
+// Validate the extension content through the canonical validator before
+// signing. The validator returns the structured-error contract on failure.
+const validation = validateProvisioningLifecycle(extension);
+if (!validation.ok) {
+  throw new Error(JSON.stringify(validation.errors));
+}
+
 const { jws } = await issue({
   iss: 'https://your-issuer.example.com',
   kind: 'evidence',
-  type: 'org.peacprotocol.stripe-projects/provisioning.add',
+  type: 'org.peacprotocol/provisioning-resource-observed',
   pillars: ['access', 'provenance'],
   occurred_at: new Date().toISOString(),
   privateKey,
   kid: 'your-key-id',
   extensions: {
-    'org.peacprotocol.stripe-projects/v1': {
-      command: 'stripe projects add neon/postgres --name primary-db',
-      provider: result.data.service.provider,
-      service_id: result.data.service.service_id,
-      resource_name: result.data.service.name,
-      resource_status: result.data.service.status,
-      artifact_hash: artifactHash,
-      state_hash_after: stateHash,
-      observer_role: 'developer',
-    },
+    [PROVISIONING_LIFECYCLE_EXTENSION_KEY]: extension,
   },
 });
 
-// Verify offline
+// Verify offline.
 const verification = await verifyLocal(jws, publicKey);
 ```
 
@@ -124,19 +136,14 @@ State hashes use `jcsHash()` from `@peac/crypto`, which applies RFC 8785 JSON Ca
 import { jcsHash } from '@peac/crypto';
 
 const state = JSON.parse(readFileSync('.projects/state.json', 'utf8'));
-const hash = await jcsHash(state); // hex string
+const stateDigest = `sha256:${await jcsHash(state)}`; // pin into upstream_artifact_digest where appropriate
 ```
 
 ## Upgrade and SPT Evidence Semantics
 
-If `stripe projects upgrade` is observed with SPT delegation:
+`stripe projects upgrade` was not executed during reconnaissance (billing and delegation risk). When upgrades with SPT delegation are observed in production, prefer mapping them through the dedicated commerce profiles (see `examples/stripe-spt-evidence/`) rather than the provisioning lifecycle profile, because the lifecycle profile records observation of provisioning state, not commerce delegation.
 
-- Record as `org.peacprotocol.stripe-projects/delegation.upgrade` (not provisioning)
-- Include `amount_limit` and `currency` from the SPT in the v1 extension
-- Do **not** set `commerce.event`: the SPT is a delegation ceiling, not an observed payment state
-- Include the `org.peacprotocol/commerce` extension only if the amount_limit is confirmed from CLI output; even then, do not set `event`
-
-Note: `upgrade` was not executed during the initial reconnaissance (billing/delegation risk). These semantics are provisional guidance, not yet grounded in observed artifacts.
+If a future revision adds an SPT-aware mapping inside the provisioning lifecycle profile, the corresponding event family will be added under the canonical namespace; the experimental delegation type used in earlier reconnaissance is no longer in scope.
 
 ## Security Guardrails
 
@@ -144,11 +151,11 @@ Note: `upgrade` was not executed during the initial reconnaissance (billing/dele
 - **No vault secrets in repo**: `.projects/vault/` is gitignored by default; never commit `vault.json` or `.env` values
 - **Sanitize fixtures**: replace account IDs, resource IDs, and project IDs before committing any CLI captures
 - **Auth requires human approval**: `stripe projects init` requires browser confirmation; automation cannot bypass this without a human approving in a browser
-- **Evidence only**: PEAC records what the CLI reported; it does not invoke or control Stripe Projects commands
+- **Records only**: PEAC records what the CLI reported; it does not invoke or control Stripe Projects commands
 
 ## Verification Pattern
 
-All receipts verify offline with `verifyLocal()`:
+All records verify offline with `verifyLocal()`:
 
 ```typescript
 import { verifyLocal } from '@peac/protocol';
@@ -161,15 +168,16 @@ if (result.valid && result.variant === 'wire-02') {
 }
 ```
 
-Verification produces expected warnings for experimental (unregistered) types and extension keys. These are informational, not errors.
-
-Audit trail reconstruction: collect all receipts with `org.peacprotocol.stripe-projects/*` types, sort by `occurred_at`, and verify each against the issuer's public key.
+Audit trail reconstruction: collect all records whose `type` matches `org.peacprotocol/provisioning-*-observed`, sort by `occurred_at`, and verify each against the issuer's public key. The 10 type URIs all carry the `*-observed` suffix to make the observer scope explicit at the record-type layer.
 
 ## Reference
 
-- Example: `examples/stripe-projects-provisioning/demo.ts`
-- SPT delegation: `examples/stripe-spt-evidence/demo.ts`
-- Commerce semantics: `docs/specs/COMMERCE-SEMANTICS.md`
-- Minimal example: `examples/minimal/demo.ts`
-- Packages: `@peac/crypto` (JCS, signing), `@peac/protocol` (issue, verify)
-- RFC 8785: JSON Canonicalization Scheme
+- Example: [`examples/agent-provisioning-demo/demo.ts`](../../examples/agent-provisioning-demo/demo.ts) — concrete sanitized demo using the canonical `org.peacprotocol/provisioning-lifecycle` extension namespace.
+- Generic example: [`examples/provisioning-lifecycle/`](../../examples/provisioning-lifecycle/) — one fixture per `*-observed` event family.
+- Profile spec: [`docs/specs/PROVISIONING-LIFECYCLE-PROFILE.md`](../../docs/specs/PROVISIONING-LIFECYCLE-PROFILE.md).
+- Operator recipe: [`docs/SOLUTIONS/verify-agent-provisioning.md`](../../docs/SOLUTIONS/verify-agent-provisioning.md).
+- SPT delegation: [`examples/stripe-spt-evidence/demo.ts`](../../examples/stripe-spt-evidence/demo.ts).
+- Commerce semantics: [`docs/specs/COMMERCE-SEMANTICS.md`](../../docs/specs/COMMERCE-SEMANTICS.md).
+- Minimal example: [`examples/minimal/demo.ts`](../../examples/minimal/demo.ts).
+- Packages: `@peac/crypto` (JCS, signing), `@peac/protocol` (issue, verify), `@peac/schema` (`validateProvisioningLifecycle`, `PROVISIONING_LIFECYCLE_EXTENSION_KEY`).
+- RFC 8785: JSON Canonicalization Scheme.

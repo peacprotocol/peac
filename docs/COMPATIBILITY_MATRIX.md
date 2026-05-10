@@ -95,6 +95,16 @@ Each tag below points at the conformance vectors and test paths that justify the
 - **[e4]** Commerce evidence vectors C-001..C-010 under [`specs/conformance/commerce/`](../specs/conformance/commerce/) plus per-mapper test suites at [`packages/adapters/x402/tests/`](../packages/adapters/x402/tests/), [`packages/mappings/acp/tests/`](../packages/mappings/acp/tests/), and [`packages/mappings/paymentauth/tests/`](../packages/mappings/paymentauth/tests/). The `assertExplicitFinality` boundary is asserted in [`packages/adapters/core/tests/finality.test.ts`](../packages/adapters/core/tests/finality.test.ts) and [`packages/adapters/core/tests/finality-fixtures.test.ts`](../packages/adapters/core/tests/finality-fixtures.test.ts).
 - **[e5]** Type-definition coverage only: TypeScript declaration file(s) in the package `src/` compile under the workspace typecheck (`pnpm typecheck:core`). No runtime assertion exists beyond the declaration shape.
 
+## Profile Coverage
+
+Profiles add normative semantic constraints on top of the wire envelope for a registered extension namespace. Each profile registers its extension namespace, type URI set, validator, and conformance section in the registries; this table summarizes profiles whose validator and parity corpus are shipped alongside the extension.
+
+| Namespace                                 | Profile version | Scope    | Stability | Spec                                                                                 | Conformance fixtures                                                                                                                                                                                                                                                                         |
+| ----------------------------------------- | --------------- | -------- | --------- | ------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `org.peacprotocol/provisioning-lifecycle` | 0.1             | Observer | Stable    | [`specs/PROVISIONING-LIFECYCLE-PROFILE.md`](specs/PROVISIONING-LIFECYCLE-PROFILE.md) | [`specs/conformance/parity-corpus/provisioning-lifecycle/`](../specs/conformance/parity-corpus/provisioning-lifecycle/) (10 positive + 19 negative vectors; `provisioning.invalid_utf8` and `provisioning.structure_too_deep` covered in schema unit tests) plus Section 31 requirement IDs. |
+
+The Observer scope means PEAC records what an external system reports happened. The 10 type URIs all carry the `*-observed` suffix to make the observer scope explicit at the record-type layer. PEAC does not authorize actions, validate credentials, settle transactions, or operate the upstream provisioning workflow.
+
 ## Performance Targets
 
 Informational and regression-oriented. Operator-facing service-level objectives are tracked in [`docs/SLO.md`](SLO.md) when published. Benchmark methodology: [`docs/BENCHMARK-METHODOLOGY.md`](BENCHMARK-METHODOLOGY.md) when published.

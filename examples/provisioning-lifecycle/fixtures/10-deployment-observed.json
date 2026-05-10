@@ -1,0 +1,13 @@
+{
+  "event_kind": "provisioning-deployment-observed",
+  "observed_at": "2026-05-01T10:45:00Z",
+  "observed_by_ref": "urn:peac:agent:demo-issuer",
+  "provider": {
+    "provider_ref": "urn:peac:provider:example-platform"
+  },
+  "deployment": {
+    "deployment_ref": "urn:peac:deployment:release-001",
+    "artifact_digest": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+    "sub_event": "completed"
+  }
+}

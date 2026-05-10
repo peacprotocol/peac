@@ -1,0 +1,16 @@
+{
+  "name": "@peac/example-provisioning-lifecycle",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Generic provisioning lifecycle records example: issue and verify signed records across all 10 *-observed event families.",
+  "type": "module",
+  "scripts": {
+    "issue": "node issue-fixtures.mjs",
+    "verify": "node verify-fixtures.mjs"
+  },
+  "dependencies": {
+    "@peac/crypto": "workspace:*",
+    "@peac/protocol": "workspace:*",
+    "@peac/schema": "workspace:*"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "event_kind": "provisioning-subscription-observed",
+  "observed_at": "2026-05-01T10:35:00Z",
+  "observed_by_ref": "urn:peac:agent:demo-issuer",
+  "provider": {
+    "provider_ref": "urn:peac:provider:example-marketplace"
+  },
+  "subscription": {
+    "sub_event": "started",
+    "subscription_ref": "urn:peac:subscription:sub-001",
+    "plan_digest": "sha256:8888888888888888888888888888888888888888888888888888888888888888"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "event_kind": "provisioning-provider-link-observed",
+  "observed_at": "2026-05-01T10:05:00Z",
+  "observed_by_ref": "urn:peac:agent:demo-issuer",
+  "provider": {
+    "provider_ref": "urn:peac:provider:example-marketplace",
+    "account_ref": "urn:peac:provider-account:link-001"
+  }
+}

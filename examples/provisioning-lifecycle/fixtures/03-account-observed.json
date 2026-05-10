@@ -1,0 +1,13 @@
+{
+  "event_kind": "provisioning-account-observed",
+  "observed_at": "2026-05-01T10:10:00Z",
+  "observed_by_ref": "urn:peac:agent:demo-issuer",
+  "provider": {
+    "provider_ref": "urn:peac:provider:example-marketplace"
+  },
+  "account": {
+    "sub_event": "created",
+    "account_ref": "urn:peac:account:tenant-001",
+    "terms_digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333"
+  }
+}

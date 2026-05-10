@@ -47,10 +47,11 @@ type parityVectorIssue struct {
 }
 
 var parityFloorCounts = map[string]int{
-	"default-flows":      12,
-	"jose-hardening":     8,
-	"runtime-governance": 7,
-	"commerce-bridges":   4,
+	"default-flows":          12,
+	"jose-hardening":         8,
+	"runtime-governance":     7,
+	"commerce-bridges":       4,
+	"provisioning-lifecycle": 29,
 }
 
 func parityCorpusRoot(t *testing.T) string {
@@ -134,6 +135,7 @@ func TestParityCorpusLoader(t *testing.T) {
 		"jose-hardening",
 		"runtime-governance",
 		"commerce-bridges",
+		"provisioning-lifecycle",
 	} {
 		t.Run(family, func(tt *testing.T) {
 			loaded := loadParityFamily(tt, family)
@@ -155,11 +157,11 @@ func TestParityCorpusLoaderUnknownFamilyHandled(t *testing.T) {
 	if _, err := os.Stat(missing); !os.IsNotExist(err) {
 		t.Fatalf("setup: expected nonexistent-family/vectors.json not to exist, got err=%v", err)
 	}
-	// Confirm the parity floor map has exactly four entries (the four families).
-	if got, want := len(parityFloorCounts), 4; got != want {
+	// Confirm the parity floor map has exactly five entries (the five families).
+	if got, want := len(parityFloorCounts), 5; got != want {
 		t.Fatalf("parityFloorCounts has %d entries, want %d", got, want)
 	}
-	for _, want := range []string{"default-flows", "jose-hardening", "runtime-governance", "commerce-bridges"} {
+	for _, want := range []string{"default-flows", "jose-hardening", "runtime-governance", "commerce-bridges", "provisioning-lifecycle"} {
 		if _, ok := parityFloorCounts[want]; !ok {
 			t.Fatalf("parityFloorCounts missing family %q", want)
 		}

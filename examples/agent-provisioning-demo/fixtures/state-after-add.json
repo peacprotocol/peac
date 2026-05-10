@@ -1,22 +1,22 @@
 {
   "version": 1,
   "providers": {
-    "neon": {
-      "name": "Neon"
+    "provider-x": {
+      "name": "provider-x"
     },
-    "posthog": {
-      "name": "PostHog"
+    "provider-y": {
+      "name": "provider-y"
     }
   },
   "resources": {
     "primary-db": {
       "name": "primary-db",
-      "providerName": "Neon",
-      "serviceId": "postgres"
+      "providerName": "provider-x",
+      "serviceId": "managed-database"
     },
     "analytics": {
       "name": "analytics",
-      "providerName": "PostHog",
+      "providerName": "provider-y",
       "serviceId": "analytics"
     }
   }

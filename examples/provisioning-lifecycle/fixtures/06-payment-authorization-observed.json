@@ -1,0 +1,20 @@
+{
+  "event_kind": "provisioning-payment-authorization-observed",
+  "observed_at": "2026-05-01T10:25:00Z",
+  "observed_by_ref": "urn:peac:agent:demo-issuer",
+  "provider": {
+    "provider_ref": "urn:peac:provider:example-marketplace"
+  },
+  "payment_authorization_observation": {
+    "scheme_id": "card.credit/network-x",
+    "authorization_ref": "urn:peac:auth:auth-001",
+    "issuer_ref": "urn:peac:psp:psp-001",
+    "scope_digest": "sha256:5555555555555555555555555555555555555555555555555555555555555555",
+    "limits_digest": "sha256:6666666666666666666666666666666666666666666666666666666666666666",
+    "currency": "USD",
+    "max_amount_minor": "5000",
+    "expires_at": "2026-06-01T10:25:00Z",
+    "sub_event": "granted",
+    "material_redaction": "never_capture"
+  }
+}

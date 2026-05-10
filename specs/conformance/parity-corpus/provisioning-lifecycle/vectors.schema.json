@@ -1,0 +1,125 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://peacprotocol.org/specs/conformance/parity-corpus/provisioning-lifecycle/vectors.schema.json",
+  "title": "Provisioning lifecycle parity corpus vectors",
+  "description": "Schema for provisioning lifecycle parity vectors. 10 positive vectors (one per *-observed event family) plus 19 negative vectors (one per validator-emitted stable error code under provisioning.*). Every vector is envelope-accepted (expected.accepted = true). Positive vectors (id matches ^pl-[0-9]) carry no expected.errors. Negative vectors (id matches ^pl-n) carry expected.errors of length exactly one, whose code matches ^provisioning\\. The wire-envelope canonical-truth test in @peac/protocol filters dotted extension-level codes (only registered family prefixes pass); the schema-validator corpus test in @peac/schema reads them directly. Two stable codes are not exercised by corpus vectors: provisioning.invalid_utf8 (fixture-loader-only) and provisioning.structure_too_deep (kernel and extension walker share the same depth cap; round-tripping through parity-vector comparison is path-sensitive).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["family", "description", "version", "vectors"],
+  "properties": {
+    "family": { "const": "provisioning-lifecycle" },
+    "description": { "type": "string", "minLength": 1 },
+    "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "generator": { "type": "string" },
+    "vectors": {
+      "type": "array",
+      "minItems": 29,
+      "items": { "$ref": "#/$defs/vector" }
+    }
+  },
+  "$defs": {
+    "vector": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "description", "input", "expected"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9-]+$", "minLength": 1, "maxLength": 96 },
+        "description": { "type": "string", "minLength": 1, "maxLength": 512 },
+        "input": { "$ref": "#/$defs/input" },
+        "expected": { "$ref": "#/$defs/expected" }
+      },
+      "allOf": [
+        {
+          "if": {
+            "type": "object",
+            "properties": { "id": { "type": "string", "pattern": "^pl-n[0-9]" } },
+            "required": ["id"]
+          },
+          "then": {
+            "properties": {
+              "expected": {
+                "type": "object",
+                "required": ["accepted", "errors"],
+                "properties": {
+                  "accepted": { "const": true },
+                  "errors": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 1,
+                    "items": {
+                      "type": "object",
+                      "required": ["code"],
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "pattern": "^provisioning\\.[a-z_]+$",
+                          "minLength": 1,
+                          "maxLength": 128
+                        },
+                        "path": { "type": "string", "maxLength": 256 }
+                      },
+                      "additionalProperties": false
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "type": "object",
+            "properties": { "id": { "type": "string", "pattern": "^pl-[0-9]" } },
+            "required": ["id"]
+          },
+          "then": {
+            "properties": {
+              "expected": {
+                "type": "object",
+                "required": ["accepted"],
+                "properties": {
+                  "accepted": { "const": true },
+                  "errors": false
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "input": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["payload"],
+      "properties": {
+        "payload": { "type": "object" },
+        "header": { "type": "object" }
+      }
+    },
+    "expected": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["accepted"],
+      "properties": {
+        "accepted": { "type": "boolean" },
+        "errors": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/diagnostic" }
+        },
+        "warnings": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/diagnostic" }
+        }
+      }
+    },
+    "diagnostic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code"],
+      "properties": {
+        "code": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "path": { "type": "string", "maxLength": 256 }
+      }
+    }
+  }
+}

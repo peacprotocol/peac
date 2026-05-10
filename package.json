@@ -56,6 +56,7 @@
     "codegen:registries": "tsx scripts/codegen-registries.ts",
     "verify:registries-schema": "node scripts/validate-registries-schema.mjs",
     "verify:codegen-drift": "bash scripts/verify-codegen-drift.sh",
+    "verify:example-source-gate": "node scripts/verify-example-source-gate.mjs",
     "verify:distribution": "node scripts/verify-distribution.mjs",
     "verify:release": "node scripts/verify-release.mjs",
     "verify:no-widening": "node scripts/verify-no-semantic-widening.mjs",
