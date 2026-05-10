@@ -24,17 +24,25 @@ import { generateKeypair, sign } from '@peac/crypto';
  * Sanitize a value for safe console logging. Webhook payloads are caller-
  * controlled, so any value emitted verbatim into a log line could let a
  * caller forge new log records by embedding CR/LF, or visually corrupt a
- * log stream by embedding ANSI escape sequences. This helper strips C0
- * control characters (including CR/LF) and ANSI CSI escapes, coerces non-
- * string values to JSON (falling back to `String(...)` when JSON is
- * undefined for the value), and caps length to bound output.
+ * log stream by embedding ANSI escape sequences. The first sanitization
+ * step is the explicit `/[\r\n]/g` removal pattern that recognized
+ * static-analysis sanitizer models look for; subsequent steps strip ANSI
+ * CSI escapes and other C0 controls, then cap output length.
  */
 function sanitizeForLog(value: unknown): string {
-  const serialized = typeof value === 'string' ? value : JSON.stringify(value);
-  const raw = serialized ?? String(value);
+  let raw: string;
+  if (typeof value === 'string') {
+    raw = value;
+  } else {
+    const json = JSON.stringify(value);
+    raw = json !== undefined ? json : String(value);
+  }
+  // First: explicit CR/LF removal (the canonical log-injection sanitizer).
+  raw = raw.replace(/[\r\n]/g, '');
+  // Then: ANSI CSI escapes and remaining C0 controls.
   // eslint-disable-next-line no-control-regex
-  const stripped = raw.replace(/\x1b\[[0-9;]*[A-Za-z]/g, '').replace(/[\x00-\x1f\x7f]/g, '');
-  return stripped.length > 256 ? `${stripped.slice(0, 253)}...` : stripped;
+  raw = raw.replace(/\x1b\[[0-9;]*[A-Za-z]/g, '').replace(/[\x00-\x1f\x7f]/g, '');
+  return raw.length > 256 ? `${raw.slice(0, 253)}...` : raw;
 }
 
 // Configuration

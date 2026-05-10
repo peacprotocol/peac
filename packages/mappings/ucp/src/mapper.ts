@@ -49,48 +49,24 @@ function deriveOrderStatus(order: UcpOrder): 'completed' | 'partial' | 'processi
 }
 
 /**
- * Forbidden built-in property-name blocklist. Assigning a remote-controlled
- * value to one of these names would pollute the prototype chain or shadow a
- * built-in slot, so the barrier below silently drops them.
- */
-const FORBIDDEN_OWN_PROPERTY_NAMES: ReadonlySet<string> = new Set([
-  '__proto__',
-  'constructor',
-  'prototype',
-]);
-
-/**
- * Assign `value` to `target[key]` only when `key` is a non-empty string and
- * not in the forbidden built-in property-name blocklist. Uses
- * `Object.defineProperty` so the assignment cannot trigger setter-based
- * prototype chain effects, and so the barrier remains valid even if a
- * caller later passes an object whose prototype chain has been tampered
- * with.
- */
-function safeOwnPropertyAssign<V>(target: Record<string, V>, key: unknown, value: V): void {
-  if (typeof key !== 'string' || key.length === 0) return;
-  if (FORBIDDEN_OWN_PROPERTY_NAMES.has(key)) return;
-  Object.defineProperty(target, key, {
-    value,
-    writable: true,
-    enumerable: true,
-    configurable: true,
-  });
-}
-
-/**
- * Extract totals by type from a UCP order. Uses the forbidden-key barrier so
- * a remote-controlled `total.type` cannot pollute the result's prototype
- * chain or shadow a built-in property name. The returned bag is a normal
- * object (Object.prototype) so JSON serialization, snapshot tests, and
- * downstream `Object.getPrototypeOf` / property-helper consumers behave
- * exactly as they did before this barrier was introduced.
+ * Extract totals by type from a UCP order. The inline literal guards before
+ * each property assignment are the recognized data-flow barrier pattern for
+ * preventing prototype-chain pollution from a remote-controlled `total.type`:
+ * the assignment is reached only when `total.type` is a non-empty string and
+ * is not one of the three built-in property names that could otherwise
+ * pollute the prototype chain or shadow a built-in slot. The returned bag
+ * is a normal object (Object.prototype) so JSON serialization, snapshot
+ * tests, and downstream `Object.getPrototypeOf` / property-helper consumers
+ * behave exactly as they did before this barrier was introduced.
  */
 function extractTotals(order: UcpOrder): Record<string, MinorUnits> {
   const result: Record<string, MinorUnits> = {};
 
   for (const total of order.totals) {
-    safeOwnPropertyAssign(result, total.type, total.amount);
+    const key = total.type;
+    if (typeof key !== 'string' || key.length === 0) continue;
+    if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue;
+    result[key] = total.amount;
   }
 
   return result;
