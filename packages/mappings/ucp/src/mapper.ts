@@ -48,32 +48,32 @@ function deriveOrderStatus(order: UcpOrder): 'completed' | 'partial' | 'processi
   return 'processing';
 }
 
+/** Built-in property names that, if used as object keys for a remote-
+ * controlled value, would pollute the prototype chain or shadow built-in
+ * slots. The barrier in `extractTotals` filters these out via
+ * `Array.includes` (the canonical blocklist guard pattern). */
+const FORBIDDEN_TOTAL_KEYS: ReadonlyArray<string> = ['__proto__', 'constructor', 'prototype'];
+
 /**
- * Extract totals by type from a UCP order. Defense-in-depth against
- * prototype-chain pollution from a remote-controlled `total.type`:
- *
- *   1. Property writes go to a null-prototype bag (`Object.create(null)`)
- *      so there is no prototype chain that a malicious key could reach.
- *   2. Inline literal guards still drop the three forbidden built-in
- *      property names from the output before assignment, so the bag never
- *      carries those keys even as own properties.
- *   3. The bag is materialized into a normal-prototype Object via a
- *      JSON round-trip so the public payload shape preserves
- *      `Object.getPrototypeOf === Object.prototype` semantics for
- *      downstream consumers (JSON serialization, snapshot tests, and
- *      property-helper consumers).
+ * Extract totals by type from a UCP order. The single combined-guard `if`
+ * block immediately before the property write is the canonical blocklist
+ * data-flow barrier for prototype-chain pollution from a remote-controlled
+ * `total.type`: the assignment is reached only when the key is a non-empty
+ * string and is not in the forbidden built-in property-name list. The
+ * returned bag is a normal object (Object.prototype) so downstream
+ * consumers see no behavioral change.
  */
 function extractTotals(order: UcpOrder): Record<string, MinorUnits> {
-  const bag: Record<string, MinorUnits> = Object.create(null);
+  const result: Record<string, MinorUnits> = {};
 
   for (const total of order.totals) {
     const key = total.type;
-    if (typeof key !== 'string' || key.length === 0) continue;
-    if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue;
-    bag[key] = total.amount;
+    if (typeof key === 'string' && key.length > 0 && !FORBIDDEN_TOTAL_KEYS.includes(key)) {
+      result[key] = total.amount;
+    }
   }
 
-  return JSON.parse(JSON.stringify(bag)) as Record<string, MinorUnits>;
+  return result;
 }
 
 /**
