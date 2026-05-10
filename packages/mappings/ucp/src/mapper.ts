@@ -48,27 +48,28 @@ function deriveOrderStatus(order: UcpOrder): 'completed' | 'partial' | 'processi
   return 'processing';
 }
 
-/** Built-in property names that, if used as object keys for a remote-
- * controlled value, would pollute the prototype chain or shadow built-in
- * slots. The barrier in `extractTotals` filters these out via
- * `Array.includes` (the canonical blocklist guard pattern). */
-const FORBIDDEN_TOTAL_KEYS: ReadonlyArray<string> = ['__proto__', 'constructor', 'prototype'];
-
 /**
- * Extract totals by type from a UCP order. The single combined-guard `if`
- * block immediately before the property write is the canonical blocklist
- * data-flow barrier for prototype-chain pollution from a remote-controlled
+ * Extract totals by type from a UCP order. The combined-guard `if` block
+ * immediately before the property write is the documented data-flow
+ * barrier for prototype-chain pollution from a remote-controlled
  * `total.type`: the assignment is reached only when the key is a non-empty
- * string and is not in the forbidden built-in property-name list. The
- * returned bag is a normal object (Object.prototype) so downstream
- * consumers see no behavioral change.
+ * string and is not equal to any of the three built-in property names that
+ * could pollute the prototype chain or shadow built-in slots. The returned
+ * bag is a normal object (Object.prototype) so downstream consumers see no
+ * behavioral change.
  */
 function extractTotals(order: UcpOrder): Record<string, MinorUnits> {
   const result: Record<string, MinorUnits> = {};
 
   for (const total of order.totals) {
     const key = total.type;
-    if (typeof key === 'string' && key.length > 0 && !FORBIDDEN_TOTAL_KEYS.includes(key)) {
+    if (
+      typeof key === 'string' &&
+      key.length > 0 &&
+      key !== '__proto__' &&
+      key !== 'constructor' &&
+      key !== 'prototype'
+    ) {
       result[key] = total.amount;
     }
   }
