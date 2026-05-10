@@ -8,7 +8,6 @@
 import { describe, it, expect } from 'vitest';
 import { issueWire01 } from '../../packages/protocol/src/issue';
 import { verify as jwsVerify, decode, generateKeypair } from '../../packages/crypto/src/jws';
-import { verifyReceipt } from '../../packages/protocol/src/verify';
 import type { PEACReceiptClaims } from '../../packages/schema/src/types';
 
 describe('Negative Test Vectors', () => {

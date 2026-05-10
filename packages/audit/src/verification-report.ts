@@ -18,7 +18,6 @@ import { readDisputeBundle } from './dispute-bundle.js';
 import { BundleErrorCodes } from './dispute-bundle.js';
 import type {
   AuditorSummary,
-  BundleError,
   BundleResult,
   BundleSignatureResult,
   DisputeBundleContents,
@@ -69,15 +68,6 @@ function parseJws(jws: string): {
   } catch {
     return null;
   }
-}
-
-/** Create a bundle error */
-function bundleError(
-  code: string,
-  message: string,
-  details?: Record<string, unknown>
-): BundleError {
-  return { code, message, details };
 }
 
 /**

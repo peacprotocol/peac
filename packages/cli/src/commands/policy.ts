@@ -20,8 +20,6 @@ import * as fs from 'fs';
 import * as path from 'path';
 import {
   loadPolicy,
-  parsePolicy,
-  validatePolicy,
   evaluate,
   explainMatches,
   createExamplePolicy,
@@ -33,7 +31,6 @@ import {
   renderPolicyMarkdown,
   PolicyLoadError,
   PolicyValidationError,
-  POLICY_VERSION,
   EvaluationContext,
   ControlPurpose,
   ControlLicensingMode,
@@ -42,8 +39,6 @@ import {
   listProfiles,
   loadProfile,
   getProfileSummary,
-  validateProfileParams,
-  customizeProfile,
   ProfileError,
   type ProfileId,
 } from '@peac/policy-kit';
@@ -744,7 +739,6 @@ policy
 
     try {
       const profile = loadProfile(id as ProfileId);
-      const summary = getProfileSummary(id as ProfileId);
 
       if (globalOpts.json) {
         output(

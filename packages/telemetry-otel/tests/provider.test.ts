@@ -6,8 +6,8 @@
  * verified through integration tests with a full OTel SDK setup.
  */
 
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { trace, metrics, context } from '@opentelemetry/api';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { trace, metrics } from '@opentelemetry/api';
 import {
   BasicTracerProvider,
   InMemorySpanExporter,
@@ -15,7 +15,6 @@ import {
 } from '@opentelemetry/sdk-trace-base';
 import { MeterProvider } from '@opentelemetry/sdk-metrics';
 import { createOtelProvider } from '../src/provider.js';
-import { PEAC_ATTRS, PEAC_EVENTS } from '@peac/telemetry';
 
 describe('createOtelProvider', () => {
   let tracerProvider: BasicTracerProvider;

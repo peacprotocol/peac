@@ -13,9 +13,6 @@ import {
   SubjectMatcher,
   EvaluationContext,
   EvaluationResult,
-  ControlPurpose,
-  ControlLicensingMode,
-  SubjectType,
 } from './types';
 
 /**

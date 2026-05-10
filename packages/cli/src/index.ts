@@ -49,7 +49,7 @@ program
       console.log('Verifying PEAC receipt...\n');
 
       // First, decode to show receipt info
-      const { header, payload } = decode<PEACReceiptClaims>(jws);
+      const { payload } = decode<PEACReceiptClaims>(jws);
 
       console.log('Receipt Information:');
       console.log(`   Receipt ID: ${payload.rid}`);

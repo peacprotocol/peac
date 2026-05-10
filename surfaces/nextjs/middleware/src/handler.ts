@@ -21,7 +21,6 @@ import {
   type ErrorCode,
   createErrorHandlerResponse,
   createChallengeHandlerResponse,
-  getErrorStatus,
 } from './errors.js';
 
 /**

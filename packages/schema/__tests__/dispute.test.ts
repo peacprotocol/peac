@@ -16,7 +16,6 @@ import {
   RemediationTypeSchema,
   RemediationSchema,
   DisputeResolutionSchema,
-  ContactMethodSchema,
   DisputeContactSchema,
   DocumentRefSchema,
   DisputeEvidenceSchema,
