@@ -1,62 +1,93 @@
 #!/usr/bin/env bash
 # scripts/check-version-coherence.sh
-# Verify all workspace packages share the same version.
+# Verify the npm release version surface is internally coherent.
 #
-# All packages in the monorepo must have the same version number.
-# This prevents partial publishes and version drift.
+# All publishable packages in scripts/publish-manifest.json must match
+# the root release version. Workspace-private packages are intentionally
+# excluded from npm release-version coherence; private:true is the publish
+# boundary, and private packages may carry independent version fields
+# without affecting the npm release surface.
 
 set -euo pipefail
 
 echo "== Version coherence check =="
 
-# Get root package version as reference
-ROOT_VERSION=$(node -e "console.log(require('./package.json').version)")
-echo "  Root version: $ROOT_VERSION"
+node - <<'NODE'
+const fs = require('fs');
+const path = require('path');
 
-bad=0
-checked=0
+const root = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+const ROOT_VERSION = root.version;
+console.log(`  Root version: ${ROOT_VERSION}`);
 
-for manifest in packages/*/package.json packages/rails/*/package.json packages/mappings/*/package.json packages/transport/*/package.json; do
-  [ -f "$manifest" ] || continue
+const manifest = JSON.parse(fs.readFileSync('scripts/publish-manifest.json', 'utf8'));
+const publishable = new Set(manifest.packages || []);
 
-  PKG_NAME=$(node -e "const p = require('./$manifest'); console.log(p.name || '')")
-  PKG_VERSION=$(node -e "const p = require('./$manifest'); console.log(p.version || '')")
+const found = new Map(); // name -> { version, file, private }
 
-  if [ -z "$PKG_NAME" ] || [ -z "$PKG_VERSION" ]; then
-    continue
-  fi
+function walk(dir) {
+  let entries;
+  try {
+    entries = fs.readdirSync(dir, { withFileTypes: true });
+  } catch {
+    return;
+  }
+  for (const e of entries) {
+    if (['node_modules', 'dist', '.turbo', '.git'].includes(e.name)) continue;
+    const p = path.join(dir, e.name);
+    if (e.isDirectory()) {
+      walk(p);
+    } else if (e.isFile() && e.name === 'package.json') {
+      try {
+        const pkg = JSON.parse(fs.readFileSync(p, 'utf8'));
+        if (pkg.name) {
+          found.set(pkg.name, {
+            version: pkg.version || '',
+            file: p,
+            private: pkg.private === true,
+          });
+        }
+      } catch {
+        // ignore malformed manifests
+      }
+    }
+  }
+}
 
-  checked=$((checked + 1))
+for (const base of ['packages', 'apps', 'surfaces']) {
+  if (fs.existsSync(base)) walk(base);
+}
 
-  if [ "$PKG_VERSION" != "$ROOT_VERSION" ]; then
-    echo "  FAIL: $PKG_NAME has version $PKG_VERSION (expected $ROOT_VERSION)"
-    bad=1
-  fi
-done
+let bad = 0;
+let ok = 0;
 
-# Also check apps
-for manifest in apps/*/package.json; do
-  [ -f "$manifest" ] || continue
+for (const name of publishable) {
+  const entry = found.get(name);
+  if (!entry) {
+    console.log(`  FAIL: ${name} listed in publish-manifest but not found in workspace`);
+    bad = 1;
+    continue;
+  }
+  if (entry.private) {
+    console.log(`  FAIL: ${name} is private:true but listed in publish-manifest packages[]`);
+    bad = 1;
+    continue;
+  }
+  if (entry.version !== ROOT_VERSION) {
+    console.log(
+      `  FAIL: ${name} has version ${entry.version} (expected ${ROOT_VERSION}) at ${entry.file}`
+    );
+    bad = 1;
+    continue;
+  }
+  ok += 1;
+}
 
-  PKG_NAME=$(node -e "const p = require('./$manifest'); console.log(p.name || '')")
-  PKG_VERSION=$(node -e "const p = require('./$manifest'); console.log(p.version || '')")
+if (bad === 0) {
+  console.log(`  OK: all ${ok} publish-manifest packages have version ${ROOT_VERSION}`);
+} else {
+  console.log('  Version coherence check FAILED');
+}
 
-  if [ -z "$PKG_NAME" ] || [ -z "$PKG_VERSION" ]; then
-    continue
-  fi
-
-  checked=$((checked + 1))
-
-  if [ "$PKG_VERSION" != "$ROOT_VERSION" ]; then
-    echo "  FAIL: $PKG_NAME has version $PKG_VERSION (expected $ROOT_VERSION)"
-    bad=1
-  fi
-done
-
-if [ "$bad" -eq 0 ]; then
-  echo "  OK: All $checked packages have version $ROOT_VERSION"
-else
-  echo "  Version coherence check FAILED"
-fi
-
-exit $bad
+process.exit(bad);
+NODE
