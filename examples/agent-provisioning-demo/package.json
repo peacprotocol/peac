@@ -1,0 +1,19 @@
+{
+  "name": "@peac/example-agent-provisioning-demo",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Concrete sanitized demo: an upstream provisioning CLI is observed and the lifecycle events become signed PEAC records.",
+  "scripts": {
+    "demo": "tsx demo.ts",
+    "build": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@peac/crypto": "workspace:*",
+    "@peac/protocol": "workspace:*",
+    "@peac/schema": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "^4.21.0",
+    "typescript": "^5.3.3"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "ok": true,
+  "command": "provision add",
+  "version": "0.1",
+  "data": {
+    "combined_file": ".env",
+    "files_modified": [".provision/vault/vault.json", ".env"],
+    "service": {
+      "key": "res_SANITIZED_RESOURCE_KEY",
+      "name": "primary-db",
+      "provider": "provider-x",
+      "provider_id": "prv_SANITIZED_PROVIDER_ID",
+      "service_id": "managed-database",
+      "status": "complete"
+    },
+    "unmapped_entries": [],
+    "vault_file": ".provision/vault/vault.json"
+  },
+  "warnings": [],
+  "next_steps": ["provision status", "provision env"],
+  "meta": {
+    "authenticated": true,
+    "project_initialized": true
+  }
+}

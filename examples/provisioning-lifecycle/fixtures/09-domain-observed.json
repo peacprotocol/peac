@@ -1,0 +1,13 @@
+{
+  "event_kind": "provisioning-domain-observed",
+  "observed_at": "2026-05-01T10:40:00Z",
+  "observed_by_ref": "urn:peac:agent:demo-issuer",
+  "provider": {
+    "provider_ref": "urn:peac:provider:example-registrar"
+  },
+  "domain": {
+    "domain_ref": "urn:peac:domain:example-app-domain-001",
+    "sub_event": "registered",
+    "registrar_ref": "urn:peac:registrar:registrar-001"
+  }
+}

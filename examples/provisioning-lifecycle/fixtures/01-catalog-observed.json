@@ -1,0 +1,14 @@
+{
+  "event_kind": "provisioning-catalog-observed",
+  "observed_at": "2026-05-01T10:00:00Z",
+  "observed_by_ref": "urn:peac:agent:demo-issuer",
+  "catalog": {
+    "service_id": "example/managed-database",
+    "retrieved_at": "2026-05-01T10:00:00Z",
+    "entry_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+    "terms_digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+  },
+  "provider": {
+    "provider_ref": "urn:peac:provider:example-marketplace"
+  }
+}

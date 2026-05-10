@@ -1,0 +1,14 @@
+{
+  "event_kind": "provisioning-resource-observed",
+  "observed_at": "2026-05-01T10:15:00Z",
+  "observed_by_ref": "urn:peac:agent:demo-issuer",
+  "provider": {
+    "provider_ref": "urn:peac:provider:example-marketplace",
+    "account_ref": "urn:peac:account:tenant-001"
+  },
+  "resource": {
+    "kind": "managed-database",
+    "resource_ref": "urn:peac:resource:db-primary-001",
+    "sub_event": "provisioned"
+  }
+}

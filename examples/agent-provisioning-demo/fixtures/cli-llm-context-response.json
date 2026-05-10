@@ -1,0 +1,29 @@
+{
+  "ok": true,
+  "command": "provision llm-context",
+  "version": "0.1",
+  "data": {
+    "fetch": false,
+    "header": "Additional provider guidance:",
+    "last_updated": "2026-03-27T01:24:22.456Z",
+    "provider_filter": null,
+    "providers": [
+      {
+        "active": true,
+        "content": null,
+        "id": "prv_SANITIZED_PROVIDER_ID",
+        "llm_context": "https://provider-x.example/agentic-provisioning-llm-context.md",
+        "name": "provider-x",
+        "source_url": "https://provider-x.example/agentic-provisioning-llm-context.md",
+        "truncated": false
+      }
+    ],
+    "source": "cache"
+  },
+  "warnings": [],
+  "next_steps": [],
+  "meta": {
+    "authenticated": true,
+    "project_initialized": true
+  }
+}

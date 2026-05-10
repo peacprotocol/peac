@@ -1,0 +1,8 @@
+{
+  "captured": "2026-03-27",
+  "shape_version": "0.1",
+  "providers_observed": ["provider-x", "provider-y"],
+  "commands_observed": ["init", "add", "rotate", "llm-context"],
+  "artifact_scope": "synthetic upstream-CLI captures, vendor-neutral",
+  "note": "Generic, sanitized JSON envelopes that follow the shape an upstream provisioning CLI typically produces. No live account identifiers, secrets, or domains."
+}

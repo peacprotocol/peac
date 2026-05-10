@@ -1,0 +1,11 @@
+{
+  "provider_x_managed_database": [
+    "PROVIDER_X_BRANCH_ID",
+    "PROVIDER_X_BRANCH_NAME",
+    "PROVIDER_X_CONNECTION_STRING_REF",
+    "PROVIDER_X_DATABASE_NAME",
+    "PROVIDER_X_ORG_ID",
+    "PROVIDER_X_PROJECT_ID"
+  ],
+  "provider_y_analytics": ["PROVIDER_Y_API_KEY_REF", "PROVIDER_Y_HOST"]
+}
