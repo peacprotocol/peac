@@ -72,8 +72,10 @@ export function createOtelProvider(options: OtelProviderOptions): TelemetryProvi
   const privacyMode = options.privacyMode ?? 'strict';
   const salt = options.hashSalt ?? 'peac-telemetry';
 
-  // Get tracer and meter
-  const tracer = trace.getTracer(tracerName, version);
+  // Preserve tracerName/version option behavior for consumers that configure
+  // instrumentation identity. Span emission still uses trace.getActiveSpan()
+  // at the call site below; the tracer instance itself is not retained.
+  void trace.getTracer(tracerName, version);
   const meter = metrics.getMeter(meterName, version);
 
   // Create baseline metrics

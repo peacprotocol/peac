@@ -18,7 +18,7 @@
  *   --dry-run     Print what would be created without writing
  */
 
-import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'fs';
+import { readFileSync, writeFileSync, mkdirSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { createInterface } from 'readline';
@@ -116,19 +116,29 @@ async function main() {
     return;
   }
 
-  // Create fixture file
+  // Create fixture file. mkdirSync(..., { recursive: true }) is idempotent
+  // and returns the first directory created (or undefined when the directory
+  // already existed), so we can use the return value for the log line.
   const fixtureDir = dirname(fullFixturePath);
-  if (!existsSync(fixtureDir)) {
-    mkdirSync(fixtureDir, { recursive: true });
+  const createdDir = mkdirSync(fixtureDir, { recursive: true });
+  if (createdDir) {
     console.log(`Created directory: ${fixtureDir}`);
   }
 
-  if (existsSync(fullFixturePath)) {
-    console.error(`Error: fixture already exists at ${fullFixturePath}`);
-    process.exit(1);
+  // Atomic create-or-fail using the 'wx' flag (O_WRONLY | O_CREAT | O_EXCL):
+  // the kernel rejects the open if the path already exists, so there is no
+  // window between an existence check and the write. EEXIST is translated
+  // to the existing user-facing error; other errno values surface as real
+  // failures.
+  try {
+    writeFileSync(fullFixturePath, JSON.stringify(fixture, null, 2) + '\n', { flag: 'wx' });
+  } catch (err) {
+    if (err && err.code === 'EEXIST') {
+      console.error(`Error: fixture already exists at ${fullFixturePath}`);
+      process.exit(1);
+    }
+    throw err;
   }
-
-  writeFileSync(fullFixturePath, JSON.stringify(fixture, null, 2) + '\n');
   console.log(`Created fixture: ${fullFixturePath}`);
 
   // Update manifest

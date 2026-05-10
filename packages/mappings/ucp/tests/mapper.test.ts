@@ -441,3 +441,46 @@ describe('DD-187: order-vs-payment semantic separation', () => {
     expect(claims.ext['dev.ucp/order_id']).toBe('order_abc123');
   });
 });
+
+// ---------------------------------------------------------------------------
+// extractTotals: prototype-pollution barrier
+// ---------------------------------------------------------------------------
+
+describe('extractTotals: forbidden built-in property-name barrier', () => {
+  it('drops __proto__, constructor, and prototype keys without changing the result prototype or polluting Object.prototype', () => {
+    const order = createMockOrder({
+      totals: [
+        { type: 'total', amount: 1000 },
+        { type: '__proto__', amount: 1 },
+        { type: 'constructor', amount: 2 },
+        { type: 'prototype', amount: 3 },
+      ],
+    });
+
+    const claims = mapUcpOrderToReceipt({
+      order,
+      issuer: 'https://issuer.example.com',
+      subject: 'agent:test',
+      currency: 'USD',
+    });
+
+    const totals = claims.payment.evidence.totals as Record<string, unknown>;
+
+    // The result is a normal object whose prototype is Object.prototype, so
+    // downstream JSON / snapshot / property-helper consumers behave exactly
+    // as they did before the barrier was introduced.
+    expect(Object.getPrototypeOf(totals)).toBe(Object.prototype);
+
+    // Legitimate keys survive.
+    expect(Object.hasOwn(totals, 'total')).toBe(true);
+    expect(totals.total).toBe(1000);
+
+    // Forbidden keys are silently dropped (not own properties of the result).
+    expect(Object.hasOwn(totals, '__proto__')).toBe(false);
+    expect(Object.hasOwn(totals, 'constructor')).toBe(false);
+    expect(Object.hasOwn(totals, 'prototype')).toBe(false);
+
+    // Object.prototype is not polluted by the barrier.
+    expect(({} as Record<string, unknown>).polluted).toBeUndefined();
+  });
+});
