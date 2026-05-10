@@ -2,24 +2,27 @@
 
 **Govern locally. Prove across boundaries.**
 
-When logs aren't enough, PEAC gives you portable signed records anyone can verify offline.
+When logs are not enough, PEAC gives teams portable signed records that can be verified outside the system that produced them.
 
-Portable signed records for agent, API, MCP, and cross-runtime interactions.
+Portable signed records for API, MCP, agent, and cross-runtime interactions.
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-brightgreen.svg)](LICENSE)
 [![Latest Release](https://img.shields.io/github/v/release/peacprotocol/peac?color=brightgreen)](https://github.com/peacprotocol/peac/releases)
 [![npm downloads](https://img.shields.io/npm/dm/@peac/protocol?style=flat&color=brightgreen)](https://www.npmjs.com/package/@peac/protocol)
 [![CI Status](https://img.shields.io/github/actions/workflow/status/peacprotocol/peac/ci.yml?branch=main&label=CI&color=brightgreen)](https://github.com/peacprotocol/peac/actions/workflows/ci.yml)
 
-## What you can do
+## What you can do with PEAC
 
-- **I run an API or HTTP service.** Issue signed receipts on every response. [API Provider Quickstart](docs/guides/quickstart-api-provider.md).
-- **I run an MCP server.** Attach signed records to tool calls. [MCP Integration Kit](integrator-kits/mcp/README.md) or `npx -y @peac/mcp-server`.
-- **I want to verify a receipt.** Verify offline with the issuer's public key. [Agent Operator Quickstart](docs/guides/quickstart-agent-operator.md).
-- **I want to prove my runtime decisions.** Record governance observations from managed runtimes. [`@peac/adapter-runtime-governance`](packages/adapters/runtime-governance/).
-- **I run agent-to-agent workflows.** Record A2A handoff events across agent-card discovery, task lifecycle, and human-review boundaries. [A2A Handoff Records](docs/specs/A2A-HANDOFF-RECORDS.md).
-- **I want to record command execution.** Use `peac observe command` for unsigned observations or `peac record command` for signed command-execution records. [CLI Carrier Profile](docs/specs/CLI-CARRIER-PROFILE.md).
-- **I need lifecycle records from another system.** Use `peac emit lifecycle` to issue records for caller-reported evaluation, approval, experiment, and workflow events. [Lifecycle Observation Profile](docs/specs/LIFECYCLE-OBSERVATION-PROFILE.md).
+| If you...                                  | PEAC helps you...                                                                                                                                           | Start here                                                                        |
+| ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| Run an API or HTTP service                 | issue signed interaction records with responses so clients can verify what happened later                                                                   | [API Provider Quickstart](docs/guides/quickstart-api-provider.md)                 |
+| Run an MCP server                          | attach signed records to tool calls and expose verification tools for operators                                                                             | [MCP Integration Kit](integrator-kits/mcp/README.md) or `npx -y @peac/mcp-server` |
+| Need to verify a record                    | verify a PEAC receipt offline with the issuer's public key                                                                                                  | [Agent Operator Quickstart](docs/guides/quickstart-agent-operator.md)             |
+| Operate managed runtimes                   | record governance observations from runtime control planes without making PEAC the control plane                                                            | [`@peac/adapter-runtime-governance`](packages/adapters/runtime-governance/)       |
+| Run agent-to-agent workflows               | record handoff events across agent-card discovery, task lifecycle, and human-review boundaries                                                              | [A2A Handoff Records](docs/specs/A2A-HANDOFF-RECORDS.md)                          |
+| Need command-execution records             | record unsigned observations with `peac observe command` or signed command-execution records with `peac record command`                                     | [CLI Carrier Profile](docs/specs/CLI-CARRIER-PROFILE.md)                          |
+| Need lifecycle records from another system | issue records for caller-reported evaluation, approval, experiment, and workflow events                                                                     | [Lifecycle Observation Profile](docs/specs/LIFECYCLE-OBSERVATION-PROFILE.md)      |
+| Need provisioning lifecycle records        | record reported catalog, provider-link, account, resource, credential, payment-authorization, budget, subscription, domain, and deployment lifecycle events | [Provisioning Lifecycle Records](docs/SOLUTIONS/verify-agent-provisioning.md)     |
 
 Full path-by-role tree: [`docs/START_HERE.md`](docs/START_HERE.md).
 
@@ -64,21 +67,26 @@ Outcome-led recipes under [`docs/SOLUTIONS/`](docs/SOLUTIONS/):
 - [Commerce evidence bundle](docs/SOLUTIONS/commerce-evidence-bundle.md)
 - [Regulatory audit trail](docs/SOLUTIONS/regulatory-audit-trail.md)
 - [Cloudflare x402 + PEAC](docs/SOLUTIONS/cloudflare-x402-peac.md)
+- [Provisioning lifecycle verification](docs/SOLUTIONS/verify-agent-provisioning.md)
 
 ## Why PEAC
 
-- Logs are local. PEAC records are portable.
-- Traces correlate systems. PEAC records survive organizational boundaries.
-- Auth and payments authorize actions. PEAC records prove what happened.
+Modern systems often need proof that travels beyond the system that produced the log.
+
+- Logs are local. PEAC records are portable and independently verifiable.
+- Traces correlate execution. PEAC records preserve signed claims across organizational boundaries.
+- Auth, policy, and payment systems decide whether actions may happen. PEAC records what another system reported happened.
 
 ## Try it in 5 minutes
 
 - Verify a receipt locally with `verifyLocal()` or `pnpm dlx @peac/cli verify`.
 - Start the MCP server: `npx -y @peac/mcp-server`.
-- Run the x402 settlement mapping demo: `pnpm install && pnpm build && pnpm --filter @peac/example-x402-upto-evidence demo`.
-- Record a command execution observation: `pnpm dlx @peac/cli@next observe command -- echo hello`. For signed command records, use `peac record command` with an issuer key; see the [CLI Carrier Profile](docs/specs/CLI-CARRIER-PROFILE.md).
-- Open an editor plugin-pack under [`surfaces/plugin-pack/`](surfaces/plugin-pack/) (Cursor, Codex, Claude Code, VS Code, Continue, Windsurf, OpenCode).
 - Run the minimal example: `pnpm --filter @peac/example-minimal demo`.
+- Run the provisioning lifecycle example:
+  ```bash
+  pnpm --filter @peac/example-provisioning-lifecycle run issue
+  pnpm --filter @peac/example-provisioning-lifecycle run verify
+  ```
 - Self-host the reference verifier: [`surfaces/reference-verifier/`](surfaces/reference-verifier/).
 
 ## Implementations and surfaces
@@ -93,6 +101,7 @@ Outcome-led recipes under [`docs/SOLUTIONS/`](docs/SOLUTIONS/):
 - **A2A handoff records** — [`docs/specs/A2A-HANDOFF-RECORDS.md`](docs/specs/A2A-HANDOFF-RECORDS.md) and [`integrator-kits/a2a/`](integrator-kits/a2a/).
 - **CLI execution records** — `peac observe command`, `peac record command`, and [`docs/specs/CLI-CARRIER-PROFILE.md`](docs/specs/CLI-CARRIER-PROFILE.md).
 - **Lifecycle observation records** — `peac emit lifecycle` and [`docs/specs/LIFECYCLE-OBSERVATION-PROFILE.md`](docs/specs/LIFECYCLE-OBSERVATION-PROFILE.md).
+- **Provisioning lifecycle records** — [`examples/provisioning-lifecycle/`](examples/provisioning-lifecycle/), [`examples/agent-provisioning-demo/`](examples/agent-provisioning-demo/), and [`docs/SOLUTIONS/verify-agent-provisioning.md`](docs/SOLUTIONS/verify-agent-provisioning.md).
 - **Supply-chain mappings** — [`packages/mappings/intoto/`](packages/mappings/intoto/) and [`packages/mappings/slsa/`](packages/mappings/slsa/).
 - **Reference verifier (self-hostable)** — [`apps/api/`](apps/api/) with deployment recipes under [`surfaces/reference-verifier/`](surfaces/reference-verifier/).
 
@@ -122,7 +131,9 @@ Other commands: `peac observe command`, `peac record command`, `peac emit lifecy
 
 ## Protocol boundary
 
-PEAC is the records layer beneath runtime governance. PEAC records what another system attested; it is not a governance toolkit, policy engine, runtime control plane, payment protocol, identity protocol, trust-score system, observability dashboard, or hosted runtime. Full boundary: [`docs/WHERE-IT-FITS.md`](docs/WHERE-IT-FITS.md).
+PEAC is a records layer, not a runtime control plane. It records what another system attested and makes that record portable, signed, and verifiable across boundaries.
+
+PEAC does not authorize actions, validate credentials, process payments, settle transactions, operate agents, host workflows, manage vaults, assign trust scores, or replace observability systems. Full boundary: [`docs/WHERE-IT-FITS.md`](docs/WHERE-IT-FITS.md).
 
 ## Security
 
