@@ -1,6 +1,7 @@
 {
   "name": "@peac/worker-core",
   "version": "0.14.1",
+  "private": true,
   "description": "Runtime-neutral TAP verification handler for edge workers",
   "type": "module",
   "main": "./dist/index.js",
@@ -46,9 +47,6 @@
     "type": "git",
     "url": "git+https://github.com/peacprotocol/peac.git",
     "directory": "packages/worker-core"
-  },
-  "publishConfig": {
-    "access": "public"
   },
   "dependencies": {
     "@peac/contracts": "workspace:*",

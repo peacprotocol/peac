@@ -1,6 +1,7 @@
 {
   "name": "@peac/pay402",
   "version": "0.14.1",
+  "private": true,
   "description": "Generic HTTP 402 adapter with multi-rail payment negotiation",
   "type": "module",
   "main": "dist/index.js",
@@ -18,10 +19,6 @@
     "README.md",
     "LICENSE"
   ],
-  "publishConfig": {
-    "access": "public",
-    "tag": "dev"
-  },
   "scripts": {
     "prebuild": "rm -rf dist",
     "build": "tsup",

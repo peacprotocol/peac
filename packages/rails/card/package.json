@@ -1,6 +1,7 @@
 {
   "name": "@peac/rails-card",
   "version": "0.14.1",
+  "private": true,
   "description": "Card payment rail adapter for PEAC protocol (Flowglad, Stripe Billing, Lago)",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -19,9 +20,6 @@
     "dist",
     "README.md"
   ],
-  "publishConfig": {
-    "access": "public"
-  },
   "scripts": {
     "build": "tsc",
     "test": "vitest run",
