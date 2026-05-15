@@ -155,6 +155,78 @@ describe('fromACPDelegatedPaymentObservation: amount semantics (minor units)', (
   });
 });
 
+describe('fromACPDelegatedPaymentObservation: authorized_amount_minor non-negative + safe-integer boundary', () => {
+  // Refund / chargeback semantics flow through the session-payment-artifact
+  // path with observed_payment_state='refunded'; delegated-payment carries
+  // only authorized | settled | pending | failed | revoked states, so
+  // authorized_amount_minor is non-negative by design.
+
+  it('accepts "0" as authorized_amount_minor', () => {
+    const out = fromACPDelegatedPaymentObservation(
+      makeObservation({ authorized_amount_minor: '0' })
+    );
+    expect(out.payment.amount).toBe(0);
+    expect(out.amt).toBe(0);
+  });
+
+  it('accepts Number.MAX_SAFE_INTEGER as authorized_amount_minor', () => {
+    const out = fromACPDelegatedPaymentObservation(
+      makeObservation({ authorized_amount_minor: '9007199254740991' })
+    );
+    expect(out.payment.amount).toBe(Number.MAX_SAFE_INTEGER);
+    expect(out.amt).toBe(Number.MAX_SAFE_INTEGER);
+    expect(out.payment.evidence?.authorized_amount_minor).toBe('9007199254740991');
+  });
+
+  it('rejects Number.MAX_SAFE_INTEGER + 1 with a precision-loss error', () => {
+    expect(() =>
+      fromACPDelegatedPaymentObservation(
+        makeObservation({ authorized_amount_minor: '9007199254740992' })
+      )
+    ).toThrow(/exceeds Number\.MAX_SAFE_INTEGER/);
+  });
+
+  it('rejects 39-digit authorized_amount_minor with a precision-loss error', () => {
+    expect(() =>
+      fromACPDelegatedPaymentObservation(
+        makeObservation({
+          authorized_amount_minor: '999999999999999999999999999999999999999',
+        })
+      )
+    ).toThrow(/exceeds Number\.MAX_SAFE_INTEGER/);
+  });
+
+  it('rejects "-1" as authorized_amount_minor', () => {
+    expect(() =>
+      fromACPDelegatedPaymentObservation(makeObservation({ authorized_amount_minor: '-1' }))
+    ).toThrow(/non-negative/);
+  });
+
+  it('rejects "-100" as authorized_amount_minor', () => {
+    expect(() =>
+      fromACPDelegatedPaymentObservation(makeObservation({ authorized_amount_minor: '-100' }))
+    ).toThrow(/non-negative/);
+  });
+
+  it('rejects negative 39-digit authorized_amount_minor', () => {
+    expect(() =>
+      fromACPDelegatedPaymentObservation(
+        makeObservation({
+          authorized_amount_minor: '-999999999999999999999999999999999999999',
+        })
+      )
+    ).toThrow(/non-negative/);
+  });
+
+  it('rejects "-9007199254740991" (negative MIN_SAFE_INTEGER form)', () => {
+    expect(() =>
+      fromACPDelegatedPaymentObservation(
+        makeObservation({ authorized_amount_minor: '-9007199254740991' })
+      )
+    ).toThrow(/non-negative/);
+  });
+});
+
 describe('fromACPDelegatedPaymentObservation: terminal/non-finality states', () => {
   for (const state of ['pending', 'failed', 'revoked'] as DelegatedPaymentState[]) {
     it(`MUST NOT emit a commerce event for observed_payment_state=${state}`, () => {
@@ -245,5 +317,51 @@ describe('fromACPDelegatedPaymentObservation: input validation', () => {
     expect(() =>
       fromACPDelegatedPaymentObservation(makeObservation({ payment_method_token_ref: '' }))
     ).toThrow(/payment_method_token_ref/);
+  });
+});
+
+describe('fromACPDelegatedPaymentObservation: resource_uri hardening', () => {
+  it('accepts a well-formed https URL', () => {
+    expect(() =>
+      fromACPDelegatedPaymentObservation(
+        makeObservation({ resource_uri: 'https://example.com/resource' })
+      )
+    ).not.toThrow();
+  });
+
+  it('rejects http://', () => {
+    expect(() =>
+      fromACPDelegatedPaymentObservation(
+        makeObservation({ resource_uri: 'http://example.com/resource' })
+      )
+    ).toThrow(/resource_uri/);
+  });
+
+  it('rejects "https://" with no hostname', () => {
+    expect(() =>
+      fromACPDelegatedPaymentObservation(makeObservation({ resource_uri: 'https://' }))
+    ).toThrow(/resource_uri/);
+  });
+
+  it('rejects opaque-path "https:example.com"', () => {
+    expect(() =>
+      fromACPDelegatedPaymentObservation(makeObservation({ resource_uri: 'https:example.com' }))
+    ).toThrow(/resource_uri/);
+  });
+
+  it('rejects credential-bearing https URL (user:pass@)', () => {
+    expect(() =>
+      fromACPDelegatedPaymentObservation(
+        makeObservation({ resource_uri: 'https://user:pass@example.com/resource' })
+      )
+    ).toThrow(/resource_uri/);
+  });
+
+  it('rejects username-only credential https URL (user@)', () => {
+    expect(() =>
+      fromACPDelegatedPaymentObservation(
+        makeObservation({ resource_uri: 'https://user@example.com/resource' })
+      )
+    ).toThrow(/resource_uri/);
   });
 });

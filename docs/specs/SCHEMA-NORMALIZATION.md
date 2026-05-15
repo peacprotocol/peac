@@ -248,10 +248,11 @@ Given an Agentic Commerce Protocol (ACP) checkout event and an x402 payment that
 const acpReceipt = fromACPCheckoutSuccess({
   checkout_id: 'checkout_abc',
   resource_uri: 'https://example.com/article/1',
-  total_amount: 500,
+  amount_minor: '500',
   currency: 'USD',
   payment_rail: 'x402',
   payment_reference: 'pay_123',
+  env: 'live',
 });
 
 // Direct x402 receipt

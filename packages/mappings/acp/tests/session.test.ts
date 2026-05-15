@@ -321,18 +321,19 @@ describe('fromACPInterventionRequired', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Existing fromACPCheckoutSuccess unchanged
+// fromACPCheckoutSuccess regression on the amount_minor + env contract
 // ---------------------------------------------------------------------------
 
 describe('fromACPCheckoutSuccess (regression)', () => {
-  it('should still work as before', () => {
+  it('should accept the canonical amount_minor + env shape', () => {
     const result = fromACPCheckoutSuccess({
       checkout_id: 'chk_123',
       resource_uri: 'https://shop.example.com/order/123',
-      total_amount: 2500,
+      amount_minor: '2500',
       currency: 'USD',
       payment_rail: 'stripe',
       payment_reference: 'pi_abc',
+      env: 'live',
     });
 
     expect(result.subject_uri).toBe('https://shop.example.com/order/123');
@@ -340,5 +341,194 @@ describe('fromACPCheckoutSuccess (regression)', () => {
     expect(result.cur).toBe('USD');
     expect(result.payment.rail).toBe('stripe');
     expect(result.payment.reference).toBe('pi_abc');
+    expect(result.payment.env).toBe('live');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Hardened resource_uri validation across all session paths
+// ---------------------------------------------------------------------------
+
+describe('resource_uri hardening: fromACPSessionLifecycleEvent', () => {
+  it('accepts a well-formed https URL', () => {
+    expect(() =>
+      fromACPSessionLifecycleEvent(
+        makeSessionEvent('created', { resource_uri: 'https://example.com/resource' })
+      )
+    ).not.toThrow();
+  });
+
+  it('rejects http://', () => {
+    expect(() =>
+      fromACPSessionLifecycleEvent(
+        makeSessionEvent('created', { resource_uri: 'http://example.com/resource' })
+      )
+    ).toThrow(/resource_uri/);
+  });
+
+  it('rejects "https://" with no hostname', () => {
+    expect(() =>
+      fromACPSessionLifecycleEvent(makeSessionEvent('created', { resource_uri: 'https://' }))
+    ).toThrow(/resource_uri/);
+  });
+
+  it('rejects opaque-path "https:example.com"', () => {
+    expect(() =>
+      fromACPSessionLifecycleEvent(
+        makeSessionEvent('created', { resource_uri: 'https:example.com' })
+      )
+    ).toThrow(/resource_uri/);
+  });
+
+  it('rejects credential-bearing https URL (user:pass@)', () => {
+    expect(() =>
+      fromACPSessionLifecycleEvent(
+        makeSessionEvent('created', { resource_uri: 'https://user:pass@example.com/resource' })
+      )
+    ).toThrow(/resource_uri/);
+  });
+
+  it('rejects username-only credential https URL (user@)', () => {
+    expect(() =>
+      fromACPSessionLifecycleEvent(
+        makeSessionEvent('created', { resource_uri: 'https://user@example.com/resource' })
+      )
+    ).toThrow(/resource_uri/);
+  });
+});
+
+describe('resource_uri hardening: fromACPPaymentObservation', () => {
+  it('accepts a well-formed https URL', () => {
+    const event = makeSessionEvent('completed', { resource_uri: 'https://example.com/order/1' });
+    expect(() => fromACPPaymentObservation(event, makePaymentArtifact())).not.toThrow();
+  });
+
+  it('rejects http://', () => {
+    const event = makeSessionEvent('completed', { resource_uri: 'http://example.com/order/1' });
+    expect(() => fromACPPaymentObservation(event, makePaymentArtifact())).toThrow(/resource_uri/);
+  });
+
+  it('rejects "https://" with no hostname', () => {
+    const event = makeSessionEvent('completed', { resource_uri: 'https://' });
+    expect(() => fromACPPaymentObservation(event, makePaymentArtifact())).toThrow(/resource_uri/);
+  });
+
+  it('rejects opaque-path "https:example.com"', () => {
+    const event = makeSessionEvent('completed', { resource_uri: 'https:example.com' });
+    expect(() => fromACPPaymentObservation(event, makePaymentArtifact())).toThrow(/resource_uri/);
+  });
+
+  it('rejects credential-bearing https URL (user:pass@)', () => {
+    const event = makeSessionEvent('completed', {
+      resource_uri: 'https://user:pass@example.com/order/1',
+    });
+    expect(() => fromACPPaymentObservation(event, makePaymentArtifact())).toThrow(/resource_uri/);
+  });
+
+  it('rejects username-only credential https URL (user@)', () => {
+    const event = makeSessionEvent('completed', {
+      resource_uri: 'https://user@example.com/order/1',
+    });
+    expect(() => fromACPPaymentObservation(event, makePaymentArtifact())).toThrow(/resource_uri/);
+  });
+});
+
+describe('resource_uri hardening: fromACPInterventionRequired', () => {
+  const base = {
+    session_id: 'sess_abc',
+    type: 'identity_verification',
+  };
+
+  it('accepts a well-formed https URL', () => {
+    expect(() =>
+      fromACPInterventionRequired({ ...base, resource_uri: 'https://example.com/resource' })
+    ).not.toThrow();
+  });
+
+  it('rejects http://', () => {
+    expect(() =>
+      fromACPInterventionRequired({ ...base, resource_uri: 'http://example.com/resource' })
+    ).toThrow(/resource_uri/);
+  });
+
+  it('rejects "https://" with no hostname', () => {
+    expect(() => fromACPInterventionRequired({ ...base, resource_uri: 'https://' })).toThrow(
+      /resource_uri/
+    );
+  });
+
+  it('rejects opaque-path "https:example.com"', () => {
+    expect(() =>
+      fromACPInterventionRequired({ ...base, resource_uri: 'https:example.com' })
+    ).toThrow(/resource_uri/);
+  });
+
+  it('rejects credential-bearing https URL (user:pass@)', () => {
+    expect(() =>
+      fromACPInterventionRequired({
+        ...base,
+        resource_uri: 'https://user:pass@example.com/resource',
+      })
+    ).toThrow(/resource_uri/);
+  });
+
+  it('rejects username-only credential https URL (user@)', () => {
+    expect(() =>
+      fromACPInterventionRequired({ ...base, resource_uri: 'https://user@example.com/resource' })
+    ).toThrow(/resource_uri/);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// paymentArtifact.amount safe-integer guard (fromACPPaymentObservation)
+// ---------------------------------------------------------------------------
+
+describe('fromACPPaymentObservation: paymentArtifact.amount safe-integer guard', () => {
+  it('accepts 1000', () => {
+    const event = makeSessionEvent('completed');
+    const artifact = makePaymentArtifact({ amount: 1000 });
+    expect(() => fromACPPaymentObservation(event, artifact)).not.toThrow();
+  });
+
+  it('accepts Number.MAX_SAFE_INTEGER', () => {
+    const event = makeSessionEvent('completed');
+    const artifact = makePaymentArtifact({ amount: Number.MAX_SAFE_INTEGER });
+    expect(() => fromACPPaymentObservation(event, artifact)).not.toThrow();
+  });
+
+  it('accepts 0', () => {
+    const event = makeSessionEvent('completed');
+    const artifact = makePaymentArtifact({ amount: 0 });
+    expect(() => fromACPPaymentObservation(event, artifact)).not.toThrow();
+  });
+
+  it('rejects 12.34 (non-integer)', () => {
+    const event = makeSessionEvent('completed');
+    const artifact = makePaymentArtifact({ amount: 12.34 });
+    expect(() => fromACPPaymentObservation(event, artifact)).toThrow(/safe integer/);
+  });
+
+  it('rejects Number.MAX_SAFE_INTEGER + 1', () => {
+    const event = makeSessionEvent('completed');
+    const artifact = makePaymentArtifact({ amount: Number.MAX_SAFE_INTEGER + 1 });
+    expect(() => fromACPPaymentObservation(event, artifact)).toThrow(/safe integer/);
+  });
+
+  it('rejects Infinity', () => {
+    const event = makeSessionEvent('completed');
+    const artifact = makePaymentArtifact({ amount: Infinity });
+    expect(() => fromACPPaymentObservation(event, artifact)).toThrow(/safe integer/);
+  });
+
+  it('rejects -Infinity', () => {
+    const event = makeSessionEvent('completed');
+    const artifact = makePaymentArtifact({ amount: -Infinity });
+    expect(() => fromACPPaymentObservation(event, artifact)).toThrow(/safe integer/);
+  });
+
+  it('rejects NaN', () => {
+    const event = makeSessionEvent('completed');
+    const artifact = makePaymentArtifact({ amount: NaN });
+    expect(() => fromACPPaymentObservation(event, artifact)).toThrow(/safe integer/);
   });
 });
