@@ -34,6 +34,7 @@ jobs:
       any_src: ${{ steps.filter.outputs.any_src }}
       stamp_any: ${{ steps.filter.outputs.stamp_any }}
       non_stamp: ${{ steps.filter.outputs.non_stamp }}
+      security_config: ${{ steps.filter.outputs.security_config }}
     steps:
       - name: Checkout
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -111,6 +112,12 @@ jobs:
               - '!docs/SURFACE_STATUS.md'
               - '!docs/PACKAGE_STATUS.md'
               - '**'
+            # Security/audit gate: changes to audit configuration, allowlist,
+            # surface package.json files, or audit gate tests.
+            security_config:
+              - 'security/**'
+              - 'surfaces/**/package.json'
+              - 'tests/scripts/**'
 
   # ---------------------------------------------------------------------------
   # Workflow lint: validates CI workflow files independently.
@@ -698,6 +705,12 @@ jobs:
     name: Audit Gate (Windows)
     runs-on: windows-latest
     timeout-minutes: 10
+    needs: detect-changes
+    if: |
+      needs.detect-changes.outputs.ci == 'true' ||
+      needs.detect-changes.outputs.root_config == 'true' ||
+      needs.detect-changes.outputs.any_src == 'true' ||
+      needs.detect-changes.outputs.security_config == 'true'
 
     steps:
       - name: Checkout
