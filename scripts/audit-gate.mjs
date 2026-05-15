@@ -60,9 +60,7 @@ function runPnpmAudit(args) {
 
   if (result.error) {
     if (result.error.code === 'ENOENT') {
-      console.error(
-        "FAIL: 'pnpm' not found. Ensure pnpm is installed and on PATH."
-      );
+      console.error("FAIL: 'pnpm' not found. Ensure pnpm is installed and on PATH.");
       process.exit(1);
     }
     throw result.error;
@@ -169,12 +167,49 @@ function runProdAudit() {
   }
 
   const advisories = extractAdvisories(auditResult);
+
+  // Exclude advisories that only affect workspace example packages (examples/*).
+  // These are not published to npm and are not production surfaces.
+  // We verify every excluded advisory has ALL paths rooted in examples/.
+  // Paths are normalized (backslash -> forward slash) for cross-platform compatibility.
+  const EXAMPLES_PREFIXES = ['examples/'];
+  let skippedExamplesCount = 0;
+  const prodAdvisories = advisories.filter((adv) => {
+    const raw = auditResult.advisories?.[adv.id];
+    if (raw && Array.isArray(raw.findings) && raw.findings.length > 0) {
+      const allInExamples = raw.findings.every(
+        (f) =>
+          Array.isArray(f.paths) &&
+          f.paths.length > 0 &&
+          f.paths.every((p) => {
+            const normalized = p.replace(/\\/g, '/');
+            return EXAMPLES_PREFIXES.some((pfx) => normalized.startsWith(pfx));
+          })
+      );
+      if (allInExamples) {
+        skippedExamplesCount++;
+        console.log(
+          `  prod audit: skip ${adv.id} (${adv.module}) -- examples-only path, not a published package`
+        );
+        return false;
+      }
+    }
+    return true;
+  });
+  if (skippedExamplesCount > 0) {
+    console.log(
+      `  prod audit: ${skippedExamplesCount} examples-only advisory(ies) excluded from prod gate`
+    );
+  }
+
   const noAllowlist = new Map();
-  const findings = classifyAdvisories(advisories, noAllowlist);
+  const findings = classifyAdvisories(prodAdvisories, noAllowlist);
 
   const totalFindings =
-    findings.critical.length + findings.high.length +
-    findings.moderate.length + findings.low.length;
+    findings.critical.length +
+    findings.high.length +
+    findings.moderate.length +
+    findings.low.length;
 
   // PEAC_AUDIT_STRICT: fail on ANY prod vulnerability (enterprise CI)
   if (prodStrict && totalFindings > 0) {
@@ -183,7 +218,9 @@ function runProdAudit() {
     if (findings.high.length) parts.push(`${findings.high.length} high`);
     if (findings.moderate.length) parts.push(`${findings.moderate.length} moderate`);
     if (findings.low.length) parts.push(`${findings.low.length} low`);
-    console.log(`  prod audit FAIL: ${parts.join(', ')} (PEAC_AUDIT_STRICT requires zero prod findings)`);
+    console.log(
+      `  prod audit FAIL: ${parts.join(', ')} (PEAC_AUDIT_STRICT requires zero prod findings)`
+    );
     return false;
   }
 
@@ -244,8 +281,34 @@ function main() {
     }
   }
 
-  // Extract and classify advisories
-  const advisories = extractAdvisories(auditResult);
+  // Extract advisories and exclude examples-only paths (same policy as Phase 1).
+  // Paths are normalized (backslash -> forward slash) for cross-platform compatibility.
+  const FULL_EXAMPLES_PREFIXES = ['examples/'];
+  const allAdvisories = extractAdvisories(auditResult);
+  let skippedFullCount = 0;
+  const advisories = allAdvisories.filter((adv) => {
+    const raw = auditResult.advisories?.[adv.id];
+    if (raw && Array.isArray(raw.findings) && raw.findings.length > 0) {
+      const allInExamples = raw.findings.every(
+        (f) =>
+          Array.isArray(f.paths) &&
+          f.paths.length > 0 &&
+          f.paths.every((p) => {
+            const normalized = p.replace(/\\/g, '/');
+            return FULL_EXAMPLES_PREFIXES.some((pfx) => normalized.startsWith(pfx));
+          })
+      );
+      if (allInExamples) {
+        skippedFullCount++;
+        return false;
+      }
+    }
+    return true;
+  });
+  if (skippedFullCount > 0) {
+    console.log(`  ${skippedFullCount} examples-only advisory(ies) excluded from full audit gate`);
+  }
+
   const findings = classifyAdvisories(advisories, allowlist);
 
   // Enforce: prod-scope entries must never allowlist HIGH/CRITICAL
