@@ -1,0 +1,32 @@
+{
+  "$id": "https://peacprotocol.org/specs/conformance/parity-corpus/agent-action/vectors.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Schema for agent action parity vectors. Six envelope-accepted deterministic JSON observation payloads covering all six event_kind values (one per kind). Per the parity-corpus convention, all vectors assert envelope-level canonical agreement and set expected.accepted=true; semantic-rejection cases for forbidden top-level keys, opaque-ref grammar violations, missing required fields, and unknown event_kind live in the schema validator tests at packages/schema/__tests__/extensions/agent-action.test.ts.",
+  "type": "object",
+  "required": ["family", "description", "version", "generator", "vectors"],
+  "properties": {
+    "family": { "const": "agent-action" },
+    "description": { "type": "string" },
+    "version": { "type": "string" },
+    "generator": { "type": "string" },
+    "vectors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "description", "input", "expected"],
+        "properties": {
+          "id": { "type": "string" },
+          "description": { "type": "string" },
+          "input": { "type": "object" },
+          "expected": {
+            "type": "object",
+            "required": ["accepted"],
+            "properties": {
+              "accepted": { "type": "boolean" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -136,6 +136,15 @@ const MINIMAL_EXT: Record<string, Record<string, unknown>> = {
     from_state: 'pending',
     to_state: 'running',
   },
+  // Agent action (uses invoked-observed shape; sufficient for the
+  // does-not-emit-type_unregistered iteration; type-specific shape is
+  // exercised by the agent-action schema tests).
+  'org.peacprotocol/agent-action': {
+    event_kind: 'agent-action-invoked-observed',
+    agent_ref: 'urn:peac:agent:worker-001',
+    action_ref: 'urn:peac:action:task-fetch-data',
+    observed_at: '2026-05-14T10:00:00Z',
+  },
 };
 
 function extensionsForType(type: string): Record<string, Record<string, unknown>> | undefined {

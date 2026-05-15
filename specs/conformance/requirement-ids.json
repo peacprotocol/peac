@@ -2934,6 +2934,114 @@
           "last_reviewed_in": "0.14.2"
         }
       ]
+    },
+    {
+      "section_number": 32,
+      "section_title": "Agent Action Records",
+      "section_anchor": "agent-action-records",
+      "governing_spec": "docs/specs/AGENT-ACTION-RECORDS.md",
+      "requirements": [
+        {
+          "id": "AGENT-ACT-001",
+          "keyword": "MUST",
+          "summary": "Validator rejects 20 forbidden top-level content-bearing keys with agent.action.inline_content_blocked",
+          "source_fragment": "agent.action.inline_content_blocked rejects 20 forbidden top-level content-bearing keys at extension top level",
+          "source_fragment_hash": "sha256:d7ff7c7780791e78f7b2946dadf4185c074abd432aeb64736037ed85f185fb4b",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.14.3",
+          "last_reviewed_in": "0.14.3"
+        },
+        {
+          "id": "AGENT-ACT-002",
+          "keyword": "MUST",
+          "summary": "All *_ref fields validated by the OpaqueRefSchema grammar (no whitespace, no @, recognized prefix, byte-bounded)",
+          "source_fragment": "all *_ref fields validated by the OpaqueRefSchema grammar (no whitespace, no @, recognized prefix, byte-bounded)",
+          "source_fragment_hash": "sha256:2d9074d9094e5491af10e8096e6b9e2cb4a7e28cbc522dc8150fecdc507cb038",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.14.3",
+          "last_reviewed_in": "0.14.3"
+        },
+        {
+          "id": "AGENT-ACT-003",
+          "keyword": "MUST",
+          "summary": "Non-string *_ref values reject with agent.action.ref_must_be_string; no Zod string error leaks as a public diagnostic",
+          "source_fragment": "non-string *_ref values reject with agent.action.ref_must_be_string; no Zod string error leaks as a public diagnostic",
+          "source_fragment_hash": "sha256:037172811820407ded5cf8d4b5798c3b6a0486a29066243ea08a84294b60e8fa",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.14.3",
+          "last_reviewed_in": "0.14.3"
+        },
+        {
+          "id": "AGENT-ACT-004",
+          "keyword": "MUST",
+          "summary": "Per-event-kind required fields enforced; missing agent_ref, action_ref, observed_at, and event-kind-specific required fields surface agent.action.missing_required_field",
+          "source_fragment": "per-event-kind required fields enforced via discriminated union; missing required fields surface agent.action.missing_required_field",
+          "source_fragment_hash": "sha256:6eef17e914d822bab871cdb0a48e9c66c7c5a6bfd54cab5511d48647bdd281f9",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.14.3",
+          "last_reviewed_in": "0.14.3"
+        },
+        {
+          "id": "AGENT-ACT-005",
+          "keyword": "MUST",
+          "summary": "Unknown event_kind rejects with agent.action.event_kind_unknown",
+          "source_fragment": "unknown event_kind rejects with agent.action.event_kind_unknown; closed-enum discriminator over 6 *-observed event kinds",
+          "source_fragment_hash": "sha256:a55363f55a2ff7d425028b6503adeb191c13b2d55cc6c5723c08f4cf06297e41",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.14.3",
+          "last_reviewed_in": "0.14.3"
+        },
+        {
+          "id": "AGENT-ACT-006",
+          "keyword": "MUST",
+          "summary": "Malformed observed_at rejects with agent.action.invalid_observed_at; missing observed_at is covered by missing_required_field",
+          "source_fragment": "malformed observed_at rejects with agent.action.invalid_observed_at; missing observed_at is covered by agent.action.missing_required_field",
+          "source_fragment_hash": "sha256:6909477ac5cb05ca110fbd3a89a349b5184229d00f6619d3f10834ad6f3382ca",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.14.3",
+          "last_reviewed_in": "0.14.3"
+        },
+        {
+          "id": "AGENT-ACT-007",
+          "keyword": "MUST",
+          "summary": "agent-action-delegated-observed requires delegated_to_ref; absent delegated_to_ref rejects with agent.action.missing_required_field",
+          "source_fragment": "agent-action-delegated-observed requires delegated_to_ref; absent delegated_to_ref rejects with agent.action.missing_required_field",
+          "source_fragment_hash": "sha256:e1fc1876f88791495a86ca15787d50a7526bfb0a89d5b56fca601924f52bc4df",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.14.3",
+          "last_reviewed_in": "0.14.3"
+        },
+        {
+          "id": "AGENT-ACT-008",
+          "keyword": "MUST",
+          "summary": "Agent action records round-trip through @peac/protocol.issue() and verifyLocal()",
+          "source_fragment": "agent action records round-trip through @peac/protocol.issue() and verifyLocal()",
+          "source_fragment_hash": "sha256:2e3bbe9674fba113121e21a9e419dd6c56e5ae2c6511b244acd7142f87fada18",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.14.3",
+          "last_reviewed_in": "0.14.3"
+        },
+        {
+          "id": "AGENT-ACT-009",
+          "keyword": "MUST",
+          "summary": "Every type URI in AGENT_ACTION_TYPE_URIS maps to org.peacprotocol/agent-action in TYPE_TO_EXTENSION_MAP; validateAgentActionForType rejects unknown type URIs (type_uri_unknown) and type URI / event_kind mismatches (type_event_kind_mismatch)",
+          "source_fragment": "every URI in AGENT_ACTION_TYPE_URIS maps to org.peacprotocol/agent-action in TYPE_TO_EXTENSION_MAP; validateAgentActionForType runtime guard: unknown type URI -> agent.action.type_uri_unknown; mismatched event_kind -> agent.action.type_event_kind_mismatch",
+          "source_fragment_hash": "sha256:a79abe5c7c57da696caee517e02ea1ee6b686cd4ef543ba79e50834264d65037",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.14.3",
+          "last_reviewed_in": "0.14.3"
+        },
+        {
+          "id": "AGENT-ACT-010",
+          "keyword": "MUST",
+          "summary": "Spec boundary text is normative and vendor-neutral; PEAC does not approve, deny, authorize, schedule, execute, govern, enforce, monitor, score, or orchestrate actions",
+          "source_fragment": "PEAC does not approve, deny, authorize, schedule, execute, govern, enforce, monitor, score, or orchestrate actions; action decisions are reported by the caller",
+          "source_fragment_hash": "sha256:912448338a3480fafdc2c9b7f2fa8a8d4379bfdf394becdee0504732c64e19de",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.14.3",
+          "last_reviewed_in": "0.14.3"
+        }
+      ]
     }
   ]
 }

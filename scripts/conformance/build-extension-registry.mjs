@@ -14,10 +14,11 @@
  *      - Governing spec: docs/specs/WIRE-0.2.md
  *
  *   2. scripts/conformance/build-extension-registry.mjs (THIS FILE)
- *      - Owns non-WIRE02 requirements (32 IDs across 7 namespaces)
+ *      - Owns non-WIRE02 requirements (78 IDs across 12 sections)
  *      - Source: inline EXTENSION_REQUIREMENTS array below
  *      - Per-section governing_spec field
- *      - Namespaces: DID-RES, GRPC-META, PKCE, RURL, SC, X402V2, RTGOV
+ *      - Namespaces: X402V2, DID-RES, GRPC-META, PKCE, RURL, SC, RTGOV,
+ *        A2A-HANDOFF, CLI-EXEC, LIFE-OBS, PROV-LIFE, AGENT-ACT
  *
  * The main builder composes both sources into the final requirement-ids.json.
  * Regeneration order:
@@ -28,7 +29,7 @@
  * ANNOTATION LEDGER (spec-presence follow-up)
  * ============================================================================
  *
- * Source fragments for the 25 non-WIRE02 IDs below are derived from
+ * Source fragments for the non-WIRE02 IDs below are derived from
  * implementation contracts and normative profile docs. Hash integrity is
  * verified by verify-registry-drift.mjs (blocking for all IDs).
  *
@@ -55,7 +56,9 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..', '..');
 const OUTPUT_PATH = join(ROOT, 'specs/conformance/extension-requirement-ids.json');
 
-const VERSION = '0.14.2';
+// Default version for sections introduced before v0.14.3.
+// Individual sections may override introduced_in/last_reviewed_in.
+const DEFAULT_VERSION = '0.14.2';
 
 function hash(fragment) {
   return 'sha256:' + createHash('sha256').update(fragment, 'utf-8').digest('hex');
@@ -388,7 +391,8 @@ const EXTENSION_REQUIREMENTS = [
       {
         id: 'A2A-HANDOFF-003',
         keyword: 'MUST',
-        summary: 'All *_ref fields use the OpaqueRefSchema grammar (no whitespace, no @, recognized prefix)',
+        summary:
+          'All *_ref fields use the OpaqueRefSchema grammar (no whitespace, no @, recognized prefix)',
         source_fragment: 'All *_ref fields in this profile use the shared opaque-reference grammar',
         enforcement_class: 'hard_fail',
       },
@@ -397,7 +401,8 @@ const EXTENSION_REQUIREMENTS = [
         keyword: 'MUST',
         summary:
           'Agent Card observation uses signature_observation.caller_reported_verification (not legacy signature.verified)',
-        source_fragment: 'The legacy shape signature: { verified: true, ... } was REJECTED in v0.14.1',
+        source_fragment:
+          'The legacy shape signature: { verified: true, ... } was REJECTED in v0.14.1',
         enforcement_class: 'hard_fail',
       },
       {
@@ -473,7 +478,8 @@ const EXTENSION_REQUIREMENTS = [
       {
         id: 'CLI-EXEC-003',
         keyword: 'MUST',
-        summary: 'command.argv_mode = raw requires capture_policy.raw_capture_unsafely_allowed = true',
+        summary:
+          'command.argv_mode = raw requires capture_policy.raw_capture_unsafely_allowed = true',
         source_fragment: 'argv_mode raw requires --unsafe-allow-raw-capture',
         enforcement_class: 'hard_fail',
       },
@@ -511,7 +517,8 @@ const EXTENSION_REQUIREMENTS = [
       {
         id: 'LIFE-OBS-001',
         keyword: 'MUST',
-        summary: 'Validator rejects 20 forbidden top-level keys with lifecycle.inline_value_blocked',
+        summary:
+          'Validator rejects 20 forbidden top-level keys with lifecycle.inline_value_blocked',
         source_fragment:
           'lifecycle.inline_value_blocked rejects all 20 forbidden top-level keys at extension top level',
         enforcement_class: 'hard_fail',
@@ -693,35 +700,143 @@ const EXTENSION_REQUIREMENTS = [
       },
     ],
   },
+
+  // --- Section 32: Agent Action Records ---
+  {
+    section: 32,
+    title: 'Agent Action Records',
+    anchor: 'agent-action-records',
+    governing_spec: 'docs/specs/AGENT-ACTION-RECORDS.md',
+    introduced_in: '0.14.3',
+    last_reviewed_in: '0.14.3',
+    requirements: [
+      {
+        id: 'AGENT-ACT-001',
+        keyword: 'MUST',
+        summary:
+          'Validator rejects 20 forbidden top-level content-bearing keys with agent.action.inline_content_blocked',
+        source_fragment:
+          'agent.action.inline_content_blocked rejects 20 forbidden top-level content-bearing keys at extension top level',
+        enforcement_class: 'hard_fail',
+      },
+      {
+        id: 'AGENT-ACT-002',
+        keyword: 'MUST',
+        summary:
+          'All *_ref fields validated by the OpaqueRefSchema grammar (no whitespace, no @, recognized prefix, byte-bounded)',
+        source_fragment:
+          'all *_ref fields validated by the OpaqueRefSchema grammar (no whitespace, no @, recognized prefix, byte-bounded)',
+        enforcement_class: 'hard_fail',
+      },
+      {
+        id: 'AGENT-ACT-003',
+        keyword: 'MUST',
+        summary:
+          'Non-string *_ref values reject with agent.action.ref_must_be_string; no Zod string error leaks as a public diagnostic',
+        source_fragment:
+          'non-string *_ref values reject with agent.action.ref_must_be_string; no Zod string error leaks as a public diagnostic',
+        enforcement_class: 'hard_fail',
+      },
+      {
+        id: 'AGENT-ACT-004',
+        keyword: 'MUST',
+        summary:
+          'Per-event-kind required fields enforced; missing agent_ref, action_ref, observed_at, and event-kind-specific required fields surface agent.action.missing_required_field',
+        source_fragment:
+          'per-event-kind required fields enforced via discriminated union; missing required fields surface agent.action.missing_required_field',
+        enforcement_class: 'hard_fail',
+      },
+      {
+        id: 'AGENT-ACT-005',
+        keyword: 'MUST',
+        summary: 'Unknown event_kind rejects with agent.action.event_kind_unknown',
+        source_fragment:
+          'unknown event_kind rejects with agent.action.event_kind_unknown; closed-enum discriminator over 6 *-observed event kinds',
+        enforcement_class: 'hard_fail',
+      },
+      {
+        id: 'AGENT-ACT-006',
+        keyword: 'MUST',
+        summary:
+          'Malformed observed_at rejects with agent.action.invalid_observed_at; missing observed_at is covered by missing_required_field',
+        source_fragment:
+          'malformed observed_at rejects with agent.action.invalid_observed_at; missing observed_at is covered by agent.action.missing_required_field',
+        enforcement_class: 'hard_fail',
+      },
+      {
+        id: 'AGENT-ACT-007',
+        keyword: 'MUST',
+        summary:
+          'agent-action-delegated-observed requires delegated_to_ref; absent delegated_to_ref rejects with agent.action.missing_required_field',
+        source_fragment:
+          'agent-action-delegated-observed requires delegated_to_ref; absent delegated_to_ref rejects with agent.action.missing_required_field',
+        enforcement_class: 'hard_fail',
+      },
+      {
+        id: 'AGENT-ACT-008',
+        keyword: 'MUST',
+        summary: 'Agent action records round-trip through @peac/protocol.issue() and verifyLocal()',
+        source_fragment:
+          'agent action records round-trip through @peac/protocol.issue() and verifyLocal()',
+        enforcement_class: 'hard_fail',
+      },
+      {
+        id: 'AGENT-ACT-009',
+        keyword: 'MUST',
+        summary:
+          'Every type URI in AGENT_ACTION_TYPE_URIS maps to org.peacprotocol/agent-action in TYPE_TO_EXTENSION_MAP; validateAgentActionForType rejects unknown type URIs (type_uri_unknown) and type URI / event_kind mismatches (type_event_kind_mismatch)',
+        source_fragment:
+          'every URI in AGENT_ACTION_TYPE_URIS maps to org.peacprotocol/agent-action in TYPE_TO_EXTENSION_MAP; validateAgentActionForType runtime guard: unknown type URI -> agent.action.type_uri_unknown; mismatched event_kind -> agent.action.type_event_kind_mismatch',
+        enforcement_class: 'hard_fail',
+      },
+      {
+        id: 'AGENT-ACT-010',
+        keyword: 'MUST',
+        summary:
+          'Spec boundary text is normative and vendor-neutral; PEAC does not approve, deny, authorize, schedule, execute, govern, enforce, monitor, score, or orchestrate actions',
+        source_fragment:
+          'PEAC does not approve, deny, authorize, schedule, execute, govern, enforce, monitor, score, or orchestrate actions; action decisions are reported by the caller',
+        enforcement_class: 'hard_fail',
+      },
+    ],
+  },
 ];
 
 // Build sections with hashes
-const sections = EXTENSION_REQUIREMENTS.map((section) => ({
-  section_number: section.section,
-  section_title: section.title,
-  section_anchor: section.anchor,
-  governing_spec: section.governing_spec,
-  requirements: section.requirements.map((req) => ({
-    id: req.id,
-    keyword: req.keyword,
-    summary: req.summary,
-    source_fragment: req.source_fragment,
-    source_fragment_hash: hash(req.source_fragment),
-    enforcement_class: req.enforcement_class,
-    introduced_in: VERSION,
-    last_reviewed_in: VERSION,
-  })),
-}));
+const sections = EXTENSION_REQUIREMENTS.map((section) => {
+  const sectionIntroduced = section.introduced_in ?? DEFAULT_VERSION;
+  const sectionReviewed = section.last_reviewed_in ?? DEFAULT_VERSION;
+  return {
+    section_number: section.section,
+    section_title: section.title,
+    section_anchor: section.anchor,
+    governing_spec: section.governing_spec,
+    requirements: section.requirements.map((req) => ({
+      id: req.id,
+      keyword: req.keyword,
+      summary: req.summary,
+      source_fragment: req.source_fragment,
+      source_fragment_hash: hash(req.source_fragment),
+      enforcement_class: req.enforcement_class,
+      introduced_in: req.introduced_in ?? sectionIntroduced,
+      last_reviewed_in: req.last_reviewed_in ?? sectionReviewed,
+    })),
+  };
+});
 
 let totalReqs = 0;
 for (const s of sections) totalReqs += s.requirements.length;
 
+// The top-level version tracks the current released package version.
+// Per-section introduced_in may reference a future version when new sections
+// are added during staged development ahead of a release (e.g. Section 32
+// has introduced_in '0.14.3' while DEFAULT_VERSION is '0.14.2').
 const output = {
   $schema:
     'https://www.peacprotocol.org/schemas/conformance/extension-requirement-registry.schema.json',
   description:
     'Non-WIRE02 conformance requirements. Generated by build-extension-registry.mjs. Composed into requirement-ids.json by the main build pipeline.',
-  version: VERSION,
+  version: DEFAULT_VERSION,
   total_requirements: totalReqs,
   sections,
 };
