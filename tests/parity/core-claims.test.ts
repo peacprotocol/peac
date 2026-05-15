@@ -49,10 +49,11 @@ describe('Cross-Mapping Core Claims Parity', () => {
       const acpStripeEvent = {
         checkout_id: 'checkout_stripe_parity',
         resource_uri: RESOURCE_URI,
-        total_amount: AMOUNT,
+        amount_minor: String(AMOUNT),
         currency: CURRENCY,
         payment_rail: 'stripe',
         payment_reference: 'cs_stripe_parity_123',
+        env: 'live' as const,
         customer_id: 'cus_stripe',
         metadata: { stripe_specific: 'data' },
       };
@@ -61,10 +62,11 @@ describe('Cross-Mapping Core Claims Parity', () => {
       const acpX402Event = {
         checkout_id: 'checkout_x402_parity',
         resource_uri: RESOURCE_URI,
-        total_amount: AMOUNT,
+        amount_minor: String(AMOUNT),
         currency: CURRENCY,
         payment_rail: 'x402',
         payment_reference: 'inv_x402_parity_456',
+        env: 'live' as const,
         customer_id: 'cus_x402',
         metadata: { x402_specific: 'different_data' },
       };

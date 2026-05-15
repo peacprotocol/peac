@@ -108,10 +108,11 @@ async function demonstrateParity() {
   const acpEvent = {
     checkout_id: 'checkout_acp_parity',
     resource_uri: RESOURCE,
-    total_amount: AMOUNT,
+    amount_minor: String(AMOUNT),
     currency: CURRENCY,
     payment_rail: 'stripe',
     payment_reference: 'cs_acp_parity_123',
+    env: 'live' as const,
   };
   const acpInput = fromACPCheckoutSuccess(acpEvent);
 

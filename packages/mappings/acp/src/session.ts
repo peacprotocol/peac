@@ -15,6 +15,7 @@
 import type { JsonObject } from '@peac/kernel';
 import type { PaymentEvidence } from '@peac/schema';
 import { assertExplicitFinality, type StrictnessMode } from '@peac/adapter-core';
+import { isValidHttpsResourceUri } from './validation.js';
 
 /**
  * PEAC Receipt Input (for issue()).
@@ -117,8 +118,10 @@ export function fromACPSessionLifecycleEvent(event: ACPSessionEvent): SessionRec
   if (!event.session_id) {
     throw new Error('ACP session event missing session_id');
   }
-  if (!event.resource_uri || !event.resource_uri.startsWith('https://')) {
-    throw new Error('ACP session event missing or invalid resource_uri (must be https://)');
+  if (!isValidHttpsResourceUri(event.resource_uri)) {
+    throw new Error(
+      'ACP session event missing or invalid resource_uri (must be an https:// URL with a hostname and no embedded credentials)'
+    );
   }
 
   const evidence: JsonObject = {
@@ -172,8 +175,10 @@ export function fromACPPaymentObservation(
   if (!event.session_id) {
     throw new Error('ACP session event missing session_id');
   }
-  if (!event.resource_uri || !event.resource_uri.startsWith('https://')) {
-    throw new Error('ACP session event missing or invalid resource_uri (must be https://)');
+  if (!isValidHttpsResourceUri(event.resource_uri)) {
+    throw new Error(
+      'ACP session event missing or invalid resource_uri (must be an https:// URL with a hostname and no embedded credentials)'
+    );
   }
   if (!paymentArtifact.rail) {
     throw new Error('Payment artifact missing rail');
@@ -183,6 +188,14 @@ export function fromACPPaymentObservation(
   }
   if (!paymentArtifact.observed_payment_state) {
     throw new Error('Payment artifact missing observed_payment_state');
+  }
+  // paymentArtifact.amount is a number on the input boundary; reject NaN,
+  // Infinity, decimals, and unsafe integers before assigning to
+  // PaymentEvidence.amount to prevent signing imprecise numeric evidence.
+  if (!Number.isSafeInteger(paymentArtifact.amount)) {
+    throw new Error(
+      'Payment artifact amount must be a safe integer minor-unit value (no NaN, Infinity, decimals, or values outside Number.MIN_SAFE_INTEGER..Number.MAX_SAFE_INTEGER)'
+    );
   }
 
   const commerceEvent = PAYMENT_STATE_TO_COMMERCE_EVENT[paymentArtifact.observed_payment_state];
@@ -249,8 +262,10 @@ export function fromACPInterventionRequired(intervention: ACPIntervention): Sess
   if (!intervention.session_id) {
     throw new Error('ACP intervention missing session_id');
   }
-  if (!intervention.resource_uri || !intervention.resource_uri.startsWith('https://')) {
-    throw new Error('ACP intervention missing or invalid resource_uri (must be https://)');
+  if (!isValidHttpsResourceUri(intervention.resource_uri)) {
+    throw new Error(
+      'ACP intervention missing or invalid resource_uri (must be an https:// URL with a hostname and no embedded credentials)'
+    );
   }
 
   const evidence: JsonObject = {
@@ -382,9 +397,9 @@ export function fromACPDelegatedPaymentObservation(
   if (!observation.delegation_id) {
     throw new Error('ACP delegated-payment observation missing delegation_id');
   }
-  if (!observation.resource_uri || !observation.resource_uri.startsWith('https://')) {
+  if (!isValidHttpsResourceUri(observation.resource_uri)) {
     throw new Error(
-      'ACP delegated-payment observation missing or invalid resource_uri (must be https://)'
+      'ACP delegated-payment observation missing or invalid resource_uri (must be an https:// URL with a hostname and no embedded credentials)'
     );
   }
   if (!observation.principal) {
@@ -399,9 +414,9 @@ export function fromACPDelegatedPaymentObservation(
   if (!observation.observed_payment_state) {
     throw new Error('ACP delegated-payment observation missing observed_payment_state');
   }
-  if (!/^-?[0-9]+$/.test(observation.authorized_amount_minor)) {
+  if (!/^[0-9]+$/.test(observation.authorized_amount_minor)) {
     throw new Error(
-      'ACP delegated-payment observation authorized_amount_minor must be a base-10 integer string'
+      'ACP delegated-payment observation authorized_amount_minor must be a non-negative base-10 integer string'
     );
   }
 
@@ -466,7 +481,22 @@ export function fromACPDelegatedPaymentObservation(
   // No currency-aware scaling is applied; consumers that need major units
   // must convert downstream using the currency. The canonical minor string
   // remains available under evidence.authorized_amount_minor.
-  const amountMinor = parseInt(observation.authorized_amount_minor, 10);
+  //
+  // Safe-integer boundary for authorized_amount_minor -> Number conversion.
+  // PaymentEvidence.amount is a JS `number`; values above the safe-integer
+  // range would silently lose precision. Negative values are rejected at
+  // the regex layer above (authorized amounts are non-negative; refund
+  // semantics flow through observed_payment_state='refunded' on the
+  // session-payment-artifact path, not through delegated-payment).
+  // Callers with amounts beyond the safe-integer range must use a
+  // string-preserving record profile, not this mapper.
+  const amountMinorBig = BigInt(observation.authorized_amount_minor);
+  if (amountMinorBig > BigInt(Number.MAX_SAFE_INTEGER)) {
+    throw new Error(
+      `ACP delegated-payment observation authorized_amount_minor (${observation.authorized_amount_minor}) exceeds Number.MAX_SAFE_INTEGER (${Number.MAX_SAFE_INTEGER}); converting to PaymentEvidence.amount would lose precision. Use a string-preserving record profile for amounts beyond the safe-integer range.`
+    );
+  }
+  const amountMinor = Number(amountMinorBig);
 
   const payment: PaymentEvidence = {
     rail: 'acp-delegated-payment',
