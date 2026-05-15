@@ -1,0 +1,153 @@
+{
+  "family": "agent-action",
+  "description": "Agent action parity vectors. Six positive deterministic JSON observation payloads (one per event_kind) covering invoked / delegated / approved / denied / cancelled / timed-out semantics. Per the parity-corpus convention, all vectors assert envelope-level canonical agreement and set expected.accepted=true; semantic rejection of extension content (forbidden top-level keys, opaque-ref grammar violations, missing required fields, unknown event_kind) lives at the Layer 3 validator surface (validateAgentAction exported from @peac/schema, exercised by packages/schema/__tests__/extensions/agent-action.test.ts).",
+  "version": "0.14.3",
+  "generator": "manual; agent-action v0.1 floor",
+  "vectors": [
+    {
+      "id": "aa-001-invoked",
+      "description": "AGENT-ACT-001 (positive): agent-action-invoked-observed event; agent_ref + action_ref are opaque references; the caller observed the invocation and the issuer issues the record.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/agent-action-invoked-observed",
+          "iss": "https://harness.example.com",
+          "iat": 1747180800,
+          "jti": "aa-001-invoked-jti",
+          "extensions": {
+            "org.peacprotocol/agent-action": {
+              "event_kind": "agent-action-invoked-observed",
+              "agent_ref": "urn:peac:agent:worker-001",
+              "action_ref": "urn:peac:action:task-fetch-data",
+              "observed_at": "2026-05-14T10:00:00Z"
+            }
+          }
+        }
+      },
+      "expected": { "accepted": true }
+    },
+    {
+      "id": "aa-002-delegated",
+      "description": "AGENT-ACT-002 (positive): agent-action-delegated-observed event; requires delegated_to_ref in addition to agent_ref + action_ref.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/agent-action-delegated-observed",
+          "iss": "https://harness.example.com",
+          "iat": 1747180800,
+          "jti": "aa-002-delegated-jti",
+          "extensions": {
+            "org.peacprotocol/agent-action": {
+              "event_kind": "agent-action-delegated-observed",
+              "agent_ref": "urn:peac:agent:orchestrator-001",
+              "action_ref": "urn:peac:action:task-summarize",
+              "observed_at": "2026-05-14T10:01:00Z",
+              "delegated_to_ref": "urn:peac:agent:sub-worker-002"
+            }
+          }
+        }
+      },
+      "expected": { "accepted": true }
+    },
+    {
+      "id": "aa-003-approved",
+      "description": "AGENT-ACT-003 (positive): agent-action-approved-observed event; the caller observed an external approver approving; PEAC does not approve.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/agent-action-approved-observed",
+          "iss": "https://harness.example.com",
+          "iat": 1747180800,
+          "jti": "aa-003-approved-jti",
+          "extensions": {
+            "org.peacprotocol/agent-action": {
+              "event_kind": "agent-action-approved-observed",
+              "agent_ref": "urn:peac:agent:worker-001",
+              "action_ref": "urn:peac:action:task-deploy-service",
+              "observed_at": "2026-05-14T10:02:00Z",
+              "policy_ref": "urn:peac:policy:deploy-approvals-v1"
+            }
+          }
+        }
+      },
+      "expected": { "accepted": true }
+    },
+    {
+      "id": "aa-004-denied",
+      "description": "AGENT-ACT-004 (positive): agent-action-denied-observed event; the caller observed an external policy denying the action; PEAC does not deny.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/agent-action-denied-observed",
+          "iss": "https://harness.example.com",
+          "iat": 1747180800,
+          "jti": "aa-004-denied-jti",
+          "extensions": {
+            "org.peacprotocol/agent-action": {
+              "event_kind": "agent-action-denied-observed",
+              "agent_ref": "urn:peac:agent:worker-003",
+              "action_ref": "urn:peac:action:task-delete-resource",
+              "observed_at": "2026-05-14T10:03:00Z",
+              "policy_ref": "urn:peac:policy:resource-protection-v2",
+              "caller_ref": "urn:peac:caller:orchestrator-system"
+            }
+          }
+        }
+      },
+      "expected": { "accepted": true }
+    },
+    {
+      "id": "aa-005-cancelled",
+      "description": "AGENT-ACT-005 (positive): agent-action-cancelled-observed event; includes optional cancelled_by_ref.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/agent-action-cancelled-observed",
+          "iss": "https://harness.example.com",
+          "iat": 1747180800,
+          "jti": "aa-005-cancelled-jti",
+          "extensions": {
+            "org.peacprotocol/agent-action": {
+              "event_kind": "agent-action-cancelled-observed",
+              "agent_ref": "urn:peac:agent:worker-002",
+              "action_ref": "urn:peac:action:task-batch-export",
+              "observed_at": "2026-05-14T10:04:00Z",
+              "cancelled_by_ref": "ref:user-signal-pseudonym-007"
+            }
+          }
+        }
+      },
+      "expected": { "accepted": true }
+    },
+    {
+      "id": "aa-006-timed-out",
+      "description": "AGENT-ACT-006 (positive): agent-action-timed-out-observed event; includes optional timeout_at timestamp.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/agent-action-timed-out-observed",
+          "iss": "https://harness.example.com",
+          "iat": 1747180800,
+          "jti": "aa-006-timed-out-jti",
+          "extensions": {
+            "org.peacprotocol/agent-action": {
+              "event_kind": "agent-action-timed-out-observed",
+              "agent_ref": "urn:peac:agent:worker-004",
+              "action_ref": "urn:peac:action:task-external-api-call",
+              "observed_at": "2026-05-14T10:05:30Z",
+              "timeout_at": "2026-05-14T10:05:25Z",
+              "parent_ref": "urn:peac:task:batch-run-2026-05-14"
+            }
+          }
+        }
+      },
+      "expected": { "accepted": true }
+    }
+  ]
+}

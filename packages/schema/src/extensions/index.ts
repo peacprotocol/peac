@@ -128,3 +128,21 @@ export type {
   ProvisioningLifecycleValidationError,
   ProvisioningLifecycleValidationResult,
 } from './provisioning-lifecycle';
+
+// Agent Action Records (org.peacprotocol/agent-action): v0.14.3
+export {
+  AGENT_ACTION_EXTENSION_KEY,
+  AGENT_ACTION_TYPE_URIS,
+  AGENT_ACTION_ERROR_CODES,
+  AGENT_ACTION_FORBIDDEN_TOP_LEVEL_KEYS,
+  AgentActionSchema,
+  validateAgentAction,
+  validateAgentActionForType,
+} from './agent-action';
+export type {
+  AgentActionEventKind,
+  AgentAction,
+  AgentActionTypeUri,
+  AgentActionValidationError,
+  AgentActionValidationResult,
+} from './agent-action';

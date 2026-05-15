@@ -122,7 +122,11 @@ if (!regs) {
   // (lifecycle observation namespace; backs `peac emit lifecycle`).
   // receipt_types gains org.peacprotocol/cli-command-execution plus the
   // 9 lifecycle event-kind type URIs. Bumps intentional; additive only.
-  const BASELINE_EXT_GROUPS = 15;
+  // v0.14.2: extension_groups gains org.peacprotocol/provisioning-lifecycle
+  // (provisioning lifecycle observation namespace; 16th extension group).
+  // v0.14.3: extension_groups gains org.peacprotocol/agent-action
+  // (agent action observation namespace; 17th extension group).
+  const BASELINE_EXT_GROUPS = 17;
   const groups = regs.extension_groups ?? regs.registries?.extension_groups ?? [];
   const groupCount = Array.isArray(groups)
     ? groups.length

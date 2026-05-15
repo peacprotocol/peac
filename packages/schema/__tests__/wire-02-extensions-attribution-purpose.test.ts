@@ -574,8 +574,8 @@ describe('Registry derivation: attribution + purpose keys are known', () => {
     expect(REGISTERED_EXTENSION_GROUP_KEYS.has(PURPOSE_EXTENSION_KEY)).toBe(true);
   });
 
-  it('REGISTERED_EXTENSION_GROUP_KEYS has exactly 16 entries (12 pillars/cross-cutting + a2a-handoff + cli-execution + lifecycle-observation added in v0.14.1 + provisioning-lifecycle added in v0.14.2)', () => {
-    expect(REGISTERED_EXTENSION_GROUP_KEYS.size).toBe(16);
+  it('REGISTERED_EXTENSION_GROUP_KEYS has exactly 17 entries (12 pillars/cross-cutting + a2a-handoff + cli-execution + lifecycle-observation added in v0.14.1 + provisioning-lifecycle added in v0.14.2 + agent-action added in v0.14.3)', () => {
+    expect(REGISTERED_EXTENSION_GROUP_KEYS.size).toBe(17);
   });
 });
 
@@ -731,15 +731,15 @@ describe('Registry completion: all receipt types have extension_group mappings',
     expect(nullEntries).toHaveLength(0);
   });
 
-  it('all 40 receipt types have non-null extension_group (10 pillars + 10 a2a-handoff + 1 cli-command-execution + 9 lifecycle event kinds + 10 provisioning-lifecycle event families)', () => {
-    expect(registries.receipt_types.values).toHaveLength(40);
+  it('all 46 receipt types have non-null extension_group (10 pillars + 10 a2a-handoff + 1 cli-command-execution + 9 lifecycle event kinds + 10 provisioning-lifecycle event families + 6 agent-action event kinds)', () => {
+    expect(registries.receipt_types.values).toHaveLength(46);
     for (const entry of registries.receipt_types.values) {
       expect(entry.extension_group).not.toBeNull();
       expect(typeof entry.extension_group).toBe('string');
     }
   });
 
-  it('extension_groups has exactly 16 entries (12 pillars/cross-cutting + a2a-handoff + cli-execution + lifecycle-observation added in v0.14.1 + provisioning-lifecycle added in v0.14.2)', () => {
-    expect(registries.extension_groups.values).toHaveLength(16);
+  it('extension_groups has exactly 17 entries (12 pillars/cross-cutting + a2a-handoff + cli-execution + lifecycle-observation added in v0.14.1 + provisioning-lifecycle added in v0.14.2 + agent-action added in v0.14.3)', () => {
+    expect(registries.extension_groups.values).toHaveLength(17);
   });
 });

@@ -21,11 +21,11 @@
  * Canonical requirement ID pattern.
  * Accepts namespace-prefixed IDs: WIRE02, CARRIER, X402V2, DID-RES,
  * PKCE, GRPC-META, RURL, SC, RTGOV, A2A-HANDOFF, CLI-EXEC, LIFE-OBS,
- * PROV-LIFE.
+ * PROV-LIFE, AGENT-ACT.
  * Section/transport part allows uppercase letters and digits (e.g., A2A).
  */
 export const REQUIREMENT_ID_PATTERN =
-  /^(WIRE02|CARRIER)-[A-Z0-9]+-[0-9]{3}$|^(X402V2|DID-RES|PKCE|GRPC-META|RURL|SC|RTGOV|A2A-HANDOFF|CLI-EXEC|LIFE-OBS|PROV-LIFE)-[0-9]{3}$/;
+  /^(WIRE02|CARRIER)-[A-Z0-9]+-[0-9]{3}$|^(X402V2|DID-RES|PKCE|GRPC-META|RURL|SC|RTGOV|A2A-HANDOFF|CLI-EXEC|LIFE-OBS|PROV-LIFE|AGENT-ACT)-[0-9]{3}$/;
 
 /**
  * Requirement ID namespaces.
@@ -44,6 +44,7 @@ export const NAMESPACES = /** @type {const} */ ([
   'CLI-EXEC',
   'LIFE-OBS',
   'PROV-LIFE',
+  'AGENT-ACT',
 ]);
 
 /**
@@ -68,7 +69,7 @@ export function parseRequirementId(id) {
   if (m) return { namespace: m[1], section: m[2], number: m[3] };
 
   m = id.match(
-    /^(X402V2|DID-RES|PKCE|GRPC-META|RURL|SC|RTGOV|A2A-HANDOFF|CLI-EXEC|LIFE-OBS|PROV-LIFE)-([0-9]{3})$/
+    /^(X402V2|DID-RES|PKCE|GRPC-META|RURL|SC|RTGOV|A2A-HANDOFF|CLI-EXEC|LIFE-OBS|PROV-LIFE|AGENT-ACT)-([0-9]{3})$/
   );
   if (m) return { namespace: m[1], section: '', number: m[2] };
 

@@ -487,6 +487,66 @@
       "test_file": "tests/tooling/provisioning-lifecycle-profile-doc-truth.test.ts",
       "test_description": "spec boundary text is normative and vendor-neutral; PEAC does not authorize the action, verify legal acceptance, provision resources, validate credentials, process payments, vouch for provider state, settle transactions, manage credential vaults, or operate the runtime; stale public-surface names from earlier revisions remain absent from the profile spec",
       "notes": "Section 3 of the profile spec carries the boundary paragraph as normative prose with vendor-neutral nouns. The tests/tooling/provisioning-lifecycle-profile-doc-truth.test.ts gate reads the spec at test time and asserts the boundary phrases are present (PEAC does not authorize the action; process payments; PEAC does not implement OAuth, DPoP, OAuth Protected Resource Metadata, or Shared Payment Tokens) and that older public-surface names (the prior recursive-walker name, the prior vendor-shaped pattern name, the legacy provider identity field) are absent. The literal stale strings are constructed at runtime via array .join() so they do not appear contiguously in the test source."
+    },
+    {
+      "requirement_id": "AGENT-ACT-001",
+      "test_file": "packages/schema/__tests__/extensions/agent-action.test.ts",
+      "test_description": "no-inline-content invariant: 20 forbidden top-level keys reject with agent.action.inline_content_blocked before Zod parse; FORBIDDEN_TOP_LEVEL_KEYS has 20 entries",
+      "notes": "Pre-flight iterates AGENT_ACTION_FORBIDDEN_TOP_LEVEL_KEYS (prompt, message, messages, body, input, output, result, response, completion, stdout, stderr, env, secret, token, api_key, private_key, credential, model_output, tool_input, tool_output) and rejects each with agent.action.inline_content_blocked before the discriminated union parse runs."
+    },
+    {
+      "requirement_id": "AGENT-ACT-002",
+      "test_file": "packages/schema/__tests__/extensions/agent-action.test.ts",
+      "test_description": "opaque-ref grammar: *_ref fields must match the OpaqueRefSchema grammar (recognized prefix, no whitespace, no @, byte-bounded); violations surface agent.action.opaque_ref_grammar_violation",
+      "notes": "agent_ref, action_ref, caller_ref, policy_ref, upstream_artifact_ref, parent_ref, delegated_to_ref, cancelled_by_ref all use createOpaqueRefSchema with errorCode agent.action.opaque_ref_grammar_violation and maxBytes 256. Tests cover: no-recognized-prefix, @ character, whitespace in urn:, numeric-only, plus did: and https: positive cases."
+    },
+    {
+      "requirement_id": "AGENT-ACT-003",
+      "test_file": "packages/schema/__tests__/extensions/agent-action.test.ts",
+      "test_description": "ref_must_be_string: non-string value for any *_ref field surfaces agent.action.ref_must_be_string",
+      "notes": "Pre-flight 1.5 checks all known ref fields; numeric agent_ref, null action_ref, and object delegated_to_ref each surface agent.action.ref_must_be_string."
+    },
+    {
+      "requirement_id": "AGENT-ACT-004",
+      "test_file": "packages/schema/__tests__/extensions/agent-action.test.ts",
+      "test_description": "missing required fields: missing event_kind, agent_ref, action_ref, observed_at each surface agent.action.missing_required_field at the correct path",
+      "notes": "Pre-flight 2 checks event_kind presence before value; pre-flight 3 checks observed_at presence; pre-flight 4 checks agent_ref and action_ref plus per-kind required fields (delegated_to_ref for delegated). Each missing field produces a separate error with the field name as path."
+    },
+    {
+      "requirement_id": "AGENT-ACT-005",
+      "test_file": "packages/schema/__tests__/extensions/agent-action.test.ts",
+      "test_description": "event_kind_unknown: unknown event_kind strings, empty string, numeric, and non-agent-action prefixes all reject with agent.action.event_kind_unknown",
+      "notes": "Pre-flight 2 checks EVENT_KINDS closed enum (6 values). agent-action-executed-observed (valid-looking but wrong), empty string, 42 (numeric), lifecycle-approval-requested (wrong namespace) all surface event_kind_unknown."
+    },
+    {
+      "requirement_id": "AGENT-ACT-006",
+      "test_file": "packages/schema/__tests__/extensions/agent-action.test.ts",
+      "test_description": "invalid_observed_at: malformed observed_at and timeout_at surface agent.action.invalid_observed_at; missing observed_at surfaces missing_required_field not invalid_observed_at",
+      "notes": "Malformed timestamps ('not-a-timestamp', '2026-05-14T10:00:00' without timezone) surface agent.action.invalid_observed_at. Missing observed_at emits missing_required_field via pre-flight 3. The missing/malformed split is enforced by the pre-flight ordering."
+    },
+    {
+      "requirement_id": "AGENT-ACT-007",
+      "test_file": "packages/schema/__tests__/extensions/agent-action.test.ts",
+      "test_description": "delegated: missing delegated_to_ref rejects with missing_required_field (per-kind required field enforcement)",
+      "notes": "REQUIRED_BY_KIND maps agent-action-delegated-observed to ['delegated_to_ref']. Pre-flight 4 checks this per-kind list alongside the common required fields and surfaces agent.action.missing_required_field."
+    },
+    {
+      "requirement_id": "AGENT-ACT-008",
+      "test_file": "specs/conformance/parity-corpus/agent-action/vectors.json",
+      "test_description": "round-trip parity: all 6 positive vectors (one per event kind) are envelope-accepted with expected.accepted=true",
+      "notes": "Six positive parity vectors (aa-001 through aa-006) cover invoked, delegated, approved, denied, cancelled, and timed-out event kinds. All assert expected.accepted=true. Negative vectors for semantic rejection live in the schema unit tests."
+    },
+    {
+      "requirement_id": "AGENT-ACT-009",
+      "test_file": "packages/schema/__tests__/extensions/agent-action-registry.test.ts",
+      "test_description": "registry completeness: all 6 agent-action type URIs are registered in TYPE_TO_EXTENSION_MAP with AGENT_ACTION_EXTENSION_KEY; REGISTERED_EXTENSION_GROUP_KEYS includes org.peacprotocol/agent-action; no duplicate type URIs; validateAgentActionForType enforces type URI / event_kind agreement",
+      "notes": "Registry mapping covered by dedicated agent-action-registry.test.ts: maps all 6 type URIs, checks REGISTERED_EXTENSION_GROUP_KEYS membership, asserts no duplicates. Type URI / event_kind enforcement covered by validateAgentActionForType tests in agent-action.test.ts (matching validates; mismatch emits type_event_kind_mismatch; unknown type URI emits type_uri_unknown)."
+    },
+    {
+      "requirement_id": "AGENT-ACT-010",
+      "test_file": "packages/schema/__tests__/extensions/agent-action.test.ts",
+      "test_description": "orchestrator boundary (NORMATIVE): PEAC does not approve, deny, authorize, schedule, execute, govern, enforce, monitor, score, or orchestrate actions; the record describes what the caller observed, not what PEAC decided",
+      "notes": "The boundary is enforced at the OBSERVER scope level: validateAgentAction accepts approved/denied event kinds as caller-reported observations; the schema has no fields for PEAC to issue decisions. The spec docs/specs/AGENT-ACTION-RECORDS.md Section 8 carries the normative boundary text."
     }
   ]
 }

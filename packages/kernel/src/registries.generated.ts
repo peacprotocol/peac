@@ -366,6 +366,54 @@ export const RECEIPT_TYPES: readonly ReceiptTypeEntry[] = [
     status: 'informational',
   },
   {
+    id: 'org.peacprotocol/agent-action-approved-observed',
+    pillar: 'compliance',
+    description:
+      'Observational record of an action being approved by an external approver or automated policy. Caller-reported; PEAC does not approve actions. Introduced in v0.14.3.',
+    extension_group: 'org.peacprotocol/agent-action',
+    status: 'informational',
+  },
+  {
+    id: 'org.peacprotocol/agent-action-cancelled-observed',
+    pillar: 'attribution',
+    description:
+      'Observational record of an action being cancelled. Optional cancelled_by_ref. Caller-reported; PEAC does not cancel actions. Introduced in v0.14.3.',
+    extension_group: 'org.peacprotocol/agent-action',
+    status: 'informational',
+  },
+  {
+    id: 'org.peacprotocol/agent-action-delegated-observed',
+    pillar: 'attribution',
+    description:
+      'Observational record of an action being delegated to a sub-agent or tool. Requires delegated_to_ref. Caller-reported; PEAC does not delegate actions. Introduced in v0.14.3.',
+    extension_group: 'org.peacprotocol/agent-action',
+    status: 'informational',
+  },
+  {
+    id: 'org.peacprotocol/agent-action-denied-observed',
+    pillar: 'compliance',
+    description:
+      'Observational record of an action being denied by an external approver or automated policy. Caller-reported; PEAC does not deny actions. Introduced in v0.14.3.',
+    extension_group: 'org.peacprotocol/agent-action',
+    status: 'informational',
+  },
+  {
+    id: 'org.peacprotocol/agent-action-invoked-observed',
+    pillar: 'attribution',
+    description:
+      'Observational record of an agent being invoked to take an action. Caller-reported; PEAC does not invoke agents. Introduced in v0.14.3.',
+    extension_group: 'org.peacprotocol/agent-action',
+    status: 'informational',
+  },
+  {
+    id: 'org.peacprotocol/agent-action-timed-out-observed',
+    pillar: 'compliance',
+    description:
+      'Observational record of an action timing out. Optional timeout_at timestamp. Caller-reported; PEAC does not execute or time out actions. Introduced in v0.14.3.',
+    extension_group: 'org.peacprotocol/agent-action',
+    status: 'informational',
+  },
+  {
     id: 'org.peacprotocol/attribution-event',
     pillar: 'attribution',
     description: 'Content or action attribution evidence',
@@ -604,6 +652,12 @@ export const EXTENSION_GROUPS: readonly ExtensionGroupEntry[] = [
     status: 'informational',
   },
   {
+    id: 'org.peacprotocol/agent-action',
+    description:
+      'Agent action records extension: records observational evidence of agent action events reported by a caller, harness, or runtime. Per-event-kind discriminated union covers six *-observed event kinds (invoked / delegated / approved / denied / cancelled / timed-out). Grammar-based no-inline-content invariant rejects 20 forbidden top-level keys (prompt/message/messages/body/input/output/result/response/completion/stdout/stderr/env/secret/token/api_key/private_key/credential/model_output/tool_input/tool_output); all *_ref fields validated by the OpaqueRefSchema grammar. Action decisions (approved / denied) are reported by the caller; the record describes what the caller observed, not what PEAC decided. PEAC does not approve, deny, authorize, schedule, execute, govern, enforce, monitor, score, or orchestrate actions. Introduced in v0.14.3.',
+    status: 'informational',
+  },
+  {
     id: 'org.peacprotocol/attribution',
     description:
       'Attribution extension: creator_ref, license_spdx, obligation_type, attribution_text, content_signal_source, content_digest',
@@ -702,6 +756,12 @@ export const TYPE_TO_EXTENSION_MAP: ReadonlyMap<string, string> = new Map([
   ['org.peacprotocol/a2a-task-state-changed', 'org.peacprotocol/a2a-handoff'],
   ['org.peacprotocol/a2a-task-submitted', 'org.peacprotocol/a2a-handoff'],
   ['org.peacprotocol/access-decision', 'org.peacprotocol/access'],
+  ['org.peacprotocol/agent-action-approved-observed', 'org.peacprotocol/agent-action'],
+  ['org.peacprotocol/agent-action-cancelled-observed', 'org.peacprotocol/agent-action'],
+  ['org.peacprotocol/agent-action-delegated-observed', 'org.peacprotocol/agent-action'],
+  ['org.peacprotocol/agent-action-denied-observed', 'org.peacprotocol/agent-action'],
+  ['org.peacprotocol/agent-action-invoked-observed', 'org.peacprotocol/agent-action'],
+  ['org.peacprotocol/agent-action-timed-out-observed', 'org.peacprotocol/agent-action'],
   ['org.peacprotocol/attribution-event', 'org.peacprotocol/attribution'],
   ['org.peacprotocol/cli-command-execution', 'org.peacprotocol/cli-execution'],
   ['org.peacprotocol/compliance-check', 'org.peacprotocol/compliance'],
