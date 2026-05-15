@@ -48,7 +48,7 @@
   },
   "devDependencies": {
     "@peac/contracts": "workspace:*",
-    "next": "^15.5.15",
+    "next": "^15.5.18",
     "typescript": "^5.3.0",
     "vitest": "^4.0.0"
   },
