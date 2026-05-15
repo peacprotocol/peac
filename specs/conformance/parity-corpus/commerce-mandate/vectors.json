@@ -1,0 +1,184 @@
+{
+  "family": "commerce-mandate",
+  "description": "Commerce mandate parity vectors. Seven positive deterministic JSON observation payloads (one per event_kind) covering mandate / authorization / capture / void / refund / settlement / budget semantics. Per the parity-corpus convention, all vectors assert envelope-level canonical agreement and set expected.accepted=true; semantic rejection of extension content (forbidden payment-data keys, opaque-ref grammar violations, finality-synthesis blocks, missing required fields, invalid event_kind, scheme conflicts) lives at the Layer 3 validator surface (validateCommerceMandate exported from @peac/schema, exercised by packages/schema/__tests__/extensions/commerce-mandate.test.ts).",
+  "version": "0.14.3",
+  "generator": "manual; commerce-mandate v0.1 floor",
+  "vectors": [
+    {
+      "id": "cm-001-mandate",
+      "description": "COMM-MAN-001 (positive): commerce-mandate-observed event; merchant_ref + payer_ref are opaque references; the caller observed a mandate binding.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/commerce-mandate-observed",
+          "iss": "https://commerce.example.com",
+          "iat": 1747180800,
+          "jti": "cm-001-mandate-jti",
+          "extensions": {
+            "org.peacprotocol/commerce-mandate": {
+              "event_kind": "commerce-mandate-observed",
+              "mandate_ref": "urn:peac:mandate:mandate-001",
+              "merchant_ref": "urn:peac:merchant:merchant-001",
+              "payer_ref": "urn:peac:payer:payer-001",
+              "observed_at": "2026-05-14T10:00:00Z"
+            }
+          }
+        }
+      },
+      "expected": { "accepted": true }
+    },
+    {
+      "id": "cm-002-authorization",
+      "description": "COMM-MAN-002 (positive): commerce-authorization-observed event; requires authorization_ref + amount_minor + currency. settlement_state is forbidden on this kind.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/commerce-authorization-observed",
+          "iss": "https://commerce.example.com",
+          "iat": 1747180800,
+          "jti": "cm-002-authorization-jti",
+          "extensions": {
+            "org.peacprotocol/commerce-mandate": {
+              "event_kind": "commerce-authorization-observed",
+              "mandate_ref": "urn:peac:mandate:mandate-002",
+              "authorization_ref": "urn:peac:authorization:auth-002",
+              "amount_minor": "1999",
+              "currency": "USD",
+              "observed_at": "2026-05-14T10:01:00Z"
+            }
+          }
+        }
+      },
+      "expected": { "accepted": true }
+    },
+    {
+      "id": "cm-003-capture",
+      "description": "COMM-MAN-003 (positive): commerce-capture-observed event; requires authorization_ref + capture_ref + amount_minor + currency.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/commerce-capture-observed",
+          "iss": "https://commerce.example.com",
+          "iat": 1747180800,
+          "jti": "cm-003-capture-jti",
+          "extensions": {
+            "org.peacprotocol/commerce-mandate": {
+              "event_kind": "commerce-capture-observed",
+              "mandate_ref": "urn:peac:mandate:mandate-003",
+              "authorization_ref": "urn:peac:authorization:auth-003",
+              "capture_ref": "urn:peac:capture:cap-003",
+              "amount_minor": "1999",
+              "currency": "USD",
+              "observed_at": "2026-05-14T10:02:00Z"
+            }
+          }
+        }
+      },
+      "expected": { "accepted": true }
+    },
+    {
+      "id": "cm-004-void",
+      "description": "COMM-MAN-004 (positive): commerce-void-observed event; requires authorization_ref + void_ref. amount_minor is optional and omitted here.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/commerce-void-observed",
+          "iss": "https://commerce.example.com",
+          "iat": 1747180800,
+          "jti": "cm-004-void-jti",
+          "extensions": {
+            "org.peacprotocol/commerce-mandate": {
+              "event_kind": "commerce-void-observed",
+              "mandate_ref": "urn:peac:mandate:mandate-004",
+              "authorization_ref": "urn:peac:authorization:auth-004",
+              "void_ref": "urn:peac:void:void-004",
+              "observed_at": "2026-05-14T10:03:00Z"
+            }
+          }
+        }
+      },
+      "expected": { "accepted": true }
+    },
+    {
+      "id": "cm-005-refund",
+      "description": "COMM-MAN-005 (positive): commerce-refund-observed event; requires refund_ref + amount_minor + currency. capture_ref is optional.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/commerce-refund-observed",
+          "iss": "https://commerce.example.com",
+          "iat": 1747180800,
+          "jti": "cm-005-refund-jti",
+          "extensions": {
+            "org.peacprotocol/commerce-mandate": {
+              "event_kind": "commerce-refund-observed",
+              "mandate_ref": "urn:peac:mandate:mandate-005",
+              "refund_ref": "urn:peac:refund:ref-005",
+              "capture_ref": "urn:peac:capture:cap-005",
+              "amount_minor": "500",
+              "currency": "USD",
+              "observed_at": "2026-05-14T10:04:00Z"
+            }
+          }
+        }
+      },
+      "expected": { "accepted": true }
+    },
+    {
+      "id": "cm-006-settlement",
+      "description": "COMM-MAN-006 (positive): commerce-settlement-observed event; requires settlement_ref + amount_minor + currency + settlement_state. settlement_state is REQUIRED on this kind and forbidden on every other kind.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/commerce-settlement-observed",
+          "iss": "https://commerce.example.com",
+          "iat": 1747180800,
+          "jti": "cm-006-settlement-jti",
+          "extensions": {
+            "org.peacprotocol/commerce-mandate": {
+              "event_kind": "commerce-settlement-observed",
+              "mandate_ref": "urn:peac:mandate:mandate-006",
+              "settlement_ref": "urn:peac:settlement:set-006",
+              "amount_minor": "1999",
+              "currency": "USD",
+              "settlement_state": "completed",
+              "observed_at": "2026-05-14T10:05:00Z"
+            }
+          }
+        }
+      },
+      "expected": { "accepted": true }
+    },
+    {
+      "id": "cm-007-budget",
+      "description": "COMM-MAN-007 (positive): commerce-budget-observed event; requires budget_ref. amount_minor and currency are optional limit information.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/commerce-budget-observed",
+          "iss": "https://commerce.example.com",
+          "iat": 1747180800,
+          "jti": "cm-007-budget-jti",
+          "extensions": {
+            "org.peacprotocol/commerce-mandate": {
+              "event_kind": "commerce-budget-observed",
+              "mandate_ref": "urn:peac:mandate:mandate-007",
+              "budget_ref": "urn:peac:budget:budget-007",
+              "amount_minor": "50000",
+              "currency": "USD",
+              "observed_at": "2026-05-14T10:06:00Z"
+            }
+          }
+        }
+      },
+      "expected": { "accepted": true }
+    }
+  ]
+}

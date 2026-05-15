@@ -43,7 +43,8 @@ const REGISTERED_KEYS = REGISTERED_EXTENSION_GROUP_KEYS;
 //   Wire 0.2 core groups: 12 (10 pillars + correlation + challenge).
 //   Profile groups:       4  (a2a-handoff, cli-execution, lifecycle-observation, provisioning-lifecycle).
 //   v0.14.3 PR 1:         1  (agent-action).
-const EXPECTED_REGISTERED_GROUP_COUNT = 17;
+//   v0.14.3 PR 2B:        1  (commerce-mandate).
+const EXPECTED_REGISTERED_GROUP_COUNT = 18;
 
 describe('checkTypeExtensionMapping(): pure helper', () => {
   it('returns skip for unmapped custom type', () => {
@@ -265,6 +266,16 @@ const MINIMAL_EXTENSIONS: Record<string, Record<string, unknown>> = {
     action_ref: 'urn:peac:action:task-fetch-data',
     observed_at: '2026-05-14T10:00:00Z',
   },
+  // Commerce mandate (uses mandate-observed shape; sufficient for the
+  // match cell of the matrix; type-specific shape is exercised by the
+  // commerce-mandate schema tests and parity corpus).
+  'org.peacprotocol/commerce-mandate': {
+    event_kind: 'commerce-mandate-observed',
+    mandate_ref: 'urn:peac:mandate:mandate-001',
+    merchant_ref: 'urn:peac:merchant:merchant-001',
+    payer_ref: 'urn:peac:payer:payer-001',
+    observed_at: '2026-05-14T10:00:00Z',
+  },
 };
 
 /**
@@ -324,6 +335,14 @@ const TYPE_PILLARS: Record<string, string> = {
   'org.peacprotocol/agent-action-denied-observed': 'compliance',
   'org.peacprotocol/agent-action-cancelled-observed': 'attribution',
   'org.peacprotocol/agent-action-timed-out-observed': 'compliance',
+  // v0.14.3 commerce-mandate family (7 type URIs, all pillar=commerce)
+  'org.peacprotocol/commerce-mandate-observed': 'commerce',
+  'org.peacprotocol/commerce-authorization-observed': 'commerce',
+  'org.peacprotocol/commerce-capture-observed': 'commerce',
+  'org.peacprotocol/commerce-void-observed': 'commerce',
+  'org.peacprotocol/commerce-refund-observed': 'commerce',
+  'org.peacprotocol/commerce-settlement-observed': 'commerce',
+  'org.peacprotocol/commerce-budget-observed': 'commerce',
 };
 
 /** Get a different registered extension group (for mismatch testing) */
@@ -483,8 +502,8 @@ describe('verifyLocal(): type-to-extension edge cases', () => {
 // ---------------------------------------------------------------------------
 
 describe('Registry completion: type-to-extension surface', () => {
-  it('TYPE_TO_EXTENSION_MAP covers all 46 registered receipt types (10 pillars + 10 a2a-handoff + 1 cli-command-execution + 9 lifecycle event kinds + 10 provisioning-lifecycle event families + 6 agent-action event kinds)', () => {
-    expect(TYPE_TO_EXTENSION_MAP.size).toBe(46);
+  it('TYPE_TO_EXTENSION_MAP covers all 53 registered receipt types (10 pillars + 10 a2a-handoff + 1 cli-command-execution + 9 lifecycle event kinds + 10 provisioning-lifecycle event families + 6 agent-action event kinds + 7 commerce-mandate event kinds)', () => {
+    expect(TYPE_TO_EXTENSION_MAP.size).toBe(53);
   });
 
   it('every mapped extension group is in REGISTERED_EXTENSION_GROUP_KEYS', () => {

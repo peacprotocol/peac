@@ -146,3 +146,21 @@ export type {
   AgentActionValidationError,
   AgentActionValidationResult,
 } from './agent-action';
+
+// Commerce Mandate Records (org.peacprotocol/commerce-mandate): v0.14.3
+export {
+  COMMERCE_MANDATE_EXTENSION_KEY,
+  COMMERCE_MANDATE_TYPE_URIS,
+  COMMERCE_MANDATE_ERROR_CODES,
+  COMMERCE_MANDATE_FORBIDDEN_PAYMENT_DATA_KEYS,
+  CommerceMandateSchema,
+  validateCommerceMandate,
+  validateCommerceMandateForType,
+} from './commerce-mandate';
+export type {
+  CommerceMandateEventKind,
+  CommerceMandate,
+  CommerceMandateTypeUri,
+  CommerceMandateValidationError,
+  CommerceMandateValidationResult,
+} from './commerce-mandate';

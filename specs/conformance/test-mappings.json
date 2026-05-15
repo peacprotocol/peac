@@ -547,6 +547,66 @@
       "test_file": "packages/schema/__tests__/extensions/agent-action.test.ts",
       "test_description": "orchestrator boundary (NORMATIVE): PEAC does not approve, deny, authorize, schedule, execute, govern, enforce, monitor, score, or orchestrate actions; the record describes what the caller observed, not what PEAC decided",
       "notes": "The boundary is enforced at the OBSERVER scope level: validateAgentAction accepts approved/denied event kinds as caller-reported observations; the schema has no fields for PEAC to issue decisions. The spec docs/specs/AGENT-ACTION-RECORDS.md Section 8 carries the normative boundary text."
+    },
+    {
+      "requirement_id": "COMM-MAN-001",
+      "test_file": "packages/schema/__tests__/extensions/commerce-mandate.test.ts",
+      "test_description": "no-inline-payment-data invariant: 20 forbidden top-level keys reject with commerce.mandate.inline_payment_data_blocked before Zod parse; COMMERCE_MANDATE_FORBIDDEN_PAYMENT_DATA_KEYS has 20 entries",
+      "notes": "Pre-flight iterates COMMERCE_MANDATE_FORBIDDEN_PAYMENT_DATA_KEYS (card_number, pan, cvv, cvc, expiry_date, card_holder_name, billing_address, shipping_address, token, raw_token, bearer_token, api_key, secret, private_key, private_key_pem, credential, password, connection_string, iban, bank_account) and rejects each with commerce.mandate.inline_payment_data_blocked before the discriminated union parse runs."
+    },
+    {
+      "requirement_id": "COMM-MAN-002",
+      "test_file": "packages/schema/__tests__/extensions/commerce-mandate.test.ts",
+      "test_description": "opaque-ref grammar: *_ref fields must match the OpaqueRefSchema grammar (recognized prefix, no whitespace, no @, byte-bounded); violations surface commerce.mandate.opaque_ref_grammar_violation; non-string values surface commerce.mandate.ref_must_be_string",
+      "notes": "mandate_ref, merchant_ref, payer_ref, authorization_ref, capture_ref, void_ref, refund_ref, settlement_ref, budget_ref, caller_ref, policy_ref, upstream_artifact_ref, parent_ref, scheme_ref all use createOpaqueRefSchema with errorCode commerce.mandate.opaque_ref_grammar_violation and maxBytes 256. Tests cover: no-recognized-prefix, @ character, whitespace in urn:, numeric-only, plus did: and https: positive cases. Non-string values surface ref_must_be_string via pre-flight."
+    },
+    {
+      "requirement_id": "COMM-MAN-003",
+      "test_file": "packages/schema/__tests__/extensions/commerce-mandate.test.ts",
+      "test_description": "money-boundary invariant: amount_minor and max_amount_minor must be base-10 integer strings; numeric, decimal, empty, and negative values reject with commerce.mandate.invalid_amount_minor",
+      "notes": "AmountMinorStringSchema is reused from @peac/schema. Pre-flight 3 rejects numeric values (typeof !== 'string') with invalid_amount_minor before Zod parse. Tests cover: numeric input, decimal '99.99', empty string, comma-formatted '9,999', negative '-100', positive integer string '1999' (positive case). Carries forward PR 2A money-boundary discipline: bounded decimal string at the input boundary."
+    },
+    {
+      "requirement_id": "COMM-MAN-004",
+      "test_file": "packages/schema/__tests__/extensions/commerce-mandate.test.ts",
+      "test_description": "per-event-kind required fields: missing mandate_ref, observed_at, and event-kind-specific required fields surface commerce.mandate.missing_required_field at the correct path",
+      "notes": "REQUIRED_BY_KIND maps each of the 7 event kinds to its required field list. Pre-flight 6 checks common required (mandate_ref) + per-kind required fields. Tests cover: missing mandate_ref, missing observed_at, missing authorization_ref on authorization-observed, missing settlement_state on settlement-observed, missing budget_ref on budget-observed."
+    },
+    {
+      "requirement_id": "COMM-MAN-005",
+      "test_file": "packages/schema/__tests__/extensions/commerce-mandate.test.ts",
+      "test_description": "invalid_event_kind: unknown event_kind strings, empty string, numeric values, the stale draft URI set (binding-requested / binding-confirmed / binding-declined / payment-settled / settlement-failed / settlement-reversed), and non-commerce prefixes all reject with commerce.mandate.invalid_event_kind",
+      "notes": "Pre-flight 4 checks EVENT_KINDS closed enum (7 values: commerce-mandate-observed / commerce-authorization-observed / commerce-capture-observed / commerce-void-observed / commerce-refund-observed / commerce-settlement-observed / commerce-budget-observed). The stale draft URI set from earlier planning iterations is explicitly tested to reject."
+    },
+    {
+      "requirement_id": "COMM-MAN-006",
+      "test_file": "packages/schema/__tests__/extensions/commerce-mandate.test.ts",
+      "test_description": "finality-synthesis boundary: settlement_state on commerce-authorization-observed (and every other non-settlement event kind) rejects with commerce.mandate.finality_synthesis_blocked",
+      "notes": "Pre-flight 7 rejects settlement_state presence on every event kind except commerce-settlement-observed. The schema variant for authorization-observed intentionally does NOT include settlement_state in its strict() shape; the pre-flight check ensures a stable structured error code is emitted rather than a Zod unrecognized_keys diagnostic. Tests cover: settlement_state on authorization / capture / void / refund / mandate / budget; positive case on settlement-observed."
+    },
+    {
+      "requirement_id": "COMM-MAN-007",
+      "test_file": "packages/schema/__tests__/extensions/commerce-mandate.test.ts",
+      "test_description": "scheme_id grammar + scheme_id/scheme_ref mutual exclusion: invalid scheme_id rejects with commerce.mandate.invalid_scheme_id; both fields present rejects with commerce.mandate.scheme_conflict",
+      "notes": "SchemeIdSchema enforces bounded grammar [a-z0-9._:/+-]{1,128}. Tests cover: whitespace, @, uppercase, over-128-byte, valid scheme_id (e.g. 'card-network', 'scheme.intent', 'urn:scheme:custom'), valid scheme_ref via OpaqueRefSchema, both set together -> scheme_conflict."
+    },
+    {
+      "requirement_id": "COMM-MAN-008",
+      "test_file": "specs/conformance/parity-corpus/commerce-mandate/vectors.json",
+      "test_description": "round-trip parity: all 7 positive vectors (one per event kind) are envelope-accepted with expected.accepted=true",
+      "notes": "Seven positive parity vectors (cm-001 through cm-007) cover mandate, authorization, capture, void, refund, settlement, and budget event kinds. All assert expected.accepted=true. Negative vectors for semantic rejection live in the schema unit tests."
+    },
+    {
+      "requirement_id": "COMM-MAN-009",
+      "test_file": "packages/schema/__tests__/extensions/commerce-mandate-registry.test.ts",
+      "test_description": "registry completeness: all 7 commerce-mandate type URIs are registered in TYPE_TO_EXTENSION_MAP with COMMERCE_MANDATE_EXTENSION_KEY; REGISTERED_EXTENSION_GROUP_KEYS includes org.peacprotocol/commerce-mandate; no duplicate type URIs; validateCommerceMandateForType enforces type URI / event_kind agreement",
+      "notes": "Registry mapping covered by dedicated commerce-mandate-registry.test.ts: maps all 7 type URIs, checks REGISTERED_EXTENSION_GROUP_KEYS membership, asserts no duplicates. Type URI / event_kind enforcement covered by validateCommerceMandateForType tests in commerce-mandate.test.ts (matching validates; mismatch emits type_event_kind_mismatch; unknown type URI emits type_uri_unknown; stale pre-lock draft URI names reject with type_uri_unknown)."
+    },
+    {
+      "requirement_id": "COMM-MAN-010",
+      "test_file": "packages/schema/__tests__/extensions/commerce-mandate.test.ts",
+      "test_description": "commerce boundary (NORMATIVE): PEAC does not authorize payments, process payments, settle funds, enforce mandates, compute payment finality, evaluate budgets, validate payment rails, or vouch for the legal validity of any commerce decision; the record describes what the caller observed, not what PEAC decided",
+      "notes": "The boundary is enforced at the OBSERVER scope level: validateCommerceMandate accepts authorization/capture/void/refund/settlement/budget event kinds as caller-reported observations; the schema has no fields for PEAC to issue commerce decisions. settlement_state on non-settlement variants is hard-rejected. The spec docs/specs/COMMERCE-MANDATE-RECORDS.md carries the normative boundary text."
     }
   ]
 }

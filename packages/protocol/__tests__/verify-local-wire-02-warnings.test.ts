@@ -145,6 +145,16 @@ const MINIMAL_EXT: Record<string, Record<string, unknown>> = {
     action_ref: 'urn:peac:action:task-fetch-data',
     observed_at: '2026-05-14T10:00:00Z',
   },
+  // Commerce mandate (uses mandate-observed shape; sufficient for the
+  // does-not-emit-type_unregistered iteration; type-specific shape is
+  // exercised by the commerce-mandate schema tests).
+  'org.peacprotocol/commerce-mandate': {
+    event_kind: 'commerce-mandate-observed',
+    mandate_ref: 'urn:peac:mandate:mandate-001',
+    merchant_ref: 'urn:peac:merchant:merchant-001',
+    payer_ref: 'urn:peac:payer:payer-001',
+    observed_at: '2026-05-14T10:00:00Z',
+  },
 };
 
 function extensionsForType(type: string): Record<string, Record<string, unknown>> | undefined {

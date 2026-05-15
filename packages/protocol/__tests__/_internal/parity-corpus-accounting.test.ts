@@ -35,16 +35,17 @@ import {
 } from '../../src/_internal/test-helpers/corpus-loader';
 
 const CORPUS_ROOT = resolveCorpusRoot();
-// Total: 12 + 8 + 7 + 4 + 15 + 6 + 11 + 29 + 6 = 98 (a2a-handoff: 10 positive + 5 negative; cli-execution: 6 positive; lifecycle-observation: 11 envelope-accepted positives covering all 9 event kinds plus 2 optional-field shape vectors; provisioning-lifecycle: 10 positive (one per *-observed event family) plus 19 negative (one per validator-emitted stable error code under provisioning.*; provisioning.structure_too_deep and provisioning.invalid_utf8 are intentionally omitted from the corpus and covered in schema unit tests); agent-action: 6 positive (one per event kind)).
-const SCHEMA_VALIDATED_TOTAL = 98;
+// Total: 12 + 8 + 7 + 4 + 15 + 6 + 11 + 29 + 6 + 7 = 105 (a2a-handoff: 10 positive + 5 negative; cli-execution: 6 positive; lifecycle-observation: 11 envelope-accepted positives covering all 9 event kinds plus 2 optional-field shape vectors; provisioning-lifecycle: 10 positive (one per *-observed event family) plus 19 negative (one per validator-emitted stable error code under provisioning.*; provisioning.structure_too_deep and provisioning.invalid_utf8 are intentionally omitted from the corpus and covered in schema unit tests); agent-action: 6 positive (one per event kind); commerce-mandate: 7 positive (one per event kind)).
+const SCHEMA_VALIDATED_TOTAL = 105;
 
 describe('parity-corpus accounting (schema-validated families)', () => {
-  it('PARITY_FAMILIES enrolls exactly 9 schema-validated families (a2a-handoff + cli-execution + lifecycle-observation + provisioning-lifecycle + agent-action added)', () => {
+  it('PARITY_FAMILIES enrolls exactly 10 schema-validated families (a2a-handoff + cli-execution + lifecycle-observation + provisioning-lifecycle + agent-action + commerce-mandate added)', () => {
     expect([...PARITY_FAMILIES].sort()).toEqual([
       'a2a-handoff',
       'agent-action',
       'cli-execution',
       'commerce-bridges',
+      'commerce-mandate',
       'default-flows',
       'jose-hardening',
       'lifecycle-observation',
@@ -53,7 +54,7 @@ describe('parity-corpus accounting (schema-validated families)', () => {
     ]);
   });
 
-  it('PARITY_FLOOR_COUNTS matches per-family floor: 12 + 8 + 7 + 4 + 15 + 6 + 11 + 29 + 6 = 98', () => {
+  it('PARITY_FLOOR_COUNTS matches per-family floor: 12 + 8 + 7 + 4 + 15 + 6 + 11 + 29 + 6 + 7 = 105', () => {
     expect(PARITY_FLOOR_COUNTS['default-flows']).toBe(12);
     expect(PARITY_FLOOR_COUNTS['jose-hardening']).toBe(8);
     expect(PARITY_FLOOR_COUNTS['runtime-governance']).toBe(7);
@@ -63,20 +64,22 @@ describe('parity-corpus accounting (schema-validated families)', () => {
     expect(PARITY_FLOOR_COUNTS['lifecycle-observation']).toBe(11);
     expect(PARITY_FLOOR_COUNTS['provisioning-lifecycle']).toBe(29);
     expect(PARITY_FLOOR_COUNTS['agent-action']).toBe(6);
+    expect(PARITY_FLOOR_COUNTS['commerce-mandate']).toBe(7);
 
     const sum = Object.values(PARITY_FLOOR_COUNTS).reduce((a, b) => a + b, 0);
     expect(sum).toBe(SCHEMA_VALIDATED_TOTAL);
   });
 
-  it('loadAllFamilies() returns exactly 9 families (a2a-handoff + cli-execution + lifecycle-observation + provisioning-lifecycle + agent-action added)', () => {
+  it('loadAllFamilies() returns exactly 10 families (a2a-handoff + cli-execution + lifecycle-observation + provisioning-lifecycle + agent-action + commerce-mandate added)', () => {
     const families = loadAllFamilies();
-    expect(families).toHaveLength(9);
+    expect(families).toHaveLength(10);
     const names = families.map((f) => f.family).sort();
     expect(names).toEqual([
       'a2a-handoff',
       'agent-action',
       'cli-execution',
       'commerce-bridges',
+      'commerce-mandate',
       'default-flows',
       'jose-hardening',
       'lifecycle-observation',
