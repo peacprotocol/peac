@@ -454,7 +454,7 @@ jobs:
   # both, not universal byte-equivalence.
   #
   # Blocking matrix: Node 22 (Maintenance LTS) + Node 24 (Active LTS)
-  # × legacy_path 0/1 = 4 cells. Programmatic-option coverage runs
+  # x legacy_path 0/1 = 4 cells. Programmatic-option coverage runs
   # inside the Vitest test suite itself
   # (packages/protocol/__tests__/_internal/legacy-path-flag.test.ts),
   # not as an extra CI matrix axis.

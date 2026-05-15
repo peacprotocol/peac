@@ -32,7 +32,7 @@ jobs:
             echo "Use RFC 9421 headers instead: Signature-Input, Signature"
             exit 1
           fi
-          echo "✓ No forbidden headers found"
+          echo "OK: No forbidden headers found"
 
       - name: Verify RFC 9421 usage in edge guides
         run: |
@@ -45,7 +45,7 @@ jobs:
             echo "ERROR: Cloudflare guide missing Signature-Input header examples"
             exit 1
           fi
-          echo "✓ RFC 9421 usage verified"
+          echo "OK: RFC 9421 usage verified"
 
       - name: Check for placeholder text
         run: |
@@ -62,7 +62,7 @@ jobs:
             echo "ERROR: Found unresolved TODO/FIXME markers in docs"
             exit 1
           fi
-          echo "✓ No unresolved placeholders"
+          echo "OK: No unresolved placeholders"
 
       - name: Verify normative specs have Status field
         run: |
@@ -81,11 +81,11 @@ jobs:
 
             # Check for PROTOCOL-BEHAVIOR.md specifically (must be tested)
             if echo "$NORMATIVE_FILES" | grep -q "PROTOCOL-BEHAVIOR.md"; then
-              echo "✓ PROTOCOL-BEHAVIOR.md is normative (expected)"
+              echo "OK: PROTOCOL-BEHAVIOR.md is normative (expected)"
             fi
           fi
 
-          echo "✓ Normative spec check complete"
+          echo "OK: Normative spec check complete"
 
       - name: Check for performance claims without caveats
         run: |
@@ -97,7 +97,7 @@ jobs:
             echo "Add '(target)' suffix or 'These are design targets' note"
             exit 1
           fi
-          echo "✓ Performance claims properly qualified"
+          echo "OK: Performance claims properly qualified"
 
       - name: Verify error code format
         run: |
@@ -108,7 +108,7 @@ jobs:
             echo "Use E_* prefix: https://www.peacprotocol.org/problems/E_TAP_SIGNATURE_INVALID"
             exit 1
           fi
-          echo "✓ Error code format consistent"
+          echo "OK: Error code format consistent"
 
       - name: Check for contract package references
         run: |
@@ -118,7 +118,7 @@ jobs:
             echo "WARNING: Cloudflare guide does not reference @peac/contracts"
             echo "This is advisory - consider adding reference to canonical error source"
           fi
-          echo "✓ Contract references check complete"
+          echo "OK: Contract references check complete"
 
       - name: Summary
         run: |
@@ -128,10 +128,10 @@ jobs:
           echo "======================================"
           echo ""
           echo "All checks passed:"
-          echo "  ✓ No forbidden Payment-* headers"
-          echo "  ✓ RFC 9421 usage verified"
-          echo "  ✓ No unresolved placeholders"
-          echo "  ✓ Normative specs labeled"
-          echo "  ✓ Performance claims qualified"
-          echo "  ✓ Error code format consistent"
+          echo "  OK: No forbidden Payment-* headers"
+          echo "  OK: RFC 9421 usage verified"
+          echo "  OK: No unresolved placeholders"
+          echo "  OK: Normative specs labeled"
+          echo "  OK: Performance claims qualified"
+          echo "  OK: Error code format consistent"
           echo ""
