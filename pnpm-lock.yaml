@@ -288,6 +288,18 @@ importers:
         specifier: ^5.3.3
         version: 5.9.3
 
+  examples/agent-action-records:
+    dependencies:
+      '@peac/crypto':
+        specifier: workspace:*
+        version: link:../../packages/crypto
+      '@peac/protocol':
+        specifier: workspace:*
+        version: link:../../packages/protocol
+      '@peac/schema':
+        specifier: workspace:*
+        version: link:../../packages/schema
+
   examples/agent-identity:
     dependencies:
       '@peac/crypto':
@@ -361,6 +373,18 @@ importers:
         specifier: ^5.3.3
         version: 5.9.3
 
+  examples/commerce-mandate-records:
+    dependencies:
+      '@peac/crypto':
+        specifier: workspace:*
+        version: link:../../packages/crypto
+      '@peac/protocol':
+        specifier: workspace:*
+        version: link:../../packages/protocol
+      '@peac/schema':
+        specifier: workspace:*
+        version: link:../../packages/schema
+
   examples/content-signals:
     dependencies:
       '@peac/crypto':
@@ -415,6 +439,18 @@ importers:
       tsx:
         specifier: ^4.21.0
         version: 4.21.0
+
+  examples/gateway-export-records:
+    dependencies:
+      '@peac/crypto':
+        specifier: workspace:*
+        version: link:../../packages/crypto
+      '@peac/protocol':
+        specifier: workspace:*
+        version: link:../../packages/protocol
+      '@peac/schema':
+        specifier: workspace:*
+        version: link:../../packages/schema
 
   examples/hello-world:
     dependencies:

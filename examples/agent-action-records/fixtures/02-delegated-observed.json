@@ -1,0 +1,9 @@
+{
+  "event_kind": "agent-action-delegated-observed",
+  "agent_ref": "urn:peac:agent:demo-worker-001",
+  "action_ref": "urn:peac:action:summarize-batch",
+  "delegated_to_ref": "urn:peac:agent:demo-worker-002",
+  "observed_at": "2026-05-16T10:01:00Z",
+  "caller_ref": "urn:peac:harness:demo-runner",
+  "parent_ref": "urn:peac:action:retrieve-documents"
+}

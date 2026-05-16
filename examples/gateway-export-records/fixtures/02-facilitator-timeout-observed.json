@@ -1,0 +1,9 @@
+{
+  "event_kind": "gateway-facilitator-timeout-observed",
+  "gateway_ref": "urn:peac:gateway:demo-gw-001",
+  "payment_ref": "urn:peac:payment:demo-pay-001",
+  "observed_at": "2026-05-16T10:00:05Z",
+  "timeout_at": "2026-05-16T10:00:05Z",
+  "timeout_profile": "datacenter",
+  "deadline_exceeded_ms": 5000
+}

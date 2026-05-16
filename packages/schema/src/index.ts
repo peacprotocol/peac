@@ -207,6 +207,30 @@ export {
   PROVISIONING_LIFECYCLE_ERROR_CODES,
   ProvisioningLifecycleSchema,
   validateProvisioningLifecycle,
+  // Agent Action Records (v0.14.3)
+  AGENT_ACTION_EXTENSION_KEY,
+  AGENT_ACTION_TYPE_URIS,
+  AGENT_ACTION_ERROR_CODES,
+  AGENT_ACTION_FORBIDDEN_TOP_LEVEL_KEYS,
+  AgentActionSchema,
+  validateAgentAction,
+  validateAgentActionForType,
+  // Commerce Mandate Records (v0.14.3)
+  COMMERCE_MANDATE_EXTENSION_KEY,
+  COMMERCE_MANDATE_TYPE_URIS,
+  COMMERCE_MANDATE_ERROR_CODES,
+  COMMERCE_MANDATE_FORBIDDEN_PAYMENT_DATA_KEYS,
+  CommerceMandateSchema,
+  validateCommerceMandate,
+  validateCommerceMandateForType,
+  // Gateway Export Records (v0.14.3)
+  GATEWAY_EXPORT_EXTENSION_KEY,
+  GATEWAY_EXPORT_TYPE_URIS,
+  GATEWAY_EXPORT_ERROR_CODES,
+  GATEWAY_EXPORT_FORBIDDEN_PAYMENT_DATA_KEYS,
+  GatewayExportSchema,
+  validateGatewayExport,
+  validateGatewayExportForType,
 } from './extensions/index';
 export type {
   CredentialEventType,
@@ -241,6 +265,24 @@ export type {
   ProvisioningLifecycleTypeUri,
   ProvisioningLifecycleValidationError,
   ProvisioningLifecycleValidationResult,
+  // Agent Action Records (v0.14.3)
+  AgentActionEventKind,
+  AgentAction,
+  AgentActionTypeUri,
+  AgentActionValidationError,
+  AgentActionValidationResult,
+  // Commerce Mandate Records (v0.14.3)
+  CommerceMandateEventKind,
+  CommerceMandate,
+  CommerceMandateTypeUri,
+  CommerceMandateValidationError,
+  CommerceMandateValidationResult,
+  // Gateway Export Records (v0.14.3)
+  GatewayExportEventKind,
+  GatewayExport,
+  GatewayExportTypeUri,
+  GatewayExportValidationError,
+  GatewayExportValidationResult,
 } from './extensions/index';
 
 // Attribution validators (v0.9.26+)

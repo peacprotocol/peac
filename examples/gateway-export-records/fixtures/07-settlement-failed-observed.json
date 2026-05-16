@@ -1,0 +1,8 @@
+{
+  "event_kind": "gateway-settlement-failed-observed",
+  "gateway_ref": "urn:peac:gateway:demo-gw-001",
+  "payment_ref": "urn:peac:payment:demo-pay-001",
+  "observed_at": "2026-05-16T10:02:00Z",
+  "final_state": "reverted",
+  "failure_reason_ref": "urn:peac:reason:demo-revert-007"
+}

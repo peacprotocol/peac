@@ -1,0 +1,8 @@
+{
+  "event_kind": "agent-action-cancelled-observed",
+  "agent_ref": "urn:peac:agent:demo-worker-001",
+  "action_ref": "urn:peac:action:long-running-fetch",
+  "cancelled_by_ref": "urn:peac:operator:demo-supervisor",
+  "observed_at": "2026-05-16T10:04:00Z",
+  "caller_ref": "urn:peac:harness:demo-runner"
+}

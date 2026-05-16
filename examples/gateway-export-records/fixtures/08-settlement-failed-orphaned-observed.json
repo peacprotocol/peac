@@ -1,0 +1,7 @@
+{
+  "event_kind": "gateway-settlement-failed-orphaned-observed",
+  "gateway_ref": "urn:peac:gateway:demo-gw-001",
+  "payment_ref": "urn:peac:payment:demo-pay-001",
+  "observed_at": "2026-05-16T10:03:00Z",
+  "last_known_state": "pending"
+}

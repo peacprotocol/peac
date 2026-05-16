@@ -1,0 +1,8 @@
+{
+  "event_kind": "agent-action-denied-observed",
+  "agent_ref": "urn:peac:agent:demo-worker-001",
+  "action_ref": "urn:peac:action:export-private-data",
+  "observed_at": "2026-05-16T10:03:00Z",
+  "caller_ref": "urn:peac:reviewer:demo-approver",
+  "policy_ref": "urn:peac:policy:demo-export-gate"
+}

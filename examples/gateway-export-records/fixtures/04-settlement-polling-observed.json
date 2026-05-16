@@ -1,0 +1,8 @@
+{
+  "event_kind": "gateway-settlement-polling-observed",
+  "gateway_ref": "urn:peac:gateway:demo-gw-001",
+  "payment_ref": "urn:peac:payment:demo-pay-001",
+  "observed_at": "2026-05-16T10:00:30Z",
+  "poll_count": 5,
+  "polling_strategy": "exponential"
+}

@@ -1,0 +1,8 @@
+{
+  "event_kind": "commerce-authorization-observed",
+  "mandate_ref": "urn:peac:mandate:demo-mandate-001",
+  "authorization_ref": "urn:peac:authorization:demo-auth-002",
+  "amount_minor": "1999",
+  "currency": "USD",
+  "observed_at": "2026-05-16T10:01:00Z"
+}

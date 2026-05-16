@@ -1,0 +1,9 @@
+{
+  "event_kind": "commerce-settlement-observed",
+  "mandate_ref": "urn:peac:mandate:demo-mandate-001",
+  "settlement_ref": "urn:peac:settlement:demo-set-006",
+  "amount_minor": "1499",
+  "currency": "USD",
+  "settlement_state": "completed",
+  "observed_at": "2026-05-16T10:05:00Z"
+}

@@ -1,0 +1,16 @@
+{
+  "name": "@peac/example-gateway-export-records",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Generic gateway-export records example: issue and verify signed records across all 8 *-observed event kinds (7 settlement/recovery states + 1 facilitator-timeout trigger observation).",
+  "type": "module",
+  "scripts": {
+    "issue": "node issue-fixtures.mjs",
+    "verify": "node verify-fixtures.mjs"
+  },
+  "dependencies": {
+    "@peac/crypto": "workspace:*",
+    "@peac/protocol": "workspace:*",
+    "@peac/schema": "workspace:*"
+  }
+}

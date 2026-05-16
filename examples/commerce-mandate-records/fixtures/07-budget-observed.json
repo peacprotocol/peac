@@ -1,0 +1,8 @@
+{
+  "event_kind": "commerce-budget-observed",
+  "mandate_ref": "urn:peac:mandate:demo-mandate-001",
+  "budget_ref": "urn:peac:budget:demo-budget-007",
+  "amount_minor": "50000",
+  "currency": "USD",
+  "observed_at": "2026-05-16T10:06:00Z"
+}

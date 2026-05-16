@@ -1,0 +1,7 @@
+{
+  "event_kind": "commerce-void-observed",
+  "mandate_ref": "urn:peac:mandate:demo-mandate-001",
+  "authorization_ref": "urn:peac:authorization:demo-auth-004",
+  "void_ref": "urn:peac:void:demo-void-004",
+  "observed_at": "2026-05-16T10:03:00Z"
+}
