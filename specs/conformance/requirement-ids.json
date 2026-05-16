@@ -3042,6 +3042,114 @@
           "last_reviewed_in": "0.14.3"
         }
       ]
+    },
+    {
+      "section_number": 33,
+      "section_title": "Commerce Mandate Records",
+      "section_anchor": "commerce-mandate-records",
+      "governing_spec": "docs/specs/COMMERCE-MANDATE-RECORDS.md",
+      "requirements": [
+        {
+          "id": "COMM-MAN-001",
+          "keyword": "MUST",
+          "summary": "Validator rejects 20 forbidden top-level payment-data keys with commerce.mandate.inline_payment_data_blocked",
+          "source_fragment": "commerce.mandate.inline_payment_data_blocked rejects 20 forbidden top-level payment-data keys (card_number / pan / cvv / cvc / expiry_date / card_holder_name / billing_address / shipping_address / token / raw_token / bearer_token / api_key / secret / private_key / private_key_pem / credential / password / connection_string / iban / bank_account) at extension top level",
+          "source_fragment_hash": "sha256:6c4a4a43616a0b1cc52f7404585873eae5ec82399f3eea5014a3ba90f71d8b26",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.14.3",
+          "last_reviewed_in": "0.14.3"
+        },
+        {
+          "id": "COMM-MAN-002",
+          "keyword": "MUST",
+          "summary": "All *_ref fields validated by the OpaqueRefSchema grammar (no whitespace, no @, recognized prefix, byte-bounded); violations surface commerce.mandate.opaque_ref_grammar_violation; non-string values surface commerce.mandate.ref_must_be_string",
+          "source_fragment": "all *_ref fields validated by the OpaqueRefSchema grammar (mandate_ref / merchant_ref / payer_ref / authorization_ref / capture_ref / void_ref / refund_ref / settlement_ref / budget_ref / caller_ref / policy_ref / upstream_artifact_ref / parent_ref / scheme_ref)",
+          "source_fragment_hash": "sha256:ccd2a07925e41775bbe90e611b7f954d7a7c75a66dcd4eb0e528c740093d8e24",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.14.3",
+          "last_reviewed_in": "0.14.3"
+        },
+        {
+          "id": "COMM-MAN-003",
+          "keyword": "MUST",
+          "summary": "All amount fields use AmountMinorStringSchema; numeric, decimal, empty, and unsafe forms reject with commerce.mandate.invalid_amount_minor",
+          "source_fragment": "AmountMinorStringSchema bounded decimal-integer string for amount_minor and max_amount_minor; numeric, decimal, empty values reject with commerce.mandate.invalid_amount_minor",
+          "source_fragment_hash": "sha256:1f3a95317dd03814e917e4ab015767ed0003bc3958ac178a6188c2e6ba032afb",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.14.3",
+          "last_reviewed_in": "0.14.3"
+        },
+        {
+          "id": "COMM-MAN-004",
+          "keyword": "MUST",
+          "summary": "Per-event-kind required fields enforced; missing mandate_ref, observed_at, and event-kind-specific required fields surface commerce.mandate.missing_required_field",
+          "source_fragment": "per-event-kind required fields enforced via discriminated union; mandate_ref and observed_at are common required; per-kind: mandate (merchant_ref, payer_ref); authorization (authorization_ref, amount_minor, currency); capture (authorization_ref, capture_ref, amount_minor, currency); void (authorization_ref, void_ref); refund (refund_ref, amount_minor, currency); settlement (settlement_ref, amount_minor, currency, settlement_state); budget (budget_ref)",
+          "source_fragment_hash": "sha256:7c3f83238aa42236be232f09bd36d64722834ff5e8f64e877368e7f8b3c9421e",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.14.3",
+          "last_reviewed_in": "0.14.3"
+        },
+        {
+          "id": "COMM-MAN-005",
+          "keyword": "MUST",
+          "summary": "Unknown event_kind rejects with commerce.mandate.invalid_event_kind",
+          "source_fragment": "unknown event_kind rejects with commerce.mandate.invalid_event_kind; closed-enum discriminator over 7 *-observed event kinds (mandate / authorization / capture / void / refund / settlement / budget)",
+          "source_fragment_hash": "sha256:b1a11620840b2b37d84f23aff278a97a2562c6e92d6dd7bdea1f759e9724d37a",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.14.3",
+          "last_reviewed_in": "0.14.3"
+        },
+        {
+          "id": "COMM-MAN-006",
+          "keyword": "MUST",
+          "summary": "Finality-synthesis boundary: settlement_state on any non-settlement event kind rejects with commerce.mandate.finality_synthesis_blocked",
+          "source_fragment": "settlement_state on commerce-authorization-observed (or any non-settlement variant) rejects with commerce.mandate.finality_synthesis_blocked; settlement finality may only be reported via commerce-settlement-observed",
+          "source_fragment_hash": "sha256:a8a60d345645a5955a1dce19aa992f5118139730319c622bb6b5eb4ebf32872a",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.14.3",
+          "last_reviewed_in": "0.14.3"
+        },
+        {
+          "id": "COMM-MAN-007",
+          "keyword": "MUST",
+          "summary": "scheme_id (bounded grammar) and scheme_ref (opaque) are mutually exclusive; both present rejects with commerce.mandate.scheme_conflict",
+          "source_fragment": "scheme_id and scheme_ref are mutually exclusive; setting both rejects with commerce.mandate.scheme_conflict; scheme_id must match bounded grammar [a-z0-9._:/+-]{1,128} (lowercase preferred; no whitespace, no @)",
+          "source_fragment_hash": "sha256:21f842a70dc350a1baf97d804ea1c1e681ba7183b6cd4be79d1b9540f4a1047f",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.14.3",
+          "last_reviewed_in": "0.14.3"
+        },
+        {
+          "id": "COMM-MAN-008",
+          "keyword": "MUST",
+          "summary": "Commerce mandate records round-trip through @peac/protocol.issue() and verifyLocal()",
+          "source_fragment": "commerce mandate records round-trip through @peac/protocol.issue() and verifyLocal()",
+          "source_fragment_hash": "sha256:ff41b6b44e879092ef3483f2dba7cd16386aeb11b6b47c79271d8b0dd3207e5e",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.14.3",
+          "last_reviewed_in": "0.14.3"
+        },
+        {
+          "id": "COMM-MAN-009",
+          "keyword": "MUST",
+          "summary": "Every type URI in COMMERCE_MANDATE_TYPE_URIS maps to org.peacprotocol/commerce-mandate in TYPE_TO_EXTENSION_MAP; validateCommerceMandateForType rejects unknown type URIs (type_uri_unknown) and type URI / event_kind mismatches (type_event_kind_mismatch)",
+          "source_fragment": "every URI in COMMERCE_MANDATE_TYPE_URIS maps to org.peacprotocol/commerce-mandate in TYPE_TO_EXTENSION_MAP; validateCommerceMandateForType runtime guard: unknown type URI -> commerce.mandate.type_uri_unknown; mismatched event_kind -> commerce.mandate.type_event_kind_mismatch",
+          "source_fragment_hash": "sha256:16542934a67dd6480ba11ebe02d15cad8e745da30a29f545198bbef4ca43d998",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.14.3",
+          "last_reviewed_in": "0.14.3"
+        },
+        {
+          "id": "COMM-MAN-010",
+          "keyword": "MUST",
+          "summary": "Spec boundary text is normative and vendor-neutral; PEAC does not authorize payments, process payments, settle funds, enforce mandates, compute payment finality, evaluate budgets, validate payment rails, or vouch for the legal validity of any commerce decision",
+          "source_fragment": "PEAC does not authorize payments, process payments, settle funds, enforce mandates, compute payment finality, evaluate budgets, validate payment rails, or vouch for the legal validity of any commerce decision; commerce decisions are reported by the caller",
+          "source_fragment_hash": "sha256:b7cc332478dc1c59ab47af75b8acd913f26f4b5f6eb256405b2d2b9feba3a6ed",
+          "enforcement_class": "hard_fail",
+          "introduced_in": "0.14.3",
+          "last_reviewed_in": "0.14.3"
+        }
+      ]
     }
   ]
 }

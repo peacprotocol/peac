@@ -575,6 +575,55 @@
         "description": "Observational record of an action timing out. Optional timeout_at timestamp. Caller-reported; PEAC does not execute or time out actions. Introduced in v0.14.3.",
         "extension_group": "org.peacprotocol/agent-action",
         "status": "informational"
+      },
+      {
+        "id": "org.peacprotocol/commerce-mandate-observed",
+        "pillar": "commerce",
+        "description": "Observational record of a commerce mandate event scoped to a merchant and payer. Caller-reported; PEAC does not enforce mandates or vouch for legal validity. Introduced in v0.14.3.",
+        "extension_group": "org.peacprotocol/commerce-mandate",
+        "status": "informational"
+      },
+      {
+        "id": "org.peacprotocol/commerce-authorization-observed",
+        "pillar": "commerce",
+        "description": "Observational record of a payment authorization event scoped to a mandate. Caller-reported; PEAC does not authorize payments or synthesize settlement finality. settlement_state is forbidden on this record kind. Introduced in v0.14.3.",
+        "extension_group": "org.peacprotocol/commerce-mandate",
+        "status": "informational"
+      },
+      {
+        "id": "org.peacprotocol/commerce-capture-observed",
+        "pillar": "commerce",
+        "description": "Observational record of a payment capture event scoped to a mandate and authorization. Caller-reported; PEAC does not capture funds. Introduced in v0.14.3.",
+        "extension_group": "org.peacprotocol/commerce-mandate",
+        "status": "informational"
+      },
+      {
+        "id": "org.peacprotocol/commerce-void-observed",
+        "pillar": "commerce",
+        "description": "Observational record of an authorization void event scoped to a mandate. Caller-reported; PEAC does not void authorizations. Introduced in v0.14.3.",
+        "extension_group": "org.peacprotocol/commerce-mandate",
+        "status": "informational"
+      },
+      {
+        "id": "org.peacprotocol/commerce-refund-observed",
+        "pillar": "commerce",
+        "description": "Observational record of a refund event scoped to a mandate. Caller-reported; PEAC does not process refunds. Introduced in v0.14.3.",
+        "extension_group": "org.peacprotocol/commerce-mandate",
+        "status": "informational"
+      },
+      {
+        "id": "org.peacprotocol/commerce-settlement-observed",
+        "pillar": "commerce",
+        "description": "Observational record of a settlement event scoped to a mandate, with caller-attested settlement_state (pending / completed / failed / reversed / partial). Caller-reported; PEAC does not settle funds or compute settlement finality. Introduced in v0.14.3.",
+        "extension_group": "org.peacprotocol/commerce-mandate",
+        "status": "informational"
+      },
+      {
+        "id": "org.peacprotocol/commerce-budget-observed",
+        "pillar": "commerce",
+        "description": "Observational record of a budget event scoped to a mandate (limit set, limit changed, threshold crossed, period rollover, etc.). Caller-reported; PEAC does not enforce budgets or evaluate budget policy. Introduced in v0.14.3.",
+        "extension_group": "org.peacprotocol/commerce-mandate",
+        "status": "informational"
       }
     ]
   },
@@ -664,6 +713,11 @@
       {
         "id": "org.peacprotocol/agent-action",
         "description": "Agent action records extension: records observational evidence of agent action events reported by a caller, harness, or runtime. Per-event-kind discriminated union covers six *-observed event kinds (invoked / delegated / approved / denied / cancelled / timed-out). Grammar-based no-inline-content invariant rejects 20 forbidden top-level keys (prompt/message/messages/body/input/output/result/response/completion/stdout/stderr/env/secret/token/api_key/private_key/credential/model_output/tool_input/tool_output); all *_ref fields validated by the OpaqueRefSchema grammar. Action decisions (approved / denied) are reported by the caller; the record describes what the caller observed, not what PEAC decided. PEAC does not approve, deny, authorize, schedule, execute, govern, enforce, monitor, score, or orchestrate actions. Introduced in v0.14.3.",
+        "status": "informational"
+      },
+      {
+        "id": "org.peacprotocol/commerce-mandate",
+        "description": "Commerce mandate records extension: records observational evidence of commerce-lifecycle events (mandate / authorization / capture / void / refund / settlement / budget) scoped to a mandate. Per-event-kind discriminated union covers seven *-observed event kinds. Grammar-based no-inline-payment-data invariant rejects 20 forbidden top-level keys (card_number / pan / cvv / cvc / expiry_date / card_holder_name / billing_address / shipping_address / token / raw_token / bearer_token / api_key / secret / private_key / private_key_pem / credential / password / connection_string / iban / bank_account) with commerce.mandate.inline_payment_data_blocked; all *_ref fields validated by the OpaqueRefSchema grammar; all amount fields use AmountMinorStringSchema (base-10 integer string; numeric and decimal forms rejected). Finality-synthesis boundary: settlement_state on any non-settlement event kind rejects with commerce.mandate.finality_synthesis_blocked. scheme_id (bounded grammar) and scheme_ref (opaque) are mutually exclusive. PEAC does not authorize payments, process payments, settle funds, enforce mandates, compute payment finality, evaluate budgets, validate payment rails, or vouch for the legal validity of any commerce decision. Introduced in v0.14.3.",
         "status": "informational"
       }
     ]

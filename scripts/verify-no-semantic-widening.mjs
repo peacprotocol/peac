@@ -124,9 +124,11 @@ if (!regs) {
   // 9 lifecycle event-kind type URIs. Bumps intentional; additive only.
   // v0.14.2: extension_groups gains org.peacprotocol/provisioning-lifecycle
   // (provisioning lifecycle observation namespace; 16th extension group).
-  // v0.14.3: extension_groups gains org.peacprotocol/agent-action
+  // v0.14.3 PR 1: extension_groups gains org.peacprotocol/agent-action
   // (agent action observation namespace; 17th extension group).
-  const BASELINE_EXT_GROUPS = 17;
+  // v0.14.3 PR 2B: extension_groups gains org.peacprotocol/commerce-mandate
+  // (commerce mandate observation namespace; 18th extension group).
+  const BASELINE_EXT_GROUPS = 18;
   const groups = regs.extension_groups ?? regs.registries?.extension_groups ?? [];
   const groupCount = Array.isArray(groups)
     ? groups.length
