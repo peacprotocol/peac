@@ -48,7 +48,7 @@ describe('REGISTERED_EXTENSION_GROUP_KEYS: a2a-handoff registration', () => {
     expect(REGISTERED_EXTENSION_GROUP_KEYS.has(A2A_HANDOFF_EXTENSION_KEY)).toBe(true);
   });
 
-  it('size is 18 (12 pillars/cross-cutting + a2a-handoff + cli-execution + lifecycle-observation added in v0.14.1 + provisioning-lifecycle added in v0.14.2 + agent-action added in v0.14.3 PR 1 + commerce-mandate added in v0.14.3 PR 2B)', () => {
-    expect(REGISTERED_EXTENSION_GROUP_KEYS.size).toBe(18);
+  it('size is 19 (12 pillars/cross-cutting + a2a-handoff + cli-execution + lifecycle-observation added in v0.14.1 + provisioning-lifecycle added in v0.14.2 + agent-action added in v0.14.3 PR 1 + commerce-mandate added in v0.14.3 PR 2B + gateway-export added in v0.14.3 PR 3)', () => {
+    expect(REGISTERED_EXTENSION_GROUP_KEYS.size).toBe(19);
   });
 });

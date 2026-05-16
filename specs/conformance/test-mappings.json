@@ -607,6 +607,66 @@
       "test_file": "packages/schema/__tests__/extensions/commerce-mandate.test.ts",
       "test_description": "commerce boundary (NORMATIVE): PEAC does not authorize payments, process payments, settle funds, enforce mandates, compute payment finality, evaluate budgets, validate payment rails, or vouch for the legal validity of any commerce decision; the record describes what the caller observed, not what PEAC decided",
       "notes": "The boundary is enforced at the OBSERVER scope level: validateCommerceMandate accepts authorization/capture/void/refund/settlement/budget event kinds as caller-reported observations; the schema has no fields for PEAC to issue commerce decisions. settlement_state on non-settlement variants is hard-rejected. The spec docs/specs/COMMERCE-MANDATE-RECORDS.md carries the normative boundary text."
+    },
+    {
+      "requirement_id": "GATE-EXP-001",
+      "test_file": "packages/schema/__tests__/extensions/gateway-export.test.ts",
+      "test_description": "no-inline-payment-data invariant: 19 forbidden top-level keys reject with gateway.export.inline_payment_data_blocked before Zod parse; GATEWAY_EXPORT_FORBIDDEN_PAYMENT_DATA_KEYS has 19 entries. value_minor is intentionally NOT in this list (rejected as gateway.export.unknown_field via the strict variant schema; single canonical money field is amount_minor)",
+      "notes": "Pre-flight iterates GATEWAY_EXPORT_FORBIDDEN_PAYMENT_DATA_KEYS (transaction_data, raw_tx, tx_hash_value, nonce, raw_nonce, payer, pay_to, payTo, payment_payload, authorization, authorization_payload, card_number, pan, cvv, token, bearer_token, api_key, private_key, credential) and rejects each with gateway.export.inline_payment_data_blocked before the discriminated union parse runs. value_minor is NOT in this list; a record carrying value_minor reaches the strict Zod variant parse and surfaces gateway.export.unknown_field (the rejected-alternate-money-field test in gateway-export.test.ts also asserts inline_payment_data_blocked is NOT emitted in that case)."
+    },
+    {
+      "requirement_id": "GATE-EXP-002",
+      "test_file": "packages/schema/__tests__/extensions/gateway-export.test.ts",
+      "test_description": "opaque-ref grammar: *_ref fields must match the OpaqueRefSchema grammar (recognized prefix, no whitespace, no @, byte-bounded); violations surface gateway.export.opaque_ref_grammar_violation; non-string values surface gateway.export.ref_must_be_string",
+      "notes": "gateway_ref, payment_ref, facilitator_ref, tx_ref, nonce_ref, upstream_artifact_ref, caller_ref, parent_ref, payer_ref, pay_to_ref, settlement_ref, failure_reason_ref, chain_ref all use createOpaqueRefSchema with errorCode gateway.export.opaque_ref_grammar_violation and maxBytes 256. Tests cover: no-recognized-prefix, @ character, whitespace, plus did: and https: positive cases. Non-string values surface ref_must_be_string via pre-flight."
+    },
+    {
+      "requirement_id": "GATE-EXP-003",
+      "test_file": "packages/schema/__tests__/extensions/gateway-export.test.ts",
+      "test_description": "money-boundary + single-canonical-money-field invariant: amount_minor (when present) uses the shared AmountMinorStringSchema grammar plus a Gateway Export non-negative profile constraint; numeric, decimal, comma-formatted, empty, AND negative values reject with gateway.export.invalid_amount_minor; no separate value_minor field is defined; records carrying value_minor reject as gateway.export.unknown_field via the strict variant schema (NOT as inline_payment_data_blocked)",
+      "notes": "NonNegativeAmountMinorStringSchema is defined locally in gateway-export.ts as a refine over the shared AmountMinorStringSchema (the shared grammar is NOT changed; other profiles MAY constrain amount_minor differently). Pre-flight 3 rejects numeric values (typeof !== 'string') with invalid_amount_minor before Zod parse; the refine rejects negatives. EIP-3009 value component is carried by amount_minor when payer_ref/pay_to_ref/nonce_ref are present (single canonical money field). Tests cover: numeric input, decimal '99.99', empty string, comma-formatted, positive integer string '1999' (positive), '0' (positive), negative values '-1' / '-100' / '-1999' on every event variant (parameterized it.each), records carrying value_minor (rejected as unknown_field via strict schema; test asserts inline_payment_data_blocked is NOT emitted)."
+    },
+    {
+      "requirement_id": "GATE-EXP-004",
+      "test_file": "packages/schema/__tests__/extensions/gateway-export.test.ts",
+      "test_description": "per-event-kind required fields: missing gateway_ref, payment_ref, observed_at, and event-kind-specific required fields surface gateway.export.missing_required_field at the correct path",
+      "notes": "REQUIRED_BY_KIND maps each of the 8 event kinds to its required field list. Pre-flight 6 checks common required (gateway_ref, payment_ref) + per-kind required fields. Pre-flight 7 additionally checks that custom timeout_profile includes all three timing fields. Tests cover: missing gateway_ref, missing payment_ref, missing observed_at, missing submitted_at on payment-submitted, missing timeout_profile on facilitator-timeout, missing settlement_ref on settlement-confirmed, missing delay_ms on settlement-confirmed-late."
+    },
+    {
+      "requirement_id": "GATE-EXP-005",
+      "test_file": "packages/schema/__tests__/extensions/gateway-export.test.ts",
+      "test_description": "invalid_event_kind: unknown event_kind strings, empty string, numeric values, and non-gateway prefixes reject with gateway.export.invalid_event_kind",
+      "notes": "Pre-flight 4 checks EVENT_KINDS closed enum (8 values across the 7-state recovery model plus the 1 facilitator-timeout trigger observation). Unknown strings, empty strings, numeric values, and substrings without the gateway- prefix all reject. The 'gateway-timeout' shorthand (without -observed suffix) rejects to demonstrate the closed-enum boundary."
+    },
+    {
+      "requirement_id": "GATE-EXP-006",
+      "test_file": "packages/schema/__tests__/extensions/gateway-export.test.ts",
+      "test_description": "trigger-vs-state doctrine: gateway-facilitator-timeout-observed is a discrete observable boundary signal, NOT an additional settlement state; the 7 other URIs map 1:1 to observed settlement/recovery states; PEAC does not introduce a new settlement state",
+      "notes": "Doctrine asserted via positive-case smoke tests on all 8 event kinds and via the spec text in docs/specs/GATEWAY-EXPORT-RECORDS.md Section 1. validateGatewayExport accepts gateway-facilitator-timeout-observed as a discrete kind without requiring any subsequent state to be present in the same record. Schema does not define any field name that implies PEAC owns a settlement state."
+    },
+    {
+      "requirement_id": "GATE-EXP-007",
+      "test_file": "packages/schema/__tests__/extensions/gateway-export.test.ts",
+      "test_description": "timeout_profile / polling_strategy closed enums; caller-reported labels; custom timeout requires all three timing fields (facilitator_timeout_ms + poll_interval_ms + max_poll_window_ms); polling_strategy is PEAC-defined OBSERVER-scope categorization (not an upstream enum)",
+      "notes": "TimeoutProfileSchema is a closed enum aligned with upstream environment profiles. Tests cover: rejected values (mobile, satellite, blockchain, instant) emit invalid_timeout_profile; accepted values (datacenter, east_africa_3g, west_africa_3g, custom). When timeout_profile='custom', pre-flight 7 enforces all three timing fields present; missing any rejects with missing_required_field. polling_strategy enum tested for invalid values rejection."
+    },
+    {
+      "requirement_id": "GATE-EXP-008",
+      "test_file": "packages/schema/__tests__/extensions/gateway-export.test.ts",
+      "test_description": "bounded numeric fields: poll_count and check_count bounded to 0..1_000_000; deadline_exceeded_ms / delay_ms / facilitator_timeout_ms / poll_interval_ms / max_poll_window_ms bounded to 0..2_592_000_000; valid_before_unix_seconds non-negative safe integer; all numeric fields enforce Number.isSafeInteger",
+      "notes": "BoundedCount and BoundedMillis helpers enforce min/max and Number.isSafeInteger. Tests cover: poll_count > 1_000_000 (invalid_poll_count), poll_count = -1 (invalid_poll_count), check_count > 1_000_000 (invalid_check_count), deadline_exceeded_ms > 2_592_000_000 (invalid_deadline_exceeded_ms), delay_ms > 2_592_000_000 (invalid_delay_ms), valid_before_unix_seconds negative (invalid_valid_before_unix_seconds), float (invalid_valid_before_unix_seconds)."
+    },
+    {
+      "requirement_id": "GATE-EXP-009",
+      "test_file": "packages/schema/__tests__/extensions/gateway-export-registry.test.ts",
+      "test_description": "registry completeness: all 8 gateway-export type URIs are registered in TYPE_TO_EXTENSION_MAP with GATEWAY_EXPORT_EXTENSION_KEY; REGISTERED_EXTENSION_GROUP_KEYS includes org.peacprotocol/gateway-export; no duplicate type URIs; validateGatewayExportForType enforces type URI / event_kind agreement",
+      "notes": "Registry mapping covered by dedicated gateway-export-registry.test.ts: maps all 8 type URIs, checks REGISTERED_EXTENSION_GROUP_KEYS membership, asserts no duplicates. Type URI / event_kind enforcement covered by validateGatewayExportForType tests in gateway-export.test.ts (matching validates; mismatch emits type_event_kind_mismatch; unknown type URI emits type_uri_unknown)."
+    },
+    {
+      "requirement_id": "GATE-EXP-010",
+      "test_file": "packages/schema/__tests__/extensions/gateway-export.test.ts",
+      "test_description": "gateway boundary (NORMATIVE): PEAC does not settle transactions, route payments, contact gateways, verify on-chain state, monitor settlements, enforce recovery policy, resolve settlement disputes, or vouch for the legal validity of any settlement decision; the record describes what the caller observed, not what PEAC decided",
+      "notes": "The boundary is enforced at the OBSERVER scope level: validateGatewayExport accepts caller-reported observations across all 8 event kinds; the schema has no fields for PEAC to issue settlement decisions. timeout_profile labels are caller-reported (PEAC does not infer geography or guarantees). The spec docs/specs/GATEWAY-EXPORT-RECORDS.md carries the normative boundary text."
     }
   ]
 }

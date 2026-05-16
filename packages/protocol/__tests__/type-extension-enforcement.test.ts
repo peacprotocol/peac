@@ -44,7 +44,8 @@ const REGISTERED_KEYS = REGISTERED_EXTENSION_GROUP_KEYS;
 //   Profile groups:       4  (a2a-handoff, cli-execution, lifecycle-observation, provisioning-lifecycle).
 //   v0.14.3 PR 1:         1  (agent-action).
 //   v0.14.3 PR 2B:        1  (commerce-mandate).
-const EXPECTED_REGISTERED_GROUP_COUNT = 18;
+//   v0.14.3 PR 3:         1  (gateway-export).
+const EXPECTED_REGISTERED_GROUP_COUNT = 19;
 
 describe('checkTypeExtensionMapping(): pure helper', () => {
   it('returns skip for unmapped custom type', () => {
@@ -276,6 +277,16 @@ const MINIMAL_EXTENSIONS: Record<string, Record<string, unknown>> = {
     payer_ref: 'urn:peac:payer:payer-001',
     observed_at: '2026-05-14T10:00:00Z',
   },
+  // Gateway export (uses payment-submitted-observed shape; sufficient for
+  // the match cell of the matrix; type-specific shape is exercised by the
+  // gateway-export schema tests and parity corpus).
+  'org.peacprotocol/gateway-export': {
+    event_kind: 'gateway-payment-submitted-observed',
+    gateway_ref: 'urn:peac:gateway:gw-001',
+    payment_ref: 'urn:peac:payment:pay-001',
+    observed_at: '2026-05-16T10:00:00Z',
+    submitted_at: '2026-05-16T10:00:00Z',
+  },
 };
 
 /**
@@ -343,6 +354,17 @@ const TYPE_PILLARS: Record<string, string> = {
   'org.peacprotocol/commerce-refund-observed': 'commerce',
   'org.peacprotocol/commerce-settlement-observed': 'commerce',
   'org.peacprotocol/commerce-budget-observed': 'commerce',
+  // v0.14.3 gateway-export family (8 type URIs, all pillar=commerce; 7
+  // settlement/recovery state observations + 1 facilitator-timeout
+  // trigger observation. PEAC does not introduce a new settlement state.)
+  'org.peacprotocol/gateway-payment-submitted-observed': 'commerce',
+  'org.peacprotocol/gateway-facilitator-timeout-observed': 'commerce',
+  'org.peacprotocol/gateway-settlement-unresolved-observed': 'commerce',
+  'org.peacprotocol/gateway-settlement-polling-observed': 'commerce',
+  'org.peacprotocol/gateway-settlement-confirmed-observed': 'commerce',
+  'org.peacprotocol/gateway-settlement-confirmed-late-observed': 'commerce',
+  'org.peacprotocol/gateway-settlement-failed-observed': 'commerce',
+  'org.peacprotocol/gateway-settlement-failed-orphaned-observed': 'commerce',
 };
 
 /** Get a different registered extension group (for mismatch testing) */
@@ -502,8 +524,8 @@ describe('verifyLocal(): type-to-extension edge cases', () => {
 // ---------------------------------------------------------------------------
 
 describe('Registry completion: type-to-extension surface', () => {
-  it('TYPE_TO_EXTENSION_MAP covers all 53 registered receipt types (10 pillars + 10 a2a-handoff + 1 cli-command-execution + 9 lifecycle event kinds + 10 provisioning-lifecycle event families + 6 agent-action event kinds + 7 commerce-mandate event kinds)', () => {
-    expect(TYPE_TO_EXTENSION_MAP.size).toBe(53);
+  it('TYPE_TO_EXTENSION_MAP covers all 61 registered receipt types (10 pillars + 10 a2a-handoff + 1 cli-command-execution + 9 lifecycle event kinds + 10 provisioning-lifecycle event families + 6 agent-action event kinds + 7 commerce-mandate event kinds + 8 gateway-export event kinds)', () => {
+    expect(TYPE_TO_EXTENSION_MAP.size).toBe(61);
   });
 
   it('every mapped extension group is in REGISTERED_EXTENSION_GROUP_KEYS', () => {

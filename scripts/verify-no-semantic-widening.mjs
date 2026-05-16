@@ -128,7 +128,9 @@ if (!regs) {
   // (agent action observation namespace; 17th extension group).
   // v0.14.3 PR 2B: extension_groups gains org.peacprotocol/commerce-mandate
   // (commerce mandate observation namespace; 18th extension group).
-  const BASELINE_EXT_GROUPS = 18;
+  // v0.14.3 PR 3: extension_groups gains org.peacprotocol/gateway-export
+  // (gateway export observation namespace; 19th extension group).
+  const BASELINE_EXT_GROUPS = 19;
   const groups = regs.extension_groups ?? regs.registries?.extension_groups ?? [];
   const groupCount = Array.isArray(groups)
     ? groups.length
