@@ -27,6 +27,7 @@ export const PARITY_FAMILIES = [
   'provisioning-lifecycle',
   'agent-action',
   'commerce-mandate',
+  'gateway-export',
 ] as const;
 
 export type ParityFamily = (typeof PARITY_FAMILIES)[number];
@@ -43,6 +44,7 @@ export const PARITY_FLOOR_COUNTS: Readonly<Record<ParityFamily, number>> = {
   'provisioning-lifecycle': 29,
   'agent-action': 6,
   'commerce-mandate': 7,
+  'gateway-export': 8,
 };
 
 export interface ParityVectorInput {

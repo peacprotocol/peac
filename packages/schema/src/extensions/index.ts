@@ -164,3 +164,21 @@ export type {
   CommerceMandateValidationError,
   CommerceMandateValidationResult,
 } from './commerce-mandate';
+
+// Gateway Export Records (org.peacprotocol/gateway-export): v0.14.3
+export {
+  GATEWAY_EXPORT_EXTENSION_KEY,
+  GATEWAY_EXPORT_TYPE_URIS,
+  GATEWAY_EXPORT_ERROR_CODES,
+  GATEWAY_EXPORT_FORBIDDEN_PAYMENT_DATA_KEYS,
+  GatewayExportSchema,
+  validateGatewayExport,
+  validateGatewayExportForType,
+} from './gateway-export';
+export type {
+  GatewayExportEventKind,
+  GatewayExport,
+  GatewayExportTypeUri,
+  GatewayExportValidationError,
+  GatewayExportValidationResult,
+} from './gateway-export';

@@ -1,0 +1,209 @@
+{
+  "family": "gateway-export",
+  "description": "Gateway export parity vectors. Eight positive deterministic JSON observation payloads covering all eight event_kind values: seven settlement/recovery state observations plus one facilitator-timeout trigger observation. Per the parity-corpus convention, all vectors assert envelope-level canonical agreement and set expected.accepted=true; semantic rejection of extension content (forbidden payment-data keys including value_minor, opaque-ref grammar violations, custom timeout missing-timing-fields, bounded-numeric overflow, invalid event_kind, type URI / event_kind mismatch, timeout_profile and polling_strategy closed enums) lives at the Layer 3 validator surface (validateGatewayExport exported from @peac/schema, exercised by packages/schema/__tests__/extensions/gateway-export.test.ts).",
+  "version": "0.14.3",
+  "generator": "manual; gateway-export v0.1 floor",
+  "vectors": [
+    {
+      "id": "ge-001-payment-submitted",
+      "description": "GATE-EXP-001 (positive): gateway-payment-submitted-observed event; the caller observed a payment submission at the gateway.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/gateway-payment-submitted-observed",
+          "iss": "https://gateway.example.com",
+          "iat": 1747400400,
+          "jti": "ge-001-payment-submitted-jti",
+          "extensions": {
+            "org.peacprotocol/gateway-export": {
+              "event_kind": "gateway-payment-submitted-observed",
+              "gateway_ref": "urn:peac:gateway:gw-001",
+              "payment_ref": "urn:peac:payment:pay-001",
+              "observed_at": "2026-05-16T10:00:00Z",
+              "submitted_at": "2026-05-16T10:00:00Z"
+            }
+          }
+        }
+      },
+      "expected": { "accepted": true }
+    },
+    {
+      "id": "ge-002-facilitator-timeout",
+      "description": "GATE-EXP-002 (positive): gateway-facilitator-timeout-observed event records the timeout TRIGGER (not a settlement state). PEAC does not introduce a new settlement state; this URI records the boundary signal that may precede unresolved recovery.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/gateway-facilitator-timeout-observed",
+          "iss": "https://gateway.example.com",
+          "iat": 1747400401,
+          "jti": "ge-002-facilitator-timeout-jti",
+          "extensions": {
+            "org.peacprotocol/gateway-export": {
+              "event_kind": "gateway-facilitator-timeout-observed",
+              "gateway_ref": "urn:peac:gateway:gw-002",
+              "payment_ref": "urn:peac:payment:pay-002",
+              "observed_at": "2026-05-16T10:01:00Z",
+              "timeout_at": "2026-05-16T10:01:00Z",
+              "timeout_profile": "datacenter",
+              "deadline_exceeded_ms": 5000
+            }
+          }
+        }
+      },
+      "expected": { "accepted": true }
+    },
+    {
+      "id": "ge-003-settlement-unresolved",
+      "description": "GATE-EXP-003 (positive): gateway-settlement-unresolved-observed event; recovery has begun but the outcome is not yet known. Requires last_checked_at + check_count.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/gateway-settlement-unresolved-observed",
+          "iss": "https://gateway.example.com",
+          "iat": 1747400402,
+          "jti": "ge-003-settlement-unresolved-jti",
+          "extensions": {
+            "org.peacprotocol/gateway-export": {
+              "event_kind": "gateway-settlement-unresolved-observed",
+              "gateway_ref": "urn:peac:gateway:gw-003",
+              "payment_ref": "urn:peac:payment:pay-003",
+              "observed_at": "2026-05-16T10:02:00Z",
+              "last_checked_at": "2026-05-16T10:02:30Z",
+              "check_count": 3
+            }
+          }
+        }
+      },
+      "expected": { "accepted": true }
+    },
+    {
+      "id": "ge-004-settlement-polling",
+      "description": "GATE-EXP-004 (positive): gateway-settlement-polling-observed event; active polling underway. Requires poll_count + polling_strategy. polling_strategy is a PEAC observer categorization, not an upstream enum.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/gateway-settlement-polling-observed",
+          "iss": "https://gateway.example.com",
+          "iat": 1747400403,
+          "jti": "ge-004-settlement-polling-jti",
+          "extensions": {
+            "org.peacprotocol/gateway-export": {
+              "event_kind": "gateway-settlement-polling-observed",
+              "gateway_ref": "urn:peac:gateway:gw-004",
+              "payment_ref": "urn:peac:payment:pay-004",
+              "observed_at": "2026-05-16T10:03:00Z",
+              "poll_count": 5,
+              "polling_strategy": "exponential"
+            }
+          }
+        }
+      },
+      "expected": { "accepted": true }
+    },
+    {
+      "id": "ge-005-settlement-confirmed",
+      "description": "GATE-EXP-005 (positive): gateway-settlement-confirmed-observed event; the caller observed settlement confirmation. Requires confirmed_at + settlement_ref.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/gateway-settlement-confirmed-observed",
+          "iss": "https://gateway.example.com",
+          "iat": 1747400404,
+          "jti": "ge-005-settlement-confirmed-jti",
+          "extensions": {
+            "org.peacprotocol/gateway-export": {
+              "event_kind": "gateway-settlement-confirmed-observed",
+              "gateway_ref": "urn:peac:gateway:gw-005",
+              "payment_ref": "urn:peac:payment:pay-005",
+              "observed_at": "2026-05-16T10:04:00Z",
+              "confirmed_at": "2026-05-16T10:04:00Z",
+              "settlement_ref": "urn:peac:settlement:set-005",
+              "amount_minor": "1999"
+            }
+          }
+        }
+      },
+      "expected": { "accepted": true }
+    },
+    {
+      "id": "ge-006-settlement-confirmed-late",
+      "description": "GATE-EXP-006 (positive): gateway-settlement-confirmed-late-observed event; confirmation observed after the original facilitator timeout window. Requires confirmed_at + settlement_ref + delay_ms.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/gateway-settlement-confirmed-late-observed",
+          "iss": "https://gateway.example.com",
+          "iat": 1747400405,
+          "jti": "ge-006-settlement-confirmed-late-jti",
+          "extensions": {
+            "org.peacprotocol/gateway-export": {
+              "event_kind": "gateway-settlement-confirmed-late-observed",
+              "gateway_ref": "urn:peac:gateway:gw-006",
+              "payment_ref": "urn:peac:payment:pay-006",
+              "observed_at": "2026-05-16T10:05:00Z",
+              "confirmed_at": "2026-05-16T10:05:30Z",
+              "settlement_ref": "urn:peac:settlement:set-006",
+              "delay_ms": 11900,
+              "valid_before_unix_seconds": 1747400500
+            }
+          }
+        }
+      },
+      "expected": { "accepted": true }
+    },
+    {
+      "id": "ge-007-settlement-failed",
+      "description": "GATE-EXP-007 (positive): gateway-settlement-failed-observed event; the caller observed settlement failure. Requires final_state (bounded short label).",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/gateway-settlement-failed-observed",
+          "iss": "https://gateway.example.com",
+          "iat": 1747400406,
+          "jti": "ge-007-settlement-failed-jti",
+          "extensions": {
+            "org.peacprotocol/gateway-export": {
+              "event_kind": "gateway-settlement-failed-observed",
+              "gateway_ref": "urn:peac:gateway:gw-007",
+              "payment_ref": "urn:peac:payment:pay-007",
+              "observed_at": "2026-05-16T10:06:00Z",
+              "final_state": "reverted"
+            }
+          }
+        }
+      },
+      "expected": { "accepted": true }
+    },
+    {
+      "id": "ge-008-settlement-failed-orphaned",
+      "description": "GATE-EXP-008 (positive): gateway-settlement-failed-orphaned-observed event; polling exhausted and transaction not found on chain. Requires last_known_state.",
+      "input": {
+        "payload": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/gateway-settlement-failed-orphaned-observed",
+          "iss": "https://gateway.example.com",
+          "iat": 1747400407,
+          "jti": "ge-008-settlement-failed-orphaned-jti",
+          "extensions": {
+            "org.peacprotocol/gateway-export": {
+              "event_kind": "gateway-settlement-failed-orphaned-observed",
+              "gateway_ref": "urn:peac:gateway:gw-008",
+              "payment_ref": "urn:peac:payment:pay-008",
+              "observed_at": "2026-05-16T10:07:00Z",
+              "last_known_state": "pending"
+            }
+          }
+        }
+      },
+      "expected": { "accepted": true }
+    }
+  ]
+}

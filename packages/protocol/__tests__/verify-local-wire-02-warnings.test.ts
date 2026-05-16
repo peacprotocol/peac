@@ -155,6 +155,16 @@ const MINIMAL_EXT: Record<string, Record<string, unknown>> = {
     payer_ref: 'urn:peac:payer:payer-001',
     observed_at: '2026-05-14T10:00:00Z',
   },
+  // Gateway export (uses payment-submitted-observed shape; sufficient for
+  // the does-not-emit-type_unregistered iteration; type-specific shape is
+  // exercised by the gateway-export schema tests).
+  'org.peacprotocol/gateway-export': {
+    event_kind: 'gateway-payment-submitted-observed',
+    gateway_ref: 'urn:peac:gateway:gw-001',
+    payment_ref: 'urn:peac:payment:pay-001',
+    observed_at: '2026-05-16T10:00:00Z',
+    submitted_at: '2026-05-16T10:00:00Z',
+  },
 };
 
 function extensionsForType(type: string): Record<string, Record<string, unknown>> | undefined {

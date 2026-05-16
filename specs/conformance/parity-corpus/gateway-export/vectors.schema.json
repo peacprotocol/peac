@@ -1,0 +1,32 @@
+{
+  "$id": "https://peacprotocol.org/specs/conformance/parity-corpus/gateway-export/vectors.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Schema for gateway-export parity vectors. Eight envelope-accepted deterministic JSON observation payloads covering all eight event_kind values: seven settlement/recovery state observations (payment-submitted, settlement-unresolved, settlement-polling, settlement-confirmed, settlement-confirmed-late, settlement-failed, settlement-failed-orphaned) plus one trigger observation (facilitator-timeout). PEAC does not introduce a new settlement state; the trigger observation records the gateway boundary signal that may precede unresolved recovery. Per the parity-corpus convention, all vectors assert envelope-level canonical agreement and set expected.accepted=true; semantic-rejection cases (invalid_payload for non-object top-level shapes, 19 forbidden top-level payment-data keys via inline_payment_data_blocked, value_minor rejected as unknown_field via the strict variant schema under the single-canonical-money-field invariant, opaque-ref grammar violations, negative amount_minor rejected via the Gateway Export non-negative profile constraint on the shared AmountMinorStringSchema grammar, custom timeout missing-timing-fields, bounded-numeric overflow, valid_before_unix_seconds safe-integer overflow, UTF-8 byte-limit overflow on asset / network / final_state / last_known_state, invalid event_kind, type URI / event_kind mismatch, and the timeout_profile / polling_strategy closed enums) live in the schema validator tests at packages/schema/__tests__/extensions/gateway-export.test.ts.",
+  "type": "object",
+  "required": ["family", "description", "version", "generator", "vectors"],
+  "properties": {
+    "family": { "const": "gateway-export" },
+    "description": { "type": "string" },
+    "version": { "type": "string" },
+    "generator": { "type": "string" },
+    "vectors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "description", "input", "expected"],
+        "properties": {
+          "id": { "type": "string" },
+          "description": { "type": "string" },
+          "input": { "type": "object" },
+          "expected": {
+            "type": "object",
+            "required": ["accepted"],
+            "properties": {
+              "accepted": { "type": "boolean" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

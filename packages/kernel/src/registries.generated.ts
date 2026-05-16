@@ -499,6 +499,70 @@ export const RECEIPT_TYPES: readonly ReceiptTypeEntry[] = [
     status: 'informational',
   },
   {
+    id: 'org.peacprotocol/gateway-facilitator-timeout-observed',
+    pillar: 'commerce',
+    description:
+      'Observational record of a facilitator-timeout trigger event at a payment gateway. Records the timeout boundary signal that may precede unresolved recovery. Caller-reported; PEAC does not contact facilitators, enforce timeouts, or trigger recovery. Not a settlement state. Introduced in v0.14.3.',
+    extension_group: 'org.peacprotocol/gateway-export',
+    status: 'informational',
+  },
+  {
+    id: 'org.peacprotocol/gateway-payment-submitted-observed',
+    pillar: 'commerce',
+    description:
+      'Observational record of a payment-submitted event at a payment gateway or facilitator. Caller-reported; PEAC does not submit, route, or settle payments. Introduced in v0.14.3.',
+    extension_group: 'org.peacprotocol/gateway-export',
+    status: 'informational',
+  },
+  {
+    id: 'org.peacprotocol/gateway-settlement-confirmed-late-observed',
+    pillar: 'commerce',
+    description:
+      'Observational record of a settlement-confirmed-late state at a payment gateway (confirmation observed after the original facilitator timeout window). Caller-reported; PEAC does not verify on-chain settlement or compute lateness. Introduced in v0.14.3.',
+    extension_group: 'org.peacprotocol/gateway-export',
+    status: 'informational',
+  },
+  {
+    id: 'org.peacprotocol/gateway-settlement-confirmed-observed',
+    pillar: 'commerce',
+    description:
+      'Observational record of a settlement-confirmed state at a payment gateway. Caller-reported; PEAC does not verify on-chain settlement or vouch for finality. Introduced in v0.14.3.',
+    extension_group: 'org.peacprotocol/gateway-export',
+    status: 'informational',
+  },
+  {
+    id: 'org.peacprotocol/gateway-settlement-failed-observed',
+    pillar: 'commerce',
+    description:
+      'Observational record of a settlement-failed state at a payment gateway (transaction reverted or rejected). Caller-reported; PEAC does not adjudicate failure cause. Introduced in v0.14.3.',
+    extension_group: 'org.peacprotocol/gateway-export',
+    status: 'informational',
+  },
+  {
+    id: 'org.peacprotocol/gateway-settlement-failed-orphaned-observed',
+    pillar: 'commerce',
+    description:
+      'Observational record of a settlement-failed-orphaned state at a payment gateway (polling exhausted, transaction not found on chain). Caller-reported; PEAC does not adjudicate orphan status or chain visibility. Introduced in v0.14.3.',
+    extension_group: 'org.peacprotocol/gateway-export',
+    status: 'informational',
+  },
+  {
+    id: 'org.peacprotocol/gateway-settlement-polling-observed',
+    pillar: 'commerce',
+    description:
+      'Observational record of an active polling state at a payment gateway. Records caller-reported polling activity (poll_count + polling_strategy categorization). Caller-reported; PEAC does not poll chains or run recovery loops. Introduced in v0.14.3.',
+    extension_group: 'org.peacprotocol/gateway-export',
+    status: 'informational',
+  },
+  {
+    id: 'org.peacprotocol/gateway-settlement-unresolved-observed',
+    pillar: 'commerce',
+    description:
+      'Observational record of a settlement-unresolved state at a payment gateway (recovery began but outcome is not yet known). Caller-reported; PEAC does not poll chains or resolve settlement. Introduced in v0.14.3.',
+    extension_group: 'org.peacprotocol/gateway-export',
+    status: 'informational',
+  },
+  {
     id: 'org.peacprotocol/identity-attestation',
     pillar: 'identity',
     description: 'Identity verification or attestation evidence',
@@ -759,6 +823,12 @@ export const EXTENSION_GROUPS: readonly ExtensionGroupEntry[] = [
     status: 'informational',
   },
   {
+    id: 'org.peacprotocol/gateway-export',
+    description:
+      'Gateway export records extension: records caller-reported observations of payment-gateway / facilitator settlement-recovery events. Eight *-observed event kinds: seven settlement/recovery state observations plus one facilitator-timeout trigger observation. PEAC does not introduce a new settlement state. Single canonical money field amount_minor uses the shared AmountMinorStringSchema grammar wrapped in a Gateway Export non-negative profile constraint (negative values reject with gateway.export.invalid_amount_minor); no separate value_minor field is defined (records carrying value_minor reject as gateway.export.unknown_field via the strict variant schema). 19 forbidden top-level payment-data keys reject with gateway.export.inline_payment_data_blocked; all *_ref fields validated by OpaqueRefSchema; bounded string fields enforce UTF-8 byte limits. timeout_profile closed enum aligned with upstream environment profiles (datacenter / east_africa_3g / west_africa_3g / custom); caller-reported labels (no geography inference); custom requires facilitator_timeout_ms + poll_interval_ms + max_poll_window_ms. polling_strategy is a PEAC observer categorization, not an upstream enum. Optional valid_before_unix_seconds (caller-reported EIP-3009 expiry) and optional EIP-3009 four-tuple references (payer_ref / pay_to_ref / nonce_ref) with the value component carried by amount_minor. PEAC does not settle transactions, route payments, contact gateways, verify on-chain state, monitor settlements, enforce recovery policy, or resolve settlement disputes. Full normative profile at docs/specs/GATEWAY-EXPORT-RECORDS.md. Introduced in v0.14.3.',
+    status: 'informational',
+  },
+  {
     id: 'org.peacprotocol/identity',
     description: 'Identity extension: proof_ref',
     status: 'informational',
@@ -835,6 +905,20 @@ export const TYPE_TO_EXTENSION_MAP: ReadonlyMap<string, string> = new Map([
   ['org.peacprotocol/commerce-void-observed', 'org.peacprotocol/commerce-mandate'],
   ['org.peacprotocol/compliance-check', 'org.peacprotocol/compliance'],
   ['org.peacprotocol/consent-record', 'org.peacprotocol/consent'],
+  ['org.peacprotocol/gateway-facilitator-timeout-observed', 'org.peacprotocol/gateway-export'],
+  ['org.peacprotocol/gateway-payment-submitted-observed', 'org.peacprotocol/gateway-export'],
+  [
+    'org.peacprotocol/gateway-settlement-confirmed-late-observed',
+    'org.peacprotocol/gateway-export',
+  ],
+  ['org.peacprotocol/gateway-settlement-confirmed-observed', 'org.peacprotocol/gateway-export'],
+  ['org.peacprotocol/gateway-settlement-failed-observed', 'org.peacprotocol/gateway-export'],
+  [
+    'org.peacprotocol/gateway-settlement-failed-orphaned-observed',
+    'org.peacprotocol/gateway-export',
+  ],
+  ['org.peacprotocol/gateway-settlement-polling-observed', 'org.peacprotocol/gateway-export'],
+  ['org.peacprotocol/gateway-settlement-unresolved-observed', 'org.peacprotocol/gateway-export'],
   ['org.peacprotocol/identity-attestation', 'org.peacprotocol/identity'],
   ['org.peacprotocol/lifecycle-approval-denied', 'org.peacprotocol/lifecycle-observation'],
   ['org.peacprotocol/lifecycle-approval-granted', 'org.peacprotocol/lifecycle-observation'],

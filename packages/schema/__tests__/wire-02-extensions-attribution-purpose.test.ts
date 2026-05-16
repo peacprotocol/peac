@@ -574,8 +574,8 @@ describe('Registry derivation: attribution + purpose keys are known', () => {
     expect(REGISTERED_EXTENSION_GROUP_KEYS.has(PURPOSE_EXTENSION_KEY)).toBe(true);
   });
 
-  it('REGISTERED_EXTENSION_GROUP_KEYS has exactly 18 entries (12 pillars/cross-cutting + a2a-handoff + cli-execution + lifecycle-observation added in v0.14.1 + provisioning-lifecycle added in v0.14.2 + agent-action added in v0.14.3 PR 1 + commerce-mandate added in v0.14.3 PR 2B)', () => {
-    expect(REGISTERED_EXTENSION_GROUP_KEYS.size).toBe(18);
+  it('REGISTERED_EXTENSION_GROUP_KEYS has exactly 19 entries (12 pillars/cross-cutting + a2a-handoff + cli-execution + lifecycle-observation added in v0.14.1 + provisioning-lifecycle added in v0.14.2 + agent-action added in v0.14.3 PR 1 + commerce-mandate added in v0.14.3 PR 2B + gateway-export added in v0.14.3 PR 3)', () => {
+    expect(REGISTERED_EXTENSION_GROUP_KEYS.size).toBe(19);
   });
 });
 
@@ -731,15 +731,15 @@ describe('Registry completion: all receipt types have extension_group mappings',
     expect(nullEntries).toHaveLength(0);
   });
 
-  it('all 53 receipt types have non-null extension_group (10 pillars + 10 a2a-handoff + 1 cli-command-execution + 9 lifecycle event kinds + 10 provisioning-lifecycle event families + 6 agent-action event kinds + 7 commerce-mandate event kinds)', () => {
-    expect(registries.receipt_types.values).toHaveLength(53);
+  it('all 61 receipt types have non-null extension_group (10 pillars + 10 a2a-handoff + 1 cli-command-execution + 9 lifecycle event kinds + 10 provisioning-lifecycle event families + 6 agent-action event kinds + 7 commerce-mandate event kinds + 8 gateway-export event kinds)', () => {
+    expect(registries.receipt_types.values).toHaveLength(61);
     for (const entry of registries.receipt_types.values) {
       expect(entry.extension_group).not.toBeNull();
       expect(typeof entry.extension_group).toBe('string');
     }
   });
 
-  it('extension_groups has exactly 18 entries (12 pillars/cross-cutting + a2a-handoff + cli-execution + lifecycle-observation added in v0.14.1 + provisioning-lifecycle added in v0.14.2 + agent-action added in v0.14.3 PR 1 + commerce-mandate added in v0.14.3 PR 2B)', () => {
-    expect(registries.extension_groups.values).toHaveLength(18);
+  it('extension_groups has exactly 19 entries (12 pillars/cross-cutting + a2a-handoff + cli-execution + lifecycle-observation added in v0.14.1 + provisioning-lifecycle added in v0.14.2 + agent-action added in v0.14.3 PR 1 + commerce-mandate added in v0.14.3 PR 2B + gateway-export added in v0.14.3 PR 3)', () => {
+    expect(registries.extension_groups.values).toHaveLength(19);
   });
 });
