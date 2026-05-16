@@ -1,0 +1,10 @@
+{
+  "event_kind": "gateway-settlement-confirmed-late-observed",
+  "gateway_ref": "urn:peac:gateway:demo-gw-001",
+  "payment_ref": "urn:peac:payment:demo-pay-001",
+  "observed_at": "2026-05-16T10:00:11Z",
+  "confirmed_at": "2026-05-16T10:00:11Z",
+  "settlement_ref": "urn:peac:settlement:demo-set-006",
+  "delay_ms": 6000,
+  "valid_before_unix_seconds": 1747400500
+}

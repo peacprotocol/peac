@@ -1,0 +1,8 @@
+{
+  "event_kind": "agent-action-timed-out-observed",
+  "agent_ref": "urn:peac:agent:demo-worker-001",
+  "action_ref": "urn:peac:action:downstream-call",
+  "observed_at": "2026-05-16T10:05:00Z",
+  "timeout_at": "2026-05-16T10:05:00Z",
+  "caller_ref": "urn:peac:harness:demo-runner"
+}

@@ -1,0 +1,10 @@
+{
+  "event_kind": "commerce-mandate-observed",
+  "mandate_ref": "urn:peac:mandate:demo-mandate-001",
+  "merchant_ref": "urn:peac:merchant:demo-merchant-001",
+  "payer_ref": "urn:peac:payer:demo-payer-001",
+  "max_amount_minor": "100000",
+  "currency": "USD",
+  "expires_at": "2026-06-16T10:00:00Z",
+  "observed_at": "2026-05-16T10:00:00Z"
+}

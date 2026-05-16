@@ -1,7 +1,7 @@
 {
   "package": "@peac/schema",
-  "version": "0.14.1",
-  "extracted_at": "2026-05-09",
+  "version": "0.14.2",
+  "extracted_at": "2026-05-16",
   "node_version": "v24.13.0",
   "value_exports": [
     {
@@ -53,6 +53,22 @@
       "typeof": "static"
     },
     {
+      "name": "AGENT_ACTION_ERROR_CODES",
+      "typeof": "static"
+    },
+    {
+      "name": "AGENT_ACTION_EXTENSION_KEY",
+      "typeof": "static"
+    },
+    {
+      "name": "AGENT_ACTION_FORBIDDEN_TOP_LEVEL_KEYS",
+      "typeof": "static"
+    },
+    {
+      "name": "AGENT_ACTION_TYPE_URIS",
+      "typeof": "static"
+    },
+    {
       "name": "AGENT_IDENTITY_TYPE",
       "typeof": "static"
     },
@@ -90,6 +106,10 @@
     },
     {
       "name": "ActorBindingSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "AgentActionSchema",
       "typeof": "static"
     },
     {
@@ -189,6 +209,22 @@
       "typeof": "static"
     },
     {
+      "name": "COMMERCE_MANDATE_ERROR_CODES",
+      "typeof": "static"
+    },
+    {
+      "name": "COMMERCE_MANDATE_EXTENSION_KEY",
+      "typeof": "static"
+    },
+    {
+      "name": "COMMERCE_MANDATE_FORBIDDEN_PAYMENT_DATA_KEYS",
+      "typeof": "static"
+    },
+    {
+      "name": "COMMERCE_MANDATE_TYPE_URIS",
+      "typeof": "static"
+    },
+    {
       "name": "COMMITMENT_CLASSES",
       "typeof": "static"
     },
@@ -278,6 +314,10 @@
     },
     {
       "name": "CommerceExtensionSchema",
+      "typeof": "static"
+    },
+    {
+      "name": "CommerceMandateSchema",
       "typeof": "static"
     },
     {
@@ -530,6 +570,26 @@
     },
     {
       "name": "FORBIDDEN_TOP_LEVEL_KEYS",
+      "typeof": "static"
+    },
+    {
+      "name": "GATEWAY_EXPORT_ERROR_CODES",
+      "typeof": "static"
+    },
+    {
+      "name": "GATEWAY_EXPORT_EXTENSION_KEY",
+      "typeof": "static"
+    },
+    {
+      "name": "GATEWAY_EXPORT_FORBIDDEN_PAYMENT_DATA_KEYS",
+      "typeof": "static"
+    },
+    {
+      "name": "GATEWAY_EXPORT_TYPE_URIS",
+      "typeof": "static"
+    },
+    {
+      "name": "GatewayExportSchema",
       "typeof": "static"
     },
     {
@@ -1521,6 +1581,14 @@
       "typeof": "static"
     },
     {
+      "name": "validateAgentAction",
+      "typeof": "static"
+    },
+    {
+      "name": "validateAgentActionForType",
+      "typeof": "static"
+    },
+    {
       "name": "validateAgentIdentityAttestation",
       "typeof": "static"
     },
@@ -1542,6 +1610,14 @@
     },
     {
       "name": "validateCliExecution",
+      "typeof": "static"
+    },
+    {
+      "name": "validateCommerceMandate",
+      "typeof": "static"
+    },
+    {
+      "name": "validateCommerceMandateForType",
       "typeof": "static"
     },
     {
@@ -1578,6 +1654,14 @@
     },
     {
       "name": "validateEvidence",
+      "typeof": "static"
+    },
+    {
+      "name": "validateGatewayExport",
+      "typeof": "static"
+    },
+    {
+      "name": "validateGatewayExportForType",
       "typeof": "static"
     },
     {
@@ -1675,6 +1759,11 @@
     "AIPREFSnapshot",
     "AccessExtension",
     "ActorBinding",
+    "AgentAction",
+    "AgentActionEventKind",
+    "AgentActionTypeUri",
+    "AgentActionValidationError",
+    "AgentActionValidationResult",
     "AgentIdentityAttestation",
     "AgentIdentityEvidence",
     "AgentIdentityVerified",
@@ -1703,6 +1792,11 @@
     "CliValidationError",
     "CliValidationResult",
     "CommerceExtension",
+    "CommerceMandate",
+    "CommerceMandateEventKind",
+    "CommerceMandateTypeUri",
+    "CommerceMandateValidationError",
+    "CommerceMandateValidationResult",
     "CommitmentClass",
     "ComplianceExtension",
     "ComplianceStatus",
@@ -1763,6 +1857,11 @@
     "Executor",
     "Extensions",
     "FingerprintRefObject",
+    "GatewayExport",
+    "GatewayExportEventKind",
+    "GatewayExportTypeUri",
+    "GatewayExportValidationError",
+    "GatewayExportValidationResult",
     "HashAlgorithm",
     "HashEncoding",
     "IdentityBinding",
@@ -1909,9 +2008,12 @@
   "legacy_extension_keys": [
     "A2A_HANDOFF_EXTENSION_KEY",
     "ACTOR_BINDING_EXTENSION_KEY",
+    "AGENT_ACTION_EXTENSION_KEY",
     "CLI_EXECUTION_EXTENSION_KEY",
+    "COMMERCE_MANDATE_EXTENSION_KEY",
     "CONTROL_ACTION_EXTENSION_KEY",
     "CREDENTIAL_EVENT_EXTENSION_KEY",
+    "GATEWAY_EXPORT_EXTENSION_KEY",
     "INTERACTION_EXTENSION_KEY",
     "LIFECYCLE_OBSERVATION_EXTENSION_KEY",
     "OBLIGATIONS_EXTENSION_KEY",
@@ -1935,6 +2037,6 @@
     "PurposeExtensionSchema",
     "SafetyExtensionSchema"
   ],
-  "total_value_exports": 415,
-  "total_type_exports": 210
+  "total_value_exports": 436,
+  "total_type_exports": 225
 }

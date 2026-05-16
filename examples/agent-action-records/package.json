@@ -1,0 +1,16 @@
+{
+  "name": "@peac/example-agent-action-records",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Generic agent-action records example: issue and verify signed records across all 6 *-observed event kinds.",
+  "type": "module",
+  "scripts": {
+    "issue": "node issue-fixtures.mjs",
+    "verify": "node verify-fixtures.mjs"
+  },
+  "dependencies": {
+    "@peac/crypto": "workspace:*",
+    "@peac/protocol": "workspace:*",
+    "@peac/schema": "workspace:*"
+  }
+}

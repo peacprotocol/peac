@@ -1,0 +1,9 @@
+{
+  "event_kind": "commerce-refund-observed",
+  "mandate_ref": "urn:peac:mandate:demo-mandate-001",
+  "refund_ref": "urn:peac:refund:demo-ref-005",
+  "capture_ref": "urn:peac:capture:demo-cap-003",
+  "amount_minor": "500",
+  "currency": "USD",
+  "observed_at": "2026-05-16T10:04:00Z"
+}

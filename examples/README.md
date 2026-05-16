@@ -1,6 +1,6 @@
 # Examples
 
-Runnable examples that demonstrate PEAC Protocol integration patterns. Each example has a `pnpm demo` script and is exercised in CI.
+Runnable examples that demonstrate PEAC Protocol integration patterns. Examples expose either `pnpm demo` or profile-specific commands such as `pnpm issue` and `pnpm verify`.
 
 ## Start here
 
@@ -20,36 +20,39 @@ Outcome-led recipes walk through the full story for each of these: [`docs/SOLUTI
 
 Every example below builds and runs end-to-end. The shipped list is the source of truth; new additions arrive alongside their corresponding spec or profile.
 
-| Example                                                   | Description                                                                               |
-| --------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| [`hello-world`](./hello-world/)                           | Issue a record, verify it offline.                                                        |
-| [`minimal`](./minimal/)                                   | Minimal issuer with typed accessor helpers.                                               |
-| [`mcp-http-quickstart`](./mcp-http-quickstart/)           | MCP server with the Streamable HTTP transport.                                            |
-| [`mcp-tool-call`](./mcp-tool-call/)                       | MCP tool-call with budget enforcement and attached records.                               |
-| [`x402-node-server`](./x402-node-server/)                 | x402 payment flow with PEAC records.                                                      |
-| [`x402-upto-evidence`](./x402-upto-evidence/)             | x402 settlement-proof observational mapping.                                              |
-| [`pay-per-inference`](./pay-per-inference/)               | Agent handles 402, obtains receipt, retries.                                              |
-| [`pay-per-crawl`](./pay-per-crawl/)                       | Policy evaluation plus record flow for AI crawlers.                                       |
-| [`acp-delegated-checkout`](./acp-delegated-checkout/)     | ACP delegated-payment observation mapping.                                                |
-| [`acp-session-lifecycle`](./acp-session-lifecycle/)       | ACP session-lifecycle observation mapping.                                                |
-| [`mpp-payment-attempt`](./mpp-payment-attempt/)           | MPP payment-attempt observation mapping.                                                  |
-| [`paymentauth-evidence`](./paymentauth-evidence/)         | paymentauth / MPP settlement observation mapping.                                         |
-| [`paymentauth-jsonrpc`](./paymentauth-jsonrpc/)           | paymentauth carried over JSON-RPC transport.                                              |
-| [`stripe-spt-evidence`](./stripe-spt-evidence/)           | Stripe SPT observation mapping.                                                           |
-| [`provisioning-lifecycle`](./provisioning-lifecycle/)     | Provisioning lifecycle records (generic, all 10 `*-observed` event families).             |
-| [`agent-provisioning-demo`](./agent-provisioning-demo/)   | Concrete sanitized provisioning lifecycle demo (init / resource / credential / rotate).   |
-| [`x402-dual-header-read`](./x402-dual-header-read/)       | x402 dual-header precedence (`PEAC-Receipt` > `PAYMENT-RESPONSE` > `X-PAYMENT-RESPONSE`). |
-| [`commerce-evidence-bundle`](./commerce-evidence-bundle/) | Build a portable bundle across multiple commerce rails.                                   |
-| [`managed-agents-export`](./managed-agents-export/)       | Export signed records from a managed-agent runtime.                                       |
-| [`a2a-gateway-pattern`](./a2a-gateway-pattern/)           | Agent-to-Agent gateway pattern.                                                           |
-| [`agent-identity`](./agent-identity/)                     | Agent identity binding with DIDs and actor proofs.                                        |
-| [`did-verification`](./did-verification/)                 | DID-based issuer verification.                                                            |
-| [`content-signals`](./content-signals/)                   | Content-signals observation mapping.                                                      |
-| [`rsl-collective`](./rsl-collective/)                     | Really Simple Licensing (RSL) integration and core claims parity.                         |
-| [`erc8004-feedback`](./erc8004-feedback/)                 | PEAC records as ERC-8004 reputation evidence.                                             |
-| [`openclaw-capture`](./openclaw-capture/)                 | OpenClaw tool calls as signed interaction records.                                        |
-| [`telemetry-otel`](./telemetry-otel/)                     | OpenTelemetry integration with privacy modes.                                             |
-| [`external-pilot`](./external-pilot/)                     | External pilot integration skeleton.                                                      |
+| Example                                                   | Description                                                                                                                                  |
+| --------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`hello-world`](./hello-world/)                           | Issue a record, verify it offline.                                                                                                           |
+| [`minimal`](./minimal/)                                   | Minimal issuer with typed accessor helpers.                                                                                                  |
+| [`mcp-http-quickstart`](./mcp-http-quickstart/)           | MCP server with the Streamable HTTP transport.                                                                                               |
+| [`mcp-tool-call`](./mcp-tool-call/)                       | MCP tool-call with budget enforcement and attached records.                                                                                  |
+| [`x402-node-server`](./x402-node-server/)                 | x402 payment flow with PEAC records.                                                                                                         |
+| [`x402-upto-evidence`](./x402-upto-evidence/)             | x402 settlement-proof observational mapping.                                                                                                 |
+| [`pay-per-inference`](./pay-per-inference/)               | Agent handles 402, obtains receipt, retries.                                                                                                 |
+| [`pay-per-crawl`](./pay-per-crawl/)                       | Policy evaluation plus record flow for AI crawlers.                                                                                          |
+| [`acp-delegated-checkout`](./acp-delegated-checkout/)     | ACP delegated-payment observation mapping.                                                                                                   |
+| [`acp-session-lifecycle`](./acp-session-lifecycle/)       | ACP session-lifecycle observation mapping.                                                                                                   |
+| [`mpp-payment-attempt`](./mpp-payment-attempt/)           | MPP payment-attempt observation mapping.                                                                                                     |
+| [`paymentauth-evidence`](./paymentauth-evidence/)         | paymentauth / MPP settlement observation mapping.                                                                                            |
+| [`paymentauth-jsonrpc`](./paymentauth-jsonrpc/)           | paymentauth carried over JSON-RPC transport.                                                                                                 |
+| [`stripe-spt-evidence`](./stripe-spt-evidence/)           | Stripe SPT observation mapping.                                                                                                              |
+| [`provisioning-lifecycle`](./provisioning-lifecycle/)     | Provisioning lifecycle records (generic, all 10 `*-observed` event families).                                                                |
+| [`agent-provisioning-demo`](./agent-provisioning-demo/)   | Concrete sanitized provisioning lifecycle demo (init / resource / credential / rotate).                                                      |
+| [`agent-action-records`](./agent-action-records/)         | Agent action records (generic, all 6 `*-observed` event kinds: invoked / delegated / approved / denied / cancelled / timed-out).             |
+| [`commerce-mandate-records`](./commerce-mandate-records/) | Commerce mandate records (generic, all 7 `*-observed` event kinds: mandate / authorization / capture / void / refund / settlement / budget). |
+| [`gateway-export-records`](./gateway-export-records/)     | Gateway export records (generic, all 8 `*-observed` event kinds: 7 settlement/recovery states + 1 facilitator-timeout trigger observation).  |
+| [`x402-dual-header-read`](./x402-dual-header-read/)       | x402 dual-header precedence (`PEAC-Receipt` > `PAYMENT-RESPONSE` > `X-PAYMENT-RESPONSE`).                                                    |
+| [`commerce-evidence-bundle`](./commerce-evidence-bundle/) | Build a portable bundle across multiple commerce rails.                                                                                      |
+| [`managed-agents-export`](./managed-agents-export/)       | Export signed records from a managed-agent runtime.                                                                                          |
+| [`a2a-gateway-pattern`](./a2a-gateway-pattern/)           | Agent-to-Agent gateway pattern.                                                                                                              |
+| [`agent-identity`](./agent-identity/)                     | Agent identity binding with DIDs and actor proofs.                                                                                           |
+| [`did-verification`](./did-verification/)                 | DID-based issuer verification.                                                                                                               |
+| [`content-signals`](./content-signals/)                   | Content-signals observation mapping.                                                                                                         |
+| [`rsl-collective`](./rsl-collective/)                     | Really Simple Licensing (RSL) integration and core claims parity.                                                                            |
+| [`erc8004-feedback`](./erc8004-feedback/)                 | PEAC records as ERC-8004 reputation evidence.                                                                                                |
+| [`openclaw-capture`](./openclaw-capture/)                 | OpenClaw tool calls as signed interaction records.                                                                                           |
+| [`telemetry-otel`](./telemetry-otel/)                     | OpenTelemetry integration with privacy modes.                                                                                                |
+| [`external-pilot`](./external-pilot/)                     | External pilot integration skeleton.                                                                                                         |
 
 ## Prerequisites
 

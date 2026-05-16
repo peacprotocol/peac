@@ -217,6 +217,69 @@ EOF
 
 node schema-smoke.mjs
 
+# v0.14.3 profile exports smoke (agent-action, commerce-mandate, gateway-export)
+echo ""
+echo "6b. Running @peac/schema v0.14.3 profile-exports smoke..."
+cat > schema-v0143-smoke.mjs << 'EOF'
+import {
+  AGENT_ACTION_EXTENSION_KEY,
+  validateAgentAction,
+  COMMERCE_MANDATE_EXTENSION_KEY,
+  validateCommerceMandate,
+  GATEWAY_EXPORT_EXTENSION_KEY,
+  validateGatewayExport,
+} from '@peac/schema';
+
+// Each EXTENSION_KEY must be a non-empty string under the org.peacprotocol/ namespace.
+const keys = {
+  AGENT_ACTION_EXTENSION_KEY,
+  COMMERCE_MANDATE_EXTENSION_KEY,
+  GATEWAY_EXPORT_EXTENSION_KEY,
+};
+for (const [name, value] of Object.entries(keys)) {
+  if (typeof value !== 'string' || value.length === 0) {
+    console.error(`FAIL: ${name} not exported as non-empty string from @peac/schema`);
+    process.exit(1);
+  }
+  if (!value.startsWith('org.peacprotocol/')) {
+    console.error(`FAIL: ${name} does not start with org.peacprotocol/: ${value}`);
+    process.exit(1);
+  }
+}
+
+// Each validate* must be a function.
+const validators = {
+  validateAgentAction,
+  validateCommerceMandate,
+  validateGatewayExport,
+};
+for (const [name, fn] of Object.entries(validators)) {
+  if (typeof fn !== 'function') {
+    console.error(`FAIL: ${name} not exported as a function from @peac/schema`);
+    process.exit(1);
+  }
+}
+
+// Smoke: each validator returns the structured-error contract { ok: false, errors }
+// on an empty input (proving the v0.14.3 validator runs end-to-end from the packed
+// barrel and emits stable error codes, not generic Zod diagnostics).
+for (const [name, fn] of Object.entries(validators)) {
+  const r = fn({});
+  if (!r || typeof r !== 'object' || r.ok !== false || !Array.isArray(r.errors)) {
+    console.error(`FAIL: ${name}({}) did not return { ok:false, errors:[] } shape`);
+    process.exit(1);
+  }
+}
+
+console.log('   AGENT_ACTION_EXTENSION_KEY:', AGENT_ACTION_EXTENSION_KEY);
+console.log('   COMMERCE_MANDATE_EXTENSION_KEY:', COMMERCE_MANDATE_EXTENSION_KEY);
+console.log('   GATEWAY_EXPORT_EXTENSION_KEY:', GATEWAY_EXPORT_EXTENSION_KEY);
+console.log('   validateAgentAction / validateCommerceMandate / validateGatewayExport: all callable');
+console.log('   OK: @peac/schema v0.14.3 profile-exports verified');
+EOF
+
+node schema-v0143-smoke.mjs
+
 # Transport-grpc import smoke (deferred package, installed from sibling tarball)
 echo ""
 echo "7. Running @peac/transport-grpc import smoke..."
