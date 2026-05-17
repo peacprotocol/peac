@@ -3,7 +3,7 @@
   "schema_version": "1.0.0",
   "version": "0.14.3",
   "wire_format_version": "0.2",
-  "dist_tag": "next",
+  "dist_tag": "latest",
   "release_date": "2026-05-17",
   "metrics": {
     "tests": 10635,
