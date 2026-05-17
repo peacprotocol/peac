@@ -109,7 +109,7 @@ PEAC reads what the runtime reported, records it under the canonical `org.peacpr
 - [Runtime evidence export](runtime-evidence-export.md): emit and aggregate runtime-governance records inside a tenant.
 - [Verify agent-action records](verify-agent-action.md): generic agent action observations (v0.14.3); pairs naturally with runtime governance for callsite-level evidence.
 - [Verify commerce-mandate records](verify-commerce-mandate.md): commerce-mandate observations alongside runtime decisions.
-- [Compatibility matrix — `@peac/adapter-runtime-governance` row](../COMPATIBILITY_MATRIX.md): record families, fixture-only stability class, and the first runtime-governance mapper note.
+- [Compatibility matrix — `@peac/adapter-runtime-governance` row](../COMPATIBILITY_MATRIX.md): record families, fixture-only stability class, and the runtime-governance mapper note.
 
 ## Footnote on an upstream anchoring proposal
 
