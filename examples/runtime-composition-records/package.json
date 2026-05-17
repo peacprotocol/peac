@@ -1,0 +1,20 @@
+{
+  "name": "@peac/example-runtime-composition-records",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Composition demo: runtime governance toolkit decides; PEAC issues portable signed records",
+  "type": "module",
+  "scripts": {
+    "demo": "tsx demo.ts",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@peac/adapter-runtime-governance": "workspace:*",
+    "@peac/protocol": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "^4.21.0",
+    "typescript": "^5.3.3"
+  }
+}

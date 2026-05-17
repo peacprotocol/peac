@@ -688,6 +688,22 @@ importers:
         specifier: ^5.3.3
         version: 5.9.3
 
+  examples/runtime-composition-records:
+    dependencies:
+      '@peac/adapter-runtime-governance':
+        specifier: workspace:*
+        version: link:../../packages/adapters/runtime-governance
+      '@peac/protocol':
+        specifier: workspace:*
+        version: link:../../packages/protocol
+    devDependencies:
+      tsx:
+        specifier: ^4.21.0
+        version: 4.21.0
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+
   examples/runtime-governance-records:
     dependencies:
       '@peac/adapter-runtime-governance':
@@ -6129,7 +6145,7 @@ packages:
       '@vitest/spy': 4.1.0
       estree-walker: 3.0.3
       magic-string: 0.30.21
-      vite: 8.0.10(@types/node@22.19.11)(tsx@4.21.0)(yaml@2.8.3)
+      vite: 8.0.10(@types/node@22.19.11)(esbuild@0.27.0)(tsx@4.21.0)(yaml@2.8.3)
     dev: true
 
   /@vitest/pretty-format@4.0.18:
@@ -11523,7 +11539,7 @@ packages:
       tinyexec: 1.0.2
       tinyglobby: 0.2.15
       tinyrainbow: 3.0.3
-      vite: 8.0.10(@types/node@22.19.11)(tsx@4.21.0)(yaml@2.8.3)
+      vite: 8.0.10(@types/node@22.19.11)(esbuild@0.27.0)(tsx@4.21.0)(yaml@2.8.3)
       why-is-node-running: 2.3.0
     transitivePeerDependencies:
       - msw
