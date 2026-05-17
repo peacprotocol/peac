@@ -1,6 +1,6 @@
 {
   "$comment": "Protocol-level test mappings for requirements not provable by fixtures alone",
-  "version": "0.14.1",
+  "version": "0.14.3",
   "mappings": [
     {
       "requirement_id": "WIRE02-VALID-001",
@@ -426,7 +426,7 @@
       "requirement_id": "LIFE-OBS-010",
       "test_file": "docs/specs/LIFECYCLE-OBSERVATION-PROFILE.md",
       "test_description": "spec orchestrator-boundary text is normative and vendor-neutral",
-      "notes": "Section 8 of the profile spec carries the orchestrator boundary as normative prose with vendor-neutral nouns (orchestrators, workflow engines, evaluation systems, approval systems, agent runtimes); checked manually as part of spec review and pinned by repository search-and-replace discipline (no specific external project name appears in the normative \u00a78 text)."
+      "notes": "Section 8 of the profile spec carries the orchestrator boundary as normative prose with vendor-neutral nouns (orchestrators, workflow engines, evaluation systems, approval systems, agent runtimes); checked manually as part of spec review and pinned by repository search-and-replace discipline (no specific external project name appears in the normative §8 text)."
     },
     {
       "requirement_id": "PROV-LIFE-001",

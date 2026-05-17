@@ -1,6 +1,6 @@
 {
   "name": "@peac/record-core",
-  "version": "0.14.1",
+  "version": "0.14.3",
   "private": true,
   "description": "PEAC Protocol - workspace-private metadata package. Not published. The canonical codec / record-core implementation lives at packages/protocol/src/_internal/record-core/ and is imported via relative paths from inside @peac/protocol; this package does NOT duplicate that source. Version tracks the workspace-wide value enforced by scripts/check-version-coherence.sh; the workspace-wide bump to 0.13.1 happens in the v0.13.1 release-prep PR.",
   "type": "module",
