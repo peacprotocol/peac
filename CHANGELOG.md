@@ -5,6 +5,87 @@ All notable changes to PEAC Protocol will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.14.3] - 2026-05-17
+
+Agent Action, Commerce Mandate, and Gateway Export Records.
+
+Three new signed-record surfaces for reported agent-action events,
+commerce-lifecycle events scoped to a mandate, and payment-gateway
+settlement/recovery observations. Caller systems (agents, harnesses,
+runtimes, payment gateways, facilitators) report what they observed;
+PEAC records that report through a portable, signed interaction
+record any party can verify offline.
+
+Public API: extended (additive only).
+Wire format: unchanged.
+Package surface: unchanged published-package count (36).
+Extension keys: 16 → 19 extension groups; 40 → 61 receipt types
+(additive). 30 new conformance requirement IDs across three new
+conformance sections.
+Default observable behavior: unchanged for existing surfaces.
+
+### Added
+
+- **Agent action extension namespace.** New
+  `org.peacprotocol/agent-action` extension namespace with 6
+  `*-observed` receipt-type URIs (invoked / delegated / approved /
+  denied / cancelled / timed-out). Schema validator with stable error
+  codes under the `agent.action.*` namespace. New normative spec
+  `docs/specs/AGENT-ACTION-RECORDS.md`. Conformance Section 32
+  `AGENT-ACT-001..010`.
+- **Commerce mandate extension namespace.** New
+  `org.peacprotocol/commerce-mandate` extension namespace with 7
+  `*-observed` receipt-type URIs (mandate / authorization / capture /
+  void / refund / settlement / budget). Schema validator with 16
+  stable error codes under the `commerce.mandate.*` namespace.
+  Profile-local non-negative-amount-minor refine wrapper.
+  Finality-synthesis boundary blocks `settlement_state` on every
+  non-settlement event kind. New normative spec
+  `docs/specs/COMMERCE-MANDATE-RECORDS.md`. Conformance Section 33
+  `COMM-MAN-001..010`.
+- **Gateway export extension namespace.** New
+  `org.peacprotocol/gateway-export` extension namespace with 8
+  `*-observed` receipt-type URIs covering a 7-state
+  settlement/recovery model plus 1 facilitator-timeout trigger
+  observation. Schema validator with 23 stable error codes under the
+  `gateway.export.*` namespace, 19 forbidden top-level payment-data
+  keys, real UTF-8 byte limits via `TextEncoder`, optional EIP-3009
+  four-tuple references, and a `valid_before_unix_seconds`
+  safe-integer-bounded field. New normative spec
+  `docs/specs/GATEWAY-EXPORT-RECORDS.md`. Conformance Section 34
+  `GATE-EXP-001..010`.
+- **Three runnable example packages and operator recipes.** New
+  `examples/agent-action-records/`, `examples/commerce-mandate-records/`,
+  and `examples/gateway-export-records/` packages with deterministic
+  synthetic fixtures and end-to-end `pnpm issue` + `pnpm verify`
+  round-trips. New operator recipes under `docs/SOLUTIONS/` for each
+  profile.
+- **`@peac/schema` barrel re-exports.** 21 new top-level exports
+  (15 types + 6 value exports) for the three new profile constants
+  and validators.
+
+### Changed
+
+- **ACP mapper boundary fix.** `packages/mappings-acp`
+  `fromACPCheckoutSuccess` now requires `amount_minor: string`
+  (replacing the prior `total_amount: number` field) and an explicit
+  `env` field. New local `ACPMapperBoundaryError` class with 11
+  stable codes. BigInt safe-integer guards on every amount
+  conversion. Shared private `isValidHttpsResourceUri` helper across
+  all five ACP mapper paths.
+- **Repository hygiene.** Test-only clock pin on the
+  `apps/api/tests/report-format.test.ts` byte-stability test (no
+  production behavior change). `api-contract.test.ts`
+  extension-key constants count bumped 24 → 27. Pack-install smoke
+  extended to verify v0.14.3 profile exports through packed
+  `@peac/schema`.
+- **Dependency overrides.** `protobufjs` override pinned to exact
+  `8.0.2` (closes 7 protobufjs Dependabot advisories across the
+  `8.0.0..8.0.1` range). New defensive `@protobufjs/utf8: 1.1.1`
+  override. Reachability is private-example-only via
+  `@peac/example-telemetry-otel@0.0.0`; no published runtime package
+  depends on protobufjs.
+
 ## [0.14.2] - 2026-05-10
 
 Provisioning Lifecycle Records.

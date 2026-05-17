@@ -1,6 +1,6 @@
 {
   "name": "commerce",
-  "version": "0.14.1",
+  "version": "0.14.3",
   "section": 26,
   "description": "Conformance vectors for the mapper-boundary finality-synthesis guard exported by @peac/adapter-core. Documents the C-001 through C-020 requirement IDs that govern the no-finality-synthesis rule across all PEAC commerce mappings (paymentauth, ACP, UCP, Stripe SPT, x402).",
   "spec_revision": "docs/specs/COMMERCE-EVIDENCE.md (v0.12.11)",
