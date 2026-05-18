@@ -3,6 +3,9 @@
 **/coverage/**
 **/.turbo/**
 **/.cache/**
+# .NET build output (per-example bin/ + obj/)
+**/bin/**
+**/obj/**
 
 # generated metadata
 **/sbom*.json

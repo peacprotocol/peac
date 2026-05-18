@@ -1,0 +1,5 @@
+{
+  "iss": "https://harness.example.com",
+  "kid": "agent-action-records-demo",
+  "public_key_b64u": "P-H_HMxV-W8Huro4jONhEZrydVlYu9ZGltCUSkBXKhI"
+}
