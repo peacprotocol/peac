@@ -4,19 +4,19 @@ Current as of the repository state after the v0.14.3 profile additions.
 
 ## Wire Format Support
 
-| Surface                    | Wire 0.2 (`interaction-record+jwt`)                                 | Wire 0.1 (`peac-receipt/0.1`)                                        | Status                                                         |
-| -------------------------- | ------------------------------------------------------------------- | -------------------------------------------------------------------- | -------------------------------------------------------------- |
-| `@peac/protocol` (TS/Node) | Full: `issue()` + `verifyLocal()`                                   | Legacy verify only (`verifyLocalWire01()`, not exported from barrel) | **default**                                                    |
-| `@peac/crypto` (TS/Node)   | Full: dual-stack sign/verify/decode                                 | Decode and verify only                                               | **default**                                                    |
-| `@peac/schema` (TS/Node)   | Full: `Wire02ClaimsSchema`, extension groups, type enforcement      | Legacy `ReceiptClaimsSchema`                                         | **default**                                                    |
-| `@peac/cli`                | Full                                                                | -                                                                    | **default**                                                    |
-| `@peac/mcp-server`         | Full (5 tools)                                                      | -                                                                    | **default**                                                    |
-| `@peac/middleware-express` | Full                                                                | -                                                                    | **default**                                                    |
-| Go SDK (`sdks/go/`)        | Full: `Issue()` + `VerifyLocal()` + JCS (22 cross-language vectors) | Legacy verify only                                                   | **supported** (core issue/verify); middleware **experimental** |
-| Python                     | API-first via reference verifier (httpx examples, `>=3.12`)         | -                                                                    | **examples only**                                              |
-| .NET                       | Offline verifier example (`examples/dotnet-quickstart/`, net10.0)   | -                                                                    | **examples only** (not a PEAC .NET SDK; no NuGet package)      |
-| `@peac/core`               | -                                                                   | Full (Wire 0.9 locked)                                               | **archived** (at v0.13.0)                                      |
-| `@peac/sdk`                | -                                                                   | Full (Wire 0.1)                                                      | **archived** (use `@peac/protocol`)                            |
+| Surface                    | Wire 0.2 (`interaction-record+jwt`)                                                | Wire 0.1 (`peac-receipt/0.1`)                                        | Status                                                         |
+| -------------------------- | ---------------------------------------------------------------------------------- | -------------------------------------------------------------------- | -------------------------------------------------------------- |
+| `@peac/protocol` (TS/Node) | Full: `issue()` + `verifyLocal()`                                                  | Legacy verify only (`verifyLocalWire01()`, not exported from barrel) | **default**                                                    |
+| `@peac/crypto` (TS/Node)   | Full: dual-stack sign/verify/decode                                                | Decode and verify only                                               | **default**                                                    |
+| `@peac/schema` (TS/Node)   | Full: `Wire02ClaimsSchema`, extension groups, type enforcement                     | Legacy `ReceiptClaimsSchema`                                         | **default**                                                    |
+| `@peac/cli`                | Full                                                                               | -                                                                    | **default**                                                    |
+| `@peac/mcp-server`         | Full (5 tools); composition guide: [MCP composition](SOLUTIONS/mcp-composition.md) | -                                                                    | **default**                                                    |
+| `@peac/middleware-express` | Full                                                                               | -                                                                    | **default**                                                    |
+| Go SDK (`sdks/go/`)        | Full: `Issue()` + `VerifyLocal()` + JCS (22 cross-language vectors)                | Legacy verify only                                                   | **supported** (core issue/verify); middleware **experimental** |
+| Python                     | API-first via reference verifier (httpx examples, `>=3.12`)                        | -                                                                    | **examples only**                                              |
+| .NET                       | Offline verifier example (`examples/dotnet-quickstart/`, net10.0)                  | -                                                                    | **examples only** (not a PEAC .NET SDK; no NuGet package)      |
+| `@peac/core`               | -                                                                                  | Full (Wire 0.9 locked)                                               | **archived** (at v0.13.0)                                      |
+| `@peac/sdk`                | -                                                                                  | Full (Wire 0.1)                                                      | **archived** (use `@peac/protocol`)                            |
 
 ## Runtime Environments
 

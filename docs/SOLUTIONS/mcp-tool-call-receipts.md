@@ -119,6 +119,7 @@ The MCP server and mapping test suites cover the `_meta` carrier path; `examples
 
 ## Where to go from here
 
+- [MCP composition with PEAC records](mcp-composition.md) — composition guide covering MCP auth observations, conformance discipline, schema evolution, deprecated MCP surfaces, and the PEAC-vs-MCP boundary.
 - [MCP Integration Kit](../../integrator-kits/mcp/README.md) — full MCP setup guide.
 - [`packages/mcp-server/`](../../packages/mcp-server/) — server reference (5 evidence tools).
 - [`packages/mappings/mcp/`](../../packages/mappings/mcp/) — `_meta` carrier mapping reference.
