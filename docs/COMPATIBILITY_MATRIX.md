@@ -14,6 +14,7 @@ Current as of the repository state after the v0.14.3 profile additions.
 | `@peac/middleware-express` | Full                                                                | -                                                                    | **default**                                                    |
 | Go SDK (`sdks/go/`)        | Full: `Issue()` + `VerifyLocal()` + JCS (22 cross-language vectors) | Legacy verify only                                                   | **supported** (core issue/verify); middleware **experimental** |
 | Python                     | API-first via reference verifier (httpx examples, `>=3.12`)         | -                                                                    | **examples only**                                              |
+| .NET                       | Offline verifier example (`examples/dotnet-quickstart/`, net10.0)   | -                                                                    | **examples only** (not a PEAC .NET SDK; no NuGet package)      |
 | `@peac/core`               | -                                                                   | Full (Wire 0.9 locked)                                               | **archived** (at v0.13.0)                                      |
 | `@peac/sdk`                | -                                                                   | Full (Wire 0.1)                                                      | **archived** (use `@peac/protocol`)                            |
 
