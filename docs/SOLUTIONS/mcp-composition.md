@@ -8,18 +8,18 @@
 
 ## What this shows
 
-How the PEAC records layer composes with the Model Context Protocol. MCP defines the runtime contract between agents and tools. PEAC produces portable signed records of what an MCP server, client, or tool integration attested during that contract. The two layers are independent: MCP evolves on its own schedule; PEAC records what an MCP participant reported and stays verifiable beyond the runtime that produced it.
+How the PEAC records layer composes with the Model Context Protocol. MCP defines the runtime contract between agents and tools. PEAC produces portable signed records of what an MCP server, client, or tool integration reported during that contract. The two layers are independent: MCP evolves on its own schedule; PEAC records what an MCP participant reported and stays verifiable beyond the runtime that produced it.
 
 This document is a composition guide. It does not change wire format, signing envelope, public API, schema, or registry. The companion code recipe is [MCP tool-call records](mcp-tool-call-receipts.md), which shows the attachment carriers and the `_meta` keys.
 
 ## How PEAC composes with MCP
 
-PEAC's MCP composition surface is shaped by three repo-local artifacts that ship today and one stable extension namespace:
+PEAC's MCP composition surface is shaped by three repo-local artifacts and one example type URI used by the existing recipe:
 
 - the existing `@peac/mcp-server` package (built-in MCP evidence tools);
 - the existing `@peac/mappings-mcp` package (`_meta` carrier mapping per the Evidence Carrier Contract);
 - the existing recipe [`docs/SOLUTIONS/mcp-tool-call-receipts.md`](mcp-tool-call-receipts.md);
-- the `org.peacprotocol/mcp-tool-call` example type URI used by that recipe (an integrator-emitted custom type URI, not a registered PEAC profile).
+- the `org.peacprotocol/mcp-tool-call` example type URI used by that recipe. It is an integrator-emitted custom type URI, not a registered PEAC extension group, registered receipt type, or PEAC profile.
 
 The composition is record-only. PEAC reads what the MCP server or client reported, signs an interaction record, and stops there. The MCP runtime keeps owning transport, registry, auth, conformance, and process management.
 
@@ -27,7 +27,9 @@ The composition is record-only. PEAC reads what the MCP server or client reporte
 
 SEP-2468 recommends including an Issuer (`iss`) parameter in MCP authentication responses. The proposal merged on 2026-05-17 into the canonical MCP specification repository (modelcontextprotocol/specification PR 2468). The recommendation aligns with the PEAC Wire 0.2 envelope: every Wire 0.2 interaction record already carries a canonical `iss` claim as a required field.
 
-Composition: an MCP server that emits SEP-2468-shaped auth responses can be observed by an integrator and re-attested by a separate PEAC interaction record. The MCP server keeps owning the authentication decision. PEAC carries a portable signed record of what the MCP server reported. The `iss` value in the PEAC record is the operator's canonical issuer URL, not necessarily the same URL the MCP server emitted in its auth response; the two carry independent identities.
+Composition: an MCP server that emits SEP-2468-shaped auth responses can be observed by an integrator and recorded by a separate PEAC interaction record. The MCP server keeps owning the authentication decision. PEAC carries a portable signed record of what the MCP server reported. The `iss` value in the PEAC record is the operator's canonical issuer URL, not necessarily the same URL the MCP server emitted in its auth response; the two carry independent identities.
+
+PEAC verifies the PEAC record issuer and signature; it does not authenticate the MCP server, replace MCP auth, or enforce MCP authorization policy. The PEAC verification step confirms that the PEAC record itself is structurally valid and signed by the issuer the record claims; it makes no statement about whether the upstream MCP server's auth decision was correct, complete, or compliant with any MCP-defined policy.
 
 ## MCP conformance discipline
 
@@ -45,7 +47,7 @@ This evolves the MCP runtime contract; it does not change the PEAC record layer.
 
 SEP-2577 deprecates the MCP server features Roots, Sampling, and Logging. The proposal merged on 2026-05-15 into the canonical MCP specification repository (modelcontextprotocol/specification PR 2577). The deprecation introduces no wire-level break during the deprecation period; clients that already integrate against those surfaces continue to interoperate while the deprecation runs.
 
-PEAC records what the MCP server attested. A PEAC record emitted before SEP-2577 that references one of those surfaces stays verifiable; a forward record simply will not reference them. PEAC has no migration burden tied to MCP feature deprecation.
+PEAC records what the MCP server reported. A PEAC record emitted before SEP-2577 that references one of those surfaces stays verifiable; a forward record simply will not reference them. PEAC has no migration burden tied to MCP feature deprecation.
 
 ## Resumable tasks and partial results
 
