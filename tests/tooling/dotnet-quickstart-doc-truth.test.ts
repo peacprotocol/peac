@@ -249,9 +249,9 @@ describe('dotnet-quickstart Program.cs: protocol + parsing semantics', () => {
   });
 
   it('imports no network APIs (no HttpClient, no Sockets)', () => {
-    expect(PROGRAM_TEXT).not.toMatch(/using\s+System\.Net\.Http/);
-    expect(PROGRAM_TEXT).not.toMatch(/using\s+System\.Net\.Sockets/);
-    expect(PROGRAM_TEXT).not.toMatch(/\bHttpClient\b/);
+    expect(PROGRAM_TEXT).not.toContain('using System.Net.Http');
+    expect(PROGRAM_TEXT).not.toContain('using System.Net.Sockets');
+    expect(PROGRAM_TEXT).not.toContain('HttpClient');
   });
 });
 
