@@ -2,16 +2,18 @@
 
 Outcome-led recipes. Each one states the real-world problem, the PEAC pieces you'll use, and a step-by-step path from a clean clone to a verified record.
 
-| Recipe                                                    | Outcome                                                                                                         | Audience                    |
-| --------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- | --------------------------- |
-| [Runtime evidence export](runtime-evidence-export.md)     | Export portable evidence from a managed agent runtime for compliance and audit.                                 | Runtime / platform operator |
-| [API record issuance](api-receipt-issuance.md)            | Issue signed records on every HTTP response with Express middleware.                                            | API provider                |
-| [MCP tool-call records](mcp-tool-call-receipts.md)        | Attach signed records to MCP tool-call responses.                                                               | MCP server operator         |
-| [Commerce evidence bundle](commerce-evidence-bundle.md)   | Bundle observational evidence across x402, ACP, and paymentauth without synthesizing payment finality.          | Commerce evidence operator  |
-| [Regulatory audit trail](regulatory-audit-trail.md)       | Build a portable, signed audit trail for EU AI Act, NIST AI RMF, and ISO 42001 review.                          | Compliance / audit lead     |
-| [Cloudflare + x402 + PEAC](cloudflare-x402-peac.md)       | Compose Cloudflare delivery surfaces and x402 PR-1986 terms with PEAC policy and terms binding.                 | Cloudflare-fronted operator |
-| [Runtime governance composition](agt-peac-composition.md) | Compose a runtime governance toolkit with portable signed records any external party can verify offline.        | Platform operator           |
-| [Verify at the edge](verify-at-the-edge.md)               | Verify PEAC records inside a Fetch-compatible edge runtime with bounded body, key, timeout, and cache behavior. | Edge runtime operator       |
+| Recipe                                                           | Outcome                                                                                                                          | Audience                     |
+| ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ---------------------------- |
+| [Runtime evidence export](runtime-evidence-export.md)            | Export portable evidence from a managed agent runtime for compliance and audit.                                                  | Runtime / platform operator  |
+| [API record issuance](api-receipt-issuance.md)                   | Issue signed records on every HTTP response with Express middleware.                                                             | API provider                 |
+| [MCP tool-call records](mcp-tool-call-receipts.md)               | Attach signed records to MCP tool-call responses.                                                                                | MCP server operator          |
+| [Commerce evidence bundle](commerce-evidence-bundle.md)          | Bundle observational evidence across x402, ACP, and paymentauth without synthesizing payment finality.                           | Commerce evidence operator   |
+| [Regulatory audit trail](regulatory-audit-trail.md)              | Build a portable, signed audit trail for EU AI Act, NIST AI RMF, and ISO 42001 review.                                           | Compliance / audit lead      |
+| [Cloudflare + x402 + PEAC](cloudflare-x402-peac.md)              | Compose Cloudflare delivery surfaces and x402 PR-1986 terms with PEAC policy and terms binding.                                  | Cloudflare-fronted operator  |
+| [Runtime governance composition](agt-peac-composition.md)        | Compose a runtime governance toolkit with portable signed records any external party can verify offline.                         | Platform operator            |
+| [Verify at the edge](verify-at-the-edge.md)                      | Verify PEAC records inside a Fetch-compatible edge runtime with bounded body, key, timeout, and cache behavior.                  | Edge runtime operator        |
+| [Record evaluation-platform events](eval-platform-records.md)    | Emit portable signed records for evaluation, experiment, and result-artifact events reported by an external evaluation platform. | Evaluation-platform operator |
+| [Issue harness execution records](harness-records-quickstart.md) | Emit portable signed records for each bounded harness run using the existing CLI execution and agent-action surfaces.            | Harness / CI operator        |
 
 Each recipe follows the same structure:
 
