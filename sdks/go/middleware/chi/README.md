@@ -15,10 +15,17 @@ dependency graph. The adapter itself carries no Chi dependency; it
 exposes the stdlib-compatible `func(http.Handler) http.Handler` that
 Chi's `r.Use(...)` accepts natively.
 
+Applications that do not already depend on Chi should also add
+`github.com/go-chi/chi/v5`; the PEAC adapter module intentionally does
+not depend on Chi directly.
+
 ## Usage
 
 ```go
 import (
+    "encoding/json"
+    "net/http"
+
     "github.com/go-chi/chi/v5"
     peacchi "github.com/peacprotocol/peac/sdks/go/middleware/chi"
 )
