@@ -1,6 +1,6 @@
 {
   "name": "@peac/adapter-did",
-  "version": "0.14.3",
+  "version": "0.14.4",
   "description": "DID document resolution for PEAC receipt verification (did:key, did:web)",
   "main": "dist/index.cjs",
   "types": "dist/index.d.ts",

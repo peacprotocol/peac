@@ -21,7 +21,7 @@ function hash(fragment) {
   return 'sha256:' + createHash('sha256').update(fragment, 'utf-8').digest('hex');
 }
 
-const VERSION = '0.14.3';
+const VERSION = '0.14.4';
 
 // Section slug mapping (markdown anchor format)
 const SECTION_ANCHORS = {

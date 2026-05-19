@@ -1,6 +1,6 @@
 {
   "name": "@peac/mappings-intoto",
-  "version": "0.14.3",
+  "version": "0.14.4",
   "description": "in-toto v1.0 attestation mapping for PEAC provenance extension",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

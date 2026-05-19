@@ -5,6 +5,71 @@ All notable changes to PEAC Protocol will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.14.4] - 2026-05-19
+
+Composition Surfaces.
+
+Documents how the PEAC records layer composes with adjacent runtimes,
+verifiers, execution surfaces, evaluation platforms, deterministic
+harnesses, agent-to-agent gateways, and the Model Context Protocol
+without introducing new protocol semantics.
+
+Public API: unchanged.
+Wire format: unchanged.
+Public schema: unchanged.
+Registered extension groups: unchanged (19).
+Registered receipt types: unchanged (61).
+Conformance sections: unchanged (32).
+Conformance requirement IDs: unchanged (290).
+Published package names: unchanged; package count remains 36.
+No new CLI surface. No new package-publication surface. No new
+signing envelope. No wire/signing change.
+
+### Added
+
+- **Runtime governance composition guide** (`docs/SOLUTIONS/agt-peac-composition.md`)
+  describing how a runtime governance toolkit and the PEAC records
+  layer compose. The runtime decides; PEAC records what the runtime
+  reported.
+- **Edge verification recipe** (`docs/SOLUTIONS/verify-at-the-edge.md`)
+  showing how to verify PEAC records inside a Fetch-compatible edge
+  runtime with bounded body, key, timeout, and cache behavior.
+- **Evaluation-platform records recipe**
+  (`docs/SOLUTIONS/eval-platform-records.md`) using the existing
+  `peac emit lifecycle` CLI and `org.peacprotocol/lifecycle-observation`
+  extension namespace.
+- **Harness execution records recipe**
+  (`docs/SOLUTIONS/harness-records-quickstart.md`) using the existing
+  `peac record command` CLI and `org.peacprotocol/cli-execution`
+  extension namespace, with optional pairing to
+  `org.peacprotocol/agent-action`.
+- **MCP composition guide** (`docs/SOLUTIONS/mcp-composition.md`)
+  documenting how PEAC records compose beneath MCP interactions,
+  citing four merged MCP SEPs by exact number (2468, 2484, 2577,
+  2106).
+- **Runtime-composition example package**
+  (`examples/runtime-composition-records/`) — vendor-neutral runnable
+  demo using a generic event-normalization flow.
+- **.NET committed-fixture quickstart verifier**
+  (`examples/dotnet-quickstart/`) targeting the current supported .NET
+  LTS runtime, verifying six committed PEAC interaction records
+  offline. Not a PEAC .NET SDK; no NuGet package; no `sdks/dotnet/`.
+- **Go middleware chi adapter parity** (`sdks/go/middleware/chi/`):
+  per-adapter README and four localized invariants matching the file
+  shape of the existing echo, gin, and nethttp adapters.
+- **Doc-truth coverage** for every new recipe and example under
+  `tests/tooling/`.
+- **Compatibility matrix and example-catalog discoverability rows**
+  for the .NET quickstart and the MCP composition guide.
+
+### Changed
+
+- `.prettierignore` extended with `**/bin/**` and `**/obj/**` to cover
+  .NET build output so contributors building the .NET example locally
+  do not trip formatting checks on generated JSON.
+- `docs/SOLUTIONS/mcp-tool-call-receipts.md` gains one cross-link to
+  the new MCP composition guide.
+
 ## [0.14.3] - 2026-05-17
 
 Agent Action, Commerce Mandate, and Gateway Export Records.
