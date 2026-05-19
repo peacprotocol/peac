@@ -1,7 +1,7 @@
 {
   "family": "default-flows",
   "description": "Wire 0.2 happy-path parity vectors. Every vector is accepted by the canonical validator chain (kernel constraints + Wire 0.2 envelope schema). Used to assert that the bounded shadow-mode validator foundation reaches zero divergence with the existing path on accepted records. All extension shapes follow the canonical typed extension-group schemas in @peac/schema/wire-02-extensions/.",
-  "version": "0.14.3",
+  "version": "0.14.4",
   "generator": "manual; v0.13.1 PR C floor",
   "vectors": [
     {

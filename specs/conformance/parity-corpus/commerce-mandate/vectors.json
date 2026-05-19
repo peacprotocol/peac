@@ -1,7 +1,7 @@
 {
   "family": "commerce-mandate",
   "description": "Commerce mandate parity vectors. Seven positive deterministic JSON observation payloads (one per event_kind) covering mandate / authorization / capture / void / refund / settlement / budget semantics. Per the parity-corpus convention, all vectors assert envelope-level canonical agreement and set expected.accepted=true; semantic rejection of extension content (forbidden payment-data keys, opaque-ref grammar violations, finality-synthesis blocks, missing required fields, invalid event_kind, scheme conflicts) lives at the Layer 3 validator surface (validateCommerceMandate exported from @peac/schema, exercised by packages/schema/__tests__/extensions/commerce-mandate.test.ts).",
-  "version": "0.14.3",
+  "version": "0.14.4",
   "generator": "manual; commerce-mandate v0.1 floor",
   "vectors": [
     {
@@ -26,7 +26,9 @@
           }
         }
       },
-      "expected": { "accepted": true }
+      "expected": {
+        "accepted": true
+      }
     },
     {
       "id": "cm-002-authorization",
@@ -51,7 +53,9 @@
           }
         }
       },
-      "expected": { "accepted": true }
+      "expected": {
+        "accepted": true
+      }
     },
     {
       "id": "cm-003-capture",
@@ -77,7 +81,9 @@
           }
         }
       },
-      "expected": { "accepted": true }
+      "expected": {
+        "accepted": true
+      }
     },
     {
       "id": "cm-004-void",
@@ -101,7 +107,9 @@
           }
         }
       },
-      "expected": { "accepted": true }
+      "expected": {
+        "accepted": true
+      }
     },
     {
       "id": "cm-005-refund",
@@ -127,7 +135,9 @@
           }
         }
       },
-      "expected": { "accepted": true }
+      "expected": {
+        "accepted": true
+      }
     },
     {
       "id": "cm-006-settlement",
@@ -153,7 +163,9 @@
           }
         }
       },
-      "expected": { "accepted": true }
+      "expected": {
+        "accepted": true
+      }
     },
     {
       "id": "cm-007-budget",
@@ -178,7 +190,9 @@
           }
         }
       },
-      "expected": { "accepted": true }
+      "expected": {
+        "accepted": true
+      }
     }
   ]
 }

@@ -3,6 +3,8 @@
 **/coverage/**
 **/.turbo/**
 **/.cache/**
+# local scratch (gitignored; PR-body drafts and similar)
+**/.tmp/**
 # .NET build output (per-example bin/ + obj/)
 **/bin/**
 **/obj/**
