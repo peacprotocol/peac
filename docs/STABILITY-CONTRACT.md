@@ -216,8 +216,8 @@ release decision.
 | COSE/CBOR codec flag (`PEAC_EXPERIMENTAL_CODEC=cose`) | Not shipped | `experimental` once shipped; gated by an explicit release decision |
 
 No public COSE/CBOR codec ships in this release. Security and semantic
-constraints for future codec surfaces are documented when public code
-lands.
+constraints for additional codec surfaces are documented with any
+released public code.
 
 ## Internal-only flags
 

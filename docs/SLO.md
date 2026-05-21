@@ -27,10 +27,10 @@ record size.
 
 ## Local protocol operations (`@peac/protocol` v0.14.4)
 
-| Operation                               | Median (p50) | p95    | p99    | Notes                                                                                                                    |
-| --------------------------------------- | ------------ | ------ | ------ | ------------------------------------------------------------------------------------------------------------------------ |
-| `issue()` (Ed25519, ~1 KB record)       | 0.4 ms       | 0.5 ms | 0.6 ms | Loopback; Ed25519 only. Measured via `issueWire02()`, which `issue()` delegates to directly without measurable overhead. |
-| `verifyLocal()` (Ed25519, ~1 KB record) | 1.5 ms       | 1.7 ms | 1.9 ms | Local validation; no network.                                                                                            |
+| Operation                               | Median (p50) | p95    | p99    | Notes                                                                   |
+| --------------------------------------- | ------------ | ------ | ------ | ----------------------------------------------------------------------- |
+| `issue()` (Ed25519, ~1 KB record)       | 0.4 ms       | 0.5 ms | 0.6 ms | Measured on the Wire 0.2 issuance path used by `issue()`; Ed25519 only. |
+| `verifyLocal()` (Ed25519, ~1 KB record) | 1.5 ms       | 1.7 ms | 1.9 ms | Local validation; no network.                                           |
 
 The existing SLO gate in [tests/perf/wire02-slo.test.ts](../tests/perf/wire02-slo.test.ts)
 asserts `verifyLocal` p95 MUST be ≤ 10 ms. That gate runs in CI on every PR.
