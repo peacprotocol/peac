@@ -1,6 +1,6 @@
 {
   "name": "@peac/capture-node",
-  "version": "0.14.4",
+  "version": "0.14.5",
   "description": "Node.js durable storage for PEAC capture pipeline (filesystem spool store and dedupe index)",
   "main": "dist/index.cjs",
   "types": "dist/index.d.ts",

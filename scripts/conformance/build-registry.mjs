@@ -10,7 +10,7 @@
  * and writes specs/conformance/requirement-ids.json.
  */
 import { createHash } from 'node:crypto';
-import { readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -21,7 +21,58 @@ function hash(fragment) {
   return 'sha256:' + createHash('sha256').update(fragment, 'utf-8').digest('hex');
 }
 
-const VERSION = '0.14.4';
+const VERSION = '0.14.5';
+
+// Preserve introduced_in across regenerations (fail-closed).
+//
+// build-registry.mjs is idempotent: running it should not silently rewrite the
+// historical version in which a requirement ID was first introduced. Without
+// this map, every regeneration restamps `introduced_in: VERSION` for every
+// requirement, producing a public-facing diff that claims previously-shipped
+// requirements were freshly introduced in the current release.
+//
+// On regeneration:
+//   - existing requirement IDs preserve their on-disk `introduced_in` value;
+//   - genuinely new IDs (absent from the existing file) get the current VERSION;
+//   - `last_reviewed_in` always moves to the current VERSION.
+//
+// Fail-closed discipline: only the absence of the existing registry file is
+// treated as an acceptable bootstrap case. Any other structural problem
+// (missing sections array, missing introduced_in field, duplicate id with
+// conflicting introduced_in) throws so the script cannot silently re-create
+// the mass-restamp bug.
+const existingRegistryPath = join(ROOT, 'specs/conformance/requirement-ids.json');
+const existingIntroducedIn = new Map();
+
+if (existsSync(existingRegistryPath)) {
+  const existing = JSON.parse(readFileSync(existingRegistryPath, 'utf-8'));
+
+  if (!Array.isArray(existing.sections)) {
+    throw new Error(
+      `Existing requirement registry at ${existingRegistryPath} is missing sections[]`
+    );
+  }
+
+  for (const section of existing.sections) {
+    if (!Array.isArray(section.requirements)) continue;
+
+    for (const req of section.requirements) {
+      if (typeof req.id !== 'string') continue;
+      if (typeof req.introduced_in !== 'string') {
+        throw new Error(`Existing requirement ${req.id} is missing string introduced_in`);
+      }
+
+      const previous = existingIntroducedIn.get(req.id);
+      if (previous && previous !== req.introduced_in) {
+        throw new Error(
+          `Duplicate requirement ${req.id} has conflicting introduced_in values: ${previous} vs ${req.introduced_in}`
+        );
+      }
+
+      existingIntroducedIn.set(req.id, req.introduced_in);
+    }
+  }
+}
 
 // Section slug mapping (markdown anchor format)
 const SECTION_ANCHORS = {
@@ -359,7 +410,7 @@ for (const [sectionNum, reqs] of [...sectionMap.entries()].sort((a, b) => a[0] -
       source_fragment: req.source_fragment,
       source_fragment_hash: hash(req.source_fragment),
       enforcement_class: req.enforcement_class,
-      introduced_in: VERSION,
+      introduced_in: existingIntroducedIn.get(id) ?? VERSION,
       last_reviewed_in: VERSION,
     };
     if (req.error_code) entry.error_code = req.error_code;

@@ -5,6 +5,91 @@ All notable changes to PEAC Protocol will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.14.5] - 2026-05-21
+
+Public Verification Readiness.
+
+Aligns PEAC's public verification, security, stability, compatibility,
+and machine-readable documentation with the v0.14.4 release state.
+Removes stale forward-looking language, clarifies supported versions,
+records measured local SLO baselines, updates deprecated and archived
+package status, and tightens wording around PEAC's protocol boundary.
+
+Public API: unchanged.
+Wire format: unchanged.
+Public schema: unchanged.
+Registered extension groups: unchanged (19).
+Registered receipt types: unchanged (61).
+Conformance sections: unchanged (32).
+Conformance requirement IDs: unchanged (290).
+Published package names: unchanged; package count remains 36.
+No new CLI surface. No new package-publication surface. No new
+signing envelope. No wire/signing change. No runtime behavior change.
+
+### Changed
+
+- **`docs/SLO.md`** records measured local baselines for `issue()` and
+  `verifyLocal()` against the v0.14.4 machine profile; reference
+  verifier and MCP round-trip rows are marked explicitly as not
+  measured in this cycle. Refreshes the `@peac/protocol` version header
+  to v0.14.4 and corrects the capture command.
+- **`SECURITY.md`** adds an Active `v0.14.x` row, a Maintenance
+  `v0.13.x` row, demotes `v0.12.x` to maintenance with a concrete
+  support window, and lists concrete end-of-support windows for
+  `v0.11.x`. Replaces the carrier-controls forward-looking section
+  with a shipped-carrier security-posture section pointing at the
+  shipped profile specs. Replaces the soft external-review wording
+  with an explicit current-coverage statement.
+- **`docs/STABILITY-CONTRACT.md`** classifies `@peac/disc` and
+  `@peac/pref` as `archived` consistent with the workspace state
+  (source under `archive/`, absent from publish manifest), adds an
+  `archived` row to the classification table, splits the `@peac/pref`
+  row out from the supporting-packages group, removes stale
+  forward-looking framing, and uses release-decision wording for
+  stability-boundary changes.
+- **`docs/COMPATIBILITY_MATRIX.md`** adds Deprecation Schedule rows
+  for `@peac/disc` and `@peac/pref` that match the archive
+  classification and name the canonical replacement packages.
+- **`docs/TRUST-ARTIFACTS.md`** replaces stale forward-looking carrier
+  language with pointers to the shipped CLI, lifecycle, and provisioning
+  profile specs, and lists `archived` alongside the other stability
+  classifications.
+- **`llms.txt`** refreshes the install command to
+  `npx -y @peac/mcp-server`, leads with interaction-record wording,
+  switches generic receipt verbs to record verbs in quick-start
+  bullets, and drops named MCP-client examples for vendor-neutral
+  phrasing.
+- **`docs/specs/RESOURCE-LIMITS.md`** uses "Record-content invariants"
+  in the kernel-invariant heading and verifier-scoped wording for the
+  256 KiB body limit.
+- **`docs/specs/DISPUTE.md`** uses verifier-scoped wording for the
+  UPPERCASE canonical form.
+- **`docs/compatibility/commerce-protocol-coverage.md`** uses
+  mapper-boundary-scoped wording for the explicit-finality rule.
+- **`docs/SOLUTIONS/runtime-evidence-export.md`** removes vendor
+  enumeration from the audience block and points related-surface
+  references at shipped CLI and lifecycle records.
+
+### Fixed
+
+- Removes the false claim in `docs/TRUST-ARTIFACTS.md` that CLI
+  execution carriers and lifecycle observation records were still
+  forthcoming; those carriers have shipped and are classified `stable`.
+- Corrects the stale `v0.12.x` security-fix window that pointed at
+  "Through the v0.13.x line" after the v0.13.x line had already
+  shipped.
+- Corrects the documented SLO capture command
+  (`pnpm exec vitest run tests/perf/wire02-slo.test.ts`) to match
+  the test's actual repo-root location.
+
+### Archived
+
+- `@peac/disc` and `@peac/pref` are now formally documented as
+  `archived` in both `docs/STABILITY-CONTRACT.md` and
+  `docs/COMPATIBILITY_MATRIX.md`. Replacements: `@peac/policy-kit` for
+  `peac.txt` policy-document loading; `@peac/mappings-content-signals`
+  for AIPREF / robots.txt / tdmrep parsing.
+
 ## [0.14.4] - 2026-05-19
 
 Composition Surfaces.

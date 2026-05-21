@@ -3,9 +3,9 @@
   "manifest_version": "0.4",
   "name": "peac-mcp-server",
   "display_name": "PEAC Protocol",
-  "version": "0.14.4",
-  "description": "Verify, inspect, decode, issue, and bundle PEAC receipts. Portable, offline-verifiable evidence for AI agent interactions.",
-  "long_description": "PEAC Protocol provides cryptographically signed, offline-verifiable receipts that record what happened during automated interactions. Each receipt is a compact JWS (JSON Web Signature) using Ed25519 signatures. This MCP server exposes 5 tools for receipt operations: verify (signature + claims), inspect (metadata without verification), decode (raw JWS structure), issue (sign new receipts), and create_bundle (portable evidence directories).",
+  "version": "0.14.5",
+  "description": "Verify, inspect, decode, issue, and bundle PEAC records. Portable, offline-verifiable evidence for agent interactions.",
+  "long_description": "PEAC Protocol provides cryptographically signed, offline-verifiable interaction records for automated interactions. Each current Wire record is a compact JWS (JSON Web Signature) using Ed25519 signatures. This MCP server exposes 5 tools for record operations: verify (signature + claims), inspect (metadata without verification), decode (raw JWS structure), issue (sign new records), and create_bundle (portable evidence directories).",
   "author": {
     "name": "Originary",
     "url": "https://www.originary.xyz"
@@ -29,23 +29,23 @@
   "tools": [
     {
       "name": "peac_verify",
-      "description": "Verify a PEAC receipt: check Ed25519 signature, validate claims, and return structured check results. Read-only, no side effects."
+      "description": "Verify a PEAC record JWS: check Ed25519 signature, validate claims, and return structured check results. Read-only, no side effects."
     },
     {
       "name": "peac_inspect",
-      "description": "Inspect a PEAC receipt without verifying the signature. Returns decoded header, payload metadata, and timestamps. Read-only."
+      "description": "Inspect a PEAC record JWS without verifying the signature. Returns decoded header, payload metadata, and timestamps. Read-only."
     },
     {
       "name": "peac_decode",
-      "description": "Raw-decode a PEAC receipt JWS into header and payload objects. No signature check. Use peac_verify for trusted results."
+      "description": "Raw-decode a PEAC record JWS into header and payload objects. No signature check. Use peac_verify for trusted results."
     },
     {
       "name": "peac_issue",
-      "description": "Sign and return a new PEAC receipt JWS. Requires server to be configured with an Ed25519 issuer key (--issuer-key)."
+      "description": "Sign and return a new PEAC record JWS. Requires server to be configured with an Ed25519 issuer key (--issuer-key)."
     },
     {
       "name": "peac_create_bundle",
-      "description": "Create a signed evidence bundle directory from one or more receipt JWS strings. Requires --issuer-key and --bundle-dir."
+      "description": "Create a signed evidence bundle directory from one or more record JWS strings. Requires --issuer-key and --bundle-dir."
     }
   ],
   "keywords": [
@@ -70,7 +70,7 @@
     "issuerKey": {
       "type": "string",
       "title": "Issuer Key",
-      "description": "Ed25519 JWK for receipt issuance (optional; read-only tools work without it). Pass as env:VAR or file:/path.",
+      "description": "Ed25519 JWK for record issuance (optional; read-only tools work without it). Pass as env:VAR or file:/path.",
       "required": false,
       "sensitive": true
     },

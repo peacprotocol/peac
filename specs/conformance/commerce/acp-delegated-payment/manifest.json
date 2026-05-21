@@ -1,6 +1,6 @@
 {
   "name": "commerce/acp-delegated-payment",
-  "version": "0.14.4",
+  "version": "0.14.5",
   "section": 26,
   "subsection": "acp-delegated-payment",
   "description": "Conformance vectors for fromACPDelegatedPaymentObservation in @peac/mappings-acp. Validates the mapper-boundary finality-synthesis guard and settlement-proof discriminator applied to ACP delegated-payment observations across the closed observed_payment_state enum and across strictness modes.",

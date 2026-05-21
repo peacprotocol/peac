@@ -98,11 +98,11 @@ describe('publish-manifest surface audit', () => {
     expect(manifest.totalPackages).toBe(V0_13_1_TARGET_COUNT);
   });
 
-  it('manifest version is either current release (0.14.3) or target (0.14.4)', () => {
+  it('manifest version is either current release (0.14.4) or target (0.14.5)', () => {
     // Version stamping belongs to release prep. Accept either the current
     // released value or the next-release target to keep the gate robust
     // across the release lifecycle.
-    expect(['0.14.3', '0.14.4']).toContain(manifest.version);
+    expect(['0.14.4', '0.14.5']).toContain(manifest.version);
   });
 
   it('totalPackages field matches packages[] length', () => {
