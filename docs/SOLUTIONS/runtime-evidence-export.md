@@ -1,6 +1,6 @@
 # Runtime evidence export
 
-> **Outcome:** Your managed agent runtime (Microsoft Agent Governance Toolkit, Claude Managed Agents, OpenAI ACP-backed runtime, or a custom harness) emits decisions. You want those decisions to leave the runtime as portable signed records that an auditor, a counterparty, or another team can verify offline.
+> **Outcome:** A managed agent runtime or custom harness emits governance decisions. You want those decisions to leave the runtime as portable signed records that an auditor, a counterparty, or another team can verify offline.
 >
 > **Audience:** Runtime / platform operator.
 >
@@ -19,7 +19,7 @@ PEAC packages:
 - `@peac/protocol` — issuance and offline verification.
 - `@peac/crypto` — Ed25519 signing.
 - `@peac/adapter-runtime-governance` — generic runtime-governance observation mapper.
-- `@peac/adapter-managed-agents` — runtime-specific mappings (Claude Managed Agents event families, and similar shapes for other managed runtimes).
+- `@peac/adapter-managed-agents` — runtime-specific mappings for managed-runtime event families.
 
 Optional adjacent systems: any runtime that already produces a structured decision event. This recipe uses the shipped conformance fixtures, so no external runtime is required to run it.
 
@@ -124,8 +124,8 @@ The conformance vectors used in the step-by-step are under [`specs/conformance/r
 
 ## Where to go from here
 
-- [`docs/compatibility/COMPATIBILITY_MATRIX.md`](../COMPATIBILITY_MATRIX.md) — Adapter Readiness row for `@peac/adapter-runtime-governance` and `@peac/adapter-managed-agents`.
+- [`docs/COMPATIBILITY_MATRIX.md`](../COMPATIBILITY_MATRIX.md) — Adapter Readiness row for `@peac/adapter-runtime-governance` and `@peac/adapter-managed-agents`.
 - [`docs/profiles/`](../profiles/) — runtime-governance profile doc.
 - [`docs/WHERE-IT-FITS.md`](../WHERE-IT-FITS.md) — PEAC vs runtime governance boundary.
 - [`docs/WHAT-PEAC-STANDARDIZES.md`](../WHAT-PEAC-STANDARDIZES.md) — what the protocol defines and what it stops at.
-- **Future carrier surfaces:** planned releases extend PEAC to carry CLI execution evidence and observational lifecycle records (eval, approval, experiment, or workflow event exports emitted by other systems) as additional carrier surfaces. The protocol boundary does not change.
+- **Related carrier surfaces:** PEAC also supports CLI execution records and observational lifecycle records as shipped carrier surfaces. These records preserve bounded work emitted by other systems; the protocol boundary does not change.

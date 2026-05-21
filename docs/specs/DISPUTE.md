@@ -451,7 +451,7 @@ Valid characters: `0123456789ABCDEFGHJKMNPQRSTVWXYZ`
 
 ### A.3 Case Sensitivity
 
-PEAC enforces UPPERCASE as the canonical form:
+Canonical form requires UPPERCASE; non-canonical input is rejected by the verifier:
 
 - Generators MUST produce uppercase
 - Validators MAY normalize lowercase but SHOULD warn
