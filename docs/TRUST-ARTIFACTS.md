@@ -12,7 +12,7 @@ the documentation can link here.
 - [Benchmark methodology](BENCHMARK-METHODOLOGY.md): machine profile,
   fixture set, measurement protocol, and reproduction commands.
 - [Stability contract](STABILITY-CONTRACT.md): every public surface
-  classified `stable`, `experimental`, `deprecated`, or `internal-only`.
+  classified `stable`, `experimental`, `deprecated`, `archived`, or `internal-only`.
 - [Threat model](THREAT_MODEL.md): consolidated threat catalog with
   per-threat test-coverage links.
 
@@ -121,10 +121,15 @@ PEAC supports privacy-aware verification and GDPR-aligned
 deployments. PEAC does not replace operator legal review, lawful-basis
 decisions, or controller obligations.
 
-## Forward-looking
+## Carrier surfaces
 
-- Execution-surface carriers (CLI execution evidence; observational
-  lifecycle records) are scheduled for v0.14.1; their pre-doctrine
-  security controls are declared in the
-  [Threat model forward-looking subsection](THREAT_MODEL.md#future-carrier-surfaces-pre-doctrine)
-  and [Stability contract forthcoming subsection](STABILITY-CONTRACT.md#forthcoming-surfaces-pre-doctrine).
+Execution-surface carriers shipped in v0.14.1 and provisioning lifecycle
+carriers shipped in v0.14.2 are classified `stable` in
+[Stability contract](STABILITY-CONTRACT.md) and have CLI surfaces under
+`@peac/cli` (`peac observe command`, `peac record command`, `peac emit lifecycle`).
+The earlier forward-looking security controls described for these
+carriers are now superseded by their shipped specs:
+
+- [`docs/specs/CLI-CARRIER-PROFILE.md`](specs/CLI-CARRIER-PROFILE.md)
+- [`docs/specs/LIFECYCLE-OBSERVATION-PROFILE.md`](specs/LIFECYCLE-OBSERVATION-PROFILE.md)
+- [`docs/specs/PROVISIONING-LIFECYCLE-PROFILE.md`](specs/PROVISIONING-LIFECYCLE-PROFILE.md)

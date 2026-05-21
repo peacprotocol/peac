@@ -124,6 +124,8 @@ Informational and regression-oriented. Operator-facing service-level objectives 
 | ------------------------- | ---------------- | ------------------------ | ------------------------------------------------------------------------------------------------ |
 | `@peac/core`              | v0.10.0          | v0.13.0 (archived)       | Use `@peac/kernel` plus `@peac/schema` plus `@peac/crypto` plus `@peac/protocol`.                |
 | `@peac/sdk`               | v0.12.7          | v0.13.0 (archived)       | Use `@peac/protocol` directly.                                                                   |
+| `@peac/disc`              | v0.12.14         | v0.13.0 (archived)       | Use `@peac/policy-kit` for peac.txt policy-document loading.                                     |
+| `@peac/pref`              | v0.12.14         | v0.13.0 (archived)       | Use `@peac/mappings-content-signals` for AIPREF / robots.txt / tdmrep parsing.                   |
 | API `/verify` endpoint    | v0.12.7          | post-Sunset (2026-11-01) | Use `/v1/verify`. Legacy `/verify` delegates in-process; carries RFC 9745 / RFC 8594 / RFC 8288. |
 | `apps/bridge`             | v0.12.7          | v0.13.0                  | Use `@peac/protocol` or `/api/v1/verify`.                                                        |
 | Wire 0.1 default teaching | v0.12.7          | Immediate                | All defaults now Wire 0.2.                                                                       |

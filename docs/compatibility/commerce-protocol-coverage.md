@@ -34,8 +34,9 @@ overclaim. PEAC keeps them separate.
 
 ## Mapper-boundary finality-synthesis rule
 
-Across all three protocols, PEAC enforces a single rule at the mapper
-boundary in code (`@peac/adapter-core` `assertExplicitFinality`):
+Across all three protocols, the mapper boundary in code
+(`@peac/adapter-core` `assertExplicitFinality`) refuses payloads that
+would synthesize finality the upstream did not claim:
 
 > Commerce mappings preserve raw upstream artifacts and MUST NOT synthesize
 > payment finality from non-payment artifacts or lifecycle states alone.

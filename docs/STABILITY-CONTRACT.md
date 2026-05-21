@@ -7,12 +7,13 @@ expectations to concrete, reviewable entries.
 
 ## Classifications
 
-| Classification  | Commitment                                                                                                                    |
-| --------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `stable`        | Public commitment. Breaking changes at a declared major-version boundary. Wire constants in this class are frozen until v1.0. |
-| `experimental`  | Public but explicitly subject to change. Breaking changes may land in any release with a CHANGELOG note. Flagged in source.   |
-| `deprecated`    | Public and supported within its declared window; scheduled for removal at a named release.                                    |
-| `internal-only` | Not part of the public surface. Not documented on README, `docs/START_HERE.md`, examples, listings, or marketing prose.       |
+| Classification  | Commitment                                                                                                                                                                              |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `stable`        | Public commitment. Breaking changes at a declared major-version boundary. Wire constants in this class are frozen until v1.0.                                                           |
+| `experimental`  | Public but explicitly subject to change. Breaking changes may land in any release with a CHANGELOG note. Flagged in source.                                                             |
+| `deprecated`    | Public and supported within its declared window; scheduled for removal at a named release.                                                                                              |
+| `archived`      | Historical surface removed from the active workspace. Source is preserved under `archive/`; historical npm versions may remain installable, but new integrations MUST NOT depend on it. |
+| `internal-only` | Not part of the public surface. Not documented on README, `docs/START_HERE.md`, examples, listings, or marketing prose.                                                                 |
 
 These classifications describe behavioral stability, not package-level
 maintenance (security and correctness fixes apply to every active line per
@@ -33,36 +34,37 @@ maintenance (security and correctness fixes apply to every active line per
 
 ## Public TypeScript APIs
 
-| Surface (package)                                                                           | Classification  | Notes                                                                                                                      |
-| ------------------------------------------------------------------------------------------- | --------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| [`@peac/protocol`](../packages/protocol) `issue()`                                          | `stable`        | Wire 0.2 issuance entry point                                                                                              |
-| [`@peac/protocol`](../packages/protocol) `verifyLocal()`                                    | `stable`        | Offline verification                                                                                                       |
-| [`@peac/protocol`](../packages/protocol) `verify()`                                         | `stable`        | Verification with optional hosted report assembly                                                                          |
-| `@peac/protocol` discovery / JWKS resolver helpers                                          | `internal-only` | Use via `verifyLocal()` / `verify()`; see [protocol-behavior](specs/PROTOCOL-BEHAVIOR.md)                                  |
-| [`@peac/crypto`](../packages/crypto) Ed25519 sign / verify                                  | `stable`        | RFC 8032 primitives                                                                                                        |
-| [`@peac/crypto`](../packages/crypto) JCS                                                    | `stable`        | RFC 8785 serialization                                                                                                     |
-| [`@peac/schema`](../packages/schema) record + extension-group exports                       | `stable`        | Zod v4 schemas                                                                                                             |
-| [`@peac/kernel`](../packages/kernel) type URIs and constants                                | `stable`        | Some constants relocate in a later release with a compat barrel; announced via [deprecation policy](DEPRECATION_POLICY.md) |
-| `@peac/control` high-level APIs                                                             | `stable`        | Compose `@peac/protocol` with higher-level flows                                                                           |
-| `@peac/middleware-core`, `@peac/middleware-express`                                         | `stable`        | HTTP middleware                                                                                                            |
-| `@peac/disc` issuer-config resolution                                                       | `stable`        | `/.well-known/peac-issuer.json` → `jwks_uri`                                                                               |
-| `@peac/jwks-cache`                                                                          | `stable`        | Bounded LRU JWKS cache with kid-reuse detection                                                                            |
-| `@peac/audit` bundle exports                                                                | `stable`        | Offline dispute-bundle composition                                                                                         |
-| [`@peac/adapter-core`](../packages/adapters/core) `assertExplicitFinality`                  | `stable`        | Commerce mapper-boundary guard                                                                                             |
-| `@peac/mappings-{mcp,a2a,acp,paymentauth,ucp,content-signals,intoto,slsa}`                  | `stable`        | Observation mappers                                                                                                        |
-| `@peac/adapter-{x402,openclaw,eat,did,managed-agents,runtime-governance,openai-compatible}` | `stable`        | Layer 4 adapters                                                                                                           |
-| `@peac/rails-x402`, `@peac/rails-card`, `@peac/rails-razorpay`, `@peac/rails-stripe`        | `stable`        | Commerce rails                                                                                                             |
-| `@peac/http-signatures`                                                                     | `stable`        | RFC 9421 helpers                                                                                                           |
-| `@peac/net-node` SSRF-safe fetch                                                            | `stable`        | Used by resolver paths; see [security considerations](specs/SECURITY-CONSIDERATIONS.md)                                    |
-| `@peac/transport-grpc`                                                                      | `stable`        | A2A gRPC carrier                                                                                                           |
-| `@peac/policy-kit`                                                                          | `stable`        | Policy authoring helpers (non-enforcement)                                                                                 |
-| `@peac/capture-core`, `@peac/capture-node`                                                  | `stable`        | Local capture utilities                                                                                                    |
-| `@peac/telemetry`, `@peac/telemetry-otel`                                                   | `stable`        | OpenTelemetry signals (opt-in)                                                                                             |
-| `@peac/contracts`                                                                           | `stable`        | Machine-readable contract exports                                                                                          |
-| `@peac/pay402`, `@peac/pref`, `@peac/attribution`, `@peac/receipts`                         | `stable`        | Supporting packages on Layer 4                                                                                             |
-| `@peac/worker-core`                                                                         | `stable`        | Worker-oriented helpers                                                                                                    |
-| `@peac/core`                                                                                | `archived`      | Archived at v0.13.0; source under `archive/0.9.0-0.9.14/packages-core/`; historical npm `<=0.9.14` remains installable     |
-| `@peac/sdk`                                                                                 | `archived`      | Archived; historical npm `<=0.10.2` remains installable                                                                    |
+| Surface (package)                                                                           | Classification  | Notes                                                                                                                                                                                                    |
+| ------------------------------------------------------------------------------------------- | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`@peac/protocol`](../packages/protocol) `issue()`                                          | `stable`        | Wire 0.2 issuance entry point                                                                                                                                                                            |
+| [`@peac/protocol`](../packages/protocol) `verifyLocal()`                                    | `stable`        | Offline verification                                                                                                                                                                                     |
+| [`@peac/protocol`](../packages/protocol) `verify()`                                         | `stable`        | Verification with optional hosted report assembly                                                                                                                                                        |
+| `@peac/protocol` discovery / JWKS resolver helpers                                          | `internal-only` | Use only through documented verification flows; do not import resolver helpers directly. See [protocol-behavior](specs/PROTOCOL-BEHAVIOR.md).                                                            |
+| [`@peac/crypto`](../packages/crypto) Ed25519 sign / verify                                  | `stable`        | RFC 8032 primitives                                                                                                                                                                                      |
+| [`@peac/crypto`](../packages/crypto) JCS                                                    | `stable`        | RFC 8785 serialization                                                                                                                                                                                   |
+| [`@peac/schema`](../packages/schema) record + extension-group exports                       | `stable`        | Zod v4 schemas                                                                                                                                                                                           |
+| [`@peac/kernel`](../packages/kernel) type URIs and constants                                | `stable`        | Some constants relocate in a later release with a compat barrel; announced via [deprecation policy](DEPRECATION_POLICY.md)                                                                               |
+| `@peac/control` high-level APIs                                                             | `stable`        | Compose `@peac/protocol` with higher-level flows                                                                                                                                                         |
+| `@peac/middleware-core`, `@peac/middleware-express`                                         | `stable`        | HTTP middleware                                                                                                                                                                                          |
+| `@peac/disc`                                                                                | `archived`      | Archived at v0.13.0; source under `archive/discovery/`; historical npm remains installable. Use `@peac/policy-kit` for peac.txt policy-document loading.                                                 |
+| `@peac/jwks-cache`                                                                          | `stable`        | Bounded LRU JWKS cache with kid-reuse detection                                                                                                                                                          |
+| `@peac/audit` bundle exports                                                                | `stable`        | Offline dispute-bundle composition                                                                                                                                                                       |
+| [`@peac/adapter-core`](../packages/adapters/core) `assertExplicitFinality`                  | `stable`        | Commerce mapper-boundary guard                                                                                                                                                                           |
+| `@peac/mappings-{mcp,a2a,acp,paymentauth,ucp,content-signals,intoto,slsa}`                  | `stable`        | Observation mappers                                                                                                                                                                                      |
+| `@peac/adapter-{x402,openclaw,eat,did,managed-agents,runtime-governance,openai-compatible}` | `stable`        | Layer 4 adapters                                                                                                                                                                                         |
+| `@peac/rails-x402`, `@peac/rails-card`, `@peac/rails-razorpay`, `@peac/rails-stripe`        | `stable`        | Commerce rails                                                                                                                                                                                           |
+| `@peac/http-signatures`                                                                     | `stable`        | RFC 9421 helpers                                                                                                                                                                                         |
+| `@peac/net-node` SSRF-safe fetch                                                            | `stable`        | Used by resolver paths; see [security considerations](specs/SECURITY-CONSIDERATIONS.md)                                                                                                                  |
+| `@peac/transport-grpc`                                                                      | `stable`        | A2A gRPC carrier                                                                                                                                                                                         |
+| `@peac/policy-kit`                                                                          | `stable`        | Policy authoring helpers (non-enforcement)                                                                                                                                                               |
+| `@peac/capture-core`, `@peac/capture-node`                                                  | `stable`        | Local capture utilities                                                                                                                                                                                  |
+| `@peac/telemetry`, `@peac/telemetry-otel`                                                   | `stable`        | OpenTelemetry signals (opt-in)                                                                                                                                                                           |
+| `@peac/contracts`                                                                           | `stable`        | Machine-readable contract exports                                                                                                                                                                        |
+| `@peac/pay402`, `@peac/attribution`, `@peac/receipts`                                       | `stable`        | Supporting packages on Layer 4                                                                                                                                                                           |
+| `@peac/pref`                                                                                | `archived`      | Archived at v0.13.0 (deprecated facade since v0.12.14); source under `archive/pref/`; historical npm remains installable. Use `@peac/mappings-content-signals` for AIPREF / robots.txt / tdmrep parsing. |
+| `@peac/worker-core`                                                                         | `stable`        | Worker-oriented helpers                                                                                                                                                                                  |
+| `@peac/core`                                                                                | `archived`      | Archived at v0.13.0; source under `archive/0.9.0-0.9.14/packages-core/`; historical npm `<=0.9.14` remains installable                                                                                   |
+| `@peac/sdk`                                                                                 | `archived`      | Archived; historical npm `<=0.10.2` remains installable                                                                                                                                                  |
 
 Consumers: import only from the package's documented public entry points.
 Subpath imports into internal modules are not a stable surface even when
@@ -191,7 +193,7 @@ Path: [`surfaces/plugin-pack/`](../surfaces/plugin-pack/).
 | `ProofMethodSchema` (compat alias)                        | v0.12.2          | v0.13.0                  | **Removed in v0.13.0.** Transport-binding values (`http-message-signature`, `dpop`, `mtls`, `jwk-thumbprint`) inlined on `AgentProofSchema.method`.                                                                                |
 | A2A v0.3.0 compatibility path                             | v0.12.3          | v0.13.0                  | **Removed in v0.13.0.** Agent Cards carrying only a top-level `url`, kebab-case TaskState strings, and the `/.well-known/agent.json` legacy discovery path are no longer accepted. A2A v1.0.0 `supportedInterfaces[]` is required. |
 | Legacy `POST /verify` endpoint (in favor of `/v1/verify`) | v0.12.x          | post-Sunset (2026-11-01) | Removed from active OpenAPI teaching at v0.13.0. Runtime alias preserved, delegating in-process to `/v1/verify`, until the advertised Sunset date.                                                                                 |
-| `packages/sdk-js/` workspace stub                         | v0.12.x          | v0.13.0                  | Scheduled                                                                                                                                                                                                                          |
+| `packages/sdk-js/` workspace stub                         | v0.12.x          | v0.13.0                  | **Removed in v0.13.0.** Historical source preserved under `archive/sdk-js/`; new integrations use `@peac/protocol` directly.                                                                                                       |
 | `peac.receipt/0.9` archival format                        | Legacy frozen    | v0.13.0 (quarantine)     | Quarantined to historical contexts; wire stays frozen                                                                                                                                                                              |
 | `@peac/core` archival verify-only path                    | Legacy frozen    | v0.13.0                  | **Archived in v0.13.0** to `archive/0.9.0-0.9.14/packages-core/`; historical npm `<=0.9.14` remains installable.                                                                                                                   |
 
@@ -202,16 +204,16 @@ All status transitions are tracked in
 policy live in [Security operations](SECURITY-OPERATIONS.md) and
 [Deprecation policy](DEPRECATION_POLICY.md).
 
-## Forthcoming surfaces (pre-doctrine)
+## Unshipped experimental surfaces
 
-The following surfaces are not yet shipped. They enter the stability
-contract only when the corresponding code lands. Classifications here are
-forward-looking and binding for the future public code, not for any
-current behavior.
+The following surfaces are not shipped in the current release. They are
+listed only to make the stability boundary explicit. They do not describe
+current behavior and are not a commitment to ship without a separate
+release decision.
 
 | Surface                                               | Status      | Target                                                             |
 | ----------------------------------------------------- | ----------- | ------------------------------------------------------------------ |
-| COSE/CBOR codec flag (`PEAC_EXPERIMENTAL_CODEC=cose`) | Not shipped | `experimental` once shipped; gated by an explicit roadmap decision |
+| COSE/CBOR codec flag (`PEAC_EXPERIMENTAL_CODEC=cose`) | Not shipped | `experimental` once shipped; gated by an explicit release decision |
 
 No public COSE/CBOR codec ships in this release. Security and semantic
 constraints for future codec surfaces are documented when public code
@@ -231,7 +233,7 @@ a public-API commitment.
 | `PEAC_INTERNAL_SHADOW_RESOLVER=1` (env)                                      | `apps/api` shadow-mode diagnostic foundation  | Activates lazy loading of the workspace-private resolver composition layer used by the shadow-mode pointer-fetch parity foundation. v0.13.2 ships only the foundation (boundary, normalization, sink, executor, no-network smoke); no live route integration, no internal endpoint, no public surface change.                                                                                                                                                                                                                                                                                                                    |
 | `PEAC_INTERNAL_SHADOW_BUFFER_SIZE=<n>` (env)                                 | `apps/api` shadow-mismatch-sink ring buffer   | Overrides the default in-memory mismatch sink capacity. Clamped to `[64, 16384]`; default 1024.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | `PEAC_INTERNAL_LEGACY_PATH=1` (env) or `_internal.legacyPath: true` (option) | `@peac/protocol.{issue, verifyLocal, verify}` | For `issue()` and `verifyLocal()`: routes the protocol entry points through the previous direct-canonical admission path (rollback) instead of the bounded validation path (default). For `verifyReceipt()` (Wire 0.1 verifier): no behavioral effect; the bounded validation path is keyed on Wire 0.2 claim shapes. Both flag values produce byte-equivalent public outputs across the covered runtime matrix. Version-specific operator runbook in [`docs/diagnostics/ROLLBACK-v0.14.0.md`](diagnostics/ROLLBACK-v0.14.0.md); release-neutral runbook in [`docs/diagnostics/ROLLBACK-PATH.md`](diagnostics/ROLLBACK-PATH.md). |
-| `PEAC_EXPERIMENTAL_CODEC=<name>` (env, future)                               | `@peac/protocol.{issue, verifyLocal, verify}` | Selects a non-default record codec. v0.13.x ships `jws-jwt` only. Future codecs (e.g., `cose-sign1`) are experimental per the Forthcoming surfaces table.                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `PEAC_EXPERIMENTAL_CODEC=<name>` (env, reserved)                             | `@peac/protocol.{issue, verifyLocal, verify}` | Selects a non-default record codec. v0.13.x ships `jws-jwt` only. Additional codecs, if released, are experimental unless this contract assigns a stronger classification.                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 
 Allowed locations for these identifiers in tracked source:
 
@@ -270,13 +272,13 @@ Either way, the public-call boundary returns the real-path value
 immediately. Shadow scheduling uses a macrotask boundary
 (`setTimeout(..., 0)`) so the shadow function does not run before the
 caller's awaited promise continuation. Pure-CPU validators are
-themselves bounded by the receipt-content invariants in
+themselves bounded by the record-content invariants in
 [Resource limits](specs/RESOURCE-LIMITS.md), so the practical
 resource bound holds even without runtime cancellation.
 
-A future internal release may wire `AbortSignal` plumbing into
-specific validator entry points if a hard cancellation guarantee
-becomes desirable.
+Hard cancellation is not part of the current stability commitment. Any
+cancellation guarantee for validator entry points requires an explicit
+release decision, documented semantics, and tests.
 
 ## Related documents
 

@@ -1,31 +1,31 @@
 # PEAC Protocol
 
 > Open standard for verifiable interaction records across agent, tool, API, and cross-runtime systems. Portable signed records anyone can verify offline.
-> Last reviewed: 2026-04-18
+> Last reviewed: 2026-05-21
 
 ## What is PEAC
 
-PEAC Protocol provides cryptographically signed, offline-verifiable receipts that record what happened during automated interactions. Each receipt is a compact JWS (JSON Web Signature) using Ed25519 signatures that can be verified offline given the issuer's public key (or a pinned JWKS). PEAC does not orchestrate protocols or enforce behavior; it provides neutral evidence of what terms applied and what happened.
+PEAC Protocol provides cryptographically signed, offline-verifiable interaction records for automated interactions. The current signed wire artifact is a compact JWS using Ed25519 signatures and can be verified offline with the issuer's public key or a pinned JWKS. PEAC does not orchestrate protocols or enforce behavior; it provides neutral evidence of what terms applied and what happened.
 
 ## Quick Start
 
-- Install the MCP server: `npm install -g @peac/mcp-server`
-- Verify a receipt: start the MCP server, then call `peac_verify` with a JWS and public key
-- Issue a receipt: use `@peac/protocol` with `issue()` and an Ed25519 signing key
+- Install the MCP server: `npx -y @peac/mcp-server`
+- Verify a record: start the MCP server, then call `peac_verify` with a JWS and public key
+- Issue a record: use `@peac/protocol` with `issue()` and an Ed25519 signing key
 - GitHub: https://github.com/peacprotocol/peac
 - Website: https://www.peacprotocol.org
 
 ## Key Packages
 
 - `@peac/kernel`: Normative constants, error codes, and type definitions (Layer 0)
-- `@peac/schema`: Zod validation schemas for receipts and evidence (Layer 1)
+- `@peac/schema`: Zod validation schemas for interaction records, legacy receipt surfaces, and evidence extensions (Layer 1)
 - `@peac/crypto`: Ed25519 signing and verification (Layer 2)
 - `@peac/protocol`: High-level issue and verify API (Layer 3)
-- `@peac/mcp-server`: MCP server with 5 tools for receipt operations (Layer 5)
+- `@peac/mcp-server`: MCP server with 5 tools for record verification and issuance (Layer 5)
 
 ## Agent Integration
 
-- MCP Server: 5-tool MCP server for Claude Desktop, Cursor, VS Code Copilot, and any MCP client
+- MCP Server: 5-tool MCP server for any MCP-compatible client
 - A2A Mapping: `@peac/mappings-a2a` for Google Agent-to-Agent protocol evidence
 - ACP Mapping: `@peac/mappings-acp` for Agentic Commerce Protocol (ACP) evidence
 - UCP Mapping: `@peac/mappings-ucp` for Universal Commerce Protocol evidence
