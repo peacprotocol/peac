@@ -10,43 +10,49 @@
 
 ## Baseline metadata
 
-| Field                      | Value                                                                                           |
-| -------------------------- | ----------------------------------------------------------------------------------------------- |
-| `baseline_commit`          | `release-prep` (final value stamped on the v0.12.12 release-prep commit)                        |
-| `baseline_date`            | `release-prep` (final value stamped on the v0.12.12 release-prep commit)                        |
-| `baseline_machine_profile` | See [Benchmark methodology](BENCHMARK-METHODOLOGY.md)                                           |
-| Capture method             | `pnpm test --filter @peac/protocol tests/perf/wire02-slo.test.ts` with `PEAC_BENCH_JSON=<path>` |
+| Field                      | Value                                                                       |
+| -------------------------- | --------------------------------------------------------------------------- |
+| `baseline_commit`          | `0c6d2047`                                                                  |
+| `baseline_date`            | `2026-05-21`                                                                |
+| `baseline_machine_profile` | See [Benchmark methodology](BENCHMARK-METHODOLOGY.md)                       |
+| Capture method             | `PEAC_BENCH_JSON=<path> pnpm exec vitest run tests/perf/wire02-slo.test.ts` |
 
-All rows below carry `baseline_commit: release-prep` until the release-prep
-commit replaces the placeholders with captured numbers. The captured numbers
-are the measurement against the `baseline_commit` on the documented machine
-profile; real-world performance varies with hardware, network, workload, and
-receipt size.
+The local protocol operations table below carries captured values for
+`issue()` and `verifyLocal()` measured against the `baseline_commit` on
+the documented machine profile. The reference verifier and MCP
+round-trip tables remain unmeasured this cycle; those rows are outside
+the current measured baseline and require dedicated benchmarks.
+Real-world performance varies with hardware, network, workload, and
+record size.
 
-## Local protocol operations (`@peac/protocol` v0.12.12)
+## Local protocol operations (`@peac/protocol` v0.14.4)
 
-| Operation                               | Median (p50)   | p95            | p99            | Notes                        |
-| --------------------------------------- | -------------- | -------------- | -------------- | ---------------------------- |
-| `issue()` (Ed25519, ~1 KB record)       | `release-prep` | `release-prep` | `release-prep` | Loopback; Ed25519 only       |
-| `verifyLocal()` (Ed25519, ~1 KB record) | `release-prep` | `release-prep` | `release-prep` | Local validation; no network |
+| Operation                               | Median (p50) | p95    | p99    | Notes                                                                                                                    |
+| --------------------------------------- | ------------ | ------ | ------ | ------------------------------------------------------------------------------------------------------------------------ |
+| `issue()` (Ed25519, ~1 KB record)       | 0.4 ms       | 0.5 ms | 0.6 ms | Loopback; Ed25519 only. Measured via `issueWire02()`, which `issue()` delegates to directly without measurable overhead. |
+| `verifyLocal()` (Ed25519, ~1 KB record) | 1.5 ms       | 1.7 ms | 1.9 ms | Local validation; no network.                                                                                            |
 
 The existing SLO gate in [tests/perf/wire02-slo.test.ts](../tests/perf/wire02-slo.test.ts)
 asserts `verifyLocal` p95 MUST be ≤ 10 ms. That gate runs in CI on every PR.
 
 ## Reference verifier (`apps/api` `/v1/verify`)
 
-| Operation                                                     | Median (p50)   | p95            | p99            | Notes                                        |
-| ------------------------------------------------------------- | -------------- | -------------- | -------------- | -------------------------------------------- |
-| `/v1/verify` (Ed25519, ~1 KB record)                          | `release-prep` | `release-prep` | `release-prep` | Loopback; no JWKS resolution                 |
-| `/v1/verify` with JWKS resolution (single issuer, warm cache) | `release-prep` | `release-prep` | `release-prep` | Measured after first request; JWKS cache hot |
+| Operation                                                     | Median (p50)            | p95                     | p99                     | Notes                                        |
+| ------------------------------------------------------------- | ----------------------- | ----------------------- | ----------------------- | -------------------------------------------- |
+| `/v1/verify` (Ed25519, ~1 KB record)                          | Not measured this cycle | Not measured this cycle | Not measured this cycle | Loopback; no JWKS resolution                 |
+| `/v1/verify` with JWKS resolution (single issuer, warm cache) | Not measured this cycle | Not measured this cycle | Not measured this cycle | Measured after first request; JWKS cache hot |
+
+> Reference verifier rows are outside the current measured baseline and require dedicated benchmarks against the same machine profile.
 
 ## MCP tool-call round-trip with record issuance
 
-| Operation                                                                 | Median (p50)   | p95            | p99            | Notes                 |
-| ------------------------------------------------------------------------- | -------------- | -------------- | -------------- | --------------------- |
-| MCP `tools/call` round-trip emitting `_meta.org.peacprotocol/receipt_jws` | `release-prep` | `release-prep` | `release-prep` | Local stdio transport |
+| Operation                                                                 | Median (p50)            | p95                     | p99                     | Notes                 |
+| ------------------------------------------------------------------------- | ----------------------- | ----------------------- | ----------------------- | --------------------- |
+| MCP `tools/call` round-trip emitting `_meta.org.peacprotocol/receipt_jws` | Not measured this cycle | Not measured this cycle | Not measured this cycle | Local stdio transport |
 
-## Receipt size classes used in the table
+> MCP round-trip row is outside the current measured baseline and requires a dedicated benchmark against the same machine profile.
+
+## Record size classes used in the table
 
 - Class A: ~1 KB record (typical agent observation; used in the rows above).
 - Class B: ~8 KB record (commerce evidence with attached upstream artifact).
@@ -64,35 +70,20 @@ The published numbers reflect Class A unless a row explicitly states otherwise.
   [Hosted Verify contract](HOSTED_VERIFY_CONTRACT.md).
 - Baseline numbers describe loopback measurement on the documented machine
   profile. Production performance varies with hardware, network, workload,
-  and receipt size.
-- SLO numbers are not available for future execution-surface carriers (CLI
-  execution evidence; observational lifecycle records). Those carriers
-  enter the SLO document at v0.14.1; see the forward-looking subsection
-  below.
+  and record size.
+- Carrier-specific capture overhead is not measured this cycle. The local
+  signing and verification cost for records emitted by those carriers is
+  represented by the `issue()` and `verifyLocal()` rows above.
 
 ## Regression policy
 
 - `verifyLocal()` p95 is gated by the existing CI benchmark regression
   check in [tests/perf/wire02-slo.test.ts](../tests/perf/wire02-slo.test.ts).
-- `issue()` baseline is published here and becomes a regression-gate
-  candidate alongside the broader mutation-testing baseline work tracked
-  for a future release.
-- Reference verifier `/v1/verify` baseline is published here. Regression
-  gating is scheduled to evolve alongside the existing Go middleware
-  benchmark discipline.
-
-## Future execution-surface carriers (pre-doctrine)
-
-This subsection is forward-looking. It documents the expected SLO
-commitments for future public carriers that have not yet shipped. These
-rules apply when, and only when, the corresponding carriers land.
-
-- CLI execution-evidence carrier: SLO rows publish at v0.14.1 against the
-  same machine profile. Until v0.14.1 ships, no CLI execution-evidence
-  SLO is claimed.
-- Observational lifecycle-record carrier: SLO rows publish at v0.14.1.
-  Lifecycle records are observational-only; SLO measures record-emission
-  time on the PEAC side, not the upstream producing system.
+- `issue()` baseline is published here. It is not a blocking regression
+  gate until a dedicated gate is added and documented.
+- Reference verifier `/v1/verify` baseline is not published in this cycle.
+  It enters regression policy only after a measured baseline is captured
+  against the documented machine profile.
 
 ## Related documents
 

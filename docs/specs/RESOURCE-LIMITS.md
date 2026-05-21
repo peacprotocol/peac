@@ -10,16 +10,16 @@
 
 Resource limits exist for three reasons: predictable verification cost,
 predictable wire size, and explicit denial-of-service surface area.
-Limits are deliberately small. Tightening a limit is a roadmap decision;
-loosening one is a stability-contract change.
+Limits are deliberately small. Tightening a limit requires a documented
+release decision; loosening one is a stability-contract change.
 
 ## Invariant table
 
 The reference values below ship at v0.13.0. Each row points at the
-authoritative constant; if a future release tightens the value, the
-constant is the single source of truth and this row is updated.
+authoritative constant. When a release changes a value, the constant is
+the single source of truth and this row is updated.
 
-### Receipt-content invariants (kernel)
+### Record-content invariants (kernel)
 
 | Invariant                      | Value   | Constant                                                                                                                 | Test                                                                                                                     |
 | ------------------------------ | ------- | ------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------ |
@@ -229,9 +229,10 @@ NOT skip any layer's cap.
   PEAC-managed app-level header-byte budget; header-size rejection is
   left to the runtime / parser / deployment layer (Node's HTTP server
   exposes `maxHeaderSize`; current Node documentation lists the
-  default at 16 KiB, but deployment hosts may differ). A request body
-  is the sized payload that PEAC enforces, capped at 256 KiB by
-  `MAX_BODY_SIZE` in [`apps/api/src/verify-v1.ts`](../../apps/api/src/verify-v1.ts).
+  default at 16 KiB, but deployment hosts may differ). The request body
+  is the payload bounded by the reference verifier. Requests above
+  256 KiB are rejected by `MAX_BODY_SIZE` in
+  [`apps/api/src/verify-v1.ts`](../../apps/api/src/verify-v1.ts).
 
 ## CLI capture limits
 
@@ -266,7 +267,7 @@ The full CLI subcommand contract is specified in
 
 ## Tightening process
 
-A future release MAY tighten any limit in this document. Tightening is
+A release MAY tighten any limit in this document. Tightening is
 a stability-contract change; the new value MUST be:
 
 1. Recorded in this document with the new value and the constant path.
@@ -274,8 +275,8 @@ a stability-contract change; the new value MUST be:
 3. Guarded by a test that asserts the new ceiling.
 4. Captured in [`CHANGELOG.md`](../../CHANGELOG.md) under "Changed".
 
-A future release MUST NOT loosen any limit in this document without an
-explicit roadmap decision recorded in
+A release MUST NOT loosen any limit in this document without an explicit
+release decision recorded in
 [`docs/STABILITY-CONTRACT.md`](../STABILITY-CONTRACT.md). Loosening is
 a stability classification flip and follows the same lifecycle as a
 public-API breaking change.

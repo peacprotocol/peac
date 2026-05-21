@@ -1,6 +1,6 @@
 # Security Policy
 
-Last reviewed: 2026-04-19
+Last reviewed: 2026-05-21
 
 This is the canonical security policy for the PEAC Protocol. It describes
 how to report a vulnerability, which versions receive security fixes, what
@@ -35,12 +35,14 @@ kept in the loop and the disclosure calendar is coordinated.
 
 ## Supported versions
 
-| Line                             | Status                            | Wire format                         | Security-fix window            |
-| -------------------------------- | --------------------------------- | ----------------------------------- | ------------------------------ |
-| `v0.12.x`                        | Active                            | Wire 0.2 (`interaction-record+jwt`) | Through the `v0.13.x` line     |
-| `v0.11.x`                        | Maintenance (security fixes only) | Wire 0.1 (`peac-receipt/0.1`)       | 6 months after `v0.13.0` ships |
-| `v0.10.x` and earlier            | End of life                       | Wire 0.1 and earlier                | No further updates             |
-| `peac.receipt/0.9` archival path | Historical verify-only            | `peac.receipt/0.9`                  | Archived at `v0.13.0`          |
+| Line                             | Status                                     | Wire format                         | Security-fix window                           |
+| -------------------------------- | ------------------------------------------ | ----------------------------------- | --------------------------------------------- |
+| `v0.14.x`                        | Active (current)                           | Wire 0.2 (`interaction-record+jwt`) | Through the next minor line                   |
+| `v0.13.x`                        | Maintenance (security fixes only)          | Wire 0.2 (`interaction-record+jwt`) | 6 months after the next minor line ships      |
+| `v0.12.x`                        | Maintenance (critical security fixes only) | Wire 0.2 (`interaction-record+jwt`) | Through 2026-11-03 (6 months after `v0.14.0`) |
+| `v0.11.x`                        | Maintenance (security fixes only)          | Wire 0.1 (`peac-receipt/0.1`)       | Through 2026-10-25 (6 months after `v0.13.0`) |
+| `v0.10.x` and earlier            | End of life                                | Wire 0.1 and earlier                | No further updates                            |
+| `peac.receipt/0.9` archival path | Historical verify-only                     | `peac.receipt/0.9`                  | Archived at `v0.13.0`                         |
 
 See [Compatibility matrix](docs/COMPATIBILITY_MATRIX.md) for full runtime
 and wire-format compatibility, and [Security operations](docs/SECURITY-OPERATIONS.md)
@@ -97,9 +99,11 @@ scan is clean; the scan is the authoritative check.
   pull requests, pushes to main, and weekly.
 - Dependency review blocks CRITICAL advisories and denies GPL-3.0 /
   AGPL-3.0 introductions.
-- External security review cadence: scope and artifact list are planned
-  for a future release; execution is coordinated with an independent
-  reviewer.
+- Independent third-party security review has not been completed for this
+  release. Current review coverage includes CodeQL, dependency review,
+  provenance attestations, audit gating, threat-model coverage, and release
+  verification. Any completed third-party review will be listed here with
+  scope and date.
 
 ## Trust artifacts
 
@@ -119,29 +123,26 @@ Full trust documentation is organized in
 - [HTTP transport security](docs/security/HTTP-TRANSPORT-SECURITY.md).
 - [OWASP ASI mapping](docs/security/OWASP-ASI-MAPPING.md).
 
-## Future carrier security controls (pre-doctrine)
+## Carrier security controls
 
-Future execution-surface carriers (CLI execution evidence; observational
-lifecycle records) are not shipped. Their security contract is
-pre-declared so that future implementation MUST honor the rules on day
-one:
+Execution, lifecycle, and provisioning carrier surfaces are shipped and
+covered by their profile specifications:
 
-- No raw secret capture by default; redaction or hashing defaults for
-  `argv`, `stdin`, `stdout`, `stderr`.
-- Hash-only default for stream captures unless a documented
-  `capture_policy` enables raw capture.
-- Environment-variable allowlist plus value hashing; no blanket
-  environment dump.
-- Explicit `argv_mode` for shell-string invocations; no hidden shell
-  expansion.
-- Bounded byte ceilings on command capture; truncation or hashing
-  replaces silent drops.
-- Lifecycle records observational-only; no implied PEAC decision, trust
-  score, policy enforcement, or payment finality.
+- [CLI carrier profile](docs/specs/CLI-CARRIER-PROFILE.md)
+- [Lifecycle observation profile](docs/specs/LIFECYCLE-OBSERVATION-PROFILE.md)
+- [Provisioning lifecycle profile](docs/specs/PROVISIONING-LIFECYCLE-PROFILE.md)
 
-Each rule above becomes a named threat ID with a concrete test file when
-the corresponding surface is implemented. Details in
-[Threat model: future carrier surfaces](docs/THREAT_MODEL.md#future-carrier-surfaces-pre-doctrine).
+The carrier security posture is:
+
+- no raw secret capture by default;
+- redaction or hashing defaults for `argv`, `stdin`, `stdout`, and `stderr`;
+- hash-only default for stream captures unless an explicit capture policy enables raw capture;
+- environment-variable allowlists plus value hashing, not blanket environment dumps;
+- explicit `argv_mode` for shell-string invocations;
+- bounded byte ceilings on command capture, with truncation or hashing instead of silent drops;
+- lifecycle records are observational only and do not imply PEAC decisions, trust scores, policy enforcement, or payment finality.
+
+Each rule is covered by the shipped profile specs and threat-model coverage.
 
 ## Contacts
 
