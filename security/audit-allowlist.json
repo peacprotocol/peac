@@ -8,7 +8,7 @@
       "reason": "esbuild dev server CSRF (MODERATE) -- dev-only via wrangler@3.114.17 -> esbuild@0.17.19. Surfaces/workers build tool only.",
       "why_not_exploitable": "esbuild dev server is only used during local worker development builds. Not exposed in production. wrangler 3.114.17 is the latest 3.x; wrangler 4.x is a major version change requiring separate evaluation.",
       "where_used": "surfaces/workers/cloudflare devDependency: wrangler@3.114.17 -> @esbuild-plugins/* -> esbuild@0.17.19",
-      "expires_at": "2026-05-21",
+      "expires_at": "2026-08-19",
       "remediation": "Evaluate wrangler 4.x migration or wait for 3.x backport",
       "issue_url": "https://github.com/advisories/GHSA-67mh-4wv8-2f99",
       "scope": "dev",
@@ -20,7 +20,7 @@
       "verified_by": "pnpm audit --prod shows no MODERATE; pnpm why esbuild confirms wrangler-only path",
       "owner": "jithinraj",
       "added_at": "2026-02-19",
-      "reviewed_at": "2026-03-24"
+      "reviewed_at": "2026-05-21"
     },
     {
       "advisory_id": "GHSA-g9mf-h72j-4rw9",
@@ -28,7 +28,7 @@
       "reason": "undici decompression bomb (MODERATE) -- dev-only via wrangler@3.114.17 -> miniflare -> undici@5.29.0. Local dev tool only.",
       "why_not_exploitable": "undici is used by miniflare (local Cloudflare Workers simulator) for HTTP fetches during development. Not in published packages. No external HTTP responses are processed in production via this path.",
       "where_used": "surfaces/workers/cloudflare devDependency: wrangler@3.114.17 -> miniflare@3.x -> undici@5.29.0",
-      "expires_at": "2026-05-21",
+      "expires_at": "2026-08-19",
       "remediation": "Evaluate wrangler 4.x migration or wait for 3.x backport",
       "issue_url": "https://github.com/advisories/GHSA-g9mf-h72j-4rw9",
       "scope": "dev",
@@ -36,7 +36,7 @@
       "verified_by": "pnpm audit --prod shows no MODERATE; pnpm why undici confirms wrangler-only path",
       "owner": "jithinraj",
       "added_at": "2026-02-19",
-      "reviewed_at": "2026-03-24"
+      "reviewed_at": "2026-05-21"
     },
     {
       "advisory_id": "GHSA-2g4f-4pwh-qvx6",
@@ -44,7 +44,7 @@
       "reason": "ajv $data ReDoS (MODERATE) -- transitive via eslint@10 -> ajv@6.12.6. Direct ajv dependency bumped to 8.18.0 (patched). Remaining path is eslint's internal ajv v6.",
       "why_not_exploitable": "ajv v6 is used internally by eslint for config schema validation. No user-supplied data reaches ajv's $data code path in our usage. Dev-only linting tool.",
       "where_used": "Root devDependency chain: eslint@10.0.1 -> ajv@6.12.6; typescript-eslint@8.56.0 -> eslint -> ajv@6.12.6",
-      "expires_at": "2026-05-21",
+      "expires_at": "2026-08-19",
       "remediation": "Wait for eslint to upgrade internal ajv dependency to >= 8.18.0",
       "issue_url": "https://github.com/advisories/GHSA-2g4f-4pwh-qvx6",
       "scope": "dev",
@@ -52,7 +52,7 @@
       "verified_by": "pnpm audit --prod shows no MODERATE; direct ajv bumped to 8.18.0; remaining is eslint transitive",
       "owner": "jithinraj",
       "added_at": "2026-02-19",
-      "reviewed_at": "2026-03-24"
+      "reviewed_at": "2026-05-21"
     },
     {
       "advisory_id": "GHSA-vrm6-8vpv-qv8q",

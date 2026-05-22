@@ -1,7 +1,7 @@
 {
   "family": "cli-execution",
   "description": "CLI execution observation parity vectors. Six deterministic JSON observation payloads exercising CLI-EXEC-001..006 schema-shape semantics. Every vector is INTERNALLY VALID against CliExecutionSchema; semantic-rejection cases (path-leak, raw-without-unsafe, env-not-in-allowlist, stream-ref inconsistency, shell_mode without shell_ref, etc.) live in the schema validator tests at packages/schema/__tests__/extensions/cli-execution.test.ts. The corpus exists to pin a deterministic floor of canonical observation shapes for cross-language conformance.",
-  "version": "0.14.4",
+  "version": "0.14.5",
   "generator": "manual; cli-execution v0.1 floor",
   "vectors": [
     {
