@@ -90,7 +90,7 @@ signing envelope. No wire/signing change. No runtime behavior change.
   `peac.txt` policy-document loading; `@peac/mappings-content-signals`
   for AIPREF / robots.txt / tdmrep parsing.
 
-## [0.14.4] - 2026-05-19
+## [0.14.4]
 
 Composition Surfaces.
 
@@ -155,7 +155,7 @@ signing envelope. No wire/signing change.
 - `docs/SOLUTIONS/mcp-tool-call-receipts.md` gains one cross-link to
   the new MCP composition guide.
 
-## [0.14.3] - 2026-05-17
+## [0.14.3]
 
 Agent Action, Commerce Mandate, and Gateway Export Records.
 
@@ -236,7 +236,7 @@ Default observable behavior: unchanged for existing surfaces.
   `@peac/example-telemetry-otel@0.0.0`; no published runtime package
   depends on protobufjs.
 
-## [0.14.2] - 2026-05-10
+## [0.14.2]
 
 Provisioning Lifecycle Records.
 
