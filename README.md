@@ -21,14 +21,18 @@ verified outside the system that produced them.
 PEAC is useful when a system does work and another party later needs to
 verify what happened without trusting that system's logs.
 
-| Event              | Example record                                                                                                     |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------ |
-| API call           | request, response, usage, access decision, policy-visible outcome                                                  |
-| MCP tool run       | tool input/output reference, tool result, issuer, timestamp, signature                                             |
-| Agent action       | action invoked, delegated, approved, denied, cancelled, or timed out                                               |
-| Gateway decision   | access, routing, export, or boundary decision reported by a gateway                                                |
-| Payment event      | payment request, authorization, settlement observation, mandate, dispute context                                   |
-| Provisioning event | catalog, provider link, account, credential, budget, subscription, domain, deployment, or resource lifecycle event |
+| Event              | Familiar surfaces                                                                                     | Example record                                                                                                     |
+| ------------------ | ----------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| API call           | Stripe-style APIs, Cloudflare Workers, Vercel functions, internal HTTP services                       | request, response, usage, access decision, policy-visible outcome                                                  |
+| MCP tool run       | MCP servers, Smithery-listed tools, internal MCP servers                                              | tool input/output reference, tool result, issuer, timestamp, signature                                             |
+| Agent action       | A2A handoffs, agent-framework steps, Microsoft AGT-style runtime events                               | action invoked, delegated, approved, denied, cancelled, or timed out                                               |
+| Gateway decision   | Cloudflare, Portkey, Kong, API gateways, AI gateways                                                  | access, routing, export, or boundary decision reported by a gateway                                                |
+| Payment event      | x402, paymentauth / MPP, ACP, AP2-style commerce flows                                                | payment request, authorization, settlement observation, mandate, dispute context                                   |
+| Provisioning event | Stripe Projects-style provider setup, Vercel deployments, GitHub Actions, Terraform-managed resources | catalog, provider link, account, credential, budget, subscription, domain, deployment, or resource lifecycle event |
+
+These are orientation examples, not partnership claims or exclusive
+integration targets. PEAC records what those systems report; it does not
+replace them.
 
 PEAC does not make those decisions. It records what another system
 reported, binds it to an issuer and time, and makes it portable for
@@ -63,7 +67,7 @@ workflows.
    facts + policy/context + result + time + issuer + signature
 
 3. A counterparty verifies the record
-   locally with issuer keys, or through a self-hosted verifier
+   locally, in CI, or through a self-hosted verifier using issuer keys
 
 4. The record travels
    audit review, dispute review, compliance workflow, incident report,
@@ -146,6 +150,11 @@ PEAC does not replace those systems. It gives them a portable records
 layer: what was reported, by whom, when, under which context, and with
 which verifiable signature.
 
+If you work around MCP, A2A, x402, paymentauth / MPP, ACP, AP2-style
+commerce, UCP-style commerce, runtime governance, OpenTelemetry, or
+internal platform workflows, PEAC is the signed-record layer beside
+those systems, not a replacement for them.
+
 ## Why PEAC
 
 Modern systems often need proof that travels beyond the system that
@@ -180,6 +189,9 @@ Practical recipes under [`docs/SOLUTIONS/`](docs/SOLUTIONS/):
 
 - [API record issuance](docs/SOLUTIONS/api-receipt-issuance.md)
 - [MCP tool-call records](docs/SOLUTIONS/mcp-tool-call-receipts.md)
+- [Agent action records](docs/SOLUTIONS/verify-agent-action.md)
+- [Gateway export records](docs/SOLUTIONS/verify-gateway-export.md)
+- [Commerce mandate records](docs/SOLUTIONS/verify-commerce-mandate.md)
 - [Commerce evidence bundle](docs/SOLUTIONS/commerce-evidence-bundle.md)
 - [Cloudflare x402 + PEAC](docs/SOLUTIONS/cloudflare-x402-peac.md)
 - [Runtime evidence export](docs/SOLUTIONS/runtime-evidence-export.md)
