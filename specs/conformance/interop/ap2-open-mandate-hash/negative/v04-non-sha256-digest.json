@@ -1,0 +1,22 @@
+{
+  "$schema": "../../../schemas/interop-vector.json",
+  "vector_id": "ap2-open-mandate-hash-v04-non-sha256-digest",
+  "description": "Composition failure: a candidate implementation derived the digest with SHA-1 over the JCS canonical bytes instead of SHA-256. The repository interop verifier confirms that this candidate digest does not equal the SHA-256 derivation defined in AP2 issue #265.",
+  "input": {
+    "body": {
+      "mandate_type": "open_checkout_mandate",
+      "mandate_version": "0.1.0",
+      "principal": "did:web:ap2.example/users/user-001",
+      "agent": "did:web:ap2.example/agents/agent-001",
+      "currency": "USD",
+      "amount_minor": 0,
+      "items": [],
+      "issued_at": "2026-05-23T00:00:00Z"
+    },
+    "candidate_open_mandate_hash_via_sha1": "46c6074b18eddd23921ab4c2cbf6d6305ea9a293"
+  },
+  "expected_failure": {
+    "kind": "digest_failure",
+    "reason": "non_sha256_digest"
+  }
+}

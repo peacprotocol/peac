@@ -1,0 +1,23 @@
+{
+  "$schema": "../../../schemas/interop-vector.json",
+  "vector_id": "ap2-open-mandate-hash-v05-non-jcs-canonicalization",
+  "description": "Composition failure: a candidate implementation serialized the unsigned mandate body with JSON.stringify in source-order instead of the RFC 8785 JCS canonical order. The repository interop verifier confirms that the candidate byte sequence does not equal the JCS canonical bytes defined in AP2 issue #265.",
+  "input": {
+    "body": {
+      "mandate_type": "open_checkout_mandate",
+      "mandate_version": "0.1.0",
+      "principal": "did:web:ap2.example/users/user-001",
+      "agent": "did:web:ap2.example/agents/agent-001",
+      "currency": "USD",
+      "amount_minor": 0,
+      "items": [],
+      "issued_at": "2026-05-23T00:00:00Z"
+    },
+    "candidate_non_jcs_bytes_utf8": "{\"issued_at\":\"2026-05-23T00:00:00Z\",\"items\":[],\"amount_minor\":0,\"currency\":\"USD\",\"agent\":\"did:web:ap2.example/agents/agent-001\",\"principal\":\"did:web:ap2.example/users/user-001\",\"mandate_version\":\"0.1.0\",\"mandate_type\":\"open_checkout_mandate\"}",
+    "candidate_open_mandate_hash_via_non_jcs": "d17e94eaeb3e614b75cca7f9e73a08e09d07269473a56f7bd821968a9a4e7047"
+  },
+  "expected_failure": {
+    "kind": "canonicalization_failure",
+    "reason": "non_jcs_canonicalization"
+  }
+}

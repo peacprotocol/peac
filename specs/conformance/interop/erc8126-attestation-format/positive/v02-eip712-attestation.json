@@ -1,0 +1,17 @@
+{
+  "$schema": "../../../schemas/interop-vector.json",
+  "vector_id": "erc8126-attestation-format-v02-eip712-attestation",
+  "description": "Validation Registry attestation reference carrying the illustrative fixture carrier label `eip712`.",
+  "input": {
+    "agent_id": "did:web:erc8126.example/agents/agent-002",
+    "verification_type": "MCV",
+    "risk_score": 32,
+    "attestationFormat": "eip712",
+    "attestation_ref": "urn:peac:interop:erc8126:eip712-attestation:0002",
+    "observed_at": "2026-05-23T00:00:00Z"
+  },
+  "expected": {
+    "canonical_bytes_utf8_length": 232,
+    "canonical_bytes_sha256_hex": "a18b9de864a3018db3665e16039bfae2fdf504a8f03564ed9a41c17cea87fab6"
+  }
+}

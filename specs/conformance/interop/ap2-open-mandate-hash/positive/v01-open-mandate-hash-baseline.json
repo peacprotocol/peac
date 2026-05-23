@@ -1,0 +1,19 @@
+{
+  "$schema": "../../../schemas/interop-vector.json",
+  "vector_id": "ap2-open-mandate-hash-v01-open-mandate-hash-baseline",
+  "description": "Baseline unsigned open-checkout-mandate body with empty items list and zero authorized amount.",
+  "input": {
+    "mandate_type": "open_checkout_mandate",
+    "mandate_version": "0.1.0",
+    "principal": "did:web:ap2.example/users/user-001",
+    "agent": "did:web:ap2.example/agents/agent-001",
+    "currency": "USD",
+    "amount_minor": 0,
+    "items": [],
+    "issued_at": "2026-05-23T00:00:00Z"
+  },
+  "expected": {
+    "canonical_bytes_utf8_length": 242,
+    "open_mandate_hash": "d1a24ae8a67d4dc30358245e8230b6f0588bc4ddd611ae4bbf2a131afc74f42c"
+  }
+}

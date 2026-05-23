@@ -1,0 +1,20 @@
+{
+  "$schema": "../../../schemas/interop-vector.json",
+  "vector_id": "ap2-open-mandate-hash-v03-open-mandate-hash-with-expiry",
+  "description": "Unsigned open-checkout-mandate body with an absolute expiry timestamp at the mandate level.",
+  "input": {
+    "mandate_type": "open_checkout_mandate",
+    "mandate_version": "0.1.0",
+    "principal": "did:web:ap2.example/users/user-001",
+    "agent": "did:web:ap2.example/agents/agent-001",
+    "currency": "USD",
+    "amount_minor": 0,
+    "items": [],
+    "expires_at": "2026-12-31T23:59:59Z",
+    "issued_at": "2026-05-23T00:00:00Z"
+  },
+  "expected": {
+    "canonical_bytes_utf8_length": 278,
+    "open_mandate_hash": "483a3952ef63af0ef06176dc69e57f5a08afdc791d9cf696775612248bcb6b80"
+  }
+}

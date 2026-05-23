@@ -1,0 +1,16 @@
+{
+  "$schema": "../../../schemas/interop-vector.json",
+  "vector_id": "erc8126-attestation-format-v05-missing-format",
+  "description": "Validation Registry attestation post that omits the attestationFormat field entirely; the repository interop verifier rejects it.",
+  "input": {
+    "agent_id": "did:web:erc8126.example/agents/agent-005",
+    "verification_type": "WV",
+    "risk_score": 12,
+    "attestation_ref": "urn:peac:interop:erc8126:missing-format-attestation:0005",
+    "observed_at": "2026-05-23T00:00:00Z"
+  },
+  "expected_failure": {
+    "kind": "validation_failure",
+    "reason": "missing_attestation_format"
+  }
+}
