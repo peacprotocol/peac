@@ -1,0 +1,17 @@
+{
+  "$schema": "../../../schemas/interop-vector.json",
+  "vector_id": "erc8126-attestation-format-v04-unknown-format",
+  "description": "Validation Registry attestation post whose attestationFormat label is not drawn from the recognized open-label set; the repository interop verifier rejects it.",
+  "input": {
+    "agent_id": "did:web:erc8126.example/agents/agent-004",
+    "verification_type": "SCV",
+    "risk_score": 41,
+    "attestationFormat": "vendor-x-proprietary-format",
+    "attestation_ref": "urn:peac:interop:erc8126:unknown-attestation:0004",
+    "observed_at": "2026-05-23T00:00:00Z"
+  },
+  "expected_failure": {
+    "kind": "validation_failure",
+    "reason": "unsupported_attestation_format"
+  }
+}

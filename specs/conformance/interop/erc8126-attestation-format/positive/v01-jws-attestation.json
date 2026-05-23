@@ -1,0 +1,17 @@
+{
+  "$schema": "../../../schemas/interop-vector.json",
+  "vector_id": "erc8126-attestation-format-v01-jws-attestation",
+  "description": "Validation Registry attestation reference carrying the illustrative fixture carrier label `jws`.",
+  "input": {
+    "agent_id": "did:web:erc8126.example/agents/agent-001",
+    "verification_type": "ETV",
+    "risk_score": 18,
+    "attestationFormat": "jws",
+    "attestation_ref": "urn:peac:interop:erc8126:jws-attestation:0001",
+    "observed_at": "2026-05-23T00:00:00Z"
+  },
+  "expected": {
+    "canonical_bytes_utf8_length": 226,
+    "canonical_bytes_sha256_hex": "5c9518545f8a0129d2237439cce67629e24419a648a926ad63e21a2ecf055d67"
+  }
+}

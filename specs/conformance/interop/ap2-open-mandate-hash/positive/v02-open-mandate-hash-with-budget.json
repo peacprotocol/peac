@@ -1,0 +1,24 @@
+{
+  "$schema": "../../../schemas/interop-vector.json",
+  "vector_id": "ap2-open-mandate-hash-v02-open-mandate-hash-with-budget",
+  "description": "Unsigned open-checkout-mandate body with a budget object capping authorized spend at the mandate-interval level.",
+  "input": {
+    "mandate_type": "open_checkout_mandate",
+    "mandate_version": "0.1.0",
+    "principal": "did:web:ap2.example/users/user-001",
+    "agent": "did:web:ap2.example/agents/agent-001",
+    "currency": "USD",
+    "amount_minor": 25000,
+    "items": [],
+    "budget": {
+      "currency": "USD",
+      "amount_minor": 25000,
+      "interval": "per_mandate"
+    },
+    "issued_at": "2026-05-23T00:00:00Z"
+  },
+  "expected": {
+    "canonical_bytes_utf8_length": 320,
+    "open_mandate_hash": "ab362e76f926ce22c5ad8ae5c0eba3829bdbb7a27cc0f577e47d881f75308224"
+  }
+}

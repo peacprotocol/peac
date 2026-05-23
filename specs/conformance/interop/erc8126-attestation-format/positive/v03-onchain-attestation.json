@@ -1,0 +1,17 @@
+{
+  "$schema": "../../../schemas/interop-vector.json",
+  "vector_id": "erc8126-attestation-format-v03-onchain-attestation",
+  "description": "Validation Registry attestation reference carrying the illustrative fixture carrier label `onchain`.",
+  "input": {
+    "agent_id": "did:web:erc8126.example/agents/agent-003",
+    "verification_type": "WAV",
+    "risk_score": 7,
+    "attestationFormat": "onchain",
+    "attestation_ref": "urn:peac:interop:erc8126:onchain-attestation:0003",
+    "observed_at": "2026-05-23T00:00:00Z"
+  },
+  "expected": {
+    "canonical_bytes_utf8_length": 233,
+    "canonical_bytes_sha256_hex": "a58287adf296a1dc7a9092eceb4f66c49e6aa752699833647161154fcbcfd5d5"
+  }
+}
