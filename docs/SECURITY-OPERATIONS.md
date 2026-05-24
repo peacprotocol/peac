@@ -1,6 +1,6 @@
 # Security operations
 
-> Version: 0.12.13 | Status: Current
+> Status: Current
 
 This document describes the operational security model of the PEAC Protocol: support windows, incident handling, supply chain provenance, logging boundaries, tenant isolation, and data residency.
 
@@ -91,7 +91,7 @@ SBOM generation (SPDX or CycloneDX) is planned but not yet configured. The turbo
 
 No multi-tenant surface. All operations are in-process. Operators control all isolation boundaries.
 
-### Hosted Verify (planned, v0.12.8)
+### Hosted Verify (planned)
 
 | Boundary             | Mechanism                                        |
 | -------------------- | ------------------------------------------------ |
