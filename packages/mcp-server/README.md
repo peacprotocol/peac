@@ -1,6 +1,6 @@
 # @peac/mcp-server
 
-MCP tool server for signed interaction receipt operations: verify, inspect, decode, issue, and bundle.
+Local MCP server for PEAC signed interaction records. It exposes tools to verify, inspect, decode, issue, and bundle PEAC records through stdio or the local Streamable HTTP transport.
 
 ## Installation
 
@@ -16,7 +16,7 @@ npx @peac/mcp-server
 
 ## What It Does
 
-`@peac/mcp-server` exposes PEAC receipt operations as Model Context Protocol (MCP) tools that AI agents and LLM-based applications can call. It supports both stdio and Streamable HTTP transports, with static policy enforcement, concurrency limits, input size guards, and structured error responses with recovery hints.
+`@peac/mcp-server` exposes PEAC signed interaction record operations as Model Context Protocol (MCP) tools that AI agents and LLM-based applications can call. It supports both stdio and Streamable HTTP transports, with static policy checks, concurrency limits, input size guards, and structured error responses with recovery hints.
 
 ## How Do I Use It?
 
@@ -72,18 +72,6 @@ npx @peac/mcp-server \
 npx @peac/mcp-server --transport http --port 3000
 ```
 
-### MCP tools
-
-| Tool                 | Description                               | Availability                                               |
-| -------------------- | ----------------------------------------- | ---------------------------------------------------------- |
-| `peac_verify`        | Verify a receipt JWS signature and claims | Always                                                     |
-| `peac_inspect`       | Inspect receipt structure and metadata    | Always                                                     |
-| `peac_decode`        | Decode a receipt JWS without verification | Always                                                     |
-| `peac_issue`         | Sign and return a new receipt JWS         | Requires `--issuer-key` and `--issuer-id`                  |
-| `peac_create_bundle` | Create a signed evidence bundle directory | Requires `--issuer-key`, `--issuer-id`, and `--bundle-dir` |
-
-All tool responses include `_meta` with `serverVersion`, `policyHash`, `protocolVersion`, and `registeredTools`.
-
 ### CLI options
 
 | Flag                    | Description                                            | Default          |
@@ -121,9 +109,21 @@ const result = await handleVerify({
 });
 ```
 
+## Available tools
+
+| Tool                 | Description                                                     | Availability                                               |
+| -------------------- | --------------------------------------------------------------- | ---------------------------------------------------------- |
+| `peac_verify`        | Verify a PEAC signed interaction record.                        | Always                                                     |
+| `peac_inspect`       | Inspect a PEAC signed interaction record without verification.  | Always                                                     |
+| `peac_decode`        | Decode a PEAC receipt JWS header and payload for diagnostics.   | Always                                                     |
+| `peac_issue`         | Issue a PEAC signed interaction record from provided claims.    | Requires `--issuer-key` and `--issuer-id`                  |
+| `peac_create_bundle` | Create a PEAC bundle from signed records and related artifacts. | Requires `--issuer-key`, `--issuer-id`, and `--bundle-dir` |
+
+All tool responses include `_meta` with `serverVersion`, `policyHash`, `protocolVersion`, and `registeredTools`.
+
 ## Integrates With
 
-- `@peac/protocol` (Layer 3): Receipt issuance and verification
+- `@peac/protocol` (Layer 3): signed-record issuance and verification
 - `@peac/crypto` (Layer 2): JWS signing and decoding
 - `@peac/schema` (Layer 1): Receipt schema validation
 - `@peac/kernel` (Layer 0): Error codes and constants
@@ -131,13 +131,13 @@ const result = await handleVerify({
 
 ## For Agent Developers
 
-Connect your agent to this server over stdio or HTTP to gain receipt verification, decoding, and issuance capabilities. The tools use structured outputs with error codes and `next_action` recovery hints so your agent can handle failures programmatically. Every response includes `_meta` for audit and traceability.
+Connect your agent to this server over stdio or HTTP to gain signed-record verification, receipt decoding, and issuance capabilities. The tools use structured outputs with error codes and `next_action` recovery hints so your agent can handle failures programmatically. Every response includes `_meta` for audit and traceability.
 
 Read-only tools (`peac_verify`, `peac_inspect`, `peac_decode`) are available with no configuration. To enable issuance, provide an Ed25519 signing key via `--issuer-key` and `--issuer-id`.
 
 ## For Operators
 
-The server enforces static policy with configurable concurrency limits, input size bounds, JWS size caps, and tool timeouts. HTTP transport binds to localhost by default with CORS deny-all. The stdout fence prevents non-JSON-RPC output from corrupting the stdio transport.
+The server applies static policy checks with configurable concurrency limits, input size bounds, JWS size caps, and tool timeouts. HTTP transport binds to localhost by default with CORS deny-all. The stdout fence prevents non-JSON-RPC output from corrupting the stdio transport.
 
 Security properties: no ambient key discovery (keys must be explicitly provided), no implicit network fetches from tool handlers, path traversal prevention on bundle output, and session isolation on HTTP transport.
 
