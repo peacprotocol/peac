@@ -1,6 +1,6 @@
 # Security operations
 
-> Version: 0.12.13 | Status: Current
+> Status: Current
 
 This document describes the operational security model of the PEAC Protocol: support windows, incident handling, supply chain provenance, logging boundaries, tenant isolation, and data residency.
 

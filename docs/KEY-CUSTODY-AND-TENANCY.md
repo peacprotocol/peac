@@ -1,6 +1,6 @@
 # Key custody and tenancy
 
-> Version: 0.12.13 | Status: Current
+> Status: Current
 
 This document describes the key custody architecture, tenancy guarantees, and procurement model for organizations evaluating or deploying the PEAC Protocol.
 

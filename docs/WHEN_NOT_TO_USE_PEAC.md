@@ -1,6 +1,6 @@
 # When Not to Use PEAC
 
-> Version: 0.12.7 | Status: Current
+> Status: Current
 
 PEAC Protocol is a signed evidence layer for recording what happened during automated interactions. It is not a general-purpose infrastructure tool. This document describes scenarios where PEAC is the wrong choice.
 
