@@ -121,7 +121,7 @@ The MCP server and mapping test suites cover the `_meta` carrier path; `examples
 
 - [MCP composition with PEAC records](mcp-composition.md) — composition guide covering MCP auth observations, conformance discipline, schema evolution, deprecated MCP surfaces, and the PEAC-vs-MCP boundary.
 - [MCP Integration Kit](../../integrator-kits/mcp/README.md) — full MCP setup guide.
-- [`packages/mcp-server/`](../../packages/mcp-server/) — server reference (5 evidence tools).
+- [`packages/mcp-server/`](../../packages/mcp-server/) — server reference (5 MCP record tools).
 - [`packages/mappings/mcp/`](../../packages/mappings/mcp/) — `_meta` carrier mapping reference.
 - [`docs/specs/EVIDENCE-CARRIER-CONTRACT.md`](../specs/EVIDENCE-CARRIER-CONTRACT.md) — MCP / A2A / UCP carrier budgets and key names.
 - [`docs/compatibility/COMPATIBILITY_MATRIX.md`](../COMPATIBILITY_MATRIX.md) — Adapter Readiness for `@peac/mcp-server` and `@peac/mappings-mcp`.

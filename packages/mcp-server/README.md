@@ -16,7 +16,7 @@ npx @peac/mcp-server
 
 ## What It Does
 
-`@peac/mcp-server` exposes PEAC receipt operations as Model Context Protocol (MCP) tools that AI agents and LLM-based applications can call. It supports both stdio and Streamable HTTP transports, with static policy checks, concurrency limits, input size guards, and structured error responses with recovery hints.
+`@peac/mcp-server` exposes PEAC signed interaction record operations as Model Context Protocol (MCP) tools that AI agents and LLM-based applications can call. It supports both stdio and Streamable HTTP transports, with static policy checks, concurrency limits, input size guards, and structured error responses with recovery hints.
 
 ## How Do I Use It?
 
@@ -123,7 +123,7 @@ All tool responses include `_meta` with `serverVersion`, `policyHash`, `protocol
 
 ## Integrates With
 
-- `@peac/protocol` (Layer 3): Receipt issuance and verification
+- `@peac/protocol` (Layer 3): signed-record issuance and verification
 - `@peac/crypto` (Layer 2): JWS signing and decoding
 - `@peac/schema` (Layer 1): Receipt schema validation
 - `@peac/kernel` (Layer 0): Error codes and constants
@@ -131,7 +131,7 @@ All tool responses include `_meta` with `serverVersion`, `policyHash`, `protocol
 
 ## For Agent Developers
 
-Connect your agent to this server over stdio or HTTP to gain receipt verification, decoding, and issuance capabilities. The tools use structured outputs with error codes and `next_action` recovery hints so your agent can handle failures programmatically. Every response includes `_meta` for audit and traceability.
+Connect your agent to this server over stdio or HTTP to gain signed-record verification, receipt decoding, and issuance capabilities. The tools use structured outputs with error codes and `next_action` recovery hints so your agent can handle failures programmatically. Every response includes `_meta` for audit and traceability.
 
 Read-only tools (`peac_verify`, `peac_inspect`, `peac_decode`) are available with no configuration. To enable issuance, provide an Ed25519 signing key via `--issuer-key` and `--issuer-id`.
 
