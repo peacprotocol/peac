@@ -40,8 +40,9 @@ function extractSection(text: string, heading: string): string {
 
 const SECTION_TEXT = extractSection(DOC_TEXT, SECTION_HEADING);
 
-// Forbidden phrasings assembled from fragments. The phrasings describe
-// overclaims the doc must never make about the PEAC and AGT relationship.
+// Disallowed relationship phrasings are assembled from fragments so this
+// guard can catch accidental overclaims without presenting them as supported
+// documentation.
 const FORBIDDEN_MICROSOFT_PARTNERSHIP = ['Microsoft', 'partnership'].join(' ');
 const FORBIDDEN_AGT_ADOPTED_PEAC = ['AGT', 'adopted', 'PEAC'].join(' ');
 const FORBIDDEN_PEAC_ADOPTS_AGT = ['PEAC', 'adopts', 'AGT'].join(' ');
