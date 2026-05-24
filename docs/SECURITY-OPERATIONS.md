@@ -91,7 +91,7 @@ SBOM generation (SPDX or CycloneDX) is planned but not yet configured. The turbo
 
 No multi-tenant surface. All operations are in-process. Operators control all isolation boundaries.
 
-### Hosted Verify (planned, v0.12.8)
+### Hosted Verify (planned)
 
 | Boundary             | Mechanism                                        |
 | -------------------- | ------------------------------------------------ |

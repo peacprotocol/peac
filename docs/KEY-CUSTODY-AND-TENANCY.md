@@ -29,7 +29,7 @@ The signing interface (`signWire02()`) accepts raw Ed25519 private keys. Organiz
 
 When organizations run `@peac/protocol` or `@peac/mcp-server` locally, all cryptographic operations execute in-process. There is no shared state, no external network calls during signing, and no multi-tenant surface.
 
-### Hosted Verify (planned, v0.12.8)
+### Hosted Verify (planned)
 
 The Hosted Verify API uses per-API-key tenant isolation:
 

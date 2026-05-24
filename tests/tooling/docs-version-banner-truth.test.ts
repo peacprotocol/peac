@@ -1,18 +1,22 @@
 /**
- * Doc-truth gate for public documentation status banners.
+ * Doc-truth gate against stale version-specific current/planned markers in
+ * evergreen public docs.
  *
- * Public docs MUST NOT use the legacy banner pattern
+ * Public docs MUST NOT use either of the legacy version-bound patterns:
  *
  *   > Version: <X.Y.Z> | Status: Current
  *
- * because the embedded version becomes stale as soon as the package
- * release moves forward. Evergreen guidance uses the version-neutral
- * pattern
+ *   ### Some Heading (planned, v<X.Y.Z>)
+ *
+ * because the embedded version becomes stale as soon as the package release
+ * moves forward. Evergreen guidance uses the version-neutral forms:
  *
  *   > Status: Current
  *
- * (as in docs/REFERENCE_ARCHITECTURES.md). Release-specific notes
- * already live under docs/release-notes/ and are not in scope.
+ *   ### Some Heading (planned)
+ *
+ * (as in docs/REFERENCE_ARCHITECTURES.md). Release-specific notes already
+ * live under docs/release-notes/ and are not in scope.
  */
 
 import { describe, expect, it } from 'vitest';
@@ -27,8 +31,9 @@ const DOCS_ROOT = join(REPO_ROOT, 'docs');
 // truth artifacts).
 const EXCLUDED_SUBDIRS = new Set(['release-notes', 'releases', 'reboot', 'baselines']);
 
-// Pattern that should never appear in evergreen public docs.
+// Patterns that should never appear in evergreen public docs.
 const STALE_BANNER = /^>\s*Version:\s*\d+\.\d+\.\d+\s*\|\s*Status:\s*Current\b/m;
+const VERSIONED_PLANNED_MARKER = /\(planned,\s*v?\d+\.\d+\.\d+\)/i;
 
 function collectMarkdownFiles(root: string, results: string[] = []): string[] {
   for (const entry of readdirSync(root)) {
@@ -56,6 +61,16 @@ describe('docs status banners: no versioned "Status: Current" claims', () => {
     it(`${rel} does not carry a versioned "Status: Current" banner`, () => {
       const text = readFileSync(path, 'utf8');
       expect(text).not.toMatch(STALE_BANNER);
+    });
+  }
+});
+
+describe('docs planned markers: no versioned "(planned, vX.Y.Z)" claims', () => {
+  for (const path of MD_FILES) {
+    const rel = path.slice(REPO_ROOT.length + 1);
+    it(`${rel} does not carry a versioned "(planned, vX.Y.Z)" marker`, () => {
+      const text = readFileSync(path, 'utf8');
+      expect(text).not.toMatch(VERSIONED_PLANNED_MARKER);
     });
   }
 });
