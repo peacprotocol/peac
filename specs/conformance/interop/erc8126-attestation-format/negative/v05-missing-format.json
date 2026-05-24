@@ -1,7 +1,7 @@
 {
   "$schema": "../../../schemas/interop-vector.json",
   "vector_id": "erc8126-attestation-format-v05-missing-format",
-  "description": "Validation Registry attestation post that omits the attestationFormat field entirely; the repository interop verifier rejects it.",
+  "description": "Validation Registry attestation reference that omits the fixture carrier label; the repository interop verifier rejects it.",
   "input": {
     "agent_id": "did:web:erc8126.example/agents/agent-005",
     "verification_type": "WV",

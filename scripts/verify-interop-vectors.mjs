@@ -189,7 +189,7 @@ function verifyErc8126Positive(vector, path) {
     issues.push(`${rel}: positive vector must declare attestationFormat`);
   } else if (!RECOGNIZED_ATTESTATION_LABELS.has(input.attestationFormat)) {
     issues.push(
-      `${rel}: positive vector attestationFormat ${input.attestationFormat} not in recognized open-label set { jws, eip712, onchain }`
+      `${rel}: positive vector attestationFormat ${input.attestationFormat} not in fixture label set { jws, eip712, onchain }`
     );
   }
   const expected = vector.expected;
@@ -239,7 +239,7 @@ function verifyErc8126Negative(vector, path) {
       issues.push(`${rel}: v04 must declare attestationFormat to exercise unsupported-format path`);
     } else if (RECOGNIZED_ATTESTATION_LABELS.has(input.attestationFormat)) {
       issues.push(
-        `${rel}: v04 attestationFormat ${input.attestationFormat} should not be in recognized open-label set`
+        `${rel}: v04 attestationFormat ${input.attestationFormat} should not be in fixture label set`
       );
     }
   } else if (filename === 'v05-missing-format.json') {
