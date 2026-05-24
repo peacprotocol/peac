@@ -111,6 +111,14 @@ PEAC reads what the runtime reported, records it under the canonical `org.peacpr
 - [Verify commerce-mandate records](verify-commerce-mandate.md): commerce-mandate observations alongside runtime decisions.
 - [Compatibility matrix — `@peac/adapter-runtime-governance` row](../COMPATIBILITY_MATRIX.md): record families, fixture-only stability class, and the runtime-governance mapper note.
 
-## Footnote on an upstream anchoring proposal
+## PEAC records and the AGT EvidenceAnchor proposal (informational)
 
-Microsoft AGT PR #2244 is an upstream proposal for a pluggable external anchoring slot. This recipe does not cover it. If the upstream project merges the proposal or publishes stable documentation for it, PEAC should document the relationship separately while preserving the same runtime boundary.
+The upstream proposal `microsoft/agent-governance-toolkit#2244` (AGT PR #2244) merged on 2026-05-18 as an EvidenceAnchor design document. The current upstream artifact is proposal documentation; no Python abstract base class, CLI flag, `anchors[]` schema emission, or plugin package is shipped in AGT today. EvidenceAnchor is currently an AGT proposal, not an implemented dependency surface.
+
+The existing PEAC and AGT composition remains record-only:
+
+> **AGT runs the runtime. PEAC records what AGT reported.**
+
+If AGT implements the proposed SPI, PEAC records can be referenced as portable signed artifacts by an anchor backend without changing PEAC wire format or AGT runtime behavior. The relevant composition point is deterministic canonical bytes: the AGT proposal describes RFC 8785 JCS + SHA-256 action references, while PEAC records use deterministic canonicalization for signed verification artifacts. That shared canonicalization contract is the narrow composition point: a PEAC record can remain a portable signed artifact that an anchor backend could reference once the upstream interface is implemented.
+
+No implementation lands in PEAC with this section. PEAC adds no AGT runtime dependency. PEAC adds no SPI shim. PEAC does not become an anchor backend, and AGT does not become a PEAC consumer. The relationship described above is conditional on upstream implementation; until then the existing record-only boundary stands unchanged.
