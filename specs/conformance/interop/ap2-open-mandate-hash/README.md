@@ -6,7 +6,7 @@ This directory holds repository interop fixtures that exercise the `open_mandate
 open_mandate_hash = sha256_hex(JCS_RFC8785(unsigned open-checkout-mandate body))
 ```
 
-(lowercase hexadecimal; the hash input is the claims object, not the JWS compact form). These fixtures complement the cross-implementation work already present in that thread; they do not extend AP2 or replace the AP2 mandate mechanism.
+(lowercase hexadecimal; the hash input is the unsigned mandate body / claims object, not the JWS compact form). These fixtures complement the cross-implementation vector work already present in that issue; they do not extend AP2 or replace the AP2 mandate mechanism.
 
 ## Layout
 
@@ -43,7 +43,7 @@ All positive fixtures share a baseline shape:
 | `budget`          | object  | Present only on `v02-open-mandate-hash-with-budget`.               |
 | `expires_at`      | string  | Present only on `v03-open-mandate-hash-with-expiry`.               |
 
-The vectors deliberately do not target the canonicalization edge cases already covered by the cross-implementation work in `AP2#265` (object-key-order, array-order, optional fields, currency-minor-unit, Unicode NFC vs NFD). PEAC-side coverage is scenario-shaped: baseline, budget-bound, expiry-bound, plus the two negative composition-failure cases.
+The vectors deliberately do not target the canonicalization edge cases already covered by the cross-implementation vector work in `AP2#265` (object-key-order, array-order, optional fields, currency-minor-unit, Unicode NFC vs NFD). These repository fixtures are scenario-shaped: baseline, budget-bound, expiry-bound, plus the two negative composition-failure cases.
 
 ## Verification
 

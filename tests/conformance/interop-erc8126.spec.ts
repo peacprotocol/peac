@@ -3,7 +3,7 @@
  *
  * Repository interop fixtures under specs/conformance/interop/erc8126-attestation-format/
  * are validated for envelope shape, deterministic JCS canonical-bytes
- * regeneration, recognized open-label set membership, and declared
+ * regeneration, fixture label set membership, and declared
  * expected_failure shape on negative vectors. Negative-vector reason
  * strings are fixture-scoped and not stable PEAC error codes.
  */
@@ -86,7 +86,7 @@ describe('ERC-8126 attestation-format interop vectors', () => {
           expect(vector).not.toHaveProperty('expected_failure');
         });
 
-        it('declares attestationFormat in the recognized open-label set', () => {
+        it('declares attestationFormat in the fixture label set', () => {
           expect(typeof vector.input.attestationFormat).toBe('string');
           expect(RECOGNIZED_LABELS.has(vector.input.attestationFormat!)).toBe(true);
         });
