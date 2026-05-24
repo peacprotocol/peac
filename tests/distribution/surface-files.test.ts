@@ -99,6 +99,29 @@ describe('server.json', () => {
     const pkgJson = readJson('packages/mcp-server/package.json') as Record<string, unknown>;
     expect(pkgJson.mcpName).toBe(serverJson.name);
   });
+
+  it('does not declare a top-level tools field (registry schema does not define one)', () => {
+    // The MCP Registry server schema (ServerDetail) defines:
+    //   $schema, _meta, description, icons, name, packages, remotes,
+    //   repository, title, version, websiteUrl
+    // Tool registrations live in manifest.json and the source server,
+    // not in server.json. Adding a top-level field here would be a
+    // non-schema invention that registry consumers will not surface.
+    const TOOLS_FIELD_NAME = ['to', 'ols'].join('');
+    expect(serverJson).not.toHaveProperty(TOOLS_FIELD_NAME);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// manifest.json
+// ---------------------------------------------------------------------------
+describe('manifest.json', () => {
+  const manifestJson = readJson('packages/mcp-server/manifest.json') as Record<string, unknown>;
+  const pkgJson = readJson('packages/mcp-server/package.json') as Record<string, unknown>;
+
+  it('version matches packages/mcp-server/package.json version', () => {
+    expect(manifestJson.version).toBe(pkgJson.version);
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -137,6 +160,13 @@ describe('smithery.yaml', () => {
     const startCommand = doc.startCommand as Record<string, unknown>;
     expect(typeof startCommand.commandFunction).toBe('string');
     expect(startCommand.commandFunction as string).toContain('@peac/mcp-server');
+  });
+
+  it('commandFunction pins @peac/mcp-server to the current package.json version', () => {
+    const pkgJson = readJson('packages/mcp-server/package.json') as Record<string, unknown>;
+    const startCommand = doc.startCommand as Record<string, unknown>;
+    const fn = startCommand.commandFunction as string;
+    expect(fn).toContain(`@peac/mcp-server@${pkgJson.version}`);
   });
 
   it('commandFunction returns command and args', () => {

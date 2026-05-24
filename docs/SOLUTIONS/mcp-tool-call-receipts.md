@@ -16,7 +16,7 @@ PEAC attaches a signed record to the MCP tool-call response via the `_meta` carr
 
 PEAC packages:
 
-- `@peac/mcp-server` — MCP server with built-in evidence tools (`verify`, `inspect`, `issue`, `bundle`).
+- `@peac/mcp-server` — MCP server with built-in record tools (`peac_verify`, `peac_inspect`, `peac_decode`, `peac_issue`, `peac_create_bundle`).
 - `@peac/mappings-mcp` — MCP `_meta` carrier mapping.
 - `@peac/protocol` — issuance and offline verification.
 - `@peac/crypto` — Ed25519 signing.
