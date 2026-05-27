@@ -54,7 +54,7 @@ const TIER_A_ROWS: ReadonlyArray<Row> = [
   },
   {
     id: 'x402-peac-owned-surface',
-    heading: '### 3. x402 — PEAC-owned surface only',
+    heading: '### 3. x402 \u2014 PEAC-owned surface only',
     requiredPaths: [
       'specs/conformance/fixtures/x402/',
       'packages/adapters/x402/',

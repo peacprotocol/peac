@@ -34,7 +34,7 @@ const DOC_TEXT = readFileSync(DOC_PATH, 'utf8');
 const ROW_HEADINGS = [
   '### 1. AP2 `open_mandate_hash`',
   '### 2. ERC-8126 attestation references (with ERC-8004 Validation Registry context)',
-  '### 3. x402 — PEAC-owned surface only',
+  '### 3. x402 \u2014 PEAC-owned surface only',
 ] as const;
 
 function extractSection(text: string, heading: string): string {
