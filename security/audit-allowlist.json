@@ -60,7 +60,7 @@
       "reason": "undici WebSocket permessage-deflate memory consumption (HIGH) -- dev-only via wrangler@3.114.17 -> miniflare -> undici@5.29.0. Local dev tool only.",
       "why_not_exploitable": "undici 5.29.0 is used by miniflare (local Cloudflare Workers simulator). Not in published packages. Production uses undici 6.24.0 (patched). No WebSocket connections in the miniflare dev path reach external servers.",
       "where_used": "surfaces/workers/cloudflare devDependency: wrangler@3.114.17 -> miniflare@3.x -> undici@5.29.0",
-      "expires_at": "2026-05-30",
+      "expires_at": "2026-08-25",
       "remediation": "Evaluate wrangler 4.x migration or wait for 3.x backport",
       "issue_url": "https://github.com/advisories/GHSA-vrm6-8vpv-qv8q",
       "scope": "dev",
@@ -68,7 +68,7 @@
       "verified_by": "pnpm audit --prod shows no HIGH for undici; pnpm ls undici -r confirms 6.24.0 in prod, 5.29.0 only in wrangler dev path",
       "owner": "jithinraj",
       "added_at": "2026-03-14",
-      "reviewed_at": "2026-05-15"
+      "reviewed_at": "2026-05-27"
     },
     {
       "advisory_id": "GHSA-v9p9-hfj2-hcw8",
@@ -76,7 +76,7 @@
       "reason": "undici WebSocket server_max_window_bits validation (HIGH) -- dev-only via wrangler@3.114.17 -> miniflare -> undici@5.29.0. Local dev tool only.",
       "why_not_exploitable": "undici 5.29.0 is used by miniflare (local Cloudflare Workers simulator). Not in published packages. Production uses undici 6.24.0 (patched). No WebSocket connections in the miniflare dev path reach external servers.",
       "where_used": "surfaces/workers/cloudflare devDependency: wrangler@3.114.17 -> miniflare@3.x -> undici@5.29.0",
-      "expires_at": "2026-05-30",
+      "expires_at": "2026-08-25",
       "remediation": "Evaluate wrangler 4.x migration or wait for 3.x backport",
       "issue_url": "https://github.com/advisories/GHSA-v9p9-hfj2-hcw8",
       "scope": "dev",
@@ -84,7 +84,7 @@
       "verified_by": "pnpm audit --prod shows no HIGH for undici; pnpm ls undici -r confirms 6.24.0 in prod, 5.29.0 only in wrangler dev path",
       "owner": "jithinraj",
       "added_at": "2026-03-14",
-      "reviewed_at": "2026-05-15"
+      "reviewed_at": "2026-05-27"
     },
     {
       "advisory_id": "GHSA-2w6w-674q-4c4q",
@@ -92,14 +92,15 @@
       "reason": "handlebars AST type confusion (CRITICAL) -- dev-only via ts-jest@29.4.5 -> handlebars@4.7.8. Test tool only.",
       "why_not_exploitable": "handlebars is used by ts-jest for internal template compilation. Not in published packages. No user-supplied templates are processed. Dev-only test infrastructure.",
       "where_used": "Root devDependency chain: ts-jest@29.4.5 -> handlebars@4.7.8",
-      "expires_at": "2026-05-30",
+      "expires_at": "2026-08-25",
       "remediation": "Wait for handlebars 4.8.0+ or ts-jest to drop handlebars dependency",
       "issue_url": "https://github.com/advisories/GHSA-2w6w-674q-4c4q",
       "scope": "dev",
       "dependency_chain": ["ts-jest@29.4.5", "handlebars@4.7.8"],
       "verified_by": "pnpm audit --prod shows no CRITICAL; pnpm why handlebars confirms ts-jest-only path",
       "owner": "jithinraj",
-      "added_at": "2026-03-28"
+      "added_at": "2026-03-28",
+      "reviewed_at": "2026-05-27"
     },
     {
       "advisory_id": "GHSA-xjpj-3mr7-gcpf",
@@ -107,14 +108,15 @@
       "reason": "handlebars CLI precompiler injection (HIGH) -- dev-only via ts-jest@29.4.5 -> handlebars@4.7.8. Test tool only; CLI precompiler not used.",
       "why_not_exploitable": "handlebars CLI precompiler is not invoked in PEAC builds. handlebars is only loaded by ts-jest for template compilation. Dev-only.",
       "where_used": "Root devDependency chain: ts-jest@29.4.5 -> handlebars@4.7.8",
-      "expires_at": "2026-05-30",
+      "expires_at": "2026-08-25",
       "remediation": "Wait for handlebars 4.8.0+ or ts-jest to drop handlebars dependency",
       "issue_url": "https://github.com/advisories/GHSA-xjpj-3mr7-gcpf",
       "scope": "dev",
       "dependency_chain": ["ts-jest@29.4.5", "handlebars@4.7.8"],
       "verified_by": "pnpm audit --prod shows no HIGH for handlebars",
       "owner": "jithinraj",
-      "added_at": "2026-03-28"
+      "added_at": "2026-03-28",
+      "reviewed_at": "2026-05-27"
     },
     {
       "advisory_id": "GHSA-xhpv-hc6g-r9c6",
@@ -122,14 +124,15 @@
       "reason": "handlebars AST type confusion (HIGH) -- dev-only via ts-jest@29.4.5 -> handlebars@4.7.8. Test tool only.",
       "why_not_exploitable": "handlebars is only loaded by ts-jest for template compilation. No user-supplied templates. Dev-only.",
       "where_used": "Root devDependency chain: ts-jest@29.4.5 -> handlebars@4.7.8",
-      "expires_at": "2026-05-30",
+      "expires_at": "2026-08-25",
       "remediation": "Wait for handlebars 4.8.0+ or ts-jest to drop handlebars dependency",
       "issue_url": "https://github.com/advisories/GHSA-xhpv-hc6g-r9c6",
       "scope": "dev",
       "dependency_chain": ["ts-jest@29.4.5", "handlebars@4.7.8"],
       "verified_by": "pnpm audit --prod shows no HIGH for handlebars",
       "owner": "jithinraj",
-      "added_at": "2026-03-28"
+      "added_at": "2026-03-28",
+      "reviewed_at": "2026-05-27"
     },
     {
       "advisory_id": "GHSA-9cx6-37pm-9jff",
@@ -137,14 +140,15 @@
       "reason": "handlebars malformed decorator DoS (HIGH) -- dev-only via ts-jest@29.4.5 -> handlebars@4.7.8. Test tool only.",
       "why_not_exploitable": "handlebars is only loaded by ts-jest for template compilation. No user-supplied templates. Dev-only.",
       "where_used": "Root devDependency chain: ts-jest@29.4.5 -> handlebars@4.7.8",
-      "expires_at": "2026-05-30",
+      "expires_at": "2026-08-25",
       "remediation": "Wait for handlebars 4.8.0+ or ts-jest to drop handlebars dependency",
       "issue_url": "https://github.com/advisories/GHSA-9cx6-37pm-9jff",
       "scope": "dev",
       "dependency_chain": ["ts-jest@29.4.5", "handlebars@4.7.8"],
       "verified_by": "pnpm audit --prod shows no HIGH for handlebars",
       "owner": "jithinraj",
-      "added_at": "2026-03-28"
+      "added_at": "2026-03-28",
+      "reviewed_at": "2026-05-27"
     },
     {
       "advisory_id": "GHSA-3mfm-83xf-c92r",
@@ -152,14 +156,15 @@
       "reason": "handlebars AST type confusion (HIGH) -- dev-only via ts-jest@29.4.5 -> handlebars@4.7.8. Test tool only.",
       "why_not_exploitable": "handlebars is only loaded by ts-jest for template compilation. No user-supplied templates. Dev-only.",
       "where_used": "Root devDependency chain: ts-jest@29.4.5 -> handlebars@4.7.8",
-      "expires_at": "2026-05-30",
+      "expires_at": "2026-08-25",
       "remediation": "Wait for handlebars 4.8.0+ or ts-jest to drop handlebars dependency",
       "issue_url": "https://github.com/advisories/GHSA-3mfm-83xf-c92r",
       "scope": "dev",
       "dependency_chain": ["ts-jest@29.4.5", "handlebars@4.7.8"],
       "verified_by": "pnpm audit --prod shows no HIGH for handlebars",
       "owner": "jithinraj",
-      "added_at": "2026-03-28"
+      "added_at": "2026-03-28",
+      "reviewed_at": "2026-05-27"
     },
     {
       "advisory_id": "GHSA-p9ff-h696-f583",
