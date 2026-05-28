@@ -1,7 +1,7 @@
 # Signed-records interop matrix
 
 **Status:** Informative.
-**Last checked:** 2026-05-27T10:53:25Z.
+**Last checked:** 2026-05-28T03:15:00Z.
 
 This matrix records how PEAC composes with adjacent records, attestations, digests, and payment evidence surfaces. For each row it lists the upstream source, the upstream status at the Last checked timestamp, the PEAC-side artifacts that already exist in this repository, the composition shape, and the boundary between PEAC and the upstream system.
 
@@ -41,6 +41,17 @@ PEAC records references and observations through committed PEAC artifacts and do
 | Composition                     | A PEAC interaction record preserves an observation of an x402 payment response or settlement-related response surfaced by a PEAC-owned x402 surface. The PEAC record envelope uses RFC 8785 JCS and SHA-256; the x402 facilitator response shape and settlement signature are preserved as observed. |
 | Boundary                        | PEAC records observations from PEAC-owned x402 surfaces. PEAC does not execute settlement, hold funds, or act as a facilitator. This row anchors to the official upstream repository and to PEAC-owned surfaces only; PEAC-side recipes are implementation guidance only.                            |
 | Last checked                    | 2026-05-27T10:53:25Z                                                                                                                                                                                                                                                                                 |
+
+### 4. SCITT working group
+
+| Field                           | Value                                                                                                                                                                                                                                                                                                                                             |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Upstream source                 | SCITT working group (`datatracker.ietf.org/wg/scitt/`); `draft-ietf-scitt-architecture-22`                                                                                                                                                                                                                                                        |
+| Upstream status at Last checked | Active SCITT WG. `draft-ietf-scitt-architecture-22` is submitted for publication as a Proposed Standard and is in the RFC Editor queue; the -22 text is dated 2025-10-10, with Datatracker updated 2026-05-26. Not yet an RFC.                                                                                                                    |
+| PEAC artifact                   | `docs/specs/SCITT-COMPOSITION.md`                                                                                                                                                                                                                                                                                                                 |
+| Composition                     | A PEAC interaction record (compact JWS, `typ: interaction-record+jwt`) can be carried as a Signed Statement payload for a SCITT-style transparency log. A SCITT log entry then carries the PEAC record plus the SCITT receipt as a Transparent Statement. PEAC verification (`verifyLocal()`) and SCITT verification remain independent.          |
+| Boundary                        | PEAC does not host a transparency log, issue SCITT receipts, switch its wire-format default to COSE/CBOR, redefine SCITT terminology, or imply endorsement by the SCITT working group. Operators planning to expose PEAC records through a SCITT-style log should verify against the current architecture draft before relying on the wire shape. |
+| Last checked                    | 2026-05-28T03:15:00Z                                                                                                                                                                                                                                                                                                                              |
 
 ## What this matrix does and does not say
 
