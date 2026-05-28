@@ -1,6 +1,6 @@
 # Runtime-governance parity corpus
 
-Managed-runtime wedge parity vectors. Covers the 6 observation-specific type URIs from `@peac/adapter-runtime-governance` plus one negative vector. The bounded shadow-mode validator foundation introduced in v0.13.1 must reach **zero divergence** with the existing canonical path on every vector. Divergence is stop-the-line.
+Managed-runtime parity vectors. Covers the 6 observation-specific type URIs from `@peac/adapter-runtime-governance` plus one negative vector. The bounded shadow-mode validator foundation introduced in v0.13.1 must reach **zero divergence** with the existing canonical path on every vector. Divergence is stop-the-line.
 
 ## Coverage (7 vectors at floor)
 
