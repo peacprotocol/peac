@@ -178,13 +178,13 @@ Path: [`surfaces/plugin-pack/`](../surfaces/plugin-pack/).
 
 ## Archived surfaces
 
-| Surface                   | Path                                                                                                         | Classification  |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------ | --------------- |
-| Historical bridge app     | [`apps/bridge`](../apps/bridge)                                                                              | `internal-only` |
-| Sandbox issuer            | [`apps/sandbox-issuer`](../apps/sandbox-issuer)                                                              | `internal-only` |
-| Experimental EAS adapter  | [`packages/adapters/eas`](../packages/adapters/eas)                                                          | `experimental`  |
-| Experimental transports   | [`packages/transport/http`](../packages/transport/http), [`packages/transport/ws`](../packages/transport/ws) | `experimental`  |
-| Nextjs middleware preview | [`surfaces/nextjs/middleware`](../surfaces/nextjs/middleware)                                                | `experimental`  |
+| Surface                   | Path                                                                                                     | Classification  |
+| ------------------------- | -------------------------------------------------------------------------------------------------------- | --------------- |
+| Historical bridge app     | [`apps/bridge`](../apps/bridge)                                                                          | `internal-only` |
+| Sandbox issuer            | [`apps/sandbox-issuer`](../apps/sandbox-issuer)                                                          | `internal-only` |
+| Experimental EAS adapter  | [`packages/adapters/eas`](../packages/adapters/eas)                                                      | `experimental`  |
+| Archived transports       | [`archive/transport/http`](../archive/transport/http), [`archive/transport/ws`](../archive/transport/ws) | `archived`      |
+| Nextjs middleware preview | [`surfaces/nextjs/middleware`](../surfaces/nextjs/middleware)                                            | `experimental`  |
 
 ## Deprecation schedule
 
@@ -240,7 +240,7 @@ Allowed locations for these identifiers in tracked source:
 - `docs/STABILITY-CONTRACT.md` (this section).
 - `packages/protocol/src/_internal/` (the wiring itself).
 - `packages/protocol/__tests__/_internal/` (tests).
-- `reference/` (local-only planning files).
+- Repository reference files outside the published package surface.
 
 These identifiers MUST NOT appear in:
 
