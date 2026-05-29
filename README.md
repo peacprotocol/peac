@@ -2,14 +2,11 @@
 
 **Portable signed records for automated interactions.**
 
-PEAC is an open protocol for issuing and verifying signed interaction
-records across APIs, MCP tools, agent workflows, gateway decisions,
-payment-adjacent flows, provisioning events, runtimes, and audit systems.
+When logs are not enough, PEAC gives teams records another party can verify outside the system that produced them.
 
-When local logs are not enough, PEAC gives teams records that can be
-verified outside the system that produced them.
+PEAC records what APIs, MCP tools, agent workflows, gateways, payment-adjacent flows, provisioning systems, runtimes, and audit systems report. It does not run those systems or make their decisions.
 
-**Govern locally. Prove across boundaries.**
+**Record locally. Verify across boundaries.**
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-brightgreen.svg)](LICENSE)
 [![Latest Release](https://img.shields.io/github/v/release/peacprotocol/peac?color=brightgreen)](https://github.com/peacprotocol/peac/releases)
