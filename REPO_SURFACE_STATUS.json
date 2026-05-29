@@ -84,7 +84,7 @@
       "wire": "0.2",
       "layer": 0,
       "published": false,
-      "note": "Workspace-private resolver-http shadow package introduced in v0.13.2 PR A per Revision 4 section 7. Holds shadow-only network-bearing resolution logic copied / extracted from packages/protocol/src/{discovery, jwks-resolver, ssrf-safe-fetch, pointer-fetch}.ts for parity testing under a shadow-mode comparison harness. Not published to npm. P0 invariant: @peac/protocol must NOT import / depend on / re-export from / emit reference to this package while it remains workspace-private (denylist seeded by v0.13.1 PR A in tests/tooling/protocol-private-imports.test.ts, private-package-deps.test.ts, protocol-public-surface-stable.test.ts, internal-package-invisibility.test.ts, kernel-public-surface-stable.test.ts; scripts/verify-dist-private-leaks.mjs; scripts/release/pack-install-smoke.mjs). PR A introduces only the package skeleton; resolver source is added in subsequent commits of the same PR."
+      "note": "Private workspace resolver package retained for parity tests. Not published. Published packages must not import or re-export it."
     },
     "packages/audit": {
       "npm": "@peac/audit",
@@ -364,18 +364,19 @@
     },
     "packages/transport/http": {
       "npm": null,
-      "state": "experimental",
-      "wire": "0.2",
-      "layer": 4,
-      "published": false
-    },
-    "packages/transport/ws": {
-      "npm": null,
-      "state": "experimental",
+      "state": "archived",
       "wire": "0.2",
       "layer": 4,
       "published": false,
-      "note": "WebSocket transport deferred"
+      "note": "Moved to archive/transport/http. Not published. No active workspace dependency or runtime import."
+    },
+    "packages/transport/ws": {
+      "npm": null,
+      "state": "archived",
+      "wire": "0.2",
+      "layer": 4,
+      "published": false,
+      "note": "Moved to archive/transport/ws. Not published. No active workspace dependency or runtime import."
     },
     "packages/net/node": {
       "npm": "@peac/net-node",
@@ -513,11 +514,11 @@
     },
     "surfaces/analytics": {
       "npm": null,
-      "state": "supported",
+      "state": "archived",
       "wire": "0.2",
       "layer": 5,
       "published": false,
-      "note": "Analytics integration surface"
+      "note": "Moved to archive/surfaces/analytics. Not published. No active workspace dependency or runtime import."
     },
     "surfaces/workers/akamai": {
       "npm": null,

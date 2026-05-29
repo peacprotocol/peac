@@ -80,8 +80,8 @@ Do not edit manually. Source: `REPO_SURFACE_STATUS.json`. Rebuild via `node scri
 | `packages/rails/x402`                  | `@peac/rails-x402`                 | supported    | 0.2  |
 | `packages/receipts`                    | `@peac/receipts`                   | supported    | 0.2  |
 | `packages/transport/grpc`              | `@peac/transport-grpc`             | supported    | 0.2  |
-| `packages/transport/http`              | -                                  | experimental | 0.2  |
-| `packages/transport/ws`                | -                                  | experimental | 0.2  |
+| `packages/transport/http`              | -                                  | archived     | 0.2  |
+| `packages/transport/ws`                | -                                  | archived     | 0.2  |
 
 ## Layer 5
 
@@ -95,7 +95,7 @@ Do not edit manually. Source: `REPO_SURFACE_STATUS.json`. Rebuild via `node scri
 | `packages/server`              | `@peac/server`      | supported    | 0.2  |
 | `packages/worker-core`         | `@peac/worker-core` | supported    | 0.2  |
 | `packages/worker-shared`       | -                   | supported    | 0.2  |
-| `surfaces/analytics`           | -                   | supported    | 0.2  |
+| `surfaces/analytics`           | -                   | archived     | 0.2  |
 | `surfaces/nextjs/middleware`   | -                   | experimental | 0.2  |
 | `surfaces/plugin-pack/codex`   | -                   | supported    | 0.2  |
 | `surfaces/workers/akamai`      | -                   | supported    | 0.2  |
