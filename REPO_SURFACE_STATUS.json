@@ -84,7 +84,7 @@
       "wire": "0.2",
       "layer": 0,
       "published": false,
-      "note": "Private workspace resolver package retained for parity tests. Not published. Published packages must not import or re-export it."
+      "note": "Workspace resolver package retained for parity tests. Not published. Published packages must not import or re-export it."
     },
     "packages/audit": {
       "npm": "@peac/audit",
