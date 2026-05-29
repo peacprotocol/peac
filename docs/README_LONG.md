@@ -1,6 +1,6 @@
 # PEAC Protocol Developer Guide
 
-> **Deep reference for package authors and integrators.** If you are new to PEAC, start at [`docs/START_HERE.md`](START_HERE.md) for the role-based job selector, then see [`docs/HOW-IT-WORKS.md`](HOW-IT-WORKS.md), [`docs/ARTIFACTS.md`](ARTIFACTS.md), [`docs/WHERE-IT-FITS.md`](WHERE-IT-FITS.md), and [`docs/WHAT-PEAC-STANDARDIZES.md`](WHAT-PEAC-STANDARDIZES.md) for the operator mental model. Outcome-led recipes under [`docs/SOLUTIONS/`](SOLUTIONS/). This document is a full package catalog and protocol-surface tour for contributors who need the long-tail detail.
+> **Deep reference for package authors and integrators.** New to PEAC? Start with [`docs/START_HERE.md`](START_HERE.md), then read [`docs/HOW-IT-WORKS.md`](HOW-IT-WORKS.md), [`docs/ARTIFACTS.md`](ARTIFACTS.md), [`docs/WHERE-IT-FITS.md`](WHERE-IT-FITS.md), and [`docs/WHAT-PEAC-STANDARDIZES.md`](WHAT-PEAC-STANDARDIZES.md) for the protocol overview. Outcome-led recipes live under [`docs/SOLUTIONS/`](SOLUTIONS/). This document is the long-form package catalog and protocol-surface guide for contributors.
 
 Integration examples, package catalog, protocol surfaces, and repo navigation. For a concise overview, see the [main README](../README.md).
 
@@ -8,7 +8,7 @@ Integration examples, package catalog, protocol surfaces, and repo navigation. F
 
 ## Getting oriented
 
-PEAC is a kernel-first monorepo. Dependencies flow down only; higher layers never import from lower layers.
+PEAC is a kernel-first monorepo. Dependencies point toward lower-numbered layers only; lower-numbered layers must never import higher-numbered layers.
 
 ```text
 Layer 0: @peac/kernel         -- zero-dependency constants and registries
@@ -48,7 +48,7 @@ PEAC records evidence from commerce protocols without executing payments. `payme
 | --------------------------------------------- | ---------------------------- | -------------------------------------------------- |
 | paymentauth / MPP (Machine Payments Protocol) | `@peac/mappings-paymentauth` | HTTP 402 challenges, receipts, carrier coexistence |
 | ACP                                           | `@peac/mappings-acp`         | Session lifecycle, payment observations            |
-| Stripe SPT                                    | `@peac/rails-stripe`         | Delegation grants, PI observations                 |
+| Stripe SPT                                    | `@peac/rails-stripe`         | Delegation records and payment-intent observations |
 | x402                                          | `@peac/adapter-x402`         | Offer/receipt verification, v1/v2 read             |
 | UCP                                           | `@peac/mappings-ucp`         | Order-vs-payment separation                        |
 
@@ -76,7 +76,7 @@ v0.14.1 adds three record surfaces for agent and operator workflows:
 
 These are record/export surfaces. The CLI wrapper may spawn a caller-supplied child process to produce an observation; PEAC does not choose the command, schedule it, supervise it as a long-running process, authorize it, or orchestrate workflows. PEAC does not approve the action, score the runtime, or vouch for the truth of caller-reported lifecycle events.
 
-### Settlement fields
+### Payment evidence fields
 
 Add payment evidence via the commerce extension:
 
@@ -160,7 +160,7 @@ See [packages/middleware-core/README.md](../packages/middleware-core/README.md) 
 
 ### x402 integration
 
-PEAC works as the receipts and verification layer for [x402](https://x402.org) payment flows. x402 handles the payment; PEAC records verifiable evidence of the payment flow.
+PEAC can carry signed records for [x402](https://x402.org) payment flows. x402 handles payment. PEAC records verifiable evidence reported around the payment flow.
 
 1. Client requests a protected resource
 2. Server returns `402 Payment Required` with x402 payment details
@@ -168,7 +168,7 @@ PEAC works as the receipts and verification layer for [x402](https://x402.org) p
 4. Server issues a signed `PEAC-Receipt` header carrying payment evidence
 5. Client verifies the receipt offline
 
-**Package:** `@peac/rails-x402` (payment rail) and `@peac/adapter-x402` (evidence carrier).
+**Package:** `@peac/rails-x402` (x402-specific evidence mapping) and `@peac/adapter-x402` (record carrier).
 
 See [examples/x402-node-server](../examples/x402-node-server) for a working implementation.
 
@@ -361,6 +361,8 @@ peac policy generate peac-policy.yaml --out dist --well-known
 
 ## Package catalog
 
+> Package catalog note: this section includes both published packages and workspace-only surfaces. Install only packages listed in the active publish manifest or marked available in [`docs/PACKAGE_STATUS.md`](PACKAGE_STATUS.md). Workspace-only surfaces are documented for contributors and integrators, not as installable public packages.
+
 **Core:**
 
 | Package          | Description                                  |
@@ -383,12 +385,12 @@ peac policy generate peac-policy.yaml --out dist --well-known
 
 **Rails:**
 
-| Package                | Description           |
-| ---------------------- | --------------------- |
-| `@peac/rails-x402`     | x402 payment rail     |
-| `@peac/rails-stripe`   | Stripe payment rail   |
-| `@peac/rails-razorpay` | Razorpay payment rail |
-| `@peac/rails-card`     | Card billing bridge   |
+| Package                | Description                   |
+| ---------------------- | ----------------------------- |
+| `@peac/rails-x402`     | x402 evidence mapping         |
+| `@peac/rails-stripe`   | Stripe evidence mapping       |
+| `@peac/rails-razorpay` | Razorpay evidence mapping     |
+| `@peac/rails-card`     | Card billing evidence mapping |
 
 **Adapters:**
 
@@ -420,7 +422,7 @@ peac policy generate peac-policy.yaml --out dist --well-known
 
 **Infrastructure:** `@peac/contracts`, `@peac/http-signatures`, `@peac/jwks-cache`, `@peac/net-node`, `@peac/adapter-core`, `@peac/privacy`, `@peac/telemetry`, `@peac/telemetry-otel`, `@peac/transport-grpc`, `@peac/capture-core`, `@peac/capture-node`, `@peac/attribution`, `@peac/audit`, `@peac/policy-kit`.
 
-**Publication status:** Package rows include both packages on npm `latest` and workspace-only surfaces. The active publish set is defined by [`scripts/publish-manifest.json`](../scripts/publish-manifest.json); per-package status is summarized in [`docs/PACKAGE_STATUS.md`](PACKAGE_STATUS.md). See [npm](https://www.npmjs.com/search?q=%40peac) and [Releases](https://github.com/peacprotocol/peac/releases). Install only packages present in the active publish manifest.
+**Publication status:** The active publish set is defined by [`scripts/publish-manifest.json`](../scripts/publish-manifest.json). Per-package status is summarized in [`docs/PACKAGE_STATUS.md`](PACKAGE_STATUS.md). Install only packages present in the active publish manifest.
 
 ---
 
