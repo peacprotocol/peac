@@ -1,10 +1,10 @@
 # Start Here
 
-**Govern locally. Prove across boundaries.**
+**Record locally. Verify across boundaries.**
 
-When logs aren't enough, PEAC gives you portable signed records anyone can verify offline.
+When logs are not enough, PEAC gives you portable signed records another party can verify offline.
 
-Portable signed records for agent, API, MCP, and cross-runtime interactions.
+PEAC helps API, MCP, agent, gateway, payment-adjacent, provisioning, runtime, and audit systems export records that travel beyond local logs.
 
 Pick the path that matches what you are building.
 
@@ -41,9 +41,9 @@ You have a receipt (JWS string) and want to verify it offline with a public key.
 
 Key packages: `@peac/protocol`, `@peac/crypto`.
 
-## I want to prove my runtime decisions
+## I need runtime decision records
 
-You run a managed agent runtime (or an adjacent governance system) and want to export signed records of its observations, decisions, or transitions so other parties can verify them offline.
+You run a managed agent runtime, policy system, or adjacent control surface and want to export signed records of what it reported, decided, or observed so other parties can verify those records offline.
 
 1. Review the [runtime-governance adapter](../packages/adapters/runtime-governance/) and its conformance fixtures.
 2. Outcome-led recipe: [`docs/SOLUTIONS/runtime-evidence-export.md`](SOLUTIONS/runtime-evidence-export.md)
@@ -97,13 +97,13 @@ You want verifiable evidence from commerce and payment flows across x402, paymen
 
 Key packages: `@peac/mappings-paymentauth`, `@peac/mappings-acp`, `@peac/rails-stripe`, `@peac/adapter-x402`, `@peac/mappings-ucp`.
 
-### Audit, dispute, and governance evidence
+### Audit, dispute, and regulatory evidence
 
-You need signed evidence for audit, dispute review, or regulatory alignment. Evidence that survives organizational boundaries, not just local logs.
+You need signed records for audit, dispute review, or regulatory alignment — records that survive organizational boundaries, not just local logs.
 
 1. Start with the [API Provider Quickstart](guides/quickstart-api-provider.md) to understand issuance
 2. See [Evidence Bundles](specs/EVIDENCE-CARRIER-CONTRACT.md) for offline verification bundles
-3. Review [Governance Mappings](governance/) for NIST AI RMF, EU AI Act, OWASP ASI alignment
+3. Review [regulatory and assurance mappings](governance/) for NIST AI RMF, EU AI Act, and OWASP ASI alignment
 4. Outcome-led recipe: [`docs/SOLUTIONS/regulatory-audit-trail.md`](SOLUTIONS/regulatory-audit-trail.md)
 
 Key packages: `@peac/protocol`, `@peac/audit`.
@@ -154,7 +154,7 @@ Layer 4: @peac/mappings-*   (MCP, A2A, x402, and more)
 Layer 5: @peac/mcp-server   (MCP server)
 ```
 
-Dependencies flow down only. Start at the highest layer you need.
+Dependencies point toward lower-numbered layers only; lower layers never import higher-numbered layers. Start at the highest layer you need.
 
 ## Reference
 
