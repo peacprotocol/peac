@@ -1,5 +1,5 @@
 /**
- * Tests for scripts/release/validate-adoption-evidence.mjs
+ * Tests for scripts/release/validate-ecosystem-record-carriers.mjs
  *
  * Exercises the validator against synthetic fixtures to verify:
  * - Schema validation (missing fields, bad types)
@@ -13,13 +13,13 @@ import { execFileSync } from 'node:child_process';
 import { join } from 'node:path';
 
 const REPO_ROOT = join(import.meta.dirname, '..', '..');
-const VALIDATOR = join(REPO_ROOT, 'scripts/release/validate-adoption-evidence.mjs');
+const VALIDATOR = join(REPO_ROOT, 'scripts/release/validate-ecosystem-record-carriers.mjs');
 
-// Minimal valid integration-evidence.json that passes schema + pointer checks
+// Minimal valid ecosystem-record-carriers.json that passes schema + pointer checks
 // Uses files known to exist in the repo
 function makeValidEvidence() {
   return {
-    $schema: './integration-evidence.schema.json',
+    $schema: './ecosystem-record-carriers.schema.json',
     $comment: 'test fixture',
     version: '1.0.0',
     integrations: [
@@ -74,19 +74,19 @@ function runValidator(args: string[] = []): { stdout: string; stderr: string; ex
   }
 }
 
-describe('validate-adoption-evidence.mjs (live repo)', () => {
+describe('validate-ecosystem-record-carriers.mjs (live repo)', () => {
   it('runs against real repo files without crashing', () => {
     const result = runValidator();
     const combined = result.stdout + result.stderr;
-    expect(combined).toContain('Integration evidence');
+    expect(combined).toContain('Ecosystem record carriers');
     expect(result.exitCode).toBe(0);
   });
 
-  it('reports correct ecosystem count from real JSON', () => {
+  it('satisfies the record-carrying surface threshold from real JSON', () => {
     const result = runValidator();
     const combined = result.stdout + result.stderr;
-    expect(combined).toContain('2 qualifying ecosystems');
-    expect(combined).toContain('3 total integrations');
+    expect(combined).toContain('Ecosystem record carriers: release gate satisfied');
+    expect(combined).not.toContain('qualifying ecosystems');
   });
 
   it('passes markdown parity check on real files', () => {
@@ -95,30 +95,28 @@ describe('validate-adoption-evidence.mjs (live repo)', () => {
     expect(combined).toContain('Markdown parity: OK');
   });
 
-  it('validates reference integrations file', () => {
+  it('validates reference surfaces file', () => {
     const result = runValidator();
     const combined = result.stdout + result.stderr;
-    expect(combined).toContain('Reference integrations:');
-    expect(combined).toContain('validated surfaces');
-    expect(combined).toContain('maintainer attestation present');
+    expect(combined).toContain('Reference surfaces: validated');
   });
 
-  it('reports zero external confirmations when none exist', () => {
+  it('reports public integration references format OK when none exist', () => {
     const result = runValidator();
     const combined = result.stdout + result.stderr;
-    expect(combined).toContain('External confirmations: 0 entries');
+    expect(combined).toContain('Public integration references: format check OK');
   });
 
   it('generates markdown without error', () => {
     const result = runValidator(['--generate']);
     const combined = result.stdout + result.stderr;
     expect(combined).toContain('Generated');
-    expect(combined).toContain('0 entries');
+    expect(combined).toContain('Public integration references: format check OK');
   });
 });
 
-describe('validate-adoption-evidence.mjs schema validation', () => {
-  it('validates real integration-evidence.json against schema', () => {
+describe('validate-ecosystem-record-carriers.mjs schema validation', () => {
+  it('validates real ecosystem-record-carriers.json against schema', () => {
     // The real validator run should not report schema errors
     const result = runValidator();
     const combined = result.stdout + result.stderr;
@@ -126,7 +124,7 @@ describe('validate-adoption-evidence.mjs schema validation', () => {
   });
 });
 
-describe('adoption evidence JSON schema', () => {
+describe('ecosystem record carriers JSON schema', () => {
   // These tests validate the schema itself using Ajv directly
   let Ajv: any;
   let schema: any;
@@ -137,7 +135,7 @@ describe('adoption evidence JSON schema', () => {
     Ajv = ajvModule.default;
     const { readFileSync } = await import('node:fs');
     schema = JSON.parse(
-      readFileSync(join(REPO_ROOT, 'docs/adoption/integration-evidence.schema.json'), 'utf-8')
+      readFileSync(join(REPO_ROOT, 'docs/interop/ecosystem-record-carriers.schema.json'), 'utf-8')
     );
     const ajv = new Ajv({ allErrors: true });
     validate = ajv.compile(schema);
@@ -209,20 +207,19 @@ describe('adoption evidence JSON schema', () => {
   });
 });
 
-describe('confirmation markdown parsing', () => {
+describe('public integration reference parsing', () => {
   // These test the validator's live parsing by inspecting its output
-  // when run against the real repo (which has 0 confirmations)
+  // when run against the real repo (which has no reference entries)
 
-  it('reports zero external confirmations', () => {
+  it('reports format check OK when no references exist', () => {
     const result = runValidator();
     const combined = result.stdout + result.stderr;
-    expect(combined).toContain('External confirmations: 0 entries');
+    expect(combined).toContain('Public integration references: format check OK');
   });
 
-  it('handles the placeholder line correctly', () => {
-    // The placeholder "No confirmations yet" should not count as an entry
+  it('does not expose entry counts in output', () => {
     const result = runValidator();
     const combined = result.stdout + result.stderr;
-    expect(combined).toContain('0 entries');
+    expect(combined).not.toContain('entries');
   });
 });

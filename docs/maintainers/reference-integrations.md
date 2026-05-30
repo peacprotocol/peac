@@ -4,7 +4,7 @@
 
 ## Validated Surfaces
 
-Each surface is cataloged in `docs/adoption/integration-evidence.json` with full detail (PR, commit SHA, test files, spec references).
+Each surface is cataloged in `docs/interop/ecosystem-record-carriers.json` with full detail (PR, commit SHA, test files, spec references).
 
 ### MCP (Model Context Protocol)
 

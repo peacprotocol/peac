@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "integration-evidence.schema.json",
-  "title": "PEAC Integration Evidence",
-  "description": "Schema for docs/adoption/integration-evidence.json. Validated in CI by the adoption-evidence gate.",
+  "$id": "ecosystem-record-carriers.schema.json",
+  "title": "PEAC Ecosystem Record Carriers",
+  "description": "Schema for docs/interop/ecosystem-record-carriers.json. Validated in CI by the ecosystem-record-carriers gate.",
   "type": "object",
   "required": ["version", "integrations", "classification_rules"],
   "additionalProperties": false,
