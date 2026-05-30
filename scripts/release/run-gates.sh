@@ -144,7 +144,7 @@ run_gate "guard" bash scripts/guard.sh
 if [ -f scripts/check-planning-leak.sh ]; then
   run_gate "planning-leak" bash scripts/check-planning-leak.sh
 else
-  echo "  [planning-leak] SKIP (local-only script not present)"
+  echo "  [planning-leak] SKIP (gate script not present)"
 fi
 run_gate "format" pnpm format:check
 
@@ -266,11 +266,11 @@ if [[ "$TARGET" == "stable" ]]; then
   # Implemented gates (PR 3: property/fuzz tests)
   run_gate "fuzz-suite" pnpm run test:property
 
-  # Implemented gate (PR 8: adoption evidence)
-  # Uses Node validator that enforces the 6-field quality bar structurally,
-  # validates ISO dates and URL formats, and reads ecosystem count from
-  # docs/adoption/integration-evidence.json (not markdown prose).
-  run_gate "adoption-evidence" node scripts/release/validate-adoption-evidence.mjs
+  # Implemented gate (PR 8: ecosystem record carriers)
+  # Uses Node validator that enforces the 6-field reference format structurally,
+  # validates ISO dates and URL formats, and reads ecosystem record-carrier
+  # source data from docs/interop/ecosystem-record-carriers.json (not markdown prose).
+  run_gate "ecosystem-record-carriers" node scripts/release/validate-ecosystem-record-carriers.mjs
 fi
 
 # --- Summary ---

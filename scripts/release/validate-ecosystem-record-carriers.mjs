@@ -1,16 +1,20 @@
 #!/usr/bin/env node
 /**
- * Adoption Evidence Validator (DD-90)
+ * Ecosystem Record Carrier Validator
  *
  * Validates:
- *   1. Integration evidence (docs/adoption/integration-evidence.json):
- *      JSON Schema validation, >= 2 DD-90 ecosystems, immutable pointers
+ *   1. Ecosystem record carriers (docs/interop/ecosystem-record-carriers.json):
+ *      JSON Schema validation, record-carrier release invariant, immutable pointers
  *   2. Reference integrations (docs/maintainers/reference-integrations.md):
  *      file exists, has validated surfaces, has maintainer attestation
- *   3. External confirmations (docs/adoption/confirmations.md):
- *      6-field quality bar enforced when entries are present
- *   4. Markdown parity: integration-evidence.md matches JSON
+ *   3. Public integration references (docs/interop/public-integration-reference-format.md):
+ *      6-field reference format enforced when entries are present
+ *   4. Markdown parity: ecosystem-record-carriers.md matches JSON
  *      (run with --generate to regenerate)
+ *
+ * Note: the internal release-gate field is `dd90_gate` in the JSON
+ * (release-engineering identifier); public generated markdown uses neutral
+ * "record-carrying surface" / "supporting evidence input" classification only.
  *
  * Exit codes:
  *   0  All checks pass
@@ -25,22 +29,25 @@ import Ajv from 'ajv/dist/2020.js';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, '..', '..');
 
-const EVIDENCE_JSON = resolve(REPO_ROOT, 'docs/adoption/integration-evidence.json');
-const EVIDENCE_SCHEMA = resolve(REPO_ROOT, 'docs/adoption/integration-evidence.schema.json');
-const EVIDENCE_MD = resolve(REPO_ROOT, 'docs/adoption/integration-evidence.md');
-const CONFIRMATIONS_MD = resolve(REPO_ROOT, 'docs/adoption/confirmations.md');
+const EVIDENCE_JSON = resolve(REPO_ROOT, 'docs/interop/ecosystem-record-carriers.json');
+const EVIDENCE_SCHEMA = resolve(REPO_ROOT, 'docs/interop/ecosystem-record-carriers.schema.json');
+const EVIDENCE_MD = resolve(REPO_ROOT, 'docs/interop/ecosystem-record-carriers.md');
+const PUBLIC_REFERENCES_MD = resolve(
+  REPO_ROOT,
+  'docs/interop/public-integration-reference-format.md'
+);
 const REFERENCE_MD = resolve(REPO_ROOT, 'docs/maintainers/reference-integrations.md');
 
 const REQUIRED_ECOSYSTEMS = 2;
-const REQUIRED_CONFIRMATIONS = 0;
+const REQUIRED_PUBLIC_REFERENCES = 0;
 
 const REQUIRED_FIELDS = [
-  'Team/Project',
-  'Integration Surface',
-  'Integration Impact',
+  'Project',
+  'PEAC Surface',
+  'Interoperability Summary',
   'Date',
-  'Public Link',
-  'Contact Role',
+  'Public Reference URL',
+  'Public Role / Context',
 ];
 
 const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
@@ -94,7 +101,7 @@ function validateIntegrationEvidence() {
   const dd90 = data.integrations.filter((i) => i.dd90_gate === true);
 
   if (dd90.length < REQUIRED_ECOSYSTEMS) {
-    errors.push(`Need >= ${REQUIRED_ECOSYSTEMS} DD-90 ecosystems, found ${dd90.length}`);
+    errors.push('record-carrier release invariant not satisfied');
   }
 
   // Immutable pointer checks
@@ -133,9 +140,9 @@ function validateIntegrationEvidence() {
       errors.push(`${name}: evidence text is empty`);
     }
 
-    // non-DD-90 integrations should have rationale
+    // supporting evidence inputs should have rationale
     if (integration.dd90_gate === false && !integration.rationale) {
-      errors.push(`${name}: non-DD-90 integration should include rationale for classification`);
+      errors.push(`${name}: supporting evidence input should include rationale for classification`);
     }
   }
 
@@ -157,19 +164,19 @@ function generateMarkdown(data) {
   const nonDd90 = data.integrations.filter((i) => i.dd90_gate !== true);
 
   const lines = [];
-  lines.push('# Integration Evidence Catalog');
+  lines.push('# Ecosystem Record Carrier Classification');
   lines.push('');
   lines.push(
-    '> **Purpose:** Documents which ecosystem integrations count toward DD-90 gates and which do not.'
+    '> **Purpose:** Classifies public PEAC ecosystem surfaces by whether they produce, carry, or consume Wire records.'
   );
   lines.push(
-    '> **Rule:** Only integrations that produce or consume Wire 0.2 records in a distinct ecosystem count.'
+    '> **Rule:** This is a technical interoperability reference for repository-defined record surfaces.'
   );
   lines.push(
-    '> **Source:** Generated from `docs/adoption/integration-evidence.json`. Do not edit manually.'
+    '> **Source:** Generated from `docs/interop/ecosystem-record-carriers.json`. Do not edit manually.'
   );
   lines.push('');
-  lines.push(`## DD-90 Ecosystem Integrations (Count: ${dd90.length})`);
+  lines.push('## Record-carrying ecosystem surfaces');
   lines.push('');
 
   for (const i of dd90) {
@@ -179,14 +186,14 @@ function generateMarkdown(data) {
     lines.push(`- **Surface:** ${i.surface}`);
     lines.push(`- **Evidence:** ${i.evidence}`);
     lines.push(`- **Wire version:** Wire ${i.wire_version}`);
-    lines.push('- **DD-90 gate:** YES (distinct ecosystem with Wire 0.2 record production)');
+    lines.push('- **Classification:** record-carrying surface');
     lines.push(`- **Test files:** ${i.test_files.map((f) => '`' + f + '`').join(', ')}`);
     lines.push(`- **Spec refs:** ${i.spec_refs.map((f) => '`' + f + '`').join(', ')}`);
     lines.push('');
   }
 
   if (nonDd90.length > 0) {
-    lines.push('## Non-DD-90 Integrations (Correctly Classified)');
+    lines.push('## Supporting evidence inputs');
     lines.push('');
 
     for (const i of nonDd90) {
@@ -198,7 +205,7 @@ function generateMarkdown(data) {
       lines.push(
         `- **Wire version:** ${i.wire_version ? 'Wire ' + i.wire_version : 'N/A (identity input, not record output)'}`
       );
-      lines.push(`- **DD-90 gate:** NO${i.dd_reference ? ` (${i.dd_reference})` : ''}`);
+      lines.push('- **Classification:** supporting evidence input');
       if (i.rationale) {
         lines.push(`- **Rationale:** ${i.rationale}`);
       }
@@ -230,7 +237,7 @@ function checkMarkdownParity(data) {
     return {
       ok: false,
       error:
-        'integration-evidence.md is out of sync with integration-evidence.json. Run: node scripts/release/validate-adoption-evidence.mjs --generate',
+        'ecosystem-record-carriers.md is out of sync with ecosystem-record-carriers.json. Run: node scripts/release/validate-ecosystem-record-carriers.mjs --generate',
     };
   }
 
@@ -274,12 +281,12 @@ function validateReferenceIntegrations() {
 // External confirmations (structured markdown)
 // ---------------------------------------------------------------------------
 
-function parseConfirmations() {
-  if (!existsSync(CONFIRMATIONS_MD)) {
-    return { ok: false, entries: [], errors: [`Missing ${CONFIRMATIONS_MD}`] };
+function parsePublicIntegrationReferences() {
+  if (!existsSync(PUBLIC_REFERENCES_MD)) {
+    return { ok: false, entries: [], errors: [`Missing ${PUBLIC_REFERENCES_MD}`] };
   }
 
-  const content = readFileSync(CONFIRMATIONS_MD, 'utf-8');
+  const content = readFileSync(PUBLIC_REFERENCES_MD, 'utf-8');
   const lines = content.split('\n');
 
   const entries = [];
@@ -324,12 +331,11 @@ function parseConfirmations() {
     entries.push(currentEntry);
   }
 
-  // Skip the placeholder line
-  const realEntries = entries.filter(
-    (e) => e.name !== '_No external confirmations recorded._'
-  );
+  // Entries come only from `### ` headings; the reference-format doc has none
+  // by default, so this is empty until real public references are added.
+  const realEntries = entries;
 
-  // Validate each entry against the 6-field quality bar
+  // Validate each entry against the 6-field reference format
   for (const entry of realEntries) {
     for (const field of REQUIRED_FIELDS) {
       if (!entry.fields[field]) {
@@ -345,17 +351,17 @@ function parseConfirmations() {
       );
     }
 
-    // Validate Public Link
-    const link = entry.fields['Public Link'];
+    // Validate Public Reference URL
+    const link = entry.fields['Public Reference URL'];
     if (link && link !== 'private' && !URL_RE.test(link)) {
       errors.push(
-        `"${entry.name}" (line ${entry.line}): Public Link must be a URL (https://...) or "private", got "${link}"`
+        `"${entry.name}" (line ${entry.line}): Public Reference URL must be a URL (https://...) or "private", got "${link}"`
       );
     }
   }
 
   return {
-    ok: realEntries.length >= REQUIRED_CONFIRMATIONS && errors.length === 0,
+    ok: realEntries.length >= REQUIRED_PUBLIC_REFERENCES && errors.length === 0,
     entries: realEntries,
     errors,
   };
@@ -373,11 +379,9 @@ function main() {
   // 1. Integration evidence
   const evidence = validateIntegrationEvidence();
   if (evidence.ok) {
-    console.log(
-      `Integration evidence: ${evidence.ecosystemCount} qualifying ecosystems, ${evidence.totalIntegrations} total integrations`
-    );
+    console.log('Ecosystem record carriers: release gate satisfied');
   } else {
-    console.error('Integration evidence FAILED:');
+    console.error('Ecosystem record carriers FAILED:');
     for (const err of evidence.errors) {
       console.error(`  ${err}`);
     }
@@ -404,30 +408,26 @@ function main() {
   // 3. Reference integration validations
   const reference = validateReferenceIntegrations();
   if (reference.ok) {
-    console.log(
-      `Reference integrations: ${reference.surfaceCount} validated surfaces, maintainer attestation present`
-    );
+    console.log('Reference surfaces: validated');
   } else {
     console.error(`Reference integrations FAILED: ${reference.error}`);
     failed = true;
   }
 
-  // 4. External confirmations (format-validated when present)
-  const confirmations = parseConfirmations();
+  // 4. Public integration references (format-validated when present)
+  const confirmations = parsePublicIntegrationReferences();
   if (confirmations.entries.length === 0) {
-    console.log('External confirmations: 0 entries');
+    console.log('Public integration references: format check OK');
   } else if (confirmations.errors.length > 0) {
     // Entries exist but are malformed: this IS a hard failure to prevent
     // low-quality entries from accumulating unchecked
-    console.error(
-      `External confirmations: ${confirmations.entries.length} entries, ${confirmations.errors.length} validation errors:`
-    );
+    console.error('Public integration references: format errors:');
     for (const err of confirmations.errors) {
       console.error(`  ${err}`);
     }
     failed = true;
   } else {
-    console.log(`External confirmations: ${confirmations.entries.length} valid entries`);
+    console.log('Public integration references: format check OK');
   }
 
   process.exit(failed ? 1 : 0);

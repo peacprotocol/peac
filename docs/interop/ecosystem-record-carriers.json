@@ -1,6 +1,6 @@
 {
-  "$schema": "./integration-evidence.schema.json",
-  "$comment": "Canonical source for DD-90 integration evidence. docs/adoption/integration-evidence.md is generated from this file.",
+  "$schema": "./ecosystem-record-carriers.schema.json",
+  "$comment": "Canonical source for ecosystem record-carrier classification. docs/interop/ecosystem-record-carriers.md is generated from this file.",
   "version": "1.0.0",
   "integrations": [
     {
@@ -49,8 +49,8 @@
     }
   ],
   "classification_rules": [
-    "An integration counts toward DD-90 if it produces or consumes Wire 0.2 records (interaction-record+jwt) in a distinct protocol ecosystem.",
-    "Identity adapters, claim mappers, and format converters that feed into PEAC but do not themselves produce records are classified under their own DDs.",
-    "Do not inflate the ecosystem count by reclassifying adapters as integrations."
+    "A surface is classified as record-carrying when repository artifacts show it produces, carries, or consumes Wire records.",
+    "Identity adapters, claim mappers, and format converters are supporting evidence inputs unless they themselves produce, carry, or consume Wire records.",
+    "Do not classify a supporting input as a record-carrying surface without repository tests or fixtures for the record-carrying behavior."
   ]
 }

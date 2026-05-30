@@ -1,10 +1,10 @@
-# Integration Evidence Catalog
+# Ecosystem Record Carrier Classification
 
-> **Purpose:** Documents which ecosystem integrations count toward DD-90 gates and which do not.
-> **Rule:** Only integrations that produce or consume Wire 0.2 records in a distinct ecosystem count.
-> **Source:** Generated from `docs/adoption/integration-evidence.json`. Do not edit manually.
+> **Purpose:** Classifies public PEAC ecosystem surfaces by whether they produce, carry, or consume Wire records.
+> **Rule:** This is a technical interoperability reference for repository-defined record surfaces.
+> **Source:** Generated from `docs/interop/ecosystem-record-carriers.json`. Do not edit manually.
 
-## DD-90 Ecosystem Integrations (Count: 2)
+## Record-carrying ecosystem surfaces
 
 ### MCP (Model Context Protocol)
 
@@ -12,7 +12,7 @@
 - **Surface:** peac_issue tool produces Wire 0.2 records; peac_verify tool verifies them
 - **Evidence:** Round-trip issuance and verification via MCP tool calls
 - **Wire version:** Wire 0.2
-- **DD-90 gate:** YES (distinct ecosystem with Wire 0.2 record production)
+- **Classification:** record-carrying surface
 - **Test files:** `packages/mcp-server/tests/handlers/issue.test.ts`, `packages/mcp-server/tests/handlers/verify.test.ts`
 - **Spec refs:** `docs/specs/EVIDENCE-CARRIER-CONTRACT.md`
 
@@ -22,11 +22,11 @@
 - **Surface:** Wire 0.2 records carried in A2A metadata[extensionURI] per Evidence Carrier Contract
 - **Evidence:** Round-trip through A2A metadata carrier (issue, embed, extract, verify)
 - **Wire version:** Wire 0.2
-- **DD-90 gate:** YES (distinct ecosystem with Wire 0.2 record production)
+- **Classification:** record-carrying surface
 - **Test files:** `tests/integration/a2a/wire02-roundtrip.test.ts`
 - **Spec refs:** `docs/specs/EVIDENCE-CARRIER-CONTRACT.md`
 
-## Non-DD-90 Integrations (Correctly Classified)
+## Supporting evidence inputs
 
 ### EAT (Entity Attestation Token)
 
@@ -34,13 +34,13 @@
 - **Surface:** COSE_Sign1 (RFC 9052) identity adapter; maps EAT claims to PEAC actor binding
 - **Evidence:** Passport-style identity input; does not produce Wire 0.2 records in the EAT ecosystem
 - **Wire version:** N/A (identity input, not record output)
-- **DD-90 gate:** NO (DD-154)
+- **Classification:** supporting evidence input
 - **Rationale:** EAT is an identity input surface. It enriches PEAC records with external attestations but does not constitute a distinct ecosystem producing Wire 0.2 evidence.
 - **Test files:** `packages/adapters/eat/tests/passport.test.ts`, `packages/adapters/eat/tests/claim-mapper.test.ts`
 - **Spec refs:** `docs/specs/EVIDENCE-CARRIER-CONTRACT.md`
 
 ## Classification Rules
 
-1. An integration counts toward DD-90 if it produces or consumes Wire 0.2 records (interaction-record+jwt) in a distinct protocol ecosystem.
-2. Identity adapters, claim mappers, and format converters that feed into PEAC but do not themselves produce records are classified under their own DDs.
-3. Do not inflate the ecosystem count by reclassifying adapters as integrations.
+1. A surface is classified as record-carrying when repository artifacts show it produces, carries, or consumes Wire records.
+2. Identity adapters, claim mappers, and format converters are supporting evidence inputs unless they themselves produce, carry, or consume Wire records.
+3. Do not classify a supporting input as a record-carrying surface without repository tests or fixtures for the record-carrying behavior.
