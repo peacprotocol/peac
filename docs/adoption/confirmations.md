@@ -1,29 +1,22 @@
-# External Integration Confirmations
+# Public Integration Reference Format
 
-> Independent third-party validation of PEAC protocol integration. When entries are present, they must meet the 6-field quality bar below.
+> **Status:** Reference format.
 
-## Quality Bar (6 Required Fields)
+This document defines the fields required before a public PEAC integration reference can be included in project documentation.
 
-Each confirmation entry MUST include all 6 fields:
+## Required fields
 
-1. **Team/Project:** Name of the team or project
-2. **Integration Surface:** Which PEAC integration point is used (e.g., MCP receipts, A2A metadata carrier, HTTP header)
-3. **Integration Impact:** One sentence describing what this integration enables or replaces
-4. **Date:** ISO 8601 date of confirmation
-5. **Public Link:** URL to public evidence (PR, blog post, repo, or issue); "private" if under NDA (requires maintainer attestation)
-6. **Contact Role:** Role of the confirming contact (e.g., "Engineering Lead", "CTO"); no PII
+A public integration reference includes all six fields:
 
-## Confirmations
+1. **Project:** Name of the public project or implementation.
+2. **PEAC Surface:** The PEAC surface involved, such as MCP record issuance, A2A metadata carrier, HTTP receipt transport, or another public PEAC surface.
+3. **Interoperability Summary:** One sentence describing what was implemented, verified, or made interoperable.
+4. **Date:** ISO 8601 date of the public reference.
+5. **Public Reference URL:** Link to public material, such as a pull request, issue, repository, release note, blog post, case study, or documentation page.
+6. **Public Role / Context:** Public role or project context for the reference. Do not include personal contact details.
 
-<!-- Add entries below. Each entry must have all 6 fields. -->
-<!-- Example:
-### Acme Agent Platform
-- **Team/Project:** Acme Agent Platform
-- **Integration Surface:** MCP record issuance via `peac_issue` tool
-- **Integration Impact:** Replaced custom audit log with structured receipts, reducing compliance integration time.
-- **Date:** 2026-04-01
-- **Public Link:** https://github.com/acme/agent-platform/pull/42
-- **Contact Role:** Engineering Lead
--->
+## Publication rule
 
-_No external confirmations recorded._
+Only cite information that is already public and approved to reference.
+
+Do not include private, unannounced, NDA-covered, sales-pipeline, or maintainer-only information in the public repository.
