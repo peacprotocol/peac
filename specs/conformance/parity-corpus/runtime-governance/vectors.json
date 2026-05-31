@@ -1,7 +1,7 @@
 {
   "family": "runtime-governance",
   "description": "Managed-runtime wedge parity vectors. Covers the 6 observation-specific type URIs from @peac/adapter-runtime-governance plus one negative vector (malformed observation extension). The bounded validator foundation must reach zero divergence with the existing path on every vector.",
-  "version": "0.14.5",
+  "version": "0.15.0",
   "generator": "manual; v0.13.1 PR C floor",
   "vectors": [
     {

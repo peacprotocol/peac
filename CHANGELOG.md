@@ -5,7 +5,71 @@ All notable changes to PEAC Protocol will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.14.5] - 2026-05-21
+## [0.15.0] - 2026-05-31
+
+Interoperability for portable signed records.
+
+Strengthens PEAC's records-first public surface and the interoperability
+and composition surfaces around portable signed interaction records.
+Reframes the front door and developer entry points around records, adds
+signed-records interoperability references and an ecosystem record-carrier
+classification, documents a COSE-Sign1 carrier design note, and adds
+ERC-8126 and AP2 interoperability conformance vectors. Archives unused
+workspace surfaces and refreshes distribution metadata.
+
+Public API: unchanged.
+Wire format: unchanged (0.2).
+Public schema: unchanged.
+Registered extension groups: unchanged (19).
+Registered receipt types: unchanged (61).
+Conformance sections: unchanged (32).
+Conformance requirement IDs: unchanged (290).
+Published package names: unchanged; package count remains 36.
+No new CLI surface. No new package-publication surface. No new
+signing envelope. No wire/signing change. No runtime behavior change.
+
+### Added
+
+- **`docs/specs/COSE-SIGN1-CARRIER-DESIGN.md`** is an informative design
+  note for a future COSE-Sign1 receipt carrier alongside the current
+  compact JWS carrier, with positive and negative fixture acceptance
+  criteria and references to RFC 9052, RFC 9053, and RFC 8949. No
+  runtime, dependency, export, or version change.
+- **`specs/conformance/interop/`** adds ERC-8126 attestation-format and
+  AP2 open-mandate-hash interoperability vectors (positive and negative)
+  resolved by a repository-scoped interop verifier, with composition
+  notes.
+- **`docs/interop/SIGNED-RECORDS-INTEROP-MATRIX.md`** records how PEAC
+  composes with adjacent signed-record formats (AP2, ERC-8126 with
+  ERC-8004, x402, MCP, SCITT), with per-row upstream source, upstream
+  status at last check, PEAC artifact, composition, and boundary.
+- **`docs/interop/`** adds an ecosystem record-carrier classification and
+  a public integration reference format.
+- **`docs/governance/`** adds verification artifact conventions.
+
+### Changed
+
+- **`README.md`, the Start Here page, and the developer guide** lead with
+  portable signed interaction records and a records-first quickstart path.
+- **MCP distribution metadata** (`server.json`, `manifest.json`,
+  `smithery.yaml`) and guidance version markers are refreshed to the
+  current server and package versions.
+- **`@peac/mappings-tap`** package description uses "interaction
+  evidence" in place of "control evidence" for boundary-accurate wording.
+- **`docs/STABILITY-CONTRACT.md`, `docs/PACKAGE_STATUS.md`,
+  `docs/SURFACE_STATUS.md`, `pnpm-workspace.yaml`, and
+  `tsconfig.base.json`** reflect archiving unused workspace surfaces
+  (`surfaces/analytics` and the `transport/http` and `transport/ws`
+  packages move under `archive/`); the build graph drops from 107 to 104
+  targets. Published package count is unchanged at 36.
+
+### Security
+
+- **Dependency-audit allowlist** refreshes development-only audit
+  exception entries with updated expiry windows. No production-bundle or
+  runtime change.
+
+## [0.14.5]
 
 Public Verification Readiness.
 

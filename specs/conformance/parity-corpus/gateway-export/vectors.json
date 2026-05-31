@@ -1,7 +1,7 @@
 {
   "family": "gateway-export",
   "description": "Gateway export parity vectors. Eight positive deterministic JSON observation payloads covering all eight event_kind values: seven settlement/recovery state observations plus one facilitator-timeout trigger observation. Per the parity-corpus convention, all vectors assert envelope-level canonical agreement and set expected.accepted=true; semantic rejection of extension content (forbidden payment-data keys including value_minor, opaque-ref grammar violations, custom timeout missing-timing-fields, bounded-numeric overflow, invalid event_kind, type URI / event_kind mismatch, timeout_profile and polling_strategy closed enums) lives at the Layer 3 validator surface (validateGatewayExport exported from @peac/schema, exercised by packages/schema/__tests__/extensions/gateway-export.test.ts).",
-  "version": "0.14.5",
+  "version": "0.15.0",
   "generator": "manual; gateway-export v0.1 floor",
   "vectors": [
     {
