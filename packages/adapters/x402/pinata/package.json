@@ -29,7 +29,7 @@
   "devDependencies": {
     "@types/node": "^22.19.11",
     "typescript": "^5.3.3",
-    "vitest": "^4.0.0"
+    "vitest": "^4.1.0"
   },
   "bugs": {
     "url": "https://github.com/peacprotocol/peac/issues"
