@@ -64,12 +64,12 @@ jobs:
           fi
           echo "OK: name=$SERVER_NAME"
 
-      - name: Install mcp-publisher (pinned to v1.4.1 with checksum verification)
+      - name: Install mcp-publisher (pinned to v1.7.9 with checksum verification)
         env:
-          MCP_PUBLISHER_VERSION: v1.4.1
-          # SHA-256 checksums from https://github.com/modelcontextprotocol/registry/releases/tag/v1.4.1
-          CHECKSUM_LINUX_AMD64: '58ce7746a990288158868b9176dfe094f20cbd7467bc9f6cb9ebb8e210c0e0d4'
-          CHECKSUM_LINUX_ARM64: 'db15ee51f517ce79296b6b3329772d08ea7e7a2b6a3613166f4d666e34e40857'
+          MCP_PUBLISHER_VERSION: v1.7.9
+          # SHA-256 checksums from https://github.com/modelcontextprotocol/registry/releases/tag/v1.7.9
+          CHECKSUM_LINUX_AMD64: 'ab128162b0616090b47cf245afe0a23f3ef08936fdce19074f5ba0a4469281ac'
+          CHECKSUM_LINUX_ARM64: '04f5199b3deef8e6fc4d6ed98c56a74f799def53edca3fe6d4862ecd4397c172'
         run: |
           ARCH=$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')
           TARBALL="mcp-publisher_linux_${ARCH}.tar.gz"
