@@ -1,11 +1,17 @@
 # PEAC Protocol
 
-> Open standard for verifiable interaction records across agent, tool, API, and cross-runtime systems. Portable signed records anyone can verify offline.
-> Last reviewed: 2026-05-21
+> Open standard for verifiable interaction records across agent, tool, API, MCP, and cross-runtime systems.
+> Portable signed records anyone can verify offline.
+> Current release: v0.15.0
+> Last reviewed: 2026-06-01
 
 ## What is PEAC
 
-PEAC Protocol provides cryptographically signed, offline-verifiable interaction records for automated interactions. The current signed wire artifact is a compact JWS using Ed25519 signatures and can be verified offline with the issuer's public key or a pinned JWKS. PEAC does not orchestrate protocols or enforce behavior; it provides neutral evidence of what terms applied and what happened.
+PEAC Protocol provides cryptographically signed, offline-verifiable interaction records for automated interactions.
+
+The current signed wire artifact is a compact JWS using Ed25519 signatures. Records can be verified offline with the issuer's public key or a pinned JWKS.
+
+PEAC does not orchestrate protocols, control systems, or enforce behavior. It records neutral evidence of what terms applied and what happened so another party can verify it outside the system that produced it.
 
 ## Quick Start
 
@@ -14,40 +20,46 @@ PEAC Protocol provides cryptographically signed, offline-verifiable interaction 
 - Issue a record: use `@peac/protocol` with `issue()` and an Ed25519 signing key
 - GitHub: https://github.com/peacprotocol/peac
 - Website: https://www.peacprotocol.org
+- MCP Registry: `io.github.peacprotocol/peac`
 
 ## Key Packages
 
-- `@peac/kernel`: Normative constants, error codes, and type definitions (Layer 0)
-- `@peac/schema`: Zod validation schemas for interaction records, legacy receipt surfaces, and evidence extensions (Layer 1)
-- `@peac/crypto`: Ed25519 signing and verification (Layer 2)
-- `@peac/protocol`: High-level issue and verify API (Layer 3)
-- `@peac/mcp-server`: MCP server with 5 tools for record verification and issuance (Layer 5)
+- `@peac/kernel`: normative constants, error codes, and type definitions
+- `@peac/schema`: validation schemas for interaction records and evidence extensions
+- `@peac/crypto`: Ed25519 signing and verification
+- `@peac/protocol`: high-level issue and verify API
+- `@peac/mcp-server`: MCP server for record verification, inspection, issuance, and bundles
+- `@peac/cli`: command-line tools for issuing, verifying, and recording interactions
 
-## Agent Integration
+## Integration Surfaces
 
-- MCP Server: 5-tool MCP server for any MCP-compatible client
-- A2A Mapping: `@peac/mappings-a2a` for Google Agent-to-Agent protocol evidence
-- ACP Mapping: `@peac/mappings-acp` for Agentic Commerce Protocol (ACP) evidence
-- UCP Mapping: `@peac/mappings-ucp` for Universal Commerce Protocol evidence
-- x402 Adapter: `@peac/adapter-x402` for payment-required HTTP evidence
-- Content Signals: `@peac/mappings-content-signals` for robots.txt, Content-Usage (AIPREF), and tdmrep.json signal parsing
-- OpenAI Adapter: `@peac/adapter-openai-compatible` for hash-first inference records from any OpenAI-compatible provider
-- HTTP: `PEAC-Receipt` response header carries compact JWS for any HTTP API
-- Evidence Carrier Contract: universal carry interface across MCP, A2A, Agentic Commerce Protocol (ACP), UCP, x402, and HTTP
+- MCP: `@peac/mcp-server`
+- HTTP: `PEAC-Receipt` response header carries a compact JWS
+- A2A: `@peac/mappings-a2a`
+- ACP: `@peac/mappings-acp` for Agentic Commerce Protocol evidence
+- UCP: `@peac/mappings-ucp`
+- x402: `@peac/adapter-x402`
+- Content signals: `@peac/mappings-content-signals`
+- OpenAI-compatible inference: `@peac/adapter-openai-compatible`
+- Evidence Carrier Contract: common carry interface across supported protocol surfaces
 
 ## Documentation
 
-- Protocol Behavior: https://www.peacprotocol.org/docs/architecture/wire-format
+- Start Here: https://www.peacprotocol.org/start-here
+- Wire Format: https://www.peacprotocol.org/docs/architecture/wire-format
+- Package Layering: https://www.peacprotocol.org/docs/architecture/package-layering
+- Error Codes: https://www.peacprotocol.org/docs/reference/error-codes
 - Evidence Carrier Contract: https://github.com/peacprotocol/peac/blob/main/docs/specs/EVIDENCE-CARRIER-CONTRACT.md
 - Kernel Constraints: https://github.com/peacprotocol/peac/blob/main/docs/specs/KERNEL-CONSTRAINTS.md
-- Architecture: https://www.peacprotocol.org/docs/architecture/package-layering
-- Error Codes: https://www.peacprotocol.org/docs/reference/error-codes
+- MCP Server: https://www.peacprotocol.org/tools/mcp-server
+- Security: https://www.peacprotocol.org/security
 
-## Optional
+## Technical Notes
 
-- Wire Format: `peac-receipt/0.1` (frozen legacy); `interaction-record+jwt` (current stable format)
-- Signing Algorithm: Ed25519 (RFC 8032)
-- Error Format: RFC 9457 Problem Details
-- Discovery: `/.well-known/peac-issuer.json` with `jwks_uri` pointing to JWKS
+- Current record format: `interaction-record+jwt`
+- Frozen legacy format: `peac-receipt/0.1`
+- Signing algorithm: Ed25519 (RFC 8032)
+- Error format: RFC 9457 Problem Details
+- Discovery: `/.well-known/peac-issuer.json` with `jwks_uri`
 - License: Apache-2.0
-- Built by Originary: https://www.originary.xyz
+- Steward: Originary, https://www.originary.xyz

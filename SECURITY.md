@@ -1,6 +1,6 @@
 # Security Policy
 
-Last reviewed: 2026-05-21
+Last reviewed: 2026-06-01
 
 This is the canonical security policy for the PEAC Protocol. It describes
 how to report a vulnerability, which versions receive security fixes, what
@@ -37,7 +37,8 @@ kept in the loop and the disclosure calendar is coordinated.
 
 | Line                             | Status                                     | Wire format                         | Security-fix window                           |
 | -------------------------------- | ------------------------------------------ | ----------------------------------- | --------------------------------------------- |
-| `v0.14.x`                        | Active (current)                           | Wire 0.2 (`interaction-record+jwt`) | Through the next minor line                   |
+| `v0.15.x`                        | Active (current)                           | Wire 0.2 (`interaction-record+jwt`) | Through the next minor line                   |
+| `v0.14.x`                        | Maintenance (security fixes only)          | Wire 0.2 (`interaction-record+jwt`) | Through 2026-12-01 (6 months after `v0.15.0`) |
 | `v0.13.x`                        | Maintenance (security fixes only)          | Wire 0.2 (`interaction-record+jwt`) | 6 months after the next minor line ships      |
 | `v0.12.x`                        | Maintenance (critical security fixes only) | Wire 0.2 (`interaction-record+jwt`) | Through 2026-11-03 (6 months after `v0.14.0`) |
 | `v0.11.x`                        | Maintenance (security fixes only)          | Wire 0.1 (`peac-receipt/0.1`)       | Through 2026-10-25 (6 months after `v0.13.0`) |
