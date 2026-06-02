@@ -75,9 +75,9 @@ export default [
   // --- @peac/mappings-content-signals: forbid network imports ---
   // Content-signal parser packages take pre-fetched bytes only.
   // Tests are exempt. (@peac/pref (packages/aipref/) was archived in v0.13.0
-  // and moved to archive/pref/; its historical source is no longer on the
-  // active lint path, so the rule now targets the canonical content-signals
-  // mapping package only.)
+  // and removed from HEAD; its historical source is recoverable from git
+  // history and no longer on the active lint path, so the rule now targets the
+  // canonical content-signals mapping package only.)
   {
     files: [
       'packages/mappings/content-signals/src/**/*.ts',

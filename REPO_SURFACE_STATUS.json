@@ -1,7 +1,7 @@
 {
   "description": "Machine-readable surface classification for PEAC Protocol workspace. CI fails if any workspace member is missing. See docs/PACKAGE_STATUS.md for human-readable view.",
   "version": "0.13.0",
-  "updated": "2026-06-01",
+  "updated": "2026-06-02",
   "states": {
     "default": "Current recommended path. Actively maintained, Wire 0.2 native.",
     "supported": "Actively maintained, published, production-ready. May not be on default quickstart path.",
@@ -45,14 +45,6 @@
       "wire": "0.2",
       "layer": 3,
       "published": true
-    },
-    "archive/discovery": {
-      "npm": "@peac/disc",
-      "state": "archived",
-      "wire": "0.2",
-      "layer": 3,
-      "published": false,
-      "note": "Archived at v0.13.1. Source moved out of the packages/* workspace glob. Active publish-manifest count drops 37 -> 36. CLI peac discover continues via internal helper at packages/cli/src/lib/policy-document-discovery.ts. Historical npm versions <= 0.13.0 remain installable with their existing deprecation messages."
     },
     "packages/registries": {
       "npm": "@peac/registries",
@@ -362,22 +354,6 @@
       "layer": 4,
       "published": true
     },
-    "packages/transport/http": {
-      "npm": null,
-      "state": "archived",
-      "wire": "0.2",
-      "layer": 4,
-      "published": false,
-      "note": "Moved to archive/transport/http. Not published. No active workspace dependency or runtime import."
-    },
-    "packages/transport/ws": {
-      "npm": null,
-      "state": "archived",
-      "wire": "0.2",
-      "layer": 4,
-      "published": false,
-      "note": "Moved to archive/transport/ws. Not published. No active workspace dependency or runtime import."
-    },
     "packages/net/node": {
       "npm": "@peac/net-node",
       "state": "supported",
@@ -457,14 +433,6 @@
       "layer": 5,
       "published": false
     },
-    "packages/sdk-js": {
-      "npm": "@peac/sdk",
-      "state": "archived",
-      "wire": "0.1",
-      "layer": "legacy",
-      "published": false,
-      "note": "Moved to archive/sdk-js/. Uses deprecated @peac/core. Replaced by @peac/protocol."
-    },
     "apps/api": {
       "npm": null,
       "state": "default",
@@ -488,14 +456,6 @@
       "published": false,
       "note": "Workspace-internal current-Wire sandbox issuer for integration tests and local demos."
     },
-    "apps/bridge": {
-      "npm": null,
-      "state": "archived",
-      "wire": "0.9.13",
-      "layer": "legacy",
-      "published": false,
-      "note": "Moved to archive/bridge/. Unused dev sidecar. Imports deprecated @peac/core."
-    },
     "sdks/go": {
       "npm": null,
       "state": "supported",
@@ -511,14 +471,6 @@
       "layer": 5,
       "published": false,
       "note": "Codex MCP server configuration (secondary install channel)"
-    },
-    "surfaces/analytics": {
-      "npm": null,
-      "state": "archived",
-      "wire": "0.2",
-      "layer": 5,
-      "published": false,
-      "note": "Moved to archive/surfaces/analytics. Not published. No active workspace dependency or runtime import."
     },
     "surfaces/workers/akamai": {
       "npm": null,
@@ -548,60 +500,6 @@
       "layer": 5,
       "published": false,
       "note": "One test quarantined due to @peac/contracts workspace linking issue"
-    },
-    "archive/pref": {
-      "npm": "@peac/pref",
-      "state": "archived",
-      "removal": "v0.13.0",
-      "wire": null,
-      "layer": null,
-      "published": false,
-      "note": "ARCHIVED in v0.13.0 (moved from packages/aipref/). Migration: @peac/mappings-content-signals (RFC 9651 Structured Fields, full RFC 8785 JCS + SHA-256 digest). Historical npm versions <=0.12.14 remain installable (deprecate-then-remove discipline)."
-    },
-    "archive/pillars/access": {
-      "npm": null,
-      "state": "archived",
-      "wire": null,
-      "layer": 6,
-      "published": false,
-      "note": "ARCHIVED in v0.13.0. Empty pillar stub never published. Pillar taxonomy label retained; concrete implementation targeted for v1.0+ watchlist."
-    },
-    "archive/pillars/compliance": {
-      "npm": null,
-      "state": "archived",
-      "wire": null,
-      "layer": 6,
-      "published": false,
-      "note": "ARCHIVED in v0.13.0. Empty pillar stub never published."
-    },
-    "archive/pillars/consent": {
-      "npm": null,
-      "state": "archived",
-      "wire": null,
-      "layer": 6,
-      "published": false,
-      "note": "ARCHIVED in v0.13.0. Empty pillar stub never published."
-    },
-    "archive/pillars/intelligence": {
-      "npm": null,
-      "state": "archived",
-      "wire": null,
-      "layer": 6,
-      "published": false,
-      "note": "ARCHIVED in v0.13.0. Empty pillar stub never published."
-    },
-    "archive/pillars/provenance": {
-      "npm": null,
-      "state": "archived",
-      "wire": null,
-      "layer": 6,
-      "published": false,
-      "note": "ARCHIVED in v0.13.0. Near-empty scaffold (version constant + doc comment) never published."
-    },
-    "archive/0.9.0-0.9.14/packages-core": {
-      "state": "archived",
-      "wire": "0.1",
-      "note": "ARCHIVED in v0.13.0. Source moved from packages/core/ to archive/0.9.0-0.9.14/packages-core/. Historical 0.9-series peac.receipt/0.9 verify-only path. Not published at v0.13.0 or later. Historical npm versions <=0.9.14 remain installable (deprecate-then-remove discipline)."
     }
   }
 }

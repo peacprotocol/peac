@@ -42,8 +42,8 @@ TRACKED_PACKAGES=(
   # of TASK_STATE_V03_TO_V1 / normalizeTaskState / _resetDeprecationWarning
   # warranted an explicit public-surface lock on this published package).
   "@peac/mappings-a2a"
-  # @peac/sdk archived (source in archive/sdk-js/); not a tracked public
-  # surface in v0.13.0+. Historical snapshot preserved in git history.
+  # @peac/sdk archived (source removed from HEAD; not a tracked public
+  # surface in v0.13.0+). Historical snapshot preserved in git history.
 )
 
 FAILED=0

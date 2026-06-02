@@ -2,7 +2,7 @@
 
 Do not edit manually. Source: `REPO_SURFACE_STATUS.json`. Rebuild via `node scripts/generate-surface-status.mjs`.
 
-**Version:** 0.13.0 | **Updated:** 2026-06-01
+**Version:** 0.13.0 | **Updated:** 2026-06-02
 
 ## Layer 1
 
@@ -27,13 +27,12 @@ Do not edit manually. Source: `REPO_SURFACE_STATUS.json`. Rebuild via `node scri
 
 ## Layer 3
 
-| Surface               | npm                | State    | Wire |
-| --------------------- | ------------------ | -------- | ---- |
-| `archive/discovery`   | `@peac/disc`       | archived | 0.2  |
-| `packages/audit`      | `@peac/audit`      | default  | 0.2  |
-| `packages/control`    | `@peac/control`    | default  | 0.2  |
-| `packages/policy-kit` | `@peac/policy-kit` | default  | 0.2  |
-| `packages/protocol`   | `@peac/protocol`   | default  | 0.2  |
+| Surface               | npm                | State   | Wire |
+| --------------------- | ------------------ | ------- | ---- |
+| `packages/audit`      | `@peac/audit`      | default | 0.2  |
+| `packages/control`    | `@peac/control`    | default | 0.2  |
+| `packages/policy-kit` | `@peac/policy-kit` | default | 0.2  |
+| `packages/protocol`   | `@peac/protocol`   | default | 0.2  |
 
 ## Layer 3.5
 
@@ -80,8 +79,6 @@ Do not edit manually. Source: `REPO_SURFACE_STATUS.json`. Rebuild via `node scri
 | `packages/rails/x402`                  | `@peac/rails-x402`                 | supported    | 0.2  |
 | `packages/receipts`                    | `@peac/receipts`                   | supported    | 0.2  |
 | `packages/transport/grpc`              | `@peac/transport-grpc`             | supported    | 0.2  |
-| `packages/transport/http`              | -                                  | archived     | 0.2  |
-| `packages/transport/ws`                | -                                  | archived     | 0.2  |
 
 ## Layer 5
 
@@ -95,7 +92,6 @@ Do not edit manually. Source: `REPO_SURFACE_STATUS.json`. Rebuild via `node scri
 | `packages/server`              | `@peac/server`      | supported    | 0.2  |
 | `packages/worker-core`         | `@peac/worker-core` | supported    | 0.2  |
 | `packages/worker-shared`       | -                   | supported    | 0.2  |
-| `surfaces/analytics`           | -                   | archived     | 0.2  |
 | `surfaces/nextjs/middleware`   | -                   | experimental | 0.2  |
 | `surfaces/plugin-pack/codex`   | -                   | supported    | 0.2  |
 | `surfaces/workers/akamai`      | -                   | supported    | 0.2  |
@@ -104,15 +100,10 @@ Do not edit manually. Source: `REPO_SURFACE_STATUS.json`. Rebuild via `node scri
 
 ## Layer 6
 
-| Surface                        | npm                 | State     | Wire |
-| ------------------------------ | ------------------- | --------- | ---- |
-| `archive/pillars/access`       | -                   | archived  | null |
-| `archive/pillars/compliance`   | -                   | archived  | null |
-| `archive/pillars/consent`      | -                   | archived  | null |
-| `archive/pillars/intelligence` | -                   | archived  | null |
-| `archive/pillars/provenance`   | -                   | archived  | null |
-| `packages/attribution`         | `@peac/attribution` | supported | 0.2  |
-| `packages/privacy`             | -                   | supported | 0.2  |
+| Surface                | npm                 | State     | Wire |
+| ---------------------- | ------------------- | --------- | ---- |
+| `packages/attribution` | `@peac/attribution` | supported | 0.2  |
+| `packages/privacy`     | -                   | supported | 0.2  |
 
 ## Layer 0
 
@@ -120,27 +111,8 @@ Do not edit manually. Source: `REPO_SURFACE_STATUS.json`. Rebuild via `node scri
 | ----------------- | -------------- | ------- | ---- |
 | `packages/kernel` | `@peac/kernel` | default | 0.2  |
 
-## Layer legacy
-
-| Surface           | npm         | State    | Wire   |
-| ----------------- | ----------- | -------- | ------ |
-| `apps/bridge`     | -           | archived | 0.9.13 |
-| `packages/sdk-js` | `@peac/sdk` | archived | 0.1    |
-
 ## Layer sdk
 
 | Surface   | npm | State     | Wire |
 | --------- | --- | --------- | ---- |
 | `sdks/go` | -   | supported | 0.2  |
-
-## Layer null
-
-| Surface        | npm          | State    | Wire |
-| -------------- | ------------ | -------- | ---- |
-| `archive/pref` | `@peac/pref` | archived | null |
-
-## Layer undefined
-
-| Surface                              | npm | State    | Wire |
-| ------------------------------------ | --- | -------- | ---- |
-| `archive/0.9.0-0.9.14/packages-core` | -   | archived | 0.1  |

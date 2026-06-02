@@ -19,9 +19,11 @@
  *      tarball whose @peac/* dependency cannot resolve on npm at the
  *      published version.
  *
- *   4. No archived path is resolvable as a workspace package. Archive is
- *      historical-only; moved source MUST NOT be discoverable via
- *      pnpm-workspace glob patterns.
+ *   4. Retired package names never re-enter the active workspace or publish
+ *      surface. The pre-0.10 archive/ tree was removed from HEAD (recoverable
+ *      from git history and tags); this is enforced by name and by asserting
+ *      pnpm-workspace.yaml declares no archive/ glob, independent of any
+ *      archive/ directory existing.
  */
 
 import { describe, it, expect } from 'vitest';
@@ -83,12 +85,13 @@ describe('publish-manifest surface audit', () => {
   //             retirement is identified (retirement requires publish-closure
   //             proof; see the publish-closure suite below).
   //
-  //   @peac/disc was retired at v0.13.1: archived under archive/discovery/
-  //   (out of the packages/* glob), removed from publish-manifest.packages[],
-  //   and dropped as a workspace:* dependency from @peac/cli and apps/api.
-  //   The CLI peac-discover command path now flows through an internal
-  //   helper (packages/cli/src/lib/policy-document-discovery.ts) that uses
-  //   public @peac/net-node and @peac/policy-kit primitives.
+  //   @peac/disc was retired at v0.13.1: removed from
+  //   publish-manifest.packages[] and dropped as a workspace:* dependency
+  //   from @peac/cli and apps/api. Its historical source was removed from
+  //   HEAD and remains recoverable from git history and tags. The CLI
+  //   peac-discover command path now flows through an internal helper
+  //   (packages/cli/src/lib/policy-document-discovery.ts) that uses public
+  //   @peac/net-node and @peac/policy-kit primitives.
   it('packages[] count does not exceed the v0.12.14 baseline of 37 (blocking)', () => {
     expect(manifest.packages.length).toBeLessThanOrEqual(V0_12_14_BASELINE_COUNT);
   });
@@ -119,56 +122,56 @@ describe('publish-manifest surface audit', () => {
     expect(missing).toEqual([]);
   });
 
-  it('archived packages are not listed in packages[]', () => {
-    const archivedNames = [
-      '@peac/pref',
-      '@peac/core',
-      '@peac/sdk',
-      '@peac/access',
-      '@peac/compliance',
-      '@peac/consent',
-      '@peac/intelligence',
-      '@peac/provenance',
-      '@peac/disc',
-    ];
-    const leaked = archivedNames.filter((n) => manifest.packages.includes(n));
+  // Retired package names. These packages were removed from the active
+  // workspace and publish surface; their historical source was removed from
+  // HEAD and remains recoverable from git history and v0.9.x / archive tags.
+  // The guard below is directory-independent: it protects the invariant
+  // ("retired names must never re-enter the active workspace or publish
+  // surface") by name and by workspace-glob shape, not by any archive/
+  // directory existing.
+  const RETIRED_PACKAGE_NAMES = [
+    '@peac/pref',
+    '@peac/core',
+    '@peac/sdk',
+    '@peac/access',
+    '@peac/compliance',
+    '@peac/consent',
+    '@peac/intelligence',
+    '@peac/provenance',
+    '@peac/disc',
+  ];
+
+  it('retired package names are absent from publish-manifest packages[]', () => {
+    const leaked = RETIRED_PACKAGE_NAMES.filter((n) => manifest.packages.includes(n));
     expect(leaked).toEqual([]);
   });
 
-  it('archived paths do not contain a package.json that could resolve as workspace', () => {
-    // Moving source under archive/ without removing its package.json from the
-    // workspace globs would silently re-publish it. archive/ is not in the
-    // workspace globs (see pnpm-workspace.yaml), so these archived package.json
-    // files are expected to exist but NOT be workspace members. This test
-    // asserts the glob guard: no archive/* path starts with a workspace prefix.
-    const archivePaths = [
-      'archive/pref/package.json',
-      'archive/pillars/access/package.json',
-      'archive/pillars/compliance/package.json',
-      'archive/pillars/consent/package.json',
-      'archive/pillars/intelligence/package.json',
-      'archive/pillars/provenance/package.json',
-      'archive/discovery/package.json',
-    ];
-    for (const p of archivePaths) {
-      const abs = join(ROOT, p);
-      if (existsSync(abs)) {
-        // Must not be reachable from any workspace glob. Workspace globs start
-        // with packages/, apps/, surfaces/, or examples/, never archive/.
-        expect(p.startsWith('archive/')).toBe(true);
-      }
-    }
+  it('retired package names are absent from the workspace package map', () => {
+    // If a contributor re-adds a retired name to WORKSPACE_PACKAGE_MAP (or
+    // re-introduces its source under a workspace glob), this catches it before
+    // the package can re-enter the publish surface.
+    const leaked = RETIRED_PACKAGE_NAMES.filter((n) => WORKSPACE_PATH_MAP[n] !== undefined);
+    expect(leaked).toEqual([]);
   });
 
-  it('@peac/disc retired: not in workspace glob, not in publish manifest', () => {
-    // The archive/discovery/package.json file exists but archive/ is not in
-    // any workspace glob, so the package is not a workspace member. The
-    // publish manifest must not list it.
-    expect(manifest.packages).not.toContain('@peac/disc');
-    // No workspace path mapping must remain for @peac/disc; if a contributor
-    // re-adds it to WORKSPACE_PATH_MAP without re-listing the source, this
-    // assertion catches it.
-    expect(WORKSPACE_PATH_MAP['@peac/disc']).toBeUndefined();
+  it('pnpm-workspace.yaml declares no archive/ workspace glob', () => {
+    // The pre-0.10 archive tree was removed from HEAD. Re-introducing an
+    // archive/ glob would make retired/legacy source resolvable as a workspace
+    // member (and thus publishable) again. Assert no workspace glob references
+    // archive/.
+    const workspaceYaml = readFileSync(join(ROOT, 'pnpm-workspace.yaml'), 'utf8');
+    const globEntries = workspaceYaml
+      .split('\n')
+      .map((line) => line.trim())
+      .filter((line) => line.startsWith('- '))
+      .map((line) =>
+        line
+          .slice(2)
+          .trim()
+          .replace(/^['"]|['"]$/g, '')
+      );
+    const archiveGlobs = globEntries.filter((glob) => glob.includes('archive'));
+    expect(archiveGlobs).toEqual([]);
   });
 });
 
