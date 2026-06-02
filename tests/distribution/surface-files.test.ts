@@ -222,8 +222,8 @@ describe('llms.txt', () => {
     expect(content).not.toContain('peac.dev');
   });
 
-  it('has Agent Integration section', () => {
-    expect(content).toContain('## Agent Integration');
+  it('has Integration Surfaces section', () => {
+    expect(content).toContain('## Integration Surfaces');
   });
 
   it('mentions the wire format', () => {
