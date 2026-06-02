@@ -46,7 +46,7 @@ const FORBIDDEN_PATTERNS: readonly RegExp[] = [
 ];
 
 // Files whose entire content is allowed to mention @peac/disc (migration
-// guide, archive READMEs, release notes that document the retirement, etc.).
+// guide, release notes that document the retirement, etc.).
 // Paths are repo-relative.
 const ALLOWED_FILES_EXACT: ReadonlySet<string> = new Set([
   'docs/MIGRATION_CURRENT.md',
@@ -54,13 +54,9 @@ const ALLOWED_FILES_EXACT: ReadonlySet<string> = new Set([
 ]);
 
 // Path-prefix allow list: anything under these prefixes is allowed because
-// historical record-keeping (release-notes, archived sources) MUST preserve
-// the package name.
-const ALLOWED_PATH_PREFIXES: readonly string[] = [
-  'docs/release-notes/',
-  'docs/case-studies/',
-  'archive/',
-];
+// historical record-keeping (release-notes, case studies) MUST preserve the
+// package name.
+const ALLOWED_PATH_PREFIXES: readonly string[] = ['docs/release-notes/', 'docs/case-studies/'];
 
 function isAllowedPath(repoRelativePath: string): boolean {
   if (ALLOWED_FILES_EXACT.has(repoRelativePath)) return true;

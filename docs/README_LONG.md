@@ -30,8 +30,7 @@ peac/
 ├─ sdks/go/               # Go SDK (verifier + middleware)
 ├─ surfaces/              # Distribution artifacts (plugin-pack, workers)
 ├─ integrator-kits/       # Integration checklists for ecosystem transports
-├─ examples/              # Canonical flow examples
-└─ archive/               # Historical and archived packages; see docs/PACKAGE_STATUS.md for npm availability
+└─ examples/              # Canonical flow examples
 ```
 
 See [ARCHITECTURE.md](ARCHITECTURE.md) for full design rationale.

@@ -47,13 +47,12 @@ const NESTED_MAPPINGS: Record<string, string> = {
   'mappings-slsa': 'packages/mappings/slsa',
   'capture-core': 'packages/capture/core',
   'capture-node': 'packages/capture/node',
-  // @peac/pref and @peac/sdk archived in v0.13.0. Historical source lives
-  // under archive/pref/ and archive/sdk-js/ respectively. Lookups for these
-  // short names are intentionally absent; consumers should migrate (see
+  // @peac/pref and @peac/sdk were archived in v0.13.0 and removed from HEAD
+  // (historical source recoverable from git history and tags). Lookups for
+  // these short names are intentionally absent; consumers should migrate (see
   // docs/MIGRATION_CURRENT.md).
   'net-node': 'packages/net/node',
   'transport-grpc': 'packages/transport/grpc',
-  disc: 'packages/discovery',
 };
 
 /**

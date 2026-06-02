@@ -60,7 +60,7 @@ v0.13.0 finishes the scheduled package-surface cleanup. Deprecate-then-remove di
 
 ### `@peac/pref` — archived
 
-**State at v0.13.0:** archived. The workspace package at `packages/aipref/` moved to `archive/pref/` and `@peac/pref` is no longer published. Historical npm versions `<=0.12.14` remain installable and emit a one-shot `PEAC_DEPRECATED_PREF` `DeprecationWarning` on import.
+**State at v0.13.0:** archived. The workspace package at `packages/aipref/` was retired and removed from HEAD (recoverable from git history and tags) and `@peac/pref` is no longer published. Historical npm versions `<=0.12.14` remain installable and emit a one-shot `PEAC_DEPRECATED_PREF` `DeprecationWarning` on import.
 
 **Migration:** replace imports from `@peac/pref` with equivalent canonical exports in [`@peac/mappings-content-signals`](../packages/mappings/content-signals/). The canonical package implements RFC 9651 Structured Fields `Content-Usage` parsing, RFC 9309 `robots.txt`, tdmrep, and full-length RFC 8785 JCS + SHA-256 content digests without the truncated-digest bug from pre-v0.12.14 `@peac/pref`.
 
@@ -76,13 +76,13 @@ No runtime behavior change: `@peac/pref` v0.12.14 was already a facade over `@pe
 
 ### `@peac/disc`: archived (v0.13.1)
 
-**State at v0.13.1:** archived. The package is removed from the workspace (its source moved to `archive/discovery/`) and from `scripts/publish-manifest.json`. Active publish-manifest count drops 37 → 36. Historical npm versions (≤ 0.13.0) remain installable from the npm registry but are deprecated; the deprecation messages were dispatched at v0.13.0.
+**State at v0.13.1:** archived. The package is removed from the workspace (its source was removed from HEAD; recoverable from git history and the `v0.13.0` tag) and from `scripts/publish-manifest.json`. Active publish-manifest count drops 37 → 36. Historical npm versions (≤ 0.13.0) remain installable from the npm registry but are deprecated; the deprecation messages were dispatched at v0.13.0.
 
-The CLI `peac discover <url>` command continues to work via an internal helper at `packages/cli/src/lib/policy-document-discovery.ts` that uses public `@peac/net-node.safeFetchRaw` and `@peac/policy-kit.parsePolicyDocument`, plus a tolerant two-pass parse step that preserves the legacy-line behavior the retired package used to provide. The helper is not exported from `@peac/cli`'s public surface; external consumers needing the same compatibility behavior can copy the pattern from `archive/discovery/src/parser.ts`.
+The CLI `peac discover <url>` command continues to work via an internal helper at `packages/cli/src/lib/policy-document-discovery.ts` that uses public `@peac/net-node.safeFetchRaw` and `@peac/policy-kit.parsePolicyDocument`, plus a tolerant two-pass parse step that preserves the legacy-line behavior the retired package used to provide. The helper is not exported from `@peac/cli`'s public surface; external consumers needing the same compatibility behavior can recover the pattern from git history (the `v0.13.0` tag).
 
 **Migration guidance (by export):**
 
-- **`import { parse } from '@peac/disc'`** → `import { parsePolicyDocument } from '@peac/policy-kit'` for **strict** parsing of `peac-policy/0.1` documents. **Note:** `parsePolicyDocument` throws `PolicyValidationError` / `PolicyLoadError` on failure, where the retired `@peac/disc.parse` returned a structured `ParseResult { valid, data?, errors?, warnings? }` and was tolerant of legacy key-discovery lines (`verify:`, `public_keys:`, `jwks:`) via a two-pass strip-and-retry. If you need the tolerant behavior, copy the `parsePolicyDocumentCompat` helper pattern from `archive/discovery/src/parser.ts` into your own code.
+- **`import { parse } from '@peac/disc'`** → `import { parsePolicyDocument } from '@peac/policy-kit'` for **strict** parsing of `peac-policy/0.1` documents. **Note:** `parsePolicyDocument` throws `PolicyValidationError` / `PolicyLoadError` on failure, where the retired `@peac/disc.parse` returned a structured `ParseResult { valid, data?, errors?, warnings? }` and was tolerant of legacy key-discovery lines (`verify:`, `public_keys:`, `jwks:`) via a two-pass strip-and-retry. If you need the tolerant behavior, recover the `parsePolicyDocumentCompat` helper pattern from git history (the `v0.13.0` tag) and adapt it into your own code.
 
 - **`import { loadPolicyDocument } from '@peac/disc'`** → `import { loadPolicyDocument } from '@peac/policy-kit'` (already supported since v0.12.14).
 
@@ -99,19 +99,19 @@ No new published version of `@peac/disc` ships from v0.13.1 onward.
 
 ### `@peac/core` — archived
 
-**State at v0.13.0:** archived. `@peac/core` was the v0.9.x `peac.receipt/0.9` verify-only implementation. Source moved from `packages/core/` to `archive/0.9.0-0.9.14/packages-core/`. `@peac/core` is **not published at v0.13.0 or later**. Historical npm versions `<=0.9.14` remain installable for verify-only use of historical `peac.receipt/0.9` records. The archive is coupled with the legacy `POST /verify` handler rewire: `apps/api/src/verifier.ts` was deleted (it was the only remaining active consumer), and the legacy `/verify` route now delegates in-process to the canonical `/v1/verify` handler while stamping RFC 9745 `Deprecation: true`, RFC 8594 `Sunset: Sat, 01 Nov 2026 00:00:00 GMT`, and RFC 8288 `Link` headers on every response.
+**State at v0.13.0:** archived. `@peac/core` was the v0.9.x `peac.receipt/0.9` verify-only implementation. Source was removed from HEAD (recoverable from git history and `v0.9.x` tags). `@peac/core` is **not published at v0.13.0 or later**. Historical npm versions `<=0.9.14` remain installable for verify-only use of historical `peac.receipt/0.9` records. This retirement is coupled with the legacy `POST /verify` handler rewire: `apps/api/src/verifier.ts` was deleted (it was the only remaining active consumer), and the legacy `/verify` route now delegates in-process to the canonical `/v1/verify` handler while stamping RFC 9745 `Deprecation: true`, RFC 8594 `Sunset: Sat, 01 Nov 2026 00:00:00 GMT`, and RFC 8288 `Link` headers on every response.
 
 **Migration:** use `@peac/protocol` (`issue`, `verifyLocal`, `verify`), `@peac/schema` (types), `@peac/crypto` (sign / verify primitives), and `@peac/kernel` (wire constants).
 
 ### Empty Layer-6 pillar stubs — archived
 
-**State at v0.13.0:** archived. Five empty pillar stubs moved from `packages/*/` to `archive/pillars/*/`:
+**State at v0.13.0:** archived. Five empty pillar stubs were removed from HEAD (recoverable from git history and tags); their former workspace paths were:
 
-- `packages/access` → `archive/pillars/access`
-- `packages/compliance` → `archive/pillars/compliance`
-- `packages/consent` → `archive/pillars/consent`
-- `packages/intelligence` → `archive/pillars/intelligence`
-- `packages/provenance` → `archive/pillars/provenance`
+- `packages/access`
+- `packages/compliance`
+- `packages/consent`
+- `packages/intelligence`
+- `packages/provenance`
 
 None of these were ever published to npm `latest`; they were workspace-internal stubs. The pillar concepts remain part of the PEAC 10-pillar taxonomy. No migration is required for external consumers.
 
@@ -122,7 +122,7 @@ Kept in workspace as shipping packages:
 
 ### `packages/sdk-js/` workspace stub — already archived
 
-`@peac/sdk` source lives in `archive/sdk-js/` from prior releases. The v0.13.0 workspace has no `packages/sdk-js/` tracked entry. Historical `@peac/sdk` npm versions remain installable; consumers should migrate to `@peac/protocol` / `@peac/schema` / `@peac/crypto` / `@peac/kernel`. See `archive/sdk-js/README.md` for the historical context.
+`@peac/sdk` source was removed from HEAD (recoverable from git history and tags). The v0.13.0 workspace has no `packages/sdk-js/` tracked entry. Historical `@peac/sdk` npm versions remain installable; consumers should migrate to `@peac/protocol` / `@peac/schema` / `@peac/crypto` / `@peac/kernel`.
 
 ### `npm deprecate` dispatch
 

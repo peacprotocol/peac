@@ -4,14 +4,14 @@ This document defines the lifecycle rules for PEAC Protocol surfaces.
 
 ## Surface States
 
-| State            | Definition                                                          | Support level                                         |
-| ---------------- | ------------------------------------------------------------------- | ----------------------------------------------------- |
-| **default**      | Current recommended path. Wire 0.2 native.                          | Full: features, fixes, docs                           |
-| **supported**    | Published, production-ready. May not be on default quickstart path. | Full: features, fixes, docs                           |
-| **compat-only**  | Maintained for backward compatibility.                              | Security and correctness fixes only. No new features. |
-| **deprecated**   | Marked for removal.                                                 | Security fixes only. Migration guidance required.     |
-| **archived**     | Moved to `archive/`. Excluded from workspace, CI, release.          | None. Buildability not guaranteed.                    |
-| **experimental** | Not yet stable.                                                     | Best-effort. API may change without notice.           |
+| State            | Definition                                                                                      | Support level                                         |
+| ---------------- | ----------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| **default**      | Current recommended path. Wire 0.2 native.                                                      | Full: features, fixes, docs                           |
+| **supported**    | Published, production-ready. May not be on default quickstart path.                             | Full: features, fixes, docs                           |
+| **compat-only**  | Maintained for backward compatibility.                                                          | Security and correctness fixes only. No new features. |
+| **deprecated**   | Marked for removal.                                                                             | Security fixes only. Migration guidance required.     |
+| **archived**     | Removed from HEAD; recoverable from git history and tags. Excluded from workspace, CI, release. | None. Buildability not guaranteed.                    |
+| **experimental** | Not yet stable.                                                                                 | Best-effort. API may change without notice.           |
 
 ## Deprecation Windows
 
@@ -57,15 +57,32 @@ No surface may be promoted from `experimental` or `compat-only` to `supported` o
 | API `/verify`             | deprecated | v0.12.7          | post-Sunset (2026-11-01) | `/v1/verify`                                                        |
 | Wire 0.1 default teaching | removed    | v0.12.7          | Immediate                | All defaults now Wire 0.2                                           |
 
+## Retired package names
+
+The following npm package names were retired and removed from HEAD. Their source is recoverable from git history and `v0.9.x` / archive tags. None are in the active workspace or the publish manifest, and all are protected by the retired-name guard in `tests/tooling/package-surface-audit.test.ts` so they cannot re-enter the published surface.
+
+| Package              | Status            | Current guidance                                                    | Recovery                    |
+| -------------------- | ----------------- | ------------------------------------------------------------------- | --------------------------- |
+| `@peac/core`         | removed from HEAD | `@peac/kernel` + `@peac/schema` + `@peac/crypto` + `@peac/protocol` | git history / `v0.9.x` tags |
+| `@peac/sdk`          | removed from HEAD | `@peac/protocol`                                                    | git history / tags          |
+| `@peac/disc`         | removed from HEAD | `@peac/policy-kit` + `@peac/net-node`                               | git history / tags          |
+| `@peac/pref`         | removed from HEAD | `@peac/mappings-content-signals`                                    | git history / tags          |
+| `@peac/access`       | removed from HEAD | Unpublished pillar stub; no replacement                             | git history / tags          |
+| `@peac/compliance`   | removed from HEAD | Unpublished pillar stub; no replacement                             | git history / tags          |
+| `@peac/consent`      | removed from HEAD | Unpublished pillar stub; no replacement                             | git history / tags          |
+| `@peac/intelligence` | removed from HEAD | Unpublished pillar stub; no replacement                             | git history / tags          |
+| `@peac/provenance`   | removed from HEAD | Unpublished pillar stub; no replacement                             | git history / tags          |
+
 ## Archive Protocol
 
-When archiving a package or app:
+When archiving (retiring) a package or app, remove it from HEAD. The repo does not keep an `archive/` tree; historical source stays recoverable from git history and tags.
 
-1. Move all tracked files to `archive/<name>/` via `git mv`
+1. Remove all of its tracked files from HEAD via `git rm`
 2. Ensure no `package.json` remains at the original path
-3. Remove from publish manifest
-4. Verify pnpm workspace no longer resolves the old path
-5. Add `archive/<name>/README.md` with reason, last version, replacement, date
-6. Ensure no CI, release, or doc surface references the old path as active
-7. Archived code is excluded from workspace resolution, CI, release, and support. Buildability is not guaranteed.
-8. Update `REPO_SURFACE_STATUS.json` with state `archived`
+3. Remove it from the publish manifest
+4. Verify the pnpm workspace no longer resolves the old path
+5. Add its npm name to the retired-name guard in `tests/tooling/package-surface-audit.test.ts` so it cannot re-enter the workspace or publish surface
+6. Record the retirement in the CHANGELOG and migration docs (reason, last version, replacement)
+7. Ensure no CI, release, or doc surface references the old path as active
+8. Drop its entry from `REPO_SURFACE_STATUS.json` (its source is no longer a workspace member)
+9. Retired code is excluded from workspace resolution, CI, release, and support. Buildability is not guaranteed.
