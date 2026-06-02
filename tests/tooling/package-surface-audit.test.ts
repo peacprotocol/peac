@@ -41,6 +41,15 @@ function readJson(path: string): any {
   return JSON.parse(readFileSync(path, 'utf8'));
 }
 
+// A workspace glob "re-introduces archive/" only if it targets the root
+// archive/ tree. Matching the bare substring "archive" would over-reject
+// unrelated future names (for example packages/archive-reader); restrict the
+// check to the root archive path.
+function isRootArchiveGlob(glob: string): boolean {
+  const normalized = glob.replace(/\\/g, '/').replace(/^\.\//, '');
+  return normalized === 'archive' || normalized === 'archive/' || normalized.startsWith('archive/');
+}
+
 const manifest = readJson(join(ROOT, 'scripts', 'publish-manifest.json')) as {
   packages: string[];
   totalPackages?: number;
@@ -170,8 +179,34 @@ describe('publish-manifest surface audit', () => {
           .trim()
           .replace(/^['"]|['"]$/g, '')
       );
-    const archiveGlobs = globEntries.filter((glob) => glob.includes('archive'));
+    const archiveGlobs = globEntries.filter(isRootArchiveGlob);
     expect(archiveGlobs).toEqual([]);
+  });
+
+  it('retired short names are absent from the resolve-package-path resolver map', () => {
+    // resolve-package-path.ts keeps its own NESTED_MAPPINGS (consumed by the
+    // publish/release closure scripts), separate from WORKSPACE_PACKAGE_MAP. A
+    // retired short name must not map to a path here either, or release tooling
+    // could resolve a retired package to a stale workspace path.
+    const resolverSrc = readFileSync(
+      join(ROOT, 'scripts', 'lib', 'resolve-package-path.ts'),
+      'utf8'
+    );
+    const retiredShortNames = [
+      'pref',
+      'core',
+      'sdk',
+      'access',
+      'compliance',
+      'consent',
+      'intelligence',
+      'provenance',
+      'disc',
+    ];
+    const leaked = retiredShortNames.filter((name) =>
+      new RegExp(`^\\s*['"]?${name}['"]?\\s*:`, 'm').test(resolverSrc)
+    );
+    expect(leaked).toEqual([]);
   });
 });
 

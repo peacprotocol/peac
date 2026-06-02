@@ -64,7 +64,7 @@ maintenance (security and correctness fixes apply to every active line per
 | `@peac/pref`                                                                                | `archived`      | Archived at v0.13.0 (deprecated facade since v0.12.14); source removed from HEAD (recoverable from git history and tags); historical npm remains installable. Use `@peac/mappings-content-signals` for AIPREF / robots.txt / tdmrep parsing. |
 | `@peac/worker-core`                                                                         | `stable`        | Worker-oriented helpers                                                                                                                                                                                                                      |
 | `@peac/core`                                                                                | `archived`      | Archived at v0.13.0; source removed from HEAD (recoverable from git history and `v0.9.x` tags); historical npm `<=0.9.14` remains installable                                                                                                |
-| `@peac/sdk`                                                                                 | `archived`      | Archived; historical npm `<=0.10.2` remains installable                                                                                                                                                                                      |
+| `@peac/sdk`                                                                                 | `archived`      | Archived at v0.13.0; source removed from HEAD (recoverable from git history and tags); historical npm `<=0.10.2` remains installable.                                                                                                        |
 
 Consumers: import only from the package's documented public entry points.
 Subpath imports into internal modules are not a stable surface even when
@@ -180,7 +180,7 @@ Path: [`surfaces/plugin-pack/`](../surfaces/plugin-pack/).
 
 | Surface                   | Path                                                                                        | Classification  |
 | ------------------------- | ------------------------------------------------------------------------------------------- | --------------- |
-| Historical bridge app     | [`apps/bridge`](../apps/bridge)                                                             | `internal-only` |
+| Historical bridge app     | `apps/bridge` (removed from HEAD; recoverable from git history and tags)                    | `internal-only` |
 | Sandbox issuer            | [`apps/sandbox-issuer`](../apps/sandbox-issuer)                                             | `internal-only` |
 | Experimental EAS adapter  | [`packages/adapters/eas`](../packages/adapters/eas)                                         | `experimental`  |
 | Archived transports       | `transport/http`, `transport/ws` (removed from HEAD; recoverable from git history and tags) | `archived`      |

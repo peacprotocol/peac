@@ -53,7 +53,6 @@ const NESTED_MAPPINGS: Record<string, string> = {
   // docs/MIGRATION_CURRENT.md).
   'net-node': 'packages/net/node',
   'transport-grpc': 'packages/transport/grpc',
-  disc: 'packages/discovery',
 };
 
 /**
