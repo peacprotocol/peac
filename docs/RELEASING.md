@@ -309,6 +309,52 @@ pnpm release:stamp:check:promote latest
 Merge the micro-PR. After this, all truth surfaces agree with the live npm
 registry state.
 
+### 11. Reconcile release-state truth
+
+After the npm and GitHub Release steps complete, reconcile every
+release-state surface (npm dist-tags, the git tag, the GitHub Release, and
+the tracked release-state JSON) with `scripts/verify-release-closeout.mjs`.
+The reconciler runs in stages because Mode 2 finalizes the GitHub Release
+after promotion, not before:
+
+```bash
+# Mode 2, mid-soak (after publish.yml, before promote): next channel.
+node scripts/verify-release-closeout.mjs --version X.Y.Z --stage publish
+
+# Mode 2, after promote-latest.yml succeeds, before finalizing the Release.
+node scripts/verify-release-closeout.mjs --version X.Y.Z --stage promote
+
+# Mode 2, after the GitHub Release is finalized (non-draft, non-prerelease).
+node scripts/verify-release-closeout.mjs --version X.Y.Z --stage final
+
+# Mode 1, single-step to latest with a finalized Release.
+node scripts/verify-release-closeout.mjs --version X.Y.Z --stage mode1
+```
+
+Stage meanings:
+
+- `publish`: audits the `next` dist-tag (latest is pre-promotion). The
+  GitHub Release may still be a draft or prerelease during Mode 2 soak.
+- `promote`: audits the `latest` dist-tag. GitHub Release finalization is
+  tolerated but not required at this stage, because Mode 2 finalizes the
+  Release after promotion. A still-draft or prerelease Release reports
+  GREEN here; finalization is asserted at `final`.
+- `final`: audits the `latest` dist-tag and requires a finalized
+  (non-draft, non-prerelease) GitHub Release.
+- `mode1`: single-step `latest` with a finalized GitHub Release.
+
+When running `--stage promote` inline before the post-promote stamp PR has
+merged, pass `--allow-stamp-pending`; after the stamp PR lands, omit it.
+
+`REPO_SURFACE_STATUS.json` freshness is an independent staleness check, not
+part of the release-state stage split. It can report YELLOW after a release
+while every release-state row is GREEN, and `--strict` still fails on a
+YELLOW row. Pass `--max-updated-age-hours <n>` to widen the window or `0` to
+skip it, and `--skip-remote` to check local artifacts only when offline.
+
+Run the reconciler's own tests with `pnpm verify:release-closeout:test` (a
+standalone Node test, not part of the Vitest suite).
+
 ## Conventions
 
 - **Examples stay at `0.0.0`**: Examples are type-check only, not published. The version scripts enforce this invariant.
