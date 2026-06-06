@@ -141,6 +141,10 @@ main.
 
 1. All PRs for this release are merged to main
 2. No WIP commits in main
+3. Dependency audit exceptions are release-ready: `node scripts/check-audit-exception-expiry.mjs --strict` exits 0. Resolve expired, invalid, expiring-soon, or review-stale exceptions in `security/audit-allowlist.json` before tagging.
+4. The NPM automation token is healthy and not near expiry (see "Pre-Release Token Verification" under npm Token Lifecycle); rotate it if needed.
+5. Provenance is retained: npm publish runs under OIDC Trusted Publishing with SLSA build provenance. Do not pass `--provenance false` for first-party packages outside the new-package bootstrap step.
+6. The release tag will be an SSH-signed annotated tag (see step 6).
 
 ## Release Steps
 
@@ -173,6 +177,7 @@ pnpm test
 ./scripts/guard.sh
 ./scripts/check-publish-list.sh
 node scripts/check-manifest-topo.mjs
+node scripts/check-audit-exception-expiry.mjs --strict
 pnpm version:check
 ```
 
@@ -196,11 +201,14 @@ gh pr create --title "chore(release): vX.Y.Z" --body "Release vX.Y.Z"
 
 ### 6. After PR Merge
 
-Tag the release from main:
+Tag the release from main with an SSH-signed annotated tag. Configure signing
+once with `git config gpg.format ssh` and `git config user.signingkey
+<path-to-signing-key>`:
 
 ```bash
 git checkout main && git pull --ff-only origin main
-git tag vX.Y.Z
+git tag -s vX.Y.Z -m "vX.Y.Z"
+git tag -v vX.Y.Z         # verify the signature before pushing
 git push origin vX.Y.Z
 ```
 
