@@ -343,6 +343,9 @@ Stage meanings:
   (non-draft, non-prerelease) GitHub Release.
 - `mode1`: single-step `latest` with a finalized GitHub Release.
 
+When running `--stage promote` inline before the post-promote stamp PR has
+merged, pass `--allow-stamp-pending`; after the stamp PR lands, omit it.
+
 `REPO_SURFACE_STATUS.json` freshness is an independent staleness check, not
 part of the release-state stage split. It can report YELLOW after a release
 while every release-state row is GREEN, and `--strict` still fails on a

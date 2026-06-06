@@ -63,6 +63,13 @@ const REPO_ROOT = resolve(__dirname, '..');
 
 const VALID_STAGES = ['publish', 'promote', 'final', 'mode1'];
 
+// Bounded defaults for the subprocess helpers. Release tooling shells out to
+// npm / git / gh; a hung or runaway command must not block closeout
+// indefinitely or buffer without limit. Failed or timed-out commands still
+// return null, so the existing reporting semantics are unchanged.
+const COMMAND_TIMEOUT_MS = 60_000;
+const COMMAND_MAX_BUFFER = 10 * 1024 * 1024;
+
 function loadJson(path) {
   try {
     return JSON.parse(readFileSync(path, 'utf8'));
@@ -76,6 +83,8 @@ function run(cmd, cmdArgs, opts = {}) {
     return execFileSync(cmd, cmdArgs, {
       stdio: ['ignore', 'pipe', 'pipe'],
       encoding: 'utf8',
+      timeout: COMMAND_TIMEOUT_MS,
+      maxBuffer: COMMAND_MAX_BUFFER,
       ...opts,
     }).trim();
   } catch (_err) {
@@ -95,9 +104,13 @@ function run(cmd, cmdArgs, opts = {}) {
  * `release` has the parsed `gh release view --json` shape:
  *   { tagName, isDraft, isPrerelease }.
  *
- * Returns { status: 'GREEN' | 'YELLOW' | 'RED', detail: string }.
+ * Returns { status: 'GREEN' | 'YELLOW' | 'RED', detail: string }. The helper
+ * fails closed: an unknown stage or a malformed release object returns RED
+ * rather than falling through to a passing branch.
  *
  * Matrix:
+ *   unknown stage              -> RED    (fail closed)
+ *   malformed release object   -> RED    (fail closed)
  *   publish + draft/prerelease -> GREEN  (a later stage finalizes)
  *   publish + finalized        -> RED    (finalized too early; check ordering)
  *   promote + draft/prerelease -> GREEN  (finalize at --stage=final)
@@ -108,7 +121,17 @@ function run(cmd, cmdArgs, opts = {}) {
  *   mode1   + finalized        -> GREEN
  */
 export function classifyGithubRelease(stage, release) {
-  const tag = release && release.tagName ? release.tagName : '(unknown tag)';
+  if (!VALID_STAGES.includes(stage)) {
+    return { status: 'RED', detail: `invalid stage=${stage}` };
+  }
+  if (
+    !release ||
+    typeof release.isDraft !== 'boolean' ||
+    typeof release.isPrerelease !== 'boolean'
+  ) {
+    return { status: 'RED', detail: 'malformed GitHub Release object' };
+  }
+  const tag = release.tagName ? release.tagName : '(unknown tag)';
   const isFinalized = !release.isDraft && !release.isPrerelease;
   const stateLabel = release.isDraft
     ? 'draft'
