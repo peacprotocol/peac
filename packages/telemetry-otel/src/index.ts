@@ -24,7 +24,8 @@
  * ```
  */
 
-export const TELEMETRY_OTEL_VERSION = '0.9.22';
+// Package version (single source of truth in ./version.ts).
+export { TELEMETRY_OTEL_VERSION } from './version.js';
 
 // Main provider
 export { createOtelProvider, type OtelProviderOptions } from './provider.js';

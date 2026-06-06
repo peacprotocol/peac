@@ -15,6 +15,7 @@ import type {
 } from '@peac/telemetry';
 import { PEAC_ATTRS, PEAC_EVENTS } from '@peac/telemetry';
 import { hashIssuer, hashKid } from './privacy.js';
+import { TELEMETRY_OTEL_VERSION } from './version.js';
 import {
   createMetrics,
   recordReceiptIssued,
@@ -38,15 +39,17 @@ export interface OtelProviderOptions extends TelemetryConfig {
   meterName?: string;
 
   /**
-   * Version for tracer/meter (defaults to 0.9.22)
+   * Version for tracer/meter (defaults to the @peac/telemetry-otel package version)
    */
   version?: string;
 }
 
 /**
- * PEAC telemetry version
+ * PEAC telemetry version emitted on spans/metrics as peac.version. Derived
+ * from the single package-version source (./version.ts), not hardcoded, so
+ * it cannot drift from the package version.
  */
-const TELEMETRY_VERSION = '0.9.22';
+const TELEMETRY_VERSION = TELEMETRY_OTEL_VERSION;
 
 /**
  * Default tracer/meter name
