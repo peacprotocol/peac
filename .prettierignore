@@ -23,6 +23,7 @@ pnpm-lock.yaml
 # local development state (gitignored)
 **/.local/**
 .claude/
+.gstack/
 
 # local planning docs (gitignored)
 CLAUDE.md
