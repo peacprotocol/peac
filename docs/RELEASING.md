@@ -141,7 +141,7 @@ main.
 
 1. All PRs for this release are merged to main
 2. No WIP commits in main
-3. Dependency audit exceptions are healthy: `node scripts/check-audit-exception-expiry.mjs` reports no expired or invalid entries. Resolve or renew any flagged exception in `security/audit-allowlist.json` before tagging (`--strict` also fails on entries past the renewal-review window).
+3. Dependency audit exceptions are release-ready: `node scripts/check-audit-exception-expiry.mjs --strict` exits 0. Resolve expired, invalid, expiring-soon, or review-stale exceptions in `security/audit-allowlist.json` before tagging.
 4. The NPM automation token is healthy and not near expiry (see "Pre-Release Token Verification" under npm Token Lifecycle); rotate it if needed.
 5. Provenance is retained: npm publish runs under OIDC Trusted Publishing with SLSA build provenance. Do not pass `--provenance false` for first-party packages outside the new-package bootstrap step.
 6. The release tag will be an SSH-signed annotated tag (see step 6).
@@ -177,7 +177,7 @@ pnpm test
 ./scripts/guard.sh
 ./scripts/check-publish-list.sh
 node scripts/check-manifest-topo.mjs
-node scripts/check-audit-exception-expiry.mjs
+node scripts/check-audit-exception-expiry.mjs --strict
 pnpm version:check
 ```
 

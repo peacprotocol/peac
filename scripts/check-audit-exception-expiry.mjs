@@ -22,15 +22,20 @@
  *   2  Usage error.
  *
  * Flags:
- *   --strict   Pass strict mode to parseAllowlist (entries older than the
- *              60-day review window without reviewed_at are rejected as
- *              invalid) and fail (exit 1) on any YELLOW warning.
- *   --json     Emit the evaluation result as JSON.
+ *   --strict           Pass strict mode to parseAllowlist (entries older
+ *                      than the 60-day review window without reviewed_at are
+ *                      rejected as invalid) and fail (exit 1) on any YELLOW
+ *                      warning. This is the release-gate mode.
+ *   --json             Emit the evaluation result as JSON.
+ *   --allowlist <path> Read the allowlist from <path> instead of the default
+ *                      security/audit-allowlist.json (relative paths resolve
+ *                      from the current working directory). Useful for tests.
  *
  * Usage:
  *   node scripts/check-audit-exception-expiry.mjs
  *   node scripts/check-audit-exception-expiry.mjs --strict
  *   node scripts/check-audit-exception-expiry.mjs --json
+ *   node scripts/check-audit-exception-expiry.mjs --allowlist <path> --strict
  */
 
 import { readFileSync } from 'node:fs';
@@ -103,21 +108,32 @@ function main() {
   const args = process.argv.slice(2);
   let strict = false;
   let jsonOutput = false;
+  let allowlistPath = ALLOWLIST_PATH;
 
-  for (const a of args) {
+  const usage = 'usage: check-audit-exception-expiry.mjs [--strict] [--json] [--allowlist <path>]\n';
+  for (let i = 0; i < args.length; i++) {
+    const a = args[i];
     if (a === '--') continue;
     else if (a === '--strict') strict = true;
     else if (a === '--json') jsonOutput = true;
-    else {
+    else if (a === '--allowlist') {
+      if (!args[i + 1]) {
+        process.stderr.write('error: --allowlist requires a path\n');
+        process.stderr.write(usage);
+        process.exit(2);
+      }
+      allowlistPath = resolve(process.cwd(), args[i + 1]);
+      i += 1;
+    } else {
       process.stderr.write(`unknown argument: ${a}\n`);
-      process.stderr.write('usage: check-audit-exception-expiry.mjs [--strict] [--json]\n');
+      process.stderr.write(usage);
       process.exit(2);
     }
   }
 
   let raw;
   try {
-    raw = JSON.parse(readFileSync(ALLOWLIST_PATH, 'utf-8'));
+    raw = JSON.parse(readFileSync(allowlistPath, 'utf-8'));
   } catch (err) {
     if (err && err.code === 'ENOENT') {
       // No allowlist file means no exceptions to expire.
@@ -135,7 +151,7 @@ function main() {
       }
       process.exit(0);
     }
-    process.stderr.write(`error: could not read ${ALLOWLIST_PATH}: ${err.message}\n`);
+    process.stderr.write(`error: could not read ${allowlistPath}: ${err.message}\n`);
     process.exit(1);
   }
 
