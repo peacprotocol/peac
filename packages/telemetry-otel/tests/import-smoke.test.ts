@@ -42,6 +42,14 @@ describe('import without SDK', () => {
     expect(typeof mod.TELEMETRY_OTEL_VERSION).toBe('string');
   });
 
+  it('TELEMETRY_OTEL_VERSION equals the package version', async () => {
+    const mod = await import('../src/index.js');
+    const { readFileSync } = await import('node:fs');
+    const { resolve } = await import('node:path');
+    const pkg = JSON.parse(readFileSync(resolve(__dirname, '../package.json'), 'utf-8'));
+    expect(mod.TELEMETRY_OTEL_VERSION).toBe(pkg.version);
+  });
+
   it('createOtelProvider works with no-op API (no SDK registered)', async () => {
     // No SDK setup -- the API provides no-op tracer/meter by default
     const { createOtelProvider } = await import('../src/index.js');

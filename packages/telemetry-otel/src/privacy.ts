@@ -9,7 +9,12 @@ import { hashIdentifier } from '@peac/privacy';
 import type { TelemetryConfig, PrivacyMode } from '@peac/telemetry';
 
 /**
- * Default salt for hashing (should be configured per deployment)
+ * Default salt for hashing (should be configured per deployment).
+ *
+ * Stable hash seed retained for backward-compatible pseudonymization. Do
+ * NOT update this when the package version changes; doing so would alter
+ * every hashed identifier. The embedded "v0.9.22" is a fixed seed string,
+ * not a version to track.
  */
 const DEFAULT_SALT = 'peac-telemetry-v0.9.22';
 
