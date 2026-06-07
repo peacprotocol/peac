@@ -16,7 +16,7 @@ npx @peac/cli verify <receipt.jws>
 
 ## What It Does
 
-`@peac/cli` provides the `peac` command for working with signed interaction receipts from the terminal. It supports verifying receipt signatures, decoding receipt contents, validating issuer configurations, managing policies, running conformance test suites, generating sample receipts, and reconciling evidence bundles.
+`@peac/cli` provides the `peac` command for working with signed interaction records from the terminal. It supports verifying record signatures, decoding record contents, validating issuer configurations, managing policies, running conformance test suites, generating sample records, and reconciling evidence bundles.
 
 ## How Do I Use It?
 
@@ -86,11 +86,11 @@ peac reconcile <bundle-a.json> <bundle-b.json>
 
 Merges two evidence bundles and detects conflicts using composite `(iss, jti)` keys with fallback resolution. Conflicts are surfaced for human decision; no auto-resolution.
 
-### Generate sample receipts
+### Generate sample records
 
 ```bash
 peac samples list                       # List available samples
-peac samples show basic-receipt         # Show a specific sample
+peac samples show basic-record          # Show a specific sample
 peac samples generate --output ./out    # Generate sample files
 ```
 
