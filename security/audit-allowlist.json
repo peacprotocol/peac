@@ -179,7 +179,8 @@
       "dependency_chain": ["@vitest/coverage-v8@4.1.0", "vitest@4.1.0", "vite@6.4.1"],
       "verified_by": "pnpm audit --prod shows no HIGH for vite; pnpm why vite confirms vitest-only path",
       "owner": "jithinraj",
-      "added_at": "2026-04-07"
+      "added_at": "2026-04-07",
+      "reviewed_at": "2026-06-07"
     },
     {
       "advisory_id": "GHSA-737v-mqg7-c878",
@@ -194,7 +195,8 @@
       "dependency_chain": ["transitive dev dependency"],
       "verified_by": "pnpm audit --prod shows no HIGH for defu",
       "owner": "jithinraj",
-      "added_at": "2026-04-07"
+      "added_at": "2026-04-07",
+      "reviewed_at": "2026-06-07"
     }
   ]
 }
