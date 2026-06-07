@@ -68,7 +68,7 @@ describe('CLI Integration Tests', () => {
     it('samples list should show available samples', () => {
       const result = runCli(['samples', 'list']);
       expect(result.exitCode).toBe(0);
-      expect(result.stdout).toContain('basic-receipt');
+      expect(result.stdout).toContain('basic-record');
       expect(result.stdout).toContain('expired');
       expect(result.stdout).toContain('VALID SAMPLES');
     });
@@ -79,14 +79,14 @@ describe('CLI Integration Tests', () => {
       const data = JSON.parse(result.stdout);
       expect(data.samples).toBeDefined();
       expect(Array.isArray(data.samples)).toBe(true);
-      expect(data.samples.some((s: { id: string }) => s.id === 'basic-receipt')).toBe(true);
+      expect(data.samples.some((s: { id: string }) => s.id === 'basic-record')).toBe(true);
     });
 
     it('samples show should display sample details', () => {
-      const result = runCli(['samples', 'show', 'basic-receipt']);
+      const result = runCli(['samples', 'show', 'basic-record']);
       expect(result.exitCode).toBe(0);
-      expect(result.stdout).toContain('basic-receipt');
-      expect(result.stdout).toContain('Claims:');
+      expect(result.stdout).toContain('basic-record');
+      expect(result.stdout).toContain('Issue input');
       expect(result.stdout).toContain('iss');
     });
 
@@ -94,7 +94,7 @@ describe('CLI Integration Tests', () => {
       const outputDir = join(TEST_OUTPUT_DIR, 'samples-test');
       const result = runCli(['samples', 'generate', '-o', outputDir]);
       expect(result.exitCode).toBe(0);
-      expect(result.stdout).toContain('Sample receipts generated successfully');
+      expect(result.stdout).toContain('Sample records generated successfully');
 
       // Check files were created
       expect(existsSync(join(outputDir, 'valid'))).toBe(true);
@@ -104,15 +104,29 @@ describe('CLI Integration Tests', () => {
 
       // Check valid samples exist
       const validFiles = readdirSync(join(outputDir, 'valid'));
-      expect(validFiles.some((f) => f.includes('basic-receipt'))).toBe(true);
+      expect(validFiles.some((f) => f.includes('basic-record'))).toBe(true);
     });
 
-    it('samples generate --now should use specified timestamp', () => {
+    it('samples generate --now should set the event time', () => {
       const outputDir = join(TEST_OUTPUT_DIR, 'samples-deterministic');
-      const timestamp = 1700000000; // Fixed timestamp
+      const timestamp = 1700000000; // Fixed historical timestamp
       const result = runCli(['samples', 'generate', '-o', outputDir, '--now', String(timestamp)]);
       expect(result.exitCode).toBe(0);
-      expect(result.stdout).toContain(`Timestamp: ${timestamp}`);
+      expect(result.stdout).toContain(`Event time: ${timestamp}`);
+    });
+
+    it('samples generate rejects an unsupported --format', () => {
+      const outputDir = join(TEST_OUTPUT_DIR, 'samples-bad-format');
+      const result = runCli(['samples', 'generate', '-o', outputDir, '--format', 'bundle']);
+      expect(result.exitCode).not.toBe(0);
+      expect(result.stderr).toContain('Unsupported sample format');
+    });
+
+    it('samples generate rejects an unknown --category', () => {
+      const outputDir = join(TEST_OUTPUT_DIR, 'samples-bad-category');
+      const result = runCli(['samples', 'generate', '-o', outputDir, '--category', 'nope']);
+      expect(result.exitCode).not.toBe(0);
+      expect(result.stderr).toContain('Unknown sample category');
     });
 
     it('samples generate --kid should use specified kid', () => {
@@ -171,6 +185,18 @@ describe('CLI Integration Tests', () => {
       const result = runCli(['samples', 'show', 'nonexistent-sample']);
       expect(result.exitCode).toBe(1);
       expect(result.stderr).toContain('Sample not found');
+    });
+
+    it('samples show long-expiry (removed) should fail gracefully', () => {
+      const result = runCli(['samples', 'show', 'long-expiry']);
+      expect(result.exitCode).toBe(1);
+      expect(result.stderr).toContain('Sample not found');
+    });
+
+    it('samples list with unknown --category should fail gracefully', () => {
+      const result = runCli(['samples', 'list', '-c', 'nope']);
+      expect(result.exitCode).toBe(1);
+      expect(result.stderr).toContain('Unknown sample category');
     });
 
     it('conformance list with invalid category should fail gracefully', () => {

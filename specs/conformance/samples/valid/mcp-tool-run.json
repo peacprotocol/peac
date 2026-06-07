@@ -1,0 +1,15 @@
+{
+  "$comment": "Valid PEAC signed interaction record for an MCP tool run. Issued via issue() with the org.peacprotocol/mcp extension; passes local verification. jti is a fresh UUIDv7 assigned at generation time.",
+  "format": "issue-options",
+  "input": {
+    "iss": "https://sandbox.peacprotocol.org",
+    "kind": "evidence",
+    "type": "org.peacprotocol/mcp",
+    "extensions": {
+      "org.peacprotocol/mcp": {
+        "server": "demo",
+        "tool": "search"
+      }
+    }
+  }
+}

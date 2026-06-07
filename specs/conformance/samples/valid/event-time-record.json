@@ -1,0 +1,10 @@
+{
+  "$comment": "Valid PEAC signed interaction record that carries an event time. occurred_at is the interaction time; iat remains issuance time. `samples generate --now <unix-seconds>` overrides occurred_at. jti is a fresh UUIDv7 assigned at generation time.",
+  "format": "issue-options",
+  "input": {
+    "iss": "https://sandbox.peacprotocol.org",
+    "kind": "evidence",
+    "type": "org.peacprotocol/access",
+    "occurred_at": "2026-01-01T00:00:00.000Z"
+  }
+}

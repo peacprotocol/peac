@@ -16,109 +16,120 @@ import * as path from 'path';
 export type SampleCategory = 'valid' | 'invalid' | 'edge';
 
 /**
- * Sample definition
+ * Valid sample: a current PEAC signed interaction record, expressed as the
+ * inputs passed to issue(). Generation supplies privateKey and kid. Generated
+ * output passes local verification (verifyLocal).
  */
-export interface SampleDefinition {
+export interface ValidSampleDefinition {
   id: string;
   name: string;
   description: string;
-  category: SampleCategory;
+  category: 'valid';
+  format: 'issue-options';
+  /** Inputs for issue() (without privateKey/kid, which generation supplies). */
+  input: Record<string, unknown>;
+}
+
+/**
+ * Invalid / edge sample: a rejection fixture expressed as raw legacy claims
+ * that are signed directly (not issued), so it can carry intentionally invalid
+ * shapes that issue() would refuse to produce.
+ */
+export interface LegacySampleDefinition {
+  id: string;
+  name: string;
+  description: string;
+  category: 'invalid' | 'edge';
+  format: 'legacy-claims';
   claims: Record<string, unknown>;
   header?: Record<string, unknown>;
   expectedError?: string;
 }
 
 /**
+ * Sample definition (discriminated by category/format).
+ */
+export type SampleDefinition = ValidSampleDefinition | LegacySampleDefinition;
+
+/**
  * Embedded fallback samples (used when specs folder not available)
  */
 const EMBEDDED_SAMPLES: SampleDefinition[] = [
   {
-    id: 'basic-receipt',
-    name: 'Basic Receipt',
-    description: 'Minimal valid PEAC receipt with only required fields',
+    id: 'basic-record',
+    name: 'Basic Record',
+    description: 'Minimal valid PEAC signed interaction record',
     category: 'valid',
-    claims: {
+    format: 'issue-options',
+    input: {
       iss: 'https://sandbox.peacprotocol.org',
-      aud: 'https://example.com',
-      iat: 0, // Placeholder - will be set at generation time
-      exp: 0, // Placeholder - will be set at generation time
-      rid: 'sample-basic-001',
+      kind: 'evidence',
+      type: 'org.peacprotocol/access',
     },
   },
   {
-    id: 'full-receipt',
-    name: 'Full Receipt',
-    description: 'PEAC receipt with all optional claims populated',
+    id: 'full-record',
+    name: 'Full Record',
+    description: 'Valid PEAC signed interaction record with optional fields',
     category: 'valid',
-    claims: {
+    format: 'issue-options',
+    input: {
       iss: 'https://sandbox.peacprotocol.org',
-      aud: 'https://api.example.com',
-      sub: 'user:demo-user',
-      iat: 0,
-      exp: 0,
-      rid: 'sample-full-001',
-      purpose_declared: ['search', 'index'],
-      purpose_enforced: 'search',
-      purpose_reason: 'allowed',
+      kind: 'evidence',
+      type: 'org.peacprotocol/access',
+      sub: 'agent:demo-agent',
+      purpose_declared: 'search',
     },
   },
   {
-    id: 'interaction-evidence',
-    name: 'Interaction Evidence',
-    description: 'Receipt with InteractionEvidence extension for AI agent calls',
+    id: 'mcp-tool-run',
+    name: 'Mcp Tool Run',
+    description: 'Valid PEAC signed interaction record for an MCP tool run',
     category: 'valid',
-    claims: {
+    format: 'issue-options',
+    input: {
       iss: 'https://sandbox.peacprotocol.org',
-      aud: 'https://agent.example.com',
-      sub: 'agent:demo-agent-v1',
-      iat: 0,
-      exp: 0,
-      rid: 'sample-ie-001',
-      ext: {
-        'org.peacprotocol/interaction@0.1': {
-          version: '0.1',
-          interaction_id: 'int_sample_001',
-          started_at: '2026-01-01T00:00:00.000Z',
-          completed_at: '2026-01-01T00:00:01.000Z',
-          outcome: { kind: 'success' },
-          input: { hash: 'sha256:abc123...', byte_length: 1024 },
-          output: { hash: 'sha256:def456...', byte_length: 2048 },
+      kind: 'evidence',
+      type: 'org.peacprotocol/mcp',
+      extensions: {
+        'org.peacprotocol/mcp': {
+          server: 'demo',
+          tool: 'search',
         },
       },
     },
   },
   {
-    id: 'payment-evidence',
-    name: 'Payment Evidence',
-    description: 'Receipt with payment evidence (402 flow)',
+    id: 'payment-event',
+    name: 'Payment Event',
+    description: 'Valid PEAC signed interaction record for a payment event',
     category: 'valid',
-    claims: {
+    format: 'issue-options',
+    input: {
       iss: 'https://sandbox.peacprotocol.org',
-      aud: 'https://api.example.com',
-      iat: 0,
-      exp: 0,
-      rid: 'sample-payment-001',
-      amt: '100',
-      cur: 'USD',
-      payment: {
-        rail: 'x402',
-        reference: 'pay_sample_001',
-        amount: '100',
-        currency: 'USD',
+      kind: 'evidence',
+      type: 'org.peacprotocol/payment',
+      extensions: {
+        'org.peacprotocol/commerce': {
+          payment_rail: 'stripe',
+          amount_minor: '1000',
+          currency: 'USD',
+        },
       },
     },
   },
   {
-    id: 'long-expiry',
-    name: 'Long Expiry',
-    description: 'Receipt with 24-hour expiration',
+    id: 'event-time-record',
+    name: 'Event Time Record',
+    description:
+      'Valid PEAC signed interaction record with an event time. occurred_at is the interaction time; iat remains issuance time. Generation maps --now to occurred_at.',
     category: 'valid',
-    claims: {
+    format: 'issue-options',
+    input: {
       iss: 'https://sandbox.peacprotocol.org',
-      aud: 'https://example.com',
-      iat: 0,
-      exp: 0, // Will be set to iat + 86400 at generation time
-      rid: 'sample-long-expiry-001',
+      kind: 'evidence',
+      type: 'org.peacprotocol/access',
+      occurred_at: '2026-01-01T00:00:00.000Z',
     },
   },
   {
@@ -126,6 +137,7 @@ const EMBEDDED_SAMPLES: SampleDefinition[] = [
     name: 'Expired Receipt',
     description: 'Receipt that has already expired (for testing rejection)',
     category: 'invalid',
+    format: 'legacy-claims',
     claims: {
       iss: 'https://sandbox.peacprotocol.org',
       aud: 'https://example.com',
@@ -140,6 +152,7 @@ const EMBEDDED_SAMPLES: SampleDefinition[] = [
     name: 'Future IAT',
     description: 'Receipt with iat in the future (should be rejected)',
     category: 'invalid',
+    format: 'legacy-claims',
     claims: {
       iss: 'https://sandbox.peacprotocol.org',
       aud: 'https://example.com',
@@ -154,6 +167,7 @@ const EMBEDDED_SAMPLES: SampleDefinition[] = [
     name: 'Missing Issuer',
     description: 'Receipt missing required iss claim (for testing validation)',
     category: 'invalid',
+    format: 'legacy-claims',
     claims: {
       aud: 'https://example.com',
       iat: 0,
@@ -207,19 +221,60 @@ function loadSampleFromFile(
 ): SampleDefinition | null {
   try {
     const content = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-
-    // Handle both formats: fixture-style (header/payload) and claims-only
-    const claims = content.payload ?? content.claims ?? content;
     const description = content.$comment ?? content.description ?? `Sample ${id}`;
+    const name = id
+      .split('-')
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(' ');
 
+    if (category === 'valid') {
+      // Valid samples are issue() input recipes -> current PEAC signed
+      // interaction records that pass local verification. Require the
+      // explicit shape rather than silently degrading to an empty input
+      // (which would fail later with an opaque issue error).
+      if (
+        content.format !== 'issue-options' ||
+        content.input === null ||
+        typeof content.input !== 'object' ||
+        Array.isArray(content.input)
+      ) {
+        process.stderr.write(
+          `samples-loader: skipping malformed valid sample '${id}' (expected format "issue-options" with an input object)\n`
+        );
+        return null;
+      }
+      return {
+        id,
+        name,
+        description,
+        category: 'valid',
+        format: 'issue-options',
+        input: content.input,
+      };
+    }
+
+    // Invalid / edge samples are raw legacy claims (rejection fixtures). They
+    // carry no format, or an explicit "legacy-claims"; anything else is
+    // surfaced and skipped rather than silently treated as claims.
+    if (content.format !== undefined && content.format !== 'legacy-claims') {
+      process.stderr.write(
+        `samples-loader: skipping '${id}' (unexpected format "${content.format}" for ${category} sample)\n`
+      );
+      return null;
+    }
+    const claims = content.payload ?? content.claims ?? content;
+    if (claims === null || typeof claims !== 'object' || Array.isArray(claims)) {
+      process.stderr.write(
+        `samples-loader: skipping malformed ${category} sample '${id}' (claims must be an object)\n`
+      );
+      return null;
+    }
     return {
       id,
-      name: id
-        .split('-')
-        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-        .join(' '),
+      name,
       description,
       category,
+      format: 'legacy-claims',
       claims,
       header: content.header,
       expectedError: content.expected_error,
@@ -272,22 +327,29 @@ function loadSamplesFromDir(samplesDir: string): SampleDefinition[] {
 }
 
 /**
- * Get sample definitions
+ * Get sample definitions.
  *
- * Loads from specs/conformance/samples/ when available (canonical source),
- * falls back to embedded samples when running outside the repo.
+ * An explicit `customSamplesPath` is an authoritative source: it must exist,
+ * and its contents are returned as-is (even if empty after skipping malformed
+ * samples). It never falls back to embedded samples, so a malformed custom
+ * catalog is not masked. With no custom path, the repo/package samples
+ * directory is used when present; the embedded samples are a fallback only for
+ * runtime environments where that directory is unavailable.
  */
 export function getSamples(customSamplesPath?: string): SampleDefinition[] {
-  const samplesDir = findSamplesDir(customSamplesPath);
-
-  if (samplesDir) {
-    const dirSamples = loadSamplesFromDir(samplesDir);
-    if (dirSamples.length > 0) {
-      return dirSamples;
+  if (customSamplesPath !== undefined) {
+    if (!fs.existsSync(customSamplesPath)) {
+      throw new Error(`Samples directory not found: ${customSamplesPath}`);
     }
+    return loadSamplesFromDir(customSamplesPath);
   }
 
-  // Fall back to embedded samples
+  const samplesDir = findSamplesDir();
+  if (samplesDir) {
+    return loadSamplesFromDir(samplesDir);
+  }
+
+  // Fall back to embedded samples only when no samples directory exists.
   return EMBEDDED_SAMPLES;
 }
 

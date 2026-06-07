@@ -1,0 +1,9 @@
+{
+  "$comment": "Minimal valid PEAC signed interaction record. Issued via the current issue() path; generated output passes local verification. jti is a fresh UUIDv7 assigned at generation time.",
+  "format": "issue-options",
+  "input": {
+    "iss": "https://sandbox.peacprotocol.org",
+    "kind": "evidence",
+    "type": "org.peacprotocol/access"
+  }
+}

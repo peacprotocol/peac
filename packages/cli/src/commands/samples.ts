@@ -1,9 +1,9 @@
 /**
  * PEAC Samples CLI Commands (v0.10.8+)
  *
- * Commands for working with sample receipts:
- * - list: List available sample receipts
- * - generate: Generate sample receipts for testing
+ * Commands for working with sample records:
+ * - list: List available sample records
+ * - generate: Generate sample records for testing
  * - show: Show details of a specific sample
  *
  * Uses specs/conformance/samples/ as canonical source when available,
@@ -15,7 +15,8 @@
 import { Command } from 'commander';
 import * as fs from 'fs';
 import * as path from 'path';
-import { sign, generateKeypair, base64urlEncode } from '@peac/crypto';
+import { sign, generateKeypair, base64urlEncode, decode } from '@peac/crypto';
+import { issue } from '@peac/protocol';
 import { getSamples, getSampleById, type SampleCategory } from '../lib/samples-loader.js';
 import { getVersion } from '../lib/version.js';
 
@@ -65,8 +66,6 @@ function applyTimeAdjustments(
 
   // Standard expiry: 1 hour
   const standardExpiry = 3600;
-  // Long expiry: 24 hours
-  const longExpiry = 86400;
 
   switch (sampleId) {
     case 'expired':
@@ -78,10 +77,6 @@ function applyTimeAdjustments(
       // Future iat: 1 hour in future
       adjusted.iat = now + 3600;
       adjusted.exp = now + 7200;
-      break;
-    case 'long-expiry':
-      adjusted.iat = now;
-      adjusted.exp = now + longExpiry;
       break;
     default:
       // Standard: iat now, exp in 1 hour
@@ -97,7 +92,7 @@ function applyTimeAdjustments(
 }
 
 const samples = new Command('samples')
-  .description('Work with PEAC sample receipts (v0.10.8+)')
+  .description('Work with PEAC sample records (v0.10.8+)')
   .option('--json', 'Output in JSON format');
 
 /**
@@ -105,13 +100,26 @@ const samples = new Command('samples')
  */
 samples
   .command('list')
-  .description('List available sample receipts')
+  .description('List available sample records')
   .option('-c, --category <category>', 'Filter by category: valid, invalid, edge')
   .option('--samples <path>', 'Path to samples directory')
   .action((options, cmd) => {
     const globalOpts = getGlobalOptions(cmd);
 
     try {
+      if (
+        options.category !== undefined &&
+        !['valid', 'invalid', 'edge'].includes(options.category)
+      ) {
+        outputError(
+          'Unknown sample category',
+          { category: options.category, supported: ['valid', 'invalid', 'edge'] },
+          globalOpts
+        );
+        process.exitCode = 1;
+        return;
+      }
+
       const allSamples = getSamples(options.samples);
       let filteredSamples = allSamples;
 
@@ -133,7 +141,7 @@ samples
         }));
         console.log(JSON.stringify({ samples: data }, null, 2));
       } else {
-        console.log('Available PEAC Sample Receipts\n');
+        console.log('Available PEAC Sample Records\n');
         console.log('VALID SAMPLES:');
         for (const s of filteredSamples.filter((x) => x.category === 'valid')) {
           console.log(`  ${s.id}`);
@@ -197,10 +205,15 @@ samples
         console.log(`ID: ${sample.id}`);
         console.log(`Category: ${sample.category}`);
         console.log(`Description: ${sample.description}\n`);
-        console.log('Claims:');
-        console.log(JSON.stringify(sample.claims, null, 2));
-        if (sample.expectedError) {
-          console.log(`\nExpected Error: ${sample.expectedError}`);
+        if (sample.category === 'valid') {
+          console.log('Issue input (current PEAC signed interaction record):');
+          console.log(JSON.stringify(sample.input, null, 2));
+        } else {
+          console.log('Claims (legacy rejection fixture):');
+          console.log(JSON.stringify(sample.claims, null, 2));
+          if (sample.expectedError) {
+            console.log(`\nExpected Error: ${sample.expectedError}`);
+          }
         }
       }
 
@@ -216,12 +229,15 @@ samples
  */
 samples
   .command('generate')
-  .description('Generate sample receipt files')
+  .description('Generate sample record files')
   .requiredOption('-o, --output <dir>', 'Output directory')
-  .option('-f, --format <format>', 'Output format: jws, json, bundle', 'jws')
+  .option('-f, --format <format>', 'Output format: jws, json', 'jws')
   .option('--category <category>', 'Generate only specific category')
   .option('--samples <path>', 'Path to samples directory')
-  .option('--now <timestamp>', 'Unix timestamp for iat/exp (for deterministic generation)')
+  .option(
+    '--now <timestamp>',
+    'Unix event time (seconds) for valid samples; sets occurred_at (must not be in the future)'
+  )
   .option('--kid <kid>', 'Key ID to use')
   .action(async (options, cmd) => {
     const globalOpts = getGlobalOptions(cmd);
@@ -229,7 +245,93 @@ samples
     try {
       const outputDir = options.output;
 
-      // Create output directories
+      // Validate ALL inputs before any filesystem side effects.
+
+      // 1. Output format: only jws and json are sample file formats. The
+      //    offline metadata bundle is always written under bundles/.
+      const allowedFormats = new Set(['jws', 'json']);
+      if (!allowedFormats.has(options.format)) {
+        outputError(
+          'Unsupported sample format',
+          { format: options.format, supported: ['jws', 'json'] },
+          globalOpts
+        );
+        process.exitCode = 1;
+        return;
+      }
+
+      // 2. Category enum (when provided).
+      const allowedCategories = new Set(['valid', 'invalid', 'edge']);
+      if (options.category !== undefined && !allowedCategories.has(options.category)) {
+        outputError(
+          'Unknown sample category',
+          { category: options.category, supported: ['valid', 'invalid', 'edge'] },
+          globalOpts
+        );
+        process.exitCode = 1;
+        return;
+      }
+
+      // 3. Select samples and fail if nothing matches.
+      let samplesToGenerate = getSamples(options.samples);
+      if (options.category) {
+        samplesToGenerate = samplesToGenerate.filter((s) => s.category === options.category);
+      }
+      if (samplesToGenerate.length === 0) {
+        outputError(
+          'No samples selected to generate',
+          { category: options.category ?? null },
+          globalOpts
+        );
+        process.exitCode = 1;
+        return;
+      }
+
+      // 4. --now is an optional integer event time (seconds) for valid samples.
+      let eventTime: number | undefined;
+      if (options.now !== undefined) {
+        const parsed = Number(options.now);
+        if (!Number.isInteger(parsed)) {
+          outputError(
+            '--now must be an integer Unix timestamp (seconds)',
+            { now: options.now },
+            globalOpts
+          );
+          process.exitCode = 1;
+          return;
+        }
+        // An integer can still be out of the supported Date range (e.g. a huge
+        // negative value), which would later throw when formatting occurred_at.
+        // Reject it here, before any filesystem writes, with a clear message.
+        if (!Number.isFinite(new Date(parsed * 1000).getTime())) {
+          outputError(
+            '--now is outside the supported date range',
+            { now: options.now },
+            globalOpts
+          );
+          process.exitCode = 1;
+          return;
+        }
+        eventTime = parsed;
+      }
+
+      // 5. A future occurred_at would be rejected by local verification
+      //    (E_OCCURRED_AT_FUTURE), so reject a future --now up front when
+      //    valid samples are selected.
+      const generationNow = Math.floor(Date.now() / 1000);
+      const SKEW_SECONDS = 300;
+      const generatesValid = samplesToGenerate.some((s) => s.category === 'valid');
+      if (eventTime !== undefined && generatesValid && eventTime > generationNow + SKEW_SECONDS) {
+        outputError(
+          '--now sets occurred_at (event time) for valid samples and must not be in the future',
+          { now: eventTime, wall_clock: generationNow, skew_seconds: SKEW_SECONDS },
+          globalOpts
+        );
+        process.exitCode = 1;
+        return;
+      }
+
+      // Inputs validated. Create output directories.
       const validDir = path.join(outputDir, 'valid');
       const invalidDir = path.join(outputDir, 'invalid');
       const edgeDir = path.join(outputDir, 'edge');
@@ -240,17 +342,15 @@ samples
       fs.mkdirSync(edgeDir, { recursive: true });
       fs.mkdirSync(bundlesDir, { recursive: true });
 
-      // Determine timestamp
-      const now = options.now ? parseInt(options.now, 10) : Math.floor(Date.now() / 1000);
-
       // Generate key pair
-      // Note: --seed option is documented but full determinism requires proper seed-to-key derivation
       const keyPair = await generateKeypair();
       const publicKeyBytes = keyPair.publicKey;
       const privateKeyBytes = keyPair.privateKey;
 
-      // Build KID
-      const kid = options.kid || `sandbox-${new Date(now * 1000).toISOString().slice(0, 7)}`;
+      // Build KID. The default kid is derived from generation time, not the
+      // event time, since --now is the interaction time (occurred_at).
+      const kid =
+        options.kid || `sandbox-${new Date(generationNow * 1000).toISOString().slice(0, 7)}`;
 
       // Build JWK for the key
       const publicJwk = {
@@ -264,12 +364,6 @@ samples
 
       const generatedFiles: string[] = [];
 
-      // Get samples to generate
-      let samplesToGenerate = getSamples(options.samples);
-      if (options.category) {
-        samplesToGenerate = samplesToGenerate.filter((s) => s.category === options.category);
-      }
-
       for (const sample of samplesToGenerate) {
         const targetDir =
           sample.category === 'valid'
@@ -280,26 +374,48 @@ samples
         const filename = `${sample.id}.${options.format === 'json' ? 'json' : 'jws'}`;
         const filepath = path.join(targetDir, filename);
 
-        // Apply time adjustments
-        const adjustedClaims = applyTimeAdjustments(sample.claims, sample.id, now);
-
-        if (options.format === 'json') {
-          // Write as decoded JSON
-          const output = {
-            $comment: sample.description,
-            header: {
-              alg: 'EdDSA',
-              typ: 'interaction-record+jwt',
-              kid,
-            },
-            payload: adjustedClaims,
-            ...(sample.expectedError ? { expected_error: sample.expectedError } : {}),
-          };
-          fs.writeFileSync(filepath, JSON.stringify(output, null, 2));
+        if (sample.category === 'valid') {
+          // Valid samples are current PEAC signed interaction records issued
+          // via issue(). iat is issuance time; --now maps to occurred_at (the
+          // interaction/event time), so generated bytes are not deterministic.
+          // The recipe `input` is untyped JSON; issue() validates it at
+          // runtime (throws IssueError on malformed input). Cast through
+          // unknown to the issue() options type.
+          const issueOptions = {
+            ...sample.input,
+            privateKey: privateKeyBytes,
+            kid,
+            ...(eventTime !== undefined
+              ? { occurred_at: new Date(eventTime * 1000).toISOString() }
+              : {}),
+          } as unknown as Parameters<typeof issue>[0];
+          const { jws } = await issue(issueOptions);
+          if (options.format === 'json') {
+            const { header, payload } = decode(jws);
+            fs.writeFileSync(
+              filepath,
+              JSON.stringify({ $comment: sample.description, header, payload }, null, 2)
+            );
+          } else {
+            fs.writeFileSync(filepath, jws);
+          }
         } else {
-          // Create actual JWS using @peac/crypto sign function
-          const jws = await sign(adjustedClaims, privateKeyBytes, kid);
-          fs.writeFileSync(filepath, jws);
+          // Invalid / edge samples remain raw legacy claims (rejection
+          // fixtures), signed directly so they can carry intentionally invalid
+          // shapes that issue() would refuse to produce.
+          const adjustedClaims = applyTimeAdjustments(sample.claims, sample.id, generationNow);
+          if (options.format === 'json') {
+            const output = {
+              $comment: sample.description,
+              header: { alg: 'EdDSA', typ: 'interaction-record+jwt', kid },
+              payload: adjustedClaims,
+              ...(sample.expectedError ? { expected_error: sample.expectedError } : {}),
+            };
+            fs.writeFileSync(filepath, JSON.stringify(output, null, 2));
+          } else {
+            const jws = await sign(adjustedClaims, privateKeyBytes, kid);
+            fs.writeFileSync(filepath, jws);
+          }
         }
 
         generatedFiles.push(filepath);
@@ -316,10 +432,9 @@ samples
       // Write offline verification bundle
       const bundlePath = path.join(bundlesDir, 'offline-verification.json');
       const bundle = {
-        $comment: 'Offline verification bundle with sample receipts and JWKS',
-        description:
-          'Bundle for offline verification testing. Contains test JWKS and sample metadata.',
-        generated_at: new Date(now * 1000).toISOString(),
+        $comment: 'Offline verification bundle with sample records and JWKS',
+        description: 'Sample record metadata and the sandbox public verification keys.',
+        generated_at: new Date(generationNow * 1000).toISOString(),
         generator: {
           name: 'peac-cli',
           version: getVersion(),
@@ -331,8 +446,10 @@ samples
           category: s.category,
         })),
         notes: [
-          'Sample timestamps are based on --now parameter or generation time.',
-          'Do NOT use sandbox samples in production.',
+          'Valid samples are issued through issue() and pass local verification (verifyLocal).',
+          'Invalid samples are intentionally invalid rejection fixtures.',
+          'For valid samples, --now sets the event time (occurred_at); iat is issuance time.',
+          'Sandbox samples are for local testing and demonstration; do NOT use them in production.',
         ],
       };
       fs.writeFileSync(bundlePath, JSON.stringify(bundle, null, 2));
@@ -346,7 +463,8 @@ samples
               output_dir: outputDir,
               files_generated: generatedFiles.length,
               files: generatedFiles,
-              timestamp: now,
+              generation_time: generationNow,
+              event_time: eventTime ?? null,
               kid,
             },
             null,
@@ -354,10 +472,15 @@ samples
           )
         );
       } else {
-        console.log(`Sample receipts generated successfully!\n`);
+        console.log(`Sample records generated successfully!\n`);
         console.log(`Output directory: ${outputDir}`);
         console.log(`Files generated: ${generatedFiles.length}`);
-        console.log(`Timestamp: ${now} (${new Date(now * 1000).toISOString()})`);
+        console.log(
+          `Generation time: ${generationNow} (${new Date(generationNow * 1000).toISOString()})`
+        );
+        if (eventTime !== undefined) {
+          console.log(`Event time: ${eventTime} (${new Date(eventTime * 1000).toISOString()})`);
+        }
         console.log(`Key ID: ${kid}\n`);
         console.log('Generated files:');
         for (const f of generatedFiles) {
