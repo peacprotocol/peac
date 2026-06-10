@@ -115,7 +115,7 @@ const result = rslToControlPurposes(['ai-all', 'search']);
 
 ### 4.3 Package
 
-`@peac/mcp-server` provides 8 tools for issuing and verifying receipts over MCP (stdio and Streamable HTTP transports). Evidence is carried in MCP `_meta` keys `org.peacprotocol/receipt_ref` and `org.peacprotocol/receipt_jws`:
+`@peac/mcp-server` provides 5 tools for issuing and verifying receipts over MCP (stdio and Streamable HTTP transports): `peac_verify`, `peac_inspect`, `peac_decode`, `peac_issue`, and `peac_create_bundle` (the latter two require an Ed25519 issuer key). Evidence is carried in MCP `_meta` keys `org.peacprotocol/receipt_ref` and `org.peacprotocol/receipt_jws`:
 
 ```typescript
 // MCP server issues and verifies receipts as tool responses.
