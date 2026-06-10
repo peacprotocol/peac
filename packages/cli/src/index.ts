@@ -5,7 +5,7 @@
  */
 
 import { Command, CommanderError } from 'commander';
-import { verifyReceipt } from '@peac/protocol';
+import { verifyReceipt, verifyLocal } from '@peac/protocol';
 import { parseIssuerConfig, fetchIssuerConfig } from '@peac/protocol';
 import { decode } from '@peac/crypto';
 import { PEACReceiptClaims } from '@peac/schema';
@@ -21,6 +21,14 @@ import { recordCommand } from './commands/record-command.js';
 import { emitCommand } from './commands/emit-lifecycle.js';
 import { formatOutput } from './utils.js';
 import { getVersion } from './lib/version.js';
+import { parsePublicKey } from './lib/public-key.js';
+import { readFileBufferSnapshot } from './lib/safe-file.js';
+
+/** Upper bound for a public-key file (a JWK/JWKS is well under 1 KiB). */
+const MAX_PUBLIC_KEY_FILE_BYTES = 16_384;
+
+/** Upper bound for a receipt JWS file passed to `peac verify`. */
+const MAX_VERIFY_JWS_FILE_BYTES = 512 * 1024;
 
 const program = new Command();
 
@@ -38,12 +46,87 @@ program
   .description('Verify a PEAC receipt JWS')
   .argument('<jws>', 'JWS compact serialization or path to file containing JWS')
   .option('-v, --verbose', 'Show detailed output')
-  .action(async (jwsInput: string, options: { verbose?: boolean }) => {
+  .option(
+    '--public-key <path>',
+    'Verify offline with a public Ed25519 JWK or single-key JWKS file (no network)'
+  )
+  .action(async (jwsInput: string, options: { verbose?: boolean; publicKey?: string }) => {
     try {
-      // Check if input is a file path
+      // Check if input is a file path; file reads are bounded.
       let jws = jwsInput;
       if (fs.existsSync(jwsInput)) {
-        jws = fs.readFileSync(jwsInput, 'utf-8').trim();
+        try {
+          jws = readFileBufferSnapshot(jwsInput, { maxBytes: MAX_VERIFY_JWS_FILE_BYTES })
+            .toString('utf8')
+            .trim();
+        } catch (readErr) {
+          const code = (readErr as NodeJS.ErrnoException).code;
+          if (code === 'E_PEAC_FILE_TOO_LARGE') {
+            console.log(
+              `Verification failed: receipt file exceeds ${MAX_VERIFY_JWS_FILE_BYTES} bytes`
+            );
+          } else if (code === 'EISDIR') {
+            console.log('Verification failed: receipt path is a directory');
+          } else {
+            console.log('Verification failed: could not read receipt file');
+          }
+          process.exitCode = 1;
+          return;
+        }
+      }
+
+      // Offline mode: verify the signature locally against a supplied public
+      // key. No network / JWKS discovery. Structure validation is performed by
+      // verifyLocal, so this path does not assume a payment-receipt shape.
+      if (options.publicKey) {
+        console.log('Verifying PEAC receipt offline...\n');
+
+        let keyContent: string;
+        try {
+          keyContent = readFileBufferSnapshot(options.publicKey, {
+            maxBytes: MAX_PUBLIC_KEY_FILE_BYTES,
+          }).toString('utf8');
+        } catch (readErr) {
+          const code = (readErr as NodeJS.ErrnoException).code;
+          if (code === 'E_PEAC_FILE_TOO_LARGE') {
+            console.log(
+              `Verification failed: public key file exceeds ${MAX_PUBLIC_KEY_FILE_BYTES} bytes`
+            );
+          } else if (code === 'EISDIR') {
+            console.log('Verification failed: public key path is a directory');
+          } else {
+            console.log('Verification failed: could not read public key file');
+          }
+          process.exitCode = 1;
+          return;
+        }
+
+        let publicKey: Uint8Array;
+        try {
+          publicKey = parsePublicKey(keyContent);
+        } catch (keyErr) {
+          console.log(
+            `Verification failed: ${keyErr instanceof Error ? keyErr.message : 'invalid public key'}`
+          );
+          process.exitCode = 1;
+          return;
+        }
+
+        const localResult = await verifyLocal(jws, publicKey);
+        if (localResult.valid) {
+          console.log('Signature valid (offline).');
+          console.log(
+            '   Verified the receipt signature and declared receipt structure against the supplied public key.'
+          );
+          process.exitCode = 0;
+        } else {
+          console.log(`Verification failed: ${localResult.message}`);
+          if (localResult.code) {
+            console.log(`   Code: ${localResult.code}`);
+          }
+          process.exitCode = 1;
+        }
+        return;
       }
 
       console.log('Verifying PEAC receipt...\n');
