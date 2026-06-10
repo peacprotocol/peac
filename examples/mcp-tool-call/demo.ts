@@ -11,12 +11,9 @@
  * 4. Two tamper checks show how modification is detected: a carrier
  *    receipt_ref mismatch and an invalid Ed25519 signature
  *
- * The record uses `type: 'org.peacprotocol/mcp-tool-call'`. This is an example
- * custom type URI used by the MCP recipe. It is not a registered PEAC extension
- * group or registered receipt type. The reference public verifier
- * (`@peac/protocol.verifyLocal()`) emits a `type_unregistered` warning for
- * unregistered type values, which downstream policy logic may treat as
- * informational.
+ * The record uses the integrator-defined type URI
+ * `org.peacprotocol/mcp-tool-call`; verification surfaces an informational
+ * `type_unregistered` warning for type values outside the registry.
  *
  * This example uses local stubs - no external services required.
  */
@@ -62,9 +59,8 @@ async function mcpToolHandler(params: {
   const query = params.args.query as string;
   const toolResult = await webSearchTool(query);
 
-  // Issue a signed record. The `type` value is an example custom URI used by
-  // this MCP recipe; it is not a registered PEAC receipt type, so verification
-  // will surface a `type_unregistered` warning.
+  // Issue a signed record with an integrator-defined type URI; verification
+  // surfaces an informational `type_unregistered` warning for such types.
   const { jws } = await issue({
     iss: ISSUER_URL,
     kind: 'evidence',
@@ -149,7 +145,7 @@ async function mcpClient(params: { privateKey: Uint8Array; publicKey: Uint8Array
   console.log(`3. Carrier extracted: receipt_ref consistency OK (0 violations)`);
 
   // Verify offline with the issuer public key. Expect a `type_unregistered`
-  // warning because org.peacprotocol/mcp-tool-call is intentionally unregistered.
+  // warning for the integrator-defined type URI.
   const carrierJws = extracted.receipts[0].receipt_jws!;
   const verifyResult = await verifyLocal(carrierJws, params.publicKey, { issuer: ISSUER_URL });
   if (verifyResult.valid) {

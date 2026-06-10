@@ -2,7 +2,7 @@
   "name": "@peac/example-mcp-tool-call",
   "version": "0.0.0",
   "private": true,
-  "description": "PEAC MCP tool call example - paid MCP tool with receipt proof and budget enforcement",
+  "description": "PEAC MCP tool-call example with signed records and offline verification",
   "type": "module",
   "scripts": {
     "demo": "tsx demo.ts",

@@ -46,7 +46,7 @@ const result = await verifyLocal(extracted.receipts[0].receipt_jws, publicKey, {
 });
 ```
 
-The record uses the example custom type URI `org.peacprotocol/mcp-tool-call`, which is intentionally unregistered; verification surfaces an informational `type_unregistered` warning.
+The record uses the integrator-defined type URI `org.peacprotocol/mcp-tool-call`; verification surfaces an informational `type_unregistered` warning for type values outside the registry.
 
 ## Files
 

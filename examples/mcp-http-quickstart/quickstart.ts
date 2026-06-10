@@ -1,8 +1,8 @@
 /**
  * MCP Streamable HTTP Quickstart
  *
- * Demonstrates issuing and verifying a PEAC receipt via the MCP server
- * over Streamable HTTP transport. Completes in under 30 seconds.
+ * Demonstrates a minimal local issue-and-verify flow against the MCP server
+ * over Streamable HTTP transport.
  *
  * Prerequisites:
  *   Start the MCP server in another terminal:
@@ -16,6 +16,7 @@ import { generateKeypair, issue, verifyLocal } from '@peac/protocol';
 
 const MCP_URL = process.env.MCP_URL ?? 'http://127.0.0.1:3000/mcp';
 const MCP_PROTOCOL_VERSION = '2025-11-25';
+const ISSUER = 'https://quickstart.example.com';
 
 interface JsonRpcResponse {
   jsonrpc: '2.0';
@@ -30,18 +31,7 @@ interface JsonRpcResponse {
 
 let requestId = 0;
 
-/**
- * POST a JSON-RPC request to the MCP endpoint.
- *
- * Streamable HTTP responses can arrive as plain JSON or as a Server-Sent
- * Events stream; both are handled. The `Mcp-Session-Id` response header from
- * `initialize` must be echoed on every subsequent request.
- */
-async function mcpCall(
-  method: string,
-  params: Record<string, unknown>,
-  sessionId?: string
-): Promise<{ body: JsonRpcResponse; sessionId?: string }> {
+function buildHeaders(sessionId?: string): Record<string, string> {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     Accept: 'application/json, text/event-stream',
@@ -49,10 +39,24 @@ async function mcpCall(
   if (sessionId) {
     headers['Mcp-Session-Id'] = sessionId;
   }
+  return headers;
+}
 
+/**
+ * POST a JSON-RPC request (with an `id`) to the MCP endpoint.
+ *
+ * Streamable HTTP responses can arrive as plain JSON or as a Server-Sent
+ * Events stream; both are handled. The `Mcp-Session-Id` response header from
+ * `initialize` must be echoed on every subsequent request.
+ */
+async function mcpRequest(
+  method: string,
+  params: Record<string, unknown>,
+  sessionId?: string
+): Promise<{ body: JsonRpcResponse; sessionId?: string }> {
   const res = await fetch(MCP_URL, {
     method: 'POST',
-    headers,
+    headers: buildHeaders(sessionId),
     body: JSON.stringify({ jsonrpc: '2.0', id: ++requestId, method, params }),
   });
 
@@ -81,6 +85,27 @@ async function mcpCall(
   return { body, sessionId: responseSessionId };
 }
 
+/**
+ * POST a JSON-RPC notification (no `id`, no response body expected) to the
+ * MCP endpoint.
+ */
+async function mcpNotify(
+  method: string,
+  params: Record<string, unknown>,
+  sessionId: string
+): Promise<void> {
+  const res = await fetch(MCP_URL, {
+    method: 'POST',
+    headers: buildHeaders(sessionId),
+    body: JSON.stringify({ jsonrpc: '2.0', method, params }),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`MCP notification failed (HTTP ${res.status}): ${text.slice(0, 200)}`);
+  }
+}
+
 async function main() {
   console.log('MCP Streamable HTTP Quickstart\n');
 
@@ -91,7 +116,7 @@ async function main() {
   // Step 2: Issue a receipt locally
   console.log('1. Issuing a receipt...');
   const { jws } = await issue({
-    iss: 'https://quickstart.example.com',
+    iss: ISSUER,
     kind: 'evidence',
     type: 'org.peacprotocol/mcp-tool-call',
     privateKey,
@@ -104,7 +129,7 @@ async function main() {
   let mcpVerified = false;
   try {
     // Initialize the session; capture Mcp-Session-Id from the response headers.
-    const init = await mcpCall('initialize', {
+    const init = await mcpRequest('initialize', {
       protocolVersion: MCP_PROTOCOL_VERSION,
       capabilities: {},
       clientInfo: { name: 'quickstart', version: '1.0.0' },
@@ -117,15 +142,19 @@ async function main() {
     } else {
       console.log(`   MCP session initialized (Mcp-Session-Id: ${init.sessionId.slice(0, 8)}...)`);
 
-      // Notify initialized, then call the peac_verify tool. The tool input
-      // field for the compact JWS is `jws`; passing the public key keeps the
-      // verification offline (no issuer discovery).
-      await mcpCall('notifications/initialized', {}, init.sessionId);
-      const verifyRes = await mcpCall(
+      // Complete the handshake, then call the peac_verify tool. The tool input
+      // field for the compact JWS is `jws`; the public key keeps verification
+      // offline, and `issuer` binds the expected issuer.
+      await mcpNotify('notifications/initialized', {}, init.sessionId);
+      const verifyRes = await mcpRequest(
         'tools/call',
         {
           name: 'peac_verify',
-          arguments: { jws, public_key_base64url: Buffer.from(publicKey).toString('base64url') },
+          arguments: {
+            jws,
+            public_key_base64url: Buffer.from(publicKey).toString('base64url'),
+            issuer: ISSUER,
+          },
         },
         init.sessionId
       );
@@ -153,7 +182,7 @@ async function main() {
 
   // Step 4: Always verify locally as proof (offline; no network)
   console.log(`\n3. Local verification (${mcpVerified ? 'cross-check' : 'FALLBACK'})...`);
-  const result = await verifyLocal(jws, publicKey);
+  const result = await verifyLocal(jws, publicKey, { issuer: ISSUER });
   if (result.valid) {
     console.log('   Verified: true');
     console.log(`   Issuer:   ${result.claims.iss}`);
