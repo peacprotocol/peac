@@ -22,6 +22,10 @@ import { emitCommand } from './commands/emit-lifecycle.js';
 import { formatOutput } from './utils.js';
 import { getVersion } from './lib/version.js';
 import { parsePublicKey } from './lib/public-key.js';
+import { readFileBufferSnapshot } from './lib/safe-file.js';
+
+/** Upper bound for a public-key file (a JWK/JWKS is well under 1 KiB). */
+const MAX_PUBLIC_KEY_FILE_BYTES = 16_384;
 
 const program = new Command();
 
@@ -59,9 +63,20 @@ program
 
         let keyContent: string;
         try {
-          keyContent = fs.readFileSync(options.publicKey, 'utf-8');
-        } catch {
-          console.log('Verification failed: could not read public key file');
+          keyContent = readFileBufferSnapshot(options.publicKey, {
+            maxBytes: MAX_PUBLIC_KEY_FILE_BYTES,
+          }).toString('utf8');
+        } catch (readErr) {
+          const code = (readErr as NodeJS.ErrnoException).code;
+          if (code === 'E_PEAC_FILE_TOO_LARGE') {
+            console.log(
+              `Verification failed: public key file exceeds ${MAX_PUBLIC_KEY_FILE_BYTES} bytes`
+            );
+          } else if (code === 'EISDIR') {
+            console.log('Verification failed: public key path is a directory');
+          } else {
+            console.log('Verification failed: could not read public key file');
+          }
           process.exitCode = 1;
           return;
         }

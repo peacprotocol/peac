@@ -1,0 +1,107 @@
+/**
+ * CLI wiring tests for `peac verify --public-key <path>`.
+ *
+ * Spawns the built CLI to prove the offline flag works end-to-end against
+ * generated samples: a valid record verifies (exit 0), a tampered record
+ * fails (non-zero), and unusable key files (private material, oversized,
+ * directory, missing) are rejected with user-safe messages.
+ */
+
+import { describe, it, expect, beforeAll } from 'vitest';
+import { execFileSync } from 'node:child_process';
+import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const CLI_PATH = join(__dirname, '..', 'dist', 'index.cjs');
+
+interface CliResult {
+  status: number;
+  stdout: string;
+}
+
+function runVerify(args: string[]): CliResult {
+  try {
+    const stdout = execFileSync('node', [CLI_PATH, 'verify', ...args], {
+      stdio: ['ignore', 'pipe', 'pipe'],
+      encoding: 'utf8',
+    });
+    return { status: 0, stdout };
+  } catch (err) {
+    const e = err as { status?: number; stdout?: string };
+    return { status: e.status ?? -1, stdout: e.stdout ?? '' };
+  }
+}
+
+let samplesDir: string;
+let validJwsPath: string;
+let jwksPath: string;
+
+beforeAll(() => {
+  samplesDir = mkdtempSync(join(tmpdir(), 'peac-verify-pk-'));
+  execFileSync('node', [CLI_PATH, 'samples', 'generate', '-o', samplesDir], {
+    stdio: ['ignore', 'pipe', 'pipe'],
+    encoding: 'utf8',
+  });
+  validJwsPath = join(samplesDir, 'valid', 'basic-record.jws');
+  jwksPath = join(samplesDir, 'bundles', 'sandbox-jwks.json');
+});
+
+describe('peac verify --public-key (CLI wiring)', () => {
+  it('verifies a valid sample offline with the sandbox JWKS', () => {
+    const { status, stdout } = runVerify([validJwsPath, '--public-key', jwksPath]);
+    expect(status).toBe(0);
+    expect(stdout).toContain('Signature valid (offline)');
+  });
+
+  it('fails on a tampered record', () => {
+    const jws = readFileSync(validJwsPath, 'utf8').trim();
+    const tamperedPath = join(samplesDir, 'tampered.jws');
+    writeFileSync(tamperedPath, `${jws.slice(0, -1)}${jws.endsWith('A') ? 'B' : 'A'}`);
+
+    const { status, stdout } = runVerify([tamperedPath, '--public-key', jwksPath]);
+    expect(status).not.toBe(0);
+    expect(stdout).toContain('E_INVALID_SIGNATURE');
+  });
+
+  it('rejects a key file containing private key material', () => {
+    const privatePath = join(samplesDir, 'private.jwk.json');
+    writeFileSync(
+      privatePath,
+      JSON.stringify({
+        kty: 'OKP',
+        crv: 'Ed25519',
+        x: Buffer.alloc(32, 7).toString('base64url'),
+        d: Buffer.alloc(32, 9).toString('base64url'),
+      })
+    );
+
+    const { status, stdout } = runVerify([validJwsPath, '--public-key', privatePath]);
+    expect(status).not.toBe(0);
+    expect(stdout).toContain('private key material');
+  });
+
+  it('rejects an oversized key file', () => {
+    const bigPath = join(samplesDir, 'big-key.json');
+    writeFileSync(bigPath, `{"pad":"${'x'.repeat(20_000)}"}`);
+
+    const { status, stdout } = runVerify([validJwsPath, '--public-key', bigPath]);
+    expect(status).not.toBe(0);
+    expect(stdout).toContain('exceeds');
+  });
+
+  it('rejects a directory as the key path', () => {
+    const { status, stdout } = runVerify([validJwsPath, '--public-key', samplesDir]);
+    expect(status).not.toBe(0);
+    expect(stdout).toContain('directory');
+  });
+
+  it('rejects a missing key path', () => {
+    const missingPath = join(samplesDir, 'does-not-exist.json');
+    const { status, stdout } = runVerify([validJwsPath, '--public-key', missingPath]);
+    expect(status).not.toBe(0);
+    expect(stdout).toContain('could not read public key file');
+  });
+});

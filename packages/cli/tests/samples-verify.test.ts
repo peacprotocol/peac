@@ -4,9 +4,9 @@
  * remain rejection fixtures.
  *
  * Spawns the built CLI (`samples generate`) and checks the generated records
- * programmatically with verifyLocal() against the generated sandbox JWKS, so
- * the check does not depend on the not-yet-merged `peac verify --public-key`
- * flag. Asserts the event-time semantics (`--now` sets occurred_at, not iat),
+ * programmatically with verifyLocal() against the generated sandbox JWKS,
+ * independent of the `peac verify --public-key` CLI flag (covered by
+ * verify-public-key-cli.test.ts). Asserts the event-time semantics (`--now` sets occurred_at, not iat),
  * kid handling, and that a payload-tampered record fails.
  */
 
