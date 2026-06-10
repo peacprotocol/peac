@@ -508,7 +508,7 @@ export async function createHttpTransport(
     server.on('error', reject);
     server.listen(port, host, () => {
       process.stderr.write(`[${SERVER_NAME}] HTTP transport listening on http://${host}:${port}\n`);
-      process.stderr.write(`  Transport: Streamable HTTP (MCP 2025-06-18)\n`);
+      process.stderr.write(`  Transport: Streamable HTTP (MCP ${MCP_PROTOCOL_VERSION})\n`);
       process.stderr.write(
         `  Auth: unprotected mode (no token validation); PRM discovery per RFC 9728\n`
       );
