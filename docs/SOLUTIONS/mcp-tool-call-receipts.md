@@ -51,16 +51,15 @@ Prerequisites: Node 22+, pnpm 8+. An MCP client to call the server (the shipped 
    async function handleToolCall(toolName, args, ctx) {
      const result = await runTool(toolName, args);
 
-     // digestOf is application-defined. In production, hash a canonicalized,
-     // redacted argument object; do not sign raw secrets.
+     // Minimal record: issuer, kind, type, and signature. For production
+     // tool-call facts (tool name, argument digests), use a registered
+     // extension group via the `extensions` option rather than ad-hoc
+     // fields; never include raw arguments or secrets in a record.
      const { jws } = await issue({
        iss: 'https://mcp.example.com',
        kind: 'evidence',
        type: 'org.peacprotocol/mcp-tool-call',
        pillars: ['attribution'],
-       ext: {
-         attribution: { tool: toolName, arguments_digest: digestOf(args) },
-       },
        privateKey: ctx.privateKey,
        kid: ctx.kid,
      });
@@ -97,7 +96,7 @@ Prerequisites: Node 22+, pnpm 8+. An MCP client to call the server (the shipped 
    const result = await verifyLocal(carrier.receipt_jws, publicKey, {
      issuer: 'https://mcp.example.com',
    });
-   console.log(result.valid, result.claims?.type, result.claims?.ext?.attribution);
+   console.log(result.valid, result.claims?.type, result.claims?.kind);
    ```
 
 5. Explore a runnable example:
@@ -121,7 +120,7 @@ A tool-call response carrying a PEAC record looks like this (MCP content + `_met
 }
 ```
 
-Decoded, the record carries the `kind: evidence` / `type: org.peacprotocol/mcp-tool-call` shape with an `attribution` extension group referencing the tool name and a digest of the arguments. The MCP server ran the tool; PEAC recorded what happened.
+Decoded, the record carries the `kind: evidence` / `type: org.peacprotocol/mcp-tool-call` shape. Production deployments can add tool-call facts (tool name, argument digests) through a registered extension group via the `extensions` option; see the runnable example for an extension-carrying record. The MCP server ran the tool; PEAC recorded what happened.
 
 ## Validated with
 
