@@ -1,6 +1,6 @@
 # MCP tool-call records
 
-> **Outcome:** Your MCP server emits a signed record for every tool call so downstream agents, auditors, or counterparties can verify what tool ran, what arguments were used, and what the result was — offline, with just your public key.
+> **Outcome:** Your MCP server attaches a portable signed record to a tool response so downstream agents, auditors, or counterparties can verify the record offline with your public key. Production deployments can bind tool name, argument digests, and result digests through a registered extension/profile.
 >
 > **Audience:** MCP server operator.
 >
@@ -19,7 +19,7 @@ PEAC packages:
 - `@peac/mcp-server` — MCP server with built-in record tools (`peac_verify`, `peac_inspect`, `peac_decode`, `peac_issue`, `peac_create_bundle`).
 - `@peac/mappings-mcp` — MCP `_meta` carrier mapping.
 - `@peac/protocol` — issuance and offline verification.
-- `@peac/crypto` — Ed25519 signing.
+- `@peac/schema` — receipt reference calculation.
 
 Prerequisites: Node 22+, pnpm 8+. An MCP client to call the server (the shipped examples use the MCP SDK stdio transport).
 
@@ -32,7 +32,7 @@ Prerequisites: Node 22+, pnpm 8+. An MCP client to call the server (the shipped 
 1. Install dependencies:
 
    ```bash
-   pnpm add @peac/mcp-server @peac/mappings-mcp @peac/protocol @peac/crypto
+   pnpm add @peac/mcp-server @peac/mappings-mcp @peac/protocol @peac/schema
    ```
 
 2. Start the server for local exploration:
@@ -45,42 +45,58 @@ Prerequisites: Node 22+, pnpm 8+. An MCP client to call the server (the shipped 
 
    ```typescript
    import { issue } from '@peac/protocol';
-   import { toMcpMeta } from '@peac/mappings-mcp';
+   import { computeReceiptRef } from '@peac/schema';
+   import { attachReceiptToMeta } from '@peac/mappings-mcp';
 
    async function handleToolCall(toolName, args, ctx) {
      const result = await runTool(toolName, args);
 
-     const jws = await issue(
-       {
-         iss: 'https://mcp.example.com',
-         kind: 'evidence',
-         type: 'org.peacprotocol/mcp-tool-call',
-         pillars: ['attribution'],
-         ext: {
-           attribution: { tool: toolName, arguments_digest: digestOf(args) },
-         },
-       },
-       ctx.privateKey
-     );
+     // Minimal record: issuer, kind, type, and signature. For production
+     // tool-call facts (tool name, argument digests), use a registered
+     // extension group via the `extensions` option rather than ad-hoc
+     // fields; never include raw arguments or secrets in a record.
+     const { jws } = await issue({
+       iss: 'https://mcp.example.com',
+       kind: 'evidence',
+       type: 'org.peacprotocol/mcp-tool-call',
+       pillars: ['attribution'],
+       privateKey: ctx.privateKey,
+       kid: ctx.kid,
+     });
 
-     return {
-       content: result.content,
-       _meta: toMcpMeta({ receipt_jws: jws }),
-     };
+     // receipt_ref is sha256(receipt_jws); attachReceiptToMeta writes both
+     // into top-level _meta under the org.peacprotocol/ carrier keys,
+     // preserving the rest of the MCP result untouched.
+     const receipt_ref = await computeReceiptRef(jws);
+
+     return attachReceiptToMeta(
+       {
+         content: result.content,
+         structuredContent: result.structuredContent,
+         isError: result.isError,
+       },
+       { receipt_ref, receipt_jws: jws }
+     );
    }
    ```
+
+   The runnable example is the source of truth for exact imports and execution: see [`examples/mcp-tool-call/`](../../examples/mcp-tool-call/).
 
 4. Verify the record from the MCP client:
 
    ```typescript
-   import { fromMcpMeta } from '@peac/mappings-mcp';
+   import { extractReceiptFromMetaAsync } from '@peac/mappings-mcp';
    import { verifyLocal } from '@peac/protocol';
 
-   const { receipt_jws } = fromMcpMeta(response._meta);
-   const result = await verifyLocal(receipt_jws, publicKey, {
+   // extractReceiptFromMetaAsync also checks receipt_ref == sha256(receipt_jws).
+   const extracted = await extractReceiptFromMetaAsync(response);
+   const carrier = extracted?.receipts[0];
+   if (!carrier?.receipt_jws) throw new Error('no PEAC receipt in _meta');
+
+   const result = await verifyLocal(carrier.receipt_jws, publicKey, {
      issuer: 'https://mcp.example.com',
    });
-   console.log(result.valid, result.claims.type, result.claims.ext.attribution);
+   console.log(result.valid, result.claims?.type, result.claims?.kind);
    ```
 
 5. Explore a runnable example:
@@ -104,7 +120,7 @@ A tool-call response carrying a PEAC record looks like this (MCP content + `_met
 }
 ```
 
-Decoded, the record carries the `kind: evidence` / `type: org.peacprotocol/mcp-tool-call` shape with an `attribution` extension group referencing the tool name and a digest of the arguments. The MCP server ran the tool; PEAC recorded what happened.
+Decoded, the record carries the `kind: evidence` / `type: org.peacprotocol/mcp-tool-call` shape. Production deployments can add tool-call facts (tool name, argument digests) through a registered extension group via the `extensions` option; see the runnable example for an extension-carrying record. The MCP server ran the tool; PEAC recorded what happened.
 
 ## Validated with
 
