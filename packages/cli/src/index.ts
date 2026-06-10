@@ -5,7 +5,7 @@
  */
 
 import { Command, CommanderError } from 'commander';
-import { verifyReceipt } from '@peac/protocol';
+import { verifyReceipt, verifyLocal } from '@peac/protocol';
 import { parseIssuerConfig, fetchIssuerConfig } from '@peac/protocol';
 import { decode } from '@peac/crypto';
 import { PEACReceiptClaims } from '@peac/schema';
@@ -21,6 +21,7 @@ import { recordCommand } from './commands/record-command.js';
 import { emitCommand } from './commands/emit-lifecycle.js';
 import { formatOutput } from './utils.js';
 import { getVersion } from './lib/version.js';
+import { parsePublicKey } from './lib/public-key.js';
 
 const program = new Command();
 
@@ -38,12 +39,59 @@ program
   .description('Verify a PEAC receipt JWS')
   .argument('<jws>', 'JWS compact serialization or path to file containing JWS')
   .option('-v, --verbose', 'Show detailed output')
-  .action(async (jwsInput: string, options: { verbose?: boolean }) => {
+  .option(
+    '--public-key <path>',
+    'Verify offline with a public Ed25519 JWK or single-key JWKS file (no network)'
+  )
+  .action(async (jwsInput: string, options: { verbose?: boolean; publicKey?: string }) => {
     try {
       // Check if input is a file path
       let jws = jwsInput;
       if (fs.existsSync(jwsInput)) {
         jws = fs.readFileSync(jwsInput, 'utf-8').trim();
+      }
+
+      // Offline mode: verify the signature locally against a supplied public
+      // key. No network / JWKS discovery. Structure validation is performed by
+      // verifyLocal, so this path does not assume a payment-receipt shape.
+      if (options.publicKey) {
+        console.log('Verifying PEAC receipt offline...\n');
+
+        let keyContent: string;
+        try {
+          keyContent = fs.readFileSync(options.publicKey, 'utf-8');
+        } catch {
+          console.log('Verification failed: could not read public key file');
+          process.exitCode = 1;
+          return;
+        }
+
+        let publicKey: Uint8Array;
+        try {
+          publicKey = parsePublicKey(keyContent);
+        } catch (keyErr) {
+          console.log(
+            `Verification failed: ${keyErr instanceof Error ? keyErr.message : 'invalid public key'}`
+          );
+          process.exitCode = 1;
+          return;
+        }
+
+        const localResult = await verifyLocal(jws, publicKey);
+        if (localResult.valid) {
+          console.log('Signature valid (offline).');
+          console.log(
+            '   Verified the receipt signature and declared receipt structure against the supplied public key.'
+          );
+          process.exitCode = 0;
+        } else {
+          console.log(`Verification failed: ${localResult.message}`);
+          if (localResult.code) {
+            console.log(`   Code: ${localResult.code}`);
+          }
+          process.exitCode = 1;
+        }
+        return;
       }
 
       console.log('Verifying PEAC receipt...\n');
