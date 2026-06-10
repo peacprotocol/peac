@@ -45,42 +45,59 @@ Prerequisites: Node 22+, pnpm 8+. An MCP client to call the server (the shipped 
 
    ```typescript
    import { issue } from '@peac/protocol';
-   import { toMcpMeta } from '@peac/mappings-mcp';
+   import { computeReceiptRef } from '@peac/schema';
+   import { attachReceiptToMeta } from '@peac/mappings-mcp';
 
    async function handleToolCall(toolName, args, ctx) {
      const result = await runTool(toolName, args);
 
-     const jws = await issue(
-       {
-         iss: 'https://mcp.example.com',
-         kind: 'evidence',
-         type: 'org.peacprotocol/mcp-tool-call',
-         pillars: ['attribution'],
-         ext: {
-           attribution: { tool: toolName, arguments_digest: digestOf(args) },
-         },
+     // digestOf is application-defined. In production, hash a canonicalized,
+     // redacted argument object; do not sign raw secrets.
+     const { jws } = await issue({
+       iss: 'https://mcp.example.com',
+       kind: 'evidence',
+       type: 'org.peacprotocol/mcp-tool-call',
+       pillars: ['attribution'],
+       ext: {
+         attribution: { tool: toolName, arguments_digest: digestOf(args) },
        },
-       ctx.privateKey
-     );
+       privateKey: ctx.privateKey,
+       kid: ctx.kid,
+     });
 
-     return {
-       content: result.content,
-       _meta: toMcpMeta({ receipt_jws: jws }),
-     };
+     // receipt_ref is sha256(receipt_jws); attachReceiptToMeta writes both
+     // into top-level _meta under the org.peacprotocol/ carrier keys,
+     // preserving the rest of the MCP result untouched.
+     const receipt_ref = await computeReceiptRef(jws);
+
+     return attachReceiptToMeta(
+       {
+         content: result.content,
+         structuredContent: result.structuredContent,
+         isError: result.isError,
+       },
+       { receipt_ref, receipt_jws: jws }
+     );
    }
    ```
+
+   The runnable example is the source of truth for exact imports and execution: see [`examples/mcp-tool-call/`](../../examples/mcp-tool-call/).
 
 4. Verify the record from the MCP client:
 
    ```typescript
-   import { fromMcpMeta } from '@peac/mappings-mcp';
+   import { extractReceiptFromMetaAsync } from '@peac/mappings-mcp';
    import { verifyLocal } from '@peac/protocol';
 
-   const { receipt_jws } = fromMcpMeta(response._meta);
-   const result = await verifyLocal(receipt_jws, publicKey, {
+   // extractReceiptFromMetaAsync also checks receipt_ref == sha256(receipt_jws).
+   const extracted = await extractReceiptFromMetaAsync(response);
+   const carrier = extracted?.receipts[0];
+   if (!carrier?.receipt_jws) throw new Error('no PEAC receipt in _meta');
+
+   const result = await verifyLocal(carrier.receipt_jws, publicKey, {
      issuer: 'https://mcp.example.com',
    });
-   console.log(result.valid, result.claims.type, result.claims.ext.attribution);
+   console.log(result.valid, result.claims?.type, result.claims?.ext?.attribution);
    ```
 
 5. Explore a runnable example:

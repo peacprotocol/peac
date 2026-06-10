@@ -102,9 +102,9 @@ const result = await handleVerify({
   input: { jws: 'eyJ...', public_key_base64url: '...' },
   policy,
   context: {
-    version: '0.12.4',
+    version: '0.15.0',
     policyHash,
-    protocolVersion: '0.2',
+    protocolVersion: '2025-11-25',
   },
 });
 ```
@@ -119,7 +119,7 @@ const result = await handleVerify({
 | `peac_issue`         | Issue a PEAC signed interaction record from provided claims.    | Requires `--issuer-key` and `--issuer-id`                  |
 | `peac_create_bundle` | Create a PEAC bundle from signed records and related artifacts. | Requires `--issuer-key`, `--issuer-id`, and `--bundle-dir` |
 
-All tool responses include `_meta` with `serverVersion`, `policyHash`, `protocolVersion`, and `registeredTools`.
+All structured tool outputs include a schema-declared `_meta` audit block with `serverVersion`, `policyHash`, `protocolVersion`, and `registeredTools`. This is separate from the top-level MCP `_meta` carrier used by `@peac/mappings-mcp` to attach PEAC receipt references.
 
 ## Integrates With
 
