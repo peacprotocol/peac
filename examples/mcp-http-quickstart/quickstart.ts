@@ -17,6 +17,7 @@ import { generateKeypair, issue, verifyLocal } from '@peac/protocol';
 const MCP_URL = process.env.MCP_URL ?? 'http://127.0.0.1:3000/mcp';
 const MCP_PROTOCOL_VERSION = '2025-11-25';
 const ISSUER = 'https://quickstart.example.com';
+const REQUEST_TIMEOUT_MS = 10_000;
 
 interface JsonRpcResponse {
   jsonrpc: '2.0';
@@ -58,6 +59,7 @@ async function mcpRequest(
     method: 'POST',
     headers: buildHeaders(sessionId),
     body: JSON.stringify({ jsonrpc: '2.0', id: ++requestId, method, params }),
+    signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
   });
 
   const responseSessionId = res.headers.get('mcp-session-id') ?? undefined;
@@ -98,12 +100,15 @@ async function mcpNotify(
     method: 'POST',
     headers: buildHeaders(sessionId),
     body: JSON.stringify({ jsonrpc: '2.0', method, params }),
+    signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
   });
 
   if (!res.ok) {
     const text = await res.text();
     throw new Error(`MCP notification failed (HTTP ${res.status}): ${text.slice(0, 200)}`);
   }
+  // Drain the body to release the connection.
+  await res.arrayBuffer();
 }
 
 async function main() {
