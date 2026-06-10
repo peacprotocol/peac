@@ -10,13 +10,16 @@
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { join } from 'node:path';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const CLI_PATH = join(__dirname, '..', 'dist', 'index.cjs');
+// Resolve the built CLI whether vitest runs with the package root or the
+// repository root as cwd.
+const PKG_ROOT = existsSync(join(process.cwd(), 'dist', 'index.cjs'))
+  ? process.cwd()
+  : join(process.cwd(), 'packages', 'cli');
+const CLI_PATH = join(PKG_ROOT, 'dist', 'index.cjs');
 const SPAWN_TIMEOUT_MS = 15_000;
 
 interface CliResult {
