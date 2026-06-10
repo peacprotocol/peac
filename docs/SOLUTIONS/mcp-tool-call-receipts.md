@@ -1,6 +1,6 @@
 # MCP tool-call records
 
-> **Outcome:** Your MCP server emits a signed record for every tool call so downstream agents, auditors, or counterparties can verify what tool ran, what arguments were used, and what the result was — offline, with just your public key.
+> **Outcome:** Your MCP server attaches a portable signed record to a tool response so downstream agents, auditors, or counterparties can verify the record offline with your public key. Production deployments can bind tool name, argument digests, and result digests through a registered extension/profile.
 >
 > **Audience:** MCP server operator.
 >
@@ -19,7 +19,7 @@ PEAC packages:
 - `@peac/mcp-server` — MCP server with built-in record tools (`peac_verify`, `peac_inspect`, `peac_decode`, `peac_issue`, `peac_create_bundle`).
 - `@peac/mappings-mcp` — MCP `_meta` carrier mapping.
 - `@peac/protocol` — issuance and offline verification.
-- `@peac/crypto` — Ed25519 signing.
+- `@peac/schema` — receipt reference calculation.
 
 Prerequisites: Node 22+, pnpm 8+. An MCP client to call the server (the shipped examples use the MCP SDK stdio transport).
 
@@ -32,7 +32,7 @@ Prerequisites: Node 22+, pnpm 8+. An MCP client to call the server (the shipped 
 1. Install dependencies:
 
    ```bash
-   pnpm add @peac/mcp-server @peac/mappings-mcp @peac/protocol @peac/crypto
+   pnpm add @peac/mcp-server @peac/mappings-mcp @peac/protocol @peac/schema
    ```
 
 2. Start the server for local exploration:
