@@ -27,6 +27,9 @@ import { readFileBufferSnapshot } from './lib/safe-file.js';
 /** Upper bound for a public-key file (a JWK/JWKS is well under 1 KiB). */
 const MAX_PUBLIC_KEY_FILE_BYTES = 16_384;
 
+/** Upper bound for a receipt JWS file passed to `peac verify`. */
+const MAX_VERIFY_JWS_FILE_BYTES = 512 * 1024;
+
 const program = new Command();
 
 program
@@ -49,10 +52,27 @@ program
   )
   .action(async (jwsInput: string, options: { verbose?: boolean; publicKey?: string }) => {
     try {
-      // Check if input is a file path
+      // Check if input is a file path; file reads are bounded.
       let jws = jwsInput;
       if (fs.existsSync(jwsInput)) {
-        jws = fs.readFileSync(jwsInput, 'utf-8').trim();
+        try {
+          jws = readFileBufferSnapshot(jwsInput, { maxBytes: MAX_VERIFY_JWS_FILE_BYTES })
+            .toString('utf8')
+            .trim();
+        } catch (readErr) {
+          const code = (readErr as NodeJS.ErrnoException).code;
+          if (code === 'E_PEAC_FILE_TOO_LARGE') {
+            console.log(
+              `Verification failed: receipt file exceeds ${MAX_VERIFY_JWS_FILE_BYTES} bytes`
+            );
+          } else if (code === 'EISDIR') {
+            console.log('Verification failed: receipt path is a directory');
+          } else {
+            console.log('Verification failed: could not read receipt file');
+          }
+          process.exitCode = 1;
+          return;
+        }
       }
 
       // Offline mode: verify the signature locally against a supplied public

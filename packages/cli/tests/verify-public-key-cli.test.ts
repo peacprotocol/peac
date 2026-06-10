@@ -3,19 +3,21 @@
  *
  * Spawns the built CLI to prove the offline flag works end-to-end against
  * generated samples: a valid record verifies (exit 0), a tampered record
- * fails (non-zero), and unusable key files (private material, oversized,
- * directory, missing) are rejected with user-safe messages.
+ * fails (non-zero), unusable key files (private material, oversized,
+ * directory, missing) are rejected, and bounded receipt-file reads reject
+ * oversized files and directory paths with user-safe messages.
  */
 
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const CLI_PATH = join(__dirname, '..', 'dist', 'index.cjs');
+const SPAWN_TIMEOUT_MS = 15_000;
 
 interface CliResult {
   status: number;
@@ -27,6 +29,7 @@ function runVerify(args: string[]): CliResult {
     const stdout = execFileSync('node', [CLI_PATH, 'verify', ...args], {
       stdio: ['ignore', 'pipe', 'pipe'],
       encoding: 'utf8',
+      timeout: SPAWN_TIMEOUT_MS,
     });
     return { status: 0, stdout };
   } catch (err) {
@@ -44,9 +47,14 @@ beforeAll(() => {
   execFileSync('node', [CLI_PATH, 'samples', 'generate', '-o', samplesDir], {
     stdio: ['ignore', 'pipe', 'pipe'],
     encoding: 'utf8',
+    timeout: SPAWN_TIMEOUT_MS,
   });
   validJwsPath = join(samplesDir, 'valid', 'basic-record.jws');
   jwksPath = join(samplesDir, 'bundles', 'sandbox-jwks.json');
+});
+
+afterAll(() => {
+  rmSync(samplesDir, { recursive: true, force: true });
 });
 
 describe('peac verify --public-key (CLI wiring)', () => {
@@ -58,8 +66,14 @@ describe('peac verify --public-key (CLI wiring)', () => {
 
   it('fails on a tampered record', () => {
     const jws = readFileSync(validJwsPath, 'utf8').trim();
+    // Flip a mid-signature character: the final base64url character of an
+    // Ed25519 signature carries 4 ignored padding bits, so tampering there
+    // can decode to identical bytes. A mid-segment flip always changes the
+    // signature.
+    const i = jws.length - 10;
+    const tampered = `${jws.slice(0, i)}${jws[i] === 'x' ? 'y' : 'x'}${jws.slice(i + 1)}`;
     const tamperedPath = join(samplesDir, 'tampered.jws');
-    writeFileSync(tamperedPath, `${jws.slice(0, -1)}${jws.endsWith('A') ? 'B' : 'A'}`);
+    writeFileSync(tamperedPath, tampered);
 
     const { status, stdout } = runVerify([tamperedPath, '--public-key', jwksPath]);
     expect(status).not.toBe(0);
@@ -103,5 +117,22 @@ describe('peac verify --public-key (CLI wiring)', () => {
     const { status, stdout } = runVerify([validJwsPath, '--public-key', missingPath]);
     expect(status).not.toBe(0);
     expect(stdout).toContain('could not read public key file');
+  });
+});
+
+describe('peac verify receipt-file input (bounded reads)', () => {
+  it('rejects an oversized receipt file', () => {
+    const bigJwsPath = join(samplesDir, 'big-receipt.jws');
+    writeFileSync(bigJwsPath, 'a'.repeat(600 * 1024));
+
+    const { status, stdout } = runVerify([bigJwsPath, '--public-key', jwksPath]);
+    expect(status).not.toBe(0);
+    expect(stdout).toContain('receipt file exceeds');
+  });
+
+  it('rejects a directory as the receipt path', () => {
+    const { status, stdout } = runVerify([samplesDir, '--public-key', jwksPath]);
+    expect(status).not.toBe(0);
+    expect(stdout).toContain('receipt path is a directory');
   });
 });
