@@ -18,10 +18,10 @@ In a separate terminal:
 npx -y @peac/mcp-server --transport http --port 3000
 ```
 
-For issuance via MCP (optional):
+For issuance via MCP (optional; demo key only, not for production keys; the key loader expects an Ed25519 private JWK):
 
 ```bash
-export PEAC_ISSUER_KEY=$(node -e "import('@peac/protocol').then(p=>p.generateKeypair()).then(k=>console.log(Buffer.from(k.privateKey).toString('hex')))")
+export PEAC_ISSUER_KEY=$(node -e "import('@peac/protocol').then(async (p) => { const k = await p.generateKeypair(); const b = (u) => Buffer.from(u).toString('base64url'); console.log(JSON.stringify({ kty: 'OKP', crv: 'Ed25519', d: b(k.privateKey), x: b(k.publicKey) })); })")
 npx -y @peac/mcp-server --transport http --port 3000 \
   --issuer-key env:PEAC_ISSUER_KEY --issuer-id https://demo.example.com
 ```
