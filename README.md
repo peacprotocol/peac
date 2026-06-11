@@ -1,10 +1,10 @@
 # PEAC Protocol
 
-**Portable signed records for automated interactions.**
+> Signed action records for AI agents, APIs, MCP tools, and gateways.
 
-When logs are not enough, PEAC gives teams records another party can verify outside the system that produced them.
+Automated systems already call APIs, run MCP tools, make gateway decisions, report payment events, and provision resources across system boundaries.
 
-PEAC records what APIs, MCP tools, agent workflows, gateways, payment-adjacent flows, provisioning systems, runtimes, and audit systems report. It does not run those systems or make their decisions.
+PEAC records those actions, decisions, and events as portable signed interaction records, so another party can verify what happened later without relying on screenshots, private logs, or unverifiable assertions.
 
 **Record locally. Verify across boundaries.**
 
@@ -83,14 +83,14 @@ scope: [`docs/WHAT-PEAC-STANDARDIZES.md`](docs/WHAT-PEAC-STANDARDIZES.md).
 
 ## Choose your path
 
-| If you...                                       | PEAC helps you...                                                                                                                      | Start here                                                                        |
-| ----------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
-| Run an API or metered service                   | issue signed records for requests, responses, usage, and policy-visible outcomes                                                       | [API Provider Quickstart](docs/guides/quickstart-api-provider.md)                 |
-| Build MCP tools or agent workflows              | attach records to tool runs, command execution, handoffs, lifecycle events, and agent actions                                          | [MCP Integration Kit](integrator-kits/mcp/README.md) or `npx -y @peac/mcp-server` |
-| Build payment, gateway, or commerce flows       | preserve signed evidence around access, payment, settlement, mandate, gateway, and dispute events without operating the payment system | [Commerce evidence bundle](docs/SOLUTIONS/commerce-evidence-bundle.md)            |
-| Track provisioning or resource lifecycle events | record catalog, provider-link, account, credential, budget, subscription, domain, deployment, and resource events                      | [Provisioning lifecycle records](docs/SOLUTIONS/verify-agent-provisioning.md)     |
-| Need audit or review evidence                   | export portable records and bundles that can be referenced beside logs, traces, SIEMs, reports, and audit repositories                 | [Where PEAC fits](docs/WHERE-IT-FITS.md)                                          |
-| Need to verify a record                         | verify a signed PEAC record with the issuer's public key or a self-hosted verifier                                                     | [Agent Operator Quickstart](docs/guides/quickstart-agent-operator.md)             |
+| If you...                                       | PEAC helps you...                                                                                                                      | Start here                                                                                                                              |
+| ----------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| Run an API or metered service                   | issue signed records for requests, responses, usage, and policy-visible outcomes                                                       | [API Provider Quickstart](docs/guides/quickstart-api-provider.md)                                                                       |
+| Build MCP tools or agent workflows              | attach records to tool runs, command execution, handoffs, lifecycle events, and agent actions                                          | [MCP Integration Kit](integrator-kits/mcp/README.md) or `npx -y @peac/mcp-server`                                                       |
+| Build payment, gateway, or commerce flows       | preserve signed evidence around access, payment, settlement, mandate, gateway, and dispute events without operating the payment system | [MCP gateway records](docs/SOLUTIONS/mcp-gateway-receipts.md) or [Commerce evidence bundle](docs/SOLUTIONS/commerce-evidence-bundle.md) |
+| Track provisioning or resource lifecycle events | record catalog, provider-link, account, credential, budget, subscription, domain, deployment, and resource events                      | [Provisioning lifecycle records](docs/SOLUTIONS/verify-agent-provisioning.md)                                                           |
+| Need audit or review evidence                   | export portable records and bundles that can be referenced beside logs, traces, SIEMs, reports, and audit repositories                 | [Where PEAC fits](docs/WHERE-IT-FITS.md)                                                                                                |
+| Need to verify a record                         | verify a signed PEAC record with the issuer's public key or a self-hosted verifier                                                     | [Agent Operator Quickstart](docs/guides/quickstart-agent-operator.md)                                                                   |
 
 Full path-by-role tree: [`docs/START_HERE.md`](docs/START_HERE.md).
 
@@ -114,7 +114,7 @@ const result = await verifyLocal(recordJws, publicKey, {
 });
 
 if (!result.valid) {
-  throw new Error(result.reason ?? 'PEAC record verification failed');
+  throw new Error(`${result.code}: ${result.message}`);
 }
 
 console.log(result.claims.iss, result.claims.kind, result.claims.type);
@@ -186,6 +186,7 @@ Practical recipes under [`docs/SOLUTIONS/`](docs/SOLUTIONS/):
 
 - [API record issuance](docs/SOLUTIONS/api-receipt-issuance.md)
 - [MCP tool-call records](docs/SOLUTIONS/mcp-tool-call-receipts.md)
+- [MCP gateway records](docs/SOLUTIONS/mcp-gateway-receipts.md)
 - [Agent action records](docs/SOLUTIONS/verify-agent-action.md)
 - [Gateway export records](docs/SOLUTIONS/verify-gateway-export.md)
 - [Commerce mandate records](docs/SOLUTIONS/verify-commerce-mandate.md)
@@ -200,6 +201,11 @@ Practical recipes under [`docs/SOLUTIONS/`](docs/SOLUTIONS/):
 - Verify a record locally with `verifyLocal()` or `pnpm dlx @peac/cli verify`.
 - Start the MCP server: `npx -y @peac/mcp-server`.
 - Run the minimal example: `pnpm --filter @peac/example-minimal demo`.
+- Run the MCP gateway records example:
+  ```bash
+  pnpm --filter @peac/example-mcp-gateway-receipts demo
+  pnpm --filter @peac/example-mcp-gateway-receipts demo:tamper
+  ```
 - Run the provisioning lifecycle example:
   ```bash
   pnpm --filter @peac/example-provisioning-lifecycle run issue
