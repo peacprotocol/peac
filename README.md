@@ -2,9 +2,9 @@
 
 > Signed action records for AI agents, APIs, and MCP tools.
 
-AI agents are starting to do real work: call APIs, run MCP tools, change data, trigger payments, and provision resources.
+AI agents, APIs, MCP tools, gateways, payment flows, and provisioning systems already perform real work across system and organizational boundaries.
 
-PEAC creates a signed record for those actions, so another system can verify what happened later without trusting screenshots, private logs, or "the agent said so."
+PEAC records what those systems report as portable signed interaction records, so another party can verify what happened later without trusting screenshots, private logs, or unverifiable assertions.
 
 **Record locally. Verify across boundaries.**
 
