@@ -199,6 +199,11 @@ Practical recipes under [`docs/SOLUTIONS/`](docs/SOLUTIONS/):
 ## Try it in 5 minutes
 
 - Verify a record locally with `verifyLocal()` or `pnpm dlx @peac/cli verify`.
+- Generate sample records and verify one offline with just a public key:
+  ```bash
+  pnpm dlx @peac/cli samples generate -o ./s
+  pnpm dlx @peac/cli verify ./s/valid/basic-record.jws --public-key ./s/bundles/sandbox-jwks.json
+  ```
 - Start the MCP server: `npx -y @peac/mcp-server`.
 - Run the minimal example: `pnpm --filter @peac/example-minimal demo`.
 - Run the MCP gateway records example:
