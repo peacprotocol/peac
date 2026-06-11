@@ -1,7 +1,7 @@
 {
   "family": "provisioning-lifecycle",
   "description": "Provisioning lifecycle parity vectors. 10 positive vectors (one per *-observed event family) plus 19 negative vectors (one per validator-emitted stable error code under provisioning.*). Every vector is envelope-accepted (expected.accepted = true). Negative vectors additionally declare expected.errors[] for the provisioning-lifecycle extension validator. The wire-envelope canonical-truth test in @peac/protocol filters these dotted extension-level codes; the schema-validator corpus test in @peac/schema reads them directly. Two stable codes are not exercised by corpus vectors: provisioning.invalid_utf8 (fixture-loader-only) and provisioning.structure_too_deep (kernel and extension walker share the same depth cap; round-tripping through parity-vector comparison is path-sensitive and brittle). Both are covered by schema unit tests.",
-  "version": "0.15.0",
+  "version": "0.15.1",
   "generator": "manual; provisioning-lifecycle Profile 0.1 floor",
   "vectors": [
     {

@@ -5,7 +5,70 @@ All notable changes to PEAC Protocol will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.15.0] - 2026-05-31
+## [0.15.1] - 2026-06-11
+
+Samples and offline verification.
+
+Makes the local verification path self-contained: generated samples now
+pass local verification out of the box, and `peac verify` accepts a local
+public key for fully offline verification. Aligns the MCP recipe,
+quickstart, and distribution metadata with the current API, and adds a
+gateway-mediated MCP records example with policy decisions and content
+digests.
+
+Public API: additive only (`peac verify --public-key`).
+Wire format: unchanged (0.2).
+Public schema: unchanged.
+Registered extension groups: unchanged (19).
+Registered receipt types: unchanged (61).
+Conformance sections: unchanged (32).
+
+### Added
+
+- `peac verify --public-key <file>`: offline receipt verification with a
+  local Ed25519 public JWK or single-key JWKS; rejects private keys,
+  multi-key sets, and non-Ed25519 keys; the network JWKS path is unchanged
+  when the flag is omitted (#833).
+- `examples/mcp-gateway-receipts`: gateway-mediated MCP tool calls with a
+  signed tool-definition manifest, allow and deny decision records,
+  deterministic content digests, redaction recorded as a fact, and two
+  tamper checks; includes an in-process runtime smoke test and the
+  `docs/SOLUTIONS/mcp-gateway-receipts.md` recipe (#834).
+- Workspace package boundary gate: fail-closed test deriving published,
+  private, and example surfaces from the publish manifest (#825).
+- Release-process gates: split-stage release closeout verification (#826),
+  dependency-audit exception expiry gate (#827), and an OpenTelemetry
+  version-currency gate with a documentation version-currency check (#828).
+
+### Changed
+
+- `peac samples generate` issues valid samples through the canonical
+  issuance path so every generated record passes local verification;
+  sample inputs validated before any write (#829).
+- MCP tool-call recipe, INTEROP tool listing, server README, and the HTTP
+  transport version log aligned with the current API and protocol version
+  (#831).
+- MCP Streamable HTTP quickstart: session header capture and reuse, current
+  protocol version, modern `_meta` carrier demo with tamper checks, and
+  current plugin-pack pins (#832).
+- Repository surface streamlined: retired pre-0.10 archive tree removed
+  from HEAD with name-based guards retained (#823).
+- Emitted telemetry version derives from a single source (#828).
+
+### Fixed
+
+- MCP HTTP quickstart issuer-key example emits an Ed25519 private JWK as
+  the key loader expects (#835).
+- vitest updated for GHSA-5xrq-8626-4rwp (#820); MCP Registry publisher
+  workflow updated (#819); GitHub Actions runtime dependencies updated
+  (#822).
+
+### Security
+
+- Dependency-audit allowlist review dates renewed for dev-only exceptions
+  (#830).
+
+## [0.15.0]
 
 Interoperability for portable signed records.
 

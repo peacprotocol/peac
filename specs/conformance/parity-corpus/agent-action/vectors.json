@@ -1,7 +1,7 @@
 {
   "family": "agent-action",
   "description": "Agent action parity vectors. Six positive deterministic JSON observation payloads (one per event_kind) covering invoked / delegated / approved / denied / cancelled / timed-out semantics. Per the parity-corpus convention, all vectors assert envelope-level canonical agreement and set expected.accepted=true; semantic rejection of extension content (forbidden top-level keys, opaque-ref grammar violations, missing required fields, unknown event_kind) lives at the Layer 3 validator surface (validateAgentAction exported from @peac/schema, exercised by packages/schema/__tests__/extensions/agent-action.test.ts).",
-  "version": "0.15.0",
+  "version": "0.15.1",
   "generator": "manual; agent-action v0.1 floor",
   "vectors": [
     {

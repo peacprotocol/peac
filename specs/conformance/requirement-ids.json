@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.peacprotocol.org/schemas/conformance/requirement-registry.schema.json",
-  "version": "0.15.0",
+  "version": "0.15.1",
   "spec_file": "docs/specs/WIRE-0.2.md",
   "sections": [
     {
@@ -16,7 +16,7 @@
           "source_fragment_hash": "sha256:0ad5b045ab78f4e9109ba8037bc1f1279ceac8a58fe748136751984969ffbbef",
           "enforcement_class": "issuance",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-MEDIA-002",
@@ -26,7 +26,7 @@
           "source_fragment_hash": "sha256:2192ce1ab3f1ba59c7488f2aff9fba90fd7c08e68c7bc636ada4606da7d049a7",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -37,7 +37,7 @@
           "source_fragment_hash": "sha256:536c2b007a3b8591d4bff457718ff298d28fa896762b1392affa342a07d29ae1",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -48,7 +48,7 @@
           "source_fragment_hash": "sha256:c5251f9b638b45a73e848b71c5121e797cd7dd4f5fa43720d0aa47ec10f1f117",
           "enforcement_class": "issuance",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-MEDIA-005",
@@ -58,7 +58,7 @@
           "source_fragment_hash": "sha256:b00235eb16c6c6a0db81c566721b4d1271c741923e2f69b30a880c11ea380652",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_WIRE_VERSION_MISMATCH"
         },
         {
@@ -69,7 +69,7 @@
           "source_fragment_hash": "sha256:feea1d7debb179f57fa31ebcb0853a4bbf1118989b05b69bcbcd187e6a101d12",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -80,7 +80,7 @@
           "source_fragment_hash": "sha256:5f3a5b55d3012cef50a6cc2699a13ed3e7c1c4d827d2e7da7d292ccdde202a62",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_FORMAT"
         }
       ]
@@ -98,7 +98,7 @@
           "source_fragment_hash": "sha256:0a219ef551e19ac56debd23c4e58fb3585a277c6b8105a879d34dea9f25c947c",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -109,7 +109,7 @@
           "source_fragment_hash": "sha256:7bdfc7c71a0079dd9be6c98c8291a9ffa977cca29b6b8838a60878b51c107b92",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_MISSING_REQUIRED_CLAIM"
         },
         {
@@ -120,7 +120,7 @@
           "source_fragment_hash": "sha256:6eb7afd03f82e66ffa5dd05154f3d0228d33c328943720a06108d3a9cac74d8e",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_MISSING_REQUIRED_CLAIM"
         },
         {
@@ -131,7 +131,7 @@
           "source_fragment_hash": "sha256:04573792998fc65838c8c6fc9aef4666f58911e5cff321bac00e0aec0b668902",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_MISSING_REQUIRED_CLAIM"
         },
         {
@@ -142,7 +142,7 @@
           "source_fragment_hash": "sha256:3b33b4c628f84218b3f3e8dd580a836a3c24100c33180a7d894dad1042631694",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_MISSING_REQUIRED_CLAIM"
         },
         {
@@ -153,7 +153,7 @@
           "source_fragment_hash": "sha256:3e51ea5e7d687be0295340ff1a9dd984de20e63a61df2a585950bd783b2ec310",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_MISSING_REQUIRED_CLAIM"
         },
         {
@@ -164,7 +164,7 @@
           "source_fragment_hash": "sha256:f3da034768ff8233af700a8b83e1313bbca770d99cc6c9dafd17ea9f8d647016",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_MISSING_REQUIRED_CLAIM"
         },
         {
@@ -175,7 +175,7 @@
           "source_fragment_hash": "sha256:368037b5dd9d9d45debe0a28810244010f647c080e2a87cef3976872e8b70110",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-ENV-009",
@@ -185,7 +185,7 @@
           "source_fragment_hash": "sha256:3c1fb8b3d1405472cdc66d347203e9949eb7706e07a0d903dac2cfb45b5d6bf8",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-ENV-010",
@@ -195,7 +195,7 @@
           "source_fragment_hash": "sha256:82aadd69066785dd8f44acf578fc2686a1eb5359e96065c46d848ed587871ba7",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-ENV-011",
@@ -205,7 +205,7 @@
           "source_fragment_hash": "sha256:93901a0cd62d30b95f49a9d0eb0d6d3d78f49abc35917291f9e42fa29014fa2d",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-ENV-012",
@@ -215,7 +215,7 @@
           "source_fragment_hash": "sha256:6c21b884daef697f596d1265e5f0999ebf30c663d83827b4f67e7669c4910f00",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-ENV-013",
@@ -225,7 +225,7 @@
           "source_fragment_hash": "sha256:09c416e1f615c62bb03424221e6e49fdb76bff6dcd054246b39be359b1bbc0dc",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-ENV-014",
@@ -235,7 +235,7 @@
           "source_fragment_hash": "sha256:6eaa35ce74a62fb8287bc7bac0555baadf18e1c1539561f8e65410c88376b37d",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-ENV-015",
@@ -245,7 +245,7 @@
           "source_fragment_hash": "sha256:357a034ff5acf71dcf7e5e8fe4f9fdaf855c6bf05daa76a6e38b3e4ed2581b3a",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-ENV-016",
@@ -255,7 +255,7 @@
           "source_fragment_hash": "sha256:0b6a7094c1677c40ed1ba6e0062d68e7292dcd6676cc994fbc78f6ff1b667acd",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_MISSING_REQUIRED_CLAIM"
         },
         {
@@ -266,7 +266,7 @@
           "source_fragment_hash": "sha256:f7fadd5e4ff154c09df1e7c997f3803c05e6cef1636627d589ec4004c8a9f359",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -277,7 +277,7 @@
           "source_fragment_hash": "sha256:7d3200d8cbdda3ad2ae9ead49df440e01aee4693ba47544472aad9b246887ccb",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-ENV-019",
@@ -287,7 +287,7 @@
           "source_fragment_hash": "sha256:847a8b8d08050a0821bac204dc0bbf29a2231edce770275418c00b91a99a2983",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-ENV-020",
@@ -297,7 +297,7 @@
           "source_fragment_hash": "sha256:b00cc865588cf7afea2762339afffbe7f4d1c2b3e6c6d4111e36e236a86d7c82",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -308,7 +308,7 @@
           "source_fragment_hash": "sha256:b9b373c3855d77993558e4f640698b8787d0e60280fadd1dde24a15960d15489",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-ENV-022",
@@ -318,7 +318,7 @@
           "source_fragment_hash": "sha256:ffc021c0e538456d445d8e0fd7907844f984bd3b2412383fdeb4571b818c2ce2",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-ENV-023",
@@ -328,7 +328,7 @@
           "source_fragment_hash": "sha256:8f93a5c91e507880fcc45133dfa7e96bff9c4f8c510111b1f8c3c6874093fb08",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-ENV-024",
@@ -338,7 +338,7 @@
           "source_fragment_hash": "sha256:63efd3cc5bed5ce343e37a669cc8180be7fe1c50120e344dd4530ade9e75cfb2",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-ENV-025",
@@ -348,7 +348,7 @@
           "source_fragment_hash": "sha256:7af6f0226cae75167152cdf21cde68c2404c4426144560742442a95657425fa8",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -359,7 +359,7 @@
           "source_fragment_hash": "sha256:d5411eee9d574e04dee5f6e9aedb0b0180b61b166072ae80872f18da4e4a365b",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -370,7 +370,7 @@
           "source_fragment_hash": "sha256:86b8b2cc2bdf87a2a388173218f0d12c91b64d6798610263e0cdcf6af59f226e",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_FORMAT"
         }
       ]
@@ -388,7 +388,7 @@
           "source_fragment_hash": "sha256:d5fcf9d57516607b494f8bd3c95ce1ddfe19e3d6e0b8d250ccc863843945c30c",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -399,7 +399,7 @@
           "source_fragment_hash": "sha256:df1dc0586b45fe1fe15460c398be50de688f5e41581c36d568d49dd69e0c48e4",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_PILLARS_NOT_SORTED"
         }
       ]
@@ -417,7 +417,7 @@
           "source_fragment_hash": "sha256:0c9326365380c0f36b9dbfb09cdc93fee3b912350e093ca74646b8e9297c6d01",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_OCCURRED_AT_ON_CHALLENGE"
         },
         {
@@ -428,7 +428,7 @@
           "source_fragment_hash": "sha256:5932bba9c1814ecb065c9d21064f3cb22737da09cc45c0ef7e878f632a4ed11e",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-KIND-003",
@@ -438,7 +438,7 @@
           "source_fragment_hash": "sha256:3419f8b63d75f9019a180b672532ecc9c75f5cbf783c2dda671bcad4428a727d",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         }
       ]
     },
@@ -455,7 +455,7 @@
           "source_fragment_hash": "sha256:76c4e2721d93d12ee6f41526c906ec4b87f0288ded040b6135890fe9057a8d47",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -466,7 +466,7 @@
           "source_fragment_hash": "sha256:791b7ed1eb8a412789e76442c9f37863918e9e151b0eff64644a282e4cd9917c",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -477,7 +477,7 @@
           "source_fragment_hash": "sha256:527c9881eabc05d1d7e6260f1a1b8664ebe0d6d40fd4088eebf1dff57daf3b3c",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -488,7 +488,7 @@
           "source_fragment_hash": "sha256:bf6b1041585078132fc5c48276049653c2b301bd459438fb8e7a7feab4d1e78b",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -499,7 +499,7 @@
           "source_fragment_hash": "sha256:397207842eeab8e97d7cf1b12b08bb5aecad68f329df64948541b1ad6cb37375",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -510,7 +510,7 @@
           "source_fragment_hash": "sha256:e40d853063da5b3e4419a41096ee14abe7c0914d68adb9d7d5e6188a04ae7a52",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -521,7 +521,7 @@
           "source_fragment_hash": "sha256:f509acdb0fc7873553b33fc2146ef92ef1e68947699affd6d429f552b515c822",
           "enforcement_class": "warning_only",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "warning_code": "type_casing"
         },
         {
@@ -532,7 +532,7 @@
           "source_fragment_hash": "sha256:82f3f63095402c90f7253a7b44800a15443cd8b746fcf0b46d54111a5489e0ed",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         }
       ]
     },
@@ -549,7 +549,7 @@
           "source_fragment_hash": "sha256:8c52f393b3c95e4454171c4e23e5be62de76cd7bd5bf31d8ec15f37c78d32b3f",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -560,7 +560,7 @@
           "source_fragment_hash": "sha256:e162bdea04ccd79484ed4fb48f2165473212dce60525430aa4b68bbd260f50f0",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -571,7 +571,7 @@
           "source_fragment_hash": "sha256:86f1129e192559d435a3a5a8370255aa8965646ea999041d5fb9b70727bd6bb3",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_PILLARS_NOT_SORTED"
         },
         {
@@ -582,7 +582,7 @@
           "source_fragment_hash": "sha256:b7c4d9c9ae2146ab351623faced439570bac1f7f98521b9b5579c293f4e120c2",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_PILLARS_NOT_SORTED"
         },
         {
@@ -593,7 +593,7 @@
           "source_fragment_hash": "sha256:a56684bbc8a9ff7a9bfa42261f273539d268b5477f3d6635c7bec6be19959005",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-PILLAR-006",
@@ -603,7 +603,7 @@
           "source_fragment_hash": "sha256:04d1aa09ef34f8a86458ad894f71768f3af04849c95174a90415f13c7eddddbc",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         }
       ]
     },
@@ -620,7 +620,7 @@
           "source_fragment_hash": "sha256:340af1900036f5018284f6a081f4dc3a36e211d166a762191023180ee44b22d7",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_ISS_NOT_CANONICAL"
         },
         {
@@ -631,7 +631,7 @@
           "source_fragment_hash": "sha256:1c9b58031d3b52cce215f86f64bec955fd14c32c7e5d74b05220b431192b2542",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_ISS_NOT_CANONICAL"
         },
         {
@@ -642,7 +642,7 @@
           "source_fragment_hash": "sha256:3fae3e5b2c05757490af983cbe35e0f6160b7f75b74ee1500f3cf2be0b79d341",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_ISS_NOT_CANONICAL"
         },
         {
@@ -653,7 +653,7 @@
           "source_fragment_hash": "sha256:c25ef0d3c0299bf0f76e958e401ed2d599885b7d9d09de11537da46b8235361d",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_ISS_NOT_CANONICAL"
         },
         {
@@ -664,7 +664,7 @@
           "source_fragment_hash": "sha256:58fedf785aee680dd1324e3a9db760e0aa065cdc231520306e2911dfa2aeee63",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_ISS_NOT_CANONICAL"
         },
         {
@@ -675,7 +675,7 @@
           "source_fragment_hash": "sha256:51c1ff570c935c7f8caaf500bc17d030d7ad7be72f353afe7f210b55b352ee4e",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_ISS_NOT_CANONICAL"
         },
         {
@@ -686,7 +686,7 @@
           "source_fragment_hash": "sha256:ca4f7e9f5736e15df7917a6edb6966b1d8146d70375f77e40046330a81fb7371",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_ISS_NOT_CANONICAL"
         },
         {
@@ -697,7 +697,7 @@
           "source_fragment_hash": "sha256:3436a530fe006ecff1bf43c79a68c1e040d107240271776d47662981b1bfe93c",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         }
       ]
     },
@@ -714,7 +714,7 @@
           "source_fragment_hash": "sha256:df73c9e7fca543026e966859413423de0442bd96c8ed261b15f43bd5ae021b42",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_FORMAT"
         }
       ]
@@ -732,7 +732,7 @@
           "source_fragment_hash": "sha256:02add0106196163c312ea724c73b8a398b70e16c846a31998383155df9ebfc8e",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -743,7 +743,7 @@
           "source_fragment_hash": "sha256:b01833bfb4f89976769b4795b7f3c70ceda6ecbeef7f97a1b6bec82dc3567574",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_JWS_MISSING_KID"
         },
         {
@@ -754,7 +754,7 @@
           "source_fragment_hash": "sha256:e82c8ed352530ef59384ee45ddff7bb287ce4ad2fb9665312e36e8259db5adf3",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_JWS_EMBEDDED_KEY"
         },
         {
@@ -765,7 +765,7 @@
           "source_fragment_hash": "sha256:0f2c91b9be324183d7aafcf21b012b2f08f2657b9b74e63ab0e2825bd2f181ec",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_JWS_CRIT_REJECTED"
         },
         {
@@ -776,7 +776,7 @@
           "source_fragment_hash": "sha256:624cf60abbefea8de74cf653a1ef02edf889c0c038140d8ff8847143230d2b10",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_JWS_B64_REJECTED"
         },
         {
@@ -787,7 +787,7 @@
           "source_fragment_hash": "sha256:0f0bf8574d920ff36ed3109b49c75595078687eccdca3543b5ba3683bee24f6c",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_JWS_ZIP_REJECTED"
         },
         {
@@ -798,7 +798,7 @@
           "source_fragment_hash": "sha256:23e75820922e5b31ecfb9de61623529017fb72e27752185e52a0a80ab277f28d",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_JWS_MISSING_KID"
         },
         {
@@ -809,7 +809,7 @@
           "source_fragment_hash": "sha256:0a2329aa89c09f8af6403f20ea63645a1f1d5de6a1f708f8540bcc1c54dcf42c",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_JWS_MISSING_KID"
         },
         {
@@ -820,7 +820,7 @@
           "source_fragment_hash": "sha256:558f335146dd4be605f9581b69c18e275ea5812034503e4da4d59d8435180527",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_FORMAT"
         }
       ]
@@ -838,7 +838,7 @@
           "source_fragment_hash": "sha256:8f97e7abf39967076fc9e9dc85f2b59d85db134c90dea3a8e36f32a8864716ea",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -849,7 +849,7 @@
           "source_fragment_hash": "sha256:861ad1d8e8729d7ff1e5840f90440935e51724249bd86643763a50fc0f44700d",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -860,7 +860,7 @@
           "source_fragment_hash": "sha256:4e5d22e97c5488174832969f3fd8ea56357488f0028ad7c99699ddac2739bde4",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         }
       ]
     },
@@ -877,7 +877,7 @@
           "source_fragment_hash": "sha256:6059e4a23465efe86be0170f488cd7bbb6b973fa1a3e56ba147609d1ce4023bf",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_EXTENSION_KEY"
         },
         {
@@ -888,7 +888,7 @@
           "source_fragment_hash": "sha256:f6d1ef132993d981e99022245e0d295b21b18c4e9513521abd2a6740c42d9a87",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_EXTENSION_KEY"
         },
         {
@@ -899,7 +899,7 @@
           "source_fragment_hash": "sha256:7b1caa3cff16e013a5b9ede5e158d7b623430b36ccafdbe415446822164682d6",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_EXTENSION_KEY"
         },
         {
@@ -910,7 +910,7 @@
           "source_fragment_hash": "sha256:e0d5a69e348a4b316aea039d986d7bd08e7605a4b0f80b2370f905e9c49c2a9e",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_EXTENSION_KEY"
         },
         {
@@ -921,7 +921,7 @@
           "source_fragment_hash": "sha256:37dda7eeb76fd63c660ec12322002e352f8f422f633ce6ea98d4e88baa9ce698",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_EXTENSION_KEY"
         },
         {
@@ -932,7 +932,7 @@
           "source_fragment_hash": "sha256:3b508ee815139f34dca10d8cd2d4f64a48bbd546654d56267f228322bb79cfa6",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_EXTENSION_FORMAT"
         },
         {
@@ -943,7 +943,7 @@
           "source_fragment_hash": "sha256:9aa4a38a7a2b5426e8760e107f2e063f719921d57b07e012122eca76f1827d41",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_EXTENSION_FORMAT"
         },
         {
@@ -954,7 +954,7 @@
           "source_fragment_hash": "sha256:2ef4df7bacdd47eb333023b0b03802107195d6b1aa270e88047e224e7325786b",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_EXTENSION_FORMAT"
         },
         {
@@ -965,7 +965,7 @@
           "source_fragment_hash": "sha256:60d7724ef11256b4581a89df925ebf7053dd181bd58d69e63af99c44c702a8d1",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_EXTENSION_FORMAT"
         },
         {
@@ -976,7 +976,7 @@
           "source_fragment_hash": "sha256:3bfc0a15f74f0a378f2e93041895f67ebad51cd15f57265bcf90821b88c2f3c9",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-EXT-011",
@@ -986,7 +986,7 @@
           "source_fragment_hash": "sha256:973a53405252385d13f9245cbebaccc8d01c99d007d7fcb09038a7cd07a81b9c",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_EXTENSION_FORMAT"
         },
         {
@@ -997,7 +997,7 @@
           "source_fragment_hash": "sha256:c7ba9eff8c89184e97601edd690d45c431a43d584834d3c8b27e45f74fb6b840",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_EXTENSION_FORMAT"
         },
         {
@@ -1008,7 +1008,7 @@
           "source_fragment_hash": "sha256:bef10f106f2bac40c8141b22dda5bb136abd20498637ce2dd068ddc8ce503f94",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_EXTENSION_FORMAT"
         },
         {
@@ -1019,7 +1019,7 @@
           "source_fragment_hash": "sha256:4fe34442550458f59fada0230ed5e6db557d1addbe027a4415ed530b506a722f",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_EXTENSION_FORMAT"
         },
         {
@@ -1030,7 +1030,7 @@
           "source_fragment_hash": "sha256:b3c1e979b846dfcd3c6a31537274ef7a007917397abe3c126eb799819014563f",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_EXTENSION_FORMAT"
         },
         {
@@ -1041,7 +1041,7 @@
           "source_fragment_hash": "sha256:069778ce9d7309fcd0c5bc56292cffa09146e9c1958084db5eea737e6c7fe1fc",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -1052,7 +1052,7 @@
           "source_fragment_hash": "sha256:7218b5a436c7bbde6657707d94d0ce89c320fd83fda5e243418138f331ffeb78",
           "enforcement_class": "warning_only",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "warning_code": "unknown_extension_preserved"
         },
         {
@@ -1063,7 +1063,7 @@
           "source_fragment_hash": "sha256:7df9acd0d60c081513e8caa9c952e64e310407fca9496a4f840fa6571fb281a5",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -1074,7 +1074,7 @@
           "source_fragment_hash": "sha256:09cea66f777b829db5404215c7020f251a2e18ac3791e0265969860d8ec6295a",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_EXTENSION_FORMAT"
         },
         {
@@ -1085,7 +1085,7 @@
           "source_fragment_hash": "sha256:0e8149e310a1aec19d7ee48c683afce8c76860d844f6a483eefa096733990a0e",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_EXTENSION_FORMAT"
         },
         {
@@ -1096,7 +1096,7 @@
           "source_fragment_hash": "sha256:9ac85070d70f8d9becb39c1314ac94009de20c705d08df722bb8cc94b30e1033",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-EXT-022",
@@ -1106,7 +1106,7 @@
           "source_fragment_hash": "sha256:8179de2cbe6b1146a51c7fe8ef40b948b1500d81b8ca3dcbb35b34020e69b973",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-EXT-024",
@@ -1116,7 +1116,7 @@
           "source_fragment_hash": "sha256:31c6461e793edbc660beaa25967694a0d8dc7888496da38352c0e99042006b0f",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_EXTENSION_FORMAT"
         },
         {
@@ -1127,7 +1127,7 @@
           "source_fragment_hash": "sha256:3bb849ef447715eb5110fa541847aa2dd380243e6293100a5a2a25fcf34396bb",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_EXTENSION_FORMAT"
         },
         {
@@ -1138,7 +1138,7 @@
           "source_fragment_hash": "sha256:66d47d95bf463063ff7eaf1365426ee0758cb94a4e5993f646664a31b926a02b",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-EXT-033",
@@ -1148,7 +1148,7 @@
           "source_fragment_hash": "sha256:3cbf29cbc11839404cab2d998b3048e60576fa01f67912c68cf25ad70ab246be",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_EXTENSION_FORMAT"
         },
         {
@@ -1159,7 +1159,7 @@
           "source_fragment_hash": "sha256:e6d3ca15130c834f7fe34fa81a01914e4f8625d7cb9c7fd753edb6f3c1ab6de8",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_EXTENSION_FORMAT"
         },
         {
@@ -1170,7 +1170,7 @@
           "source_fragment_hash": "sha256:5d9df644e04721e6d15151ecc58ae9382985fbde9a80657662fd1026565c7b27",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-EXT-036",
@@ -1180,7 +1180,7 @@
           "source_fragment_hash": "sha256:85075e07e7bab318149b81ad9393e984054dc15006cf1f8457f2b6da3f911648",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-EXT-037",
@@ -1190,7 +1190,7 @@
           "source_fragment_hash": "sha256:bbb4ea179df8a616d537805b0f5dab41eb5e952484a4210a6695112e8a5daedf",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_EXTENSION_FORMAT"
         },
         {
@@ -1201,7 +1201,7 @@
           "source_fragment_hash": "sha256:81e8c421221f1011ccf56f564f9d333314fa94705325d4ea18d094f1de2166e8",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_EXTENSION_FORMAT"
         },
         {
@@ -1212,7 +1212,7 @@
           "source_fragment_hash": "sha256:d4b463389daa264e05b666424eccc181b855a239564d4dd40f6d7c79bf8e945e",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-EXT-040",
@@ -1222,7 +1222,7 @@
           "source_fragment_hash": "sha256:a5bb4c064c702ae509f68a3732389d4cd4298962cb4b89978366ffa2f4d53106",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-EXT-041",
@@ -1232,7 +1232,7 @@
           "source_fragment_hash": "sha256:40afb5bd14bfeeb154224a5d68bc85904875d9549f5b9355363301e47a7a73a1",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-EXT-042",
@@ -1242,7 +1242,7 @@
           "source_fragment_hash": "sha256:ab7c36421d23ee44cb93c1286466a8471d54678307175ff1dc532c7b2bbd917f",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-EXT-043",
@@ -1252,7 +1252,7 @@
           "source_fragment_hash": "sha256:84a1e8f85d718faae95fff55d60b823fe507b09e2e9812699e5cf9ef51718997",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_EXTENSION_FORMAT"
         },
         {
@@ -1263,7 +1263,7 @@
           "source_fragment_hash": "sha256:9ef31d79e0a23985bf608a81be4b609ffcb6aa8a53b48ace54e19a7b6ad6612d",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_EXTENSION_FORMAT"
         },
         {
@@ -1274,7 +1274,7 @@
           "source_fragment_hash": "sha256:493767e96d33aca475e6d6745e30087f76a774dbd84c07df8d5919a5259137ce",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-EXT-046",
@@ -1284,7 +1284,7 @@
           "source_fragment_hash": "sha256:7e24cb7558329bf4fddb184bfc7c6c4b80a92759aa19f1e799a7ca16ee99aa92",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-EXT-047",
@@ -1294,7 +1294,7 @@
           "source_fragment_hash": "sha256:8e2d1ecc65139b8cb02d4824511714220bff8fde072a3848d163201249e704e6",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-EXT-048",
@@ -1304,7 +1304,7 @@
           "source_fragment_hash": "sha256:122f818833eeb49b4977c5f3e76e68f9a03a079e16404b56f180dadbf1a350c9",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_EXTENSION_FORMAT"
         },
         {
@@ -1315,7 +1315,7 @@
           "source_fragment_hash": "sha256:311e9b372eb9f8fe50cf91784fe1e345870a95771918ad6895e2d9303cca5f3b",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_EXTENSION_FORMAT"
         },
         {
@@ -1326,7 +1326,7 @@
           "source_fragment_hash": "sha256:7130696c116901b704490060724bb144fb692416f7f16c371ec7dab8cd0d67b9",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-EXT-051",
@@ -1336,7 +1336,7 @@
           "source_fragment_hash": "sha256:663e68e061ff0ee03650b86702694c298439ee9fc2e7654ef8acae1c0943490b",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-EXT-052",
@@ -1346,7 +1346,7 @@
           "source_fragment_hash": "sha256:1aecd99b250f6194ef512c5a699e31ae26e2d5a454ee9918e72d4340e847e288",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-EXT-053",
@@ -1356,7 +1356,7 @@
           "source_fragment_hash": "sha256:32aec8d80ca7ce4426709dd18089bfb2d2df6cac0a883de2f932be4cc8c08352",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_EXTENSION_FORMAT"
         },
         {
@@ -1367,7 +1367,7 @@
           "source_fragment_hash": "sha256:369e48a0cbe003e4290b8817948023d341744cc3445ef5e0b5f8ab8eed06f68c",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-EXT-055",
@@ -1377,7 +1377,7 @@
           "source_fragment_hash": "sha256:97a506548e347b92f202d916486f02f081581f73b7229f22d8729ac163cd6018",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_EXTENSION_FORMAT"
         },
         {
@@ -1388,7 +1388,7 @@
           "source_fragment_hash": "sha256:f897ef7cc16f279befa9d50e2ab61608cae47987a83f1d58ad397c26b1322c08",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-EXT-057",
@@ -1398,7 +1398,7 @@
           "source_fragment_hash": "sha256:9eb9c06f5aa56fb2ec8867e4947fe4956c996a700abd68ff197b5e8636ce50f6",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_EXTENSION_FORMAT"
         },
         {
@@ -1409,7 +1409,7 @@
           "source_fragment_hash": "sha256:f9df2fb27b768f7990151d341035a40494d3f42f9a7ccfaaf62d8955d5a06636",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-EXT-059",
@@ -1419,7 +1419,7 @@
           "source_fragment_hash": "sha256:47003ad9870adb66488f4a3f28327ae249487ff2b91493cc970fd5999a484757",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_EXTENSION_FORMAT"
         },
         {
@@ -1430,7 +1430,7 @@
           "source_fragment_hash": "sha256:f2ed1b90e528aceb625c676ba9908b997b7f433ed921d9b580a8e5b859c6c2c9",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-EXT-061",
@@ -1440,7 +1440,7 @@
           "source_fragment_hash": "sha256:d11d9ae832701052b15c6ef52a73b3d48589b26cdf80209c83e16b24ee6d54dc",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_EXTENSION_FORMAT"
         },
         {
@@ -1451,7 +1451,7 @@
           "source_fragment_hash": "sha256:e7bc1dc712ff834e1bc20f285e8a203baff09363440d716573c15447a71c019d",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-EXT-063",
@@ -1461,7 +1461,7 @@
           "source_fragment_hash": "sha256:4d53de5af04b137171e9cedb767934d1cf8bd98206c1951bbd9f225e31b2b727",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-EXT-064",
@@ -1471,7 +1471,7 @@
           "source_fragment_hash": "sha256:371bb62d235b518b0148847fc7b77a04af8a5c5853ee92a7bc36da63e6afd86a",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_EXTENSION_FORMAT"
         },
         {
@@ -1482,7 +1482,7 @@
           "source_fragment_hash": "sha256:4c0eaebcdbfa11fb123d581db002ef228de34c92b047ef7602c464097fa328c4",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_EXTENSION_FORMAT"
         },
         {
@@ -1493,7 +1493,7 @@
           "source_fragment_hash": "sha256:82831a0e370e06ea44d5b13c3d87bc9c8a98ed0cbdaf3900a091e006bc70be5e",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-EXT-071",
@@ -1503,7 +1503,7 @@
           "source_fragment_hash": "sha256:dbcd6e3c158bfd4782f83f90d01a642a15c9d5f8c4c92d0d1fb79788d5242f7b",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_EXTENSION_FORMAT"
         },
         {
@@ -1514,7 +1514,7 @@
           "source_fragment_hash": "sha256:003a2a08d3a25910733772e67d31234b1fcf65440bbb1077be8c5f79c8adac63",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_EXTENSION_FORMAT",
           "warning_code": "extension_group_missing"
         },
@@ -1526,7 +1526,7 @@
           "source_fragment_hash": "sha256:003d4dde216ce42def198af46128132ef770cd831acf18b756055e87f3b66350",
           "enforcement_class": "warning_only",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "warning_code": "extension_group_missing"
         },
         {
@@ -1537,7 +1537,7 @@
           "source_fragment_hash": "sha256:871e93601acd89d873cc654906cf656628e4baf02fd2ac62e69a49c31e8a8190",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_EXTENSION_FORMAT",
           "warning_code": "extension_group_mismatch"
         },
@@ -1549,7 +1549,7 @@
           "source_fragment_hash": "sha256:fe8dd908e5178fb09f2e215c491f1278eae9dbfa70a2e5dc2ae7017679b5eded",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         }
       ]
     },
@@ -1566,7 +1566,7 @@
           "source_fragment_hash": "sha256:b4218e7ac57b5bf9763b94b4cbc7edcd1e360cf1162d9c083e6c3d29d9ad70d4",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_EXTENSION_FORMAT"
         },
         {
@@ -1577,7 +1577,7 @@
           "source_fragment_hash": "sha256:336fe7122380cfb8ee818e73689d3a9f676b9a135dc07246969ffcee570861f0",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_EXTENSION_FORMAT"
         },
         {
@@ -1588,7 +1588,7 @@
           "source_fragment_hash": "sha256:0fdb18e80464e208d1e2bd5151107bb006e4d64a7fbda704d8e647dd5f275768",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-CHAL-004",
@@ -1598,7 +1598,7 @@
           "source_fragment_hash": "sha256:3d2883122fa49b9184bb9d9556f984fd3cfbd6edde0bd91ed606e35c334d1f69",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-CHAL-005",
@@ -1608,7 +1608,7 @@
           "source_fragment_hash": "sha256:c91561a806f53774e3288522c42a21211f2af4e043dff9d66bccaa0dc7cdbe4a",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-CHAL-006",
@@ -1618,7 +1618,7 @@
           "source_fragment_hash": "sha256:8ec538f2f5c8884e2a91e5cfd0276438d1a7b5832a8aa99cb8e749a13e68efab",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-CHAL-007",
@@ -1628,7 +1628,7 @@
           "source_fragment_hash": "sha256:4cd10b5a9f3e5524e6f5bec0b44bbd5df2d03415afc905ba00fa78ed3147800b",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         }
       ]
     },
@@ -1645,7 +1645,7 @@
           "source_fragment_hash": "sha256:aeae61c3e1f194cf11323fafd2810f55704efde214f3d7c2895911d4851100ae",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -1656,7 +1656,7 @@
           "source_fragment_hash": "sha256:4ce4086f3c8535c97df31bdb2619e257c8349eeab809b32cd9c6ffee8226c01a",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -1667,7 +1667,7 @@
           "source_fragment_hash": "sha256:da9dc2e53c59e715f0c547855d47f703c8a27d41d9de01b2bfa62a13eb341792",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-WARN-004",
@@ -1677,7 +1677,7 @@
           "source_fragment_hash": "sha256:0abcd88cb76eec7c1920c54a8b350da9c165499ba7d77dea426811d852460e5a",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-WARN-005",
@@ -1687,7 +1687,7 @@
           "source_fragment_hash": "sha256:a20c727a06711424cf334d4735243ff0646b3c9da8613fe76369144eb60ece23",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-WARN-006",
@@ -1697,7 +1697,7 @@
           "source_fragment_hash": "sha256:533c1b7fd85aeed77615120ec8ab044c2d2f742d0cfdf302e3194045ba3b2cf9",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-WARN-007",
@@ -1707,7 +1707,7 @@
           "source_fragment_hash": "sha256:09e1408513af162bf1c74da14026aa9195460703a39d6b2889080f705a248215",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -1718,7 +1718,7 @@
           "source_fragment_hash": "sha256:049af55e0fc391c97d96e42c7e44fc9675fde9145a696fd279e0ec74b9f3c9ac",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-WARN-009",
@@ -1728,7 +1728,7 @@
           "source_fragment_hash": "sha256:168e30636fc4164b370eae96e9570de0f11cf64457f5cd35ed4a2107af978cc8",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         }
       ]
     },
@@ -1745,7 +1745,7 @@
           "source_fragment_hash": "sha256:21ef041cd2efe1ca1429cddbf3043f1c4b302b05586285af26b5de63d72ae21f",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_WIRE_VERSION_MISMATCH"
         },
         {
@@ -1756,7 +1756,7 @@
           "source_fragment_hash": "sha256:b45a1c576245f248194b3ce73626b45523725356900db2a5c87e03a5f63f54f0",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_WIRE_VERSION_MISMATCH"
         },
         {
@@ -1767,7 +1767,7 @@
           "source_fragment_hash": "sha256:7131653b896b21b5c8805bec85fc1a2cdc940de336c16a31dfe98ea4b98f34cd",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_WIRE_VERSION_MISMATCH"
         }
       ]
@@ -1785,7 +1785,7 @@
           "source_fragment_hash": "sha256:5106f5d60d9724a46f15f75d921552e6e0f2fe0358b4cbda541d107e1b90df6d",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -1796,7 +1796,7 @@
           "source_fragment_hash": "sha256:a73c3888ee9f366fdf3d620e23336b4e804bf6755a223267343b0d6e1beef229",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -1807,7 +1807,7 @@
           "source_fragment_hash": "sha256:2ce27e3de73b934a758c88791dacb2726042377fa19dfcb253f0b3fb98c0964d",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         }
       ]
     },
@@ -1824,7 +1824,7 @@
           "source_fragment_hash": "sha256:66b3df3e98ef9e64b3479b15dbe8ba55de1e91d01a931cee8b0c5ee1ac27b5fa",
           "enforcement_class": "issuance",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-IDENT-002",
@@ -1834,7 +1834,7 @@
           "source_fragment_hash": "sha256:0d694b4d700e7214b23c88b889d9f0cb47badf2cde00470cc04515ac54a9f69f",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -1845,7 +1845,7 @@
           "source_fragment_hash": "sha256:79a9b6f7133f4ed3a663776297d1072b174115329d47ebffcde917ea063745a6",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -1856,7 +1856,7 @@
           "source_fragment_hash": "sha256:c459e15f3358ed1350da5e97be4206679a06689aed5dbd988deaec86fb233528",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_WIRE_VERSION_MISMATCH"
         },
         {
@@ -1867,7 +1867,7 @@
           "source_fragment_hash": "sha256:ce03eb555707e7b685b512790116727b730bcbba9ac8220308cfeb701ff5ab20",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-IDENT-006",
@@ -1877,7 +1877,7 @@
           "source_fragment_hash": "sha256:444f26b04d129b0690a5e2fc9674c470e655e45e0dae0497d89aa7728cd9e66f",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-IDENT-007",
@@ -1887,7 +1887,7 @@
           "source_fragment_hash": "sha256:b96a8e527c40171cb1d81ee42cce33e854ae56ba37aa1c66db9bf0a90c15b497",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         }
       ]
     },
@@ -1904,7 +1904,7 @@
           "source_fragment_hash": "sha256:4128f7475c53d98a4e70cac0671afc8a247bb7d0ec1b3798f66f60c3c661a9b8",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -1915,7 +1915,7 @@
           "source_fragment_hash": "sha256:1d89cea8c8aa48ad9023d83847f3f73ea95b63949aaf2d90c2c11afc3da7c74e",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -1926,7 +1926,7 @@
           "source_fragment_hash": "sha256:1e88d48481f5bc56e8231cdf4abc77fb1842aa24a31235c1a741bba223bc8271",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -1937,7 +1937,7 @@
           "source_fragment_hash": "sha256:e91cc74e34001e7eea4cb856b9ff1aa6fa8973759561339aef88b0d983d76a30",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -1948,7 +1948,7 @@
           "source_fragment_hash": "sha256:bb3957aeaab5c3d3acb727ca1df11272d2e8c190786fe3b6d57c683bad55173c",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -1959,7 +1959,7 @@
           "source_fragment_hash": "sha256:a9a566b439e97cd88451d44f3c2cf0ae54e377b595daf3b548218c0c398137ab",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_INVALID_FORMAT"
         },
         {
@@ -1970,7 +1970,7 @@
           "source_fragment_hash": "sha256:154b58e4f819d531f2e3ea87fb4a29e9c518407f07625328d820374d7e20b563",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_CONSTRAINT_VIOLATION"
         },
         {
@@ -1981,7 +1981,7 @@
           "source_fragment_hash": "sha256:07dec89d4303bb400bb8d20b5185c70755e217e255dd530fb107cdda1408cfd1",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_NOT_YET_VALID"
         },
         {
@@ -1992,7 +1992,7 @@
           "source_fragment_hash": "sha256:5494a3e5cde868771a2f1061c7394739dff025ab45c9b5ac6a42f49067529cad",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_MISSING_REQUIRED_CLAIM"
         },
         {
@@ -2003,7 +2003,7 @@
           "source_fragment_hash": "sha256:ae1e18480bea50183b3c9407bb7ba5d2264fc03a2bbbb4ba6d91a2c536953a97",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-VALID-011",
@@ -2013,7 +2013,7 @@
           "source_fragment_hash": "sha256:9193f11f66a913d2032a76e80cdfd063863a8a803bde92c629d18b19d9dd91d1",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-VALID-012",
@@ -2023,7 +2023,7 @@
           "source_fragment_hash": "sha256:0b01c93a0a54fcdcb2d5f1d293a568b7f40233d53c6fad7dfb51ed57552fd7e5",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         }
       ]
     },
@@ -2040,7 +2040,7 @@
           "source_fragment_hash": "sha256:460780907183f76a99ef33f4a22f6c3e81c94dbb02afb3cd91cbf9202bba9ba2",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_MISSING_REQUIRED_CLAIM"
         },
         {
@@ -2051,7 +2051,7 @@
           "source_fragment_hash": "sha256:39a87e0be4d2b781f4888a8b30d69ec44a56dda023f22ef24599c53c63d6eb9b",
           "enforcement_class": "issuance",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-REPLAY-003",
@@ -2061,7 +2061,7 @@
           "source_fragment_hash": "sha256:1203bf2bc4c86cd5b41cd8ee3985f2654464f314fcf697cc889b8d578a495c90",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_MISSING_REQUIRED_CLAIM"
         },
         {
@@ -2072,7 +2072,7 @@
           "source_fragment_hash": "sha256:72a3f6caea40dfa3ede2d547c652e206824ee5172b34fb3e630ab2fec1267663",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-REPLAY-005",
@@ -2082,7 +2082,7 @@
           "source_fragment_hash": "sha256:25f08ecd322bde687e84eae8066045c8a7be4c01d95dda79973bc2007b63a3b1",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-REPLAY-006",
@@ -2092,7 +2092,7 @@
           "source_fragment_hash": "sha256:d9673740aa9379ad1afaafb490dfb31b976b32fb737baad7fd92c3ba41e9865a",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-REPLAY-007",
@@ -2102,7 +2102,7 @@
           "source_fragment_hash": "sha256:0e012acf04d5dfb402653c296f4b8f6b88a3b9add432952abfb10006b85c31ca",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-REPLAY-008",
@@ -2112,7 +2112,7 @@
           "source_fragment_hash": "sha256:0e48a4e3a328cdf6b91bc9cca1f544f447e8091e594c9df2690d8273400e89e3",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-REPLAY-009",
@@ -2122,7 +2122,7 @@
           "source_fragment_hash": "sha256:fa37f432cdec2c3e57e684d9b9fd170e7bad898a2d11fa18b94b5870f6655d72",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-REPLAY-010",
@@ -2132,7 +2132,7 @@
           "source_fragment_hash": "sha256:9f49f49451d5a5b0feb62354f4737c44d041aa1dfa007d1fb86f708b50d41fa9",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-REPLAY-011",
@@ -2142,7 +2142,7 @@
           "source_fragment_hash": "sha256:f4954bc439f94c9203e5eb67291f9e4a55b87ae3e3d924c4d78e311668ff5249",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-REPLAY-012",
@@ -2152,7 +2152,7 @@
           "source_fragment_hash": "sha256:21689600c2bb21482e756b96ebb569b450e355b25156c70847e0a48bd55119be",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0"
+          "last_reviewed_in": "0.15.1"
         },
         {
           "id": "WIRE02-REPLAY-013",
@@ -2162,7 +2162,7 @@
           "source_fragment_hash": "sha256:36cbe5e5b9a462edadfc673c9f3df0ea4a61d4608cf1392bdd7025bebb3f1d57",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
-          "last_reviewed_in": "0.15.0",
+          "last_reviewed_in": "0.15.1",
           "error_code": "E_MISSING_REQUIRED_CLAIM"
         }
       ]

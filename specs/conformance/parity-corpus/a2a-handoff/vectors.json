@@ -1,7 +1,7 @@
 {
   "family": "a2a-handoff",
   "description": "A2A handoff observation parity vectors. Covers the 10 type URIs of org.peacprotocol/a2a-handoff (Agent Card observation + 9 task / human lifecycle events) plus 5 envelope-level vectors that exercise extension-content edge cases (digest-only card_ref violation, decision-vocabulary injection, legacy signature shape, type/event mismatch, opaque-ref grammar violation on task_id). Per the parity-corpus convention established by runtime-governance vector rg-007, all vectors here assert envelope-level canonical agreement (LEFT/RIGHT verifier agreement on the wire envelope) and set expected.accepted=true; the actual semantic rejection of the extension content lives at the Layer 3 validator surface (validateA2AHandoff exported from @peac/schema, exercised by packages/schema/__tests__/extensions/a2a-handoff-shape.test.ts and a2a-handoff-registry.test.ts).",
-  "version": "0.15.0",
+  "version": "0.15.1",
   "generator": "manual; a2a-handoff v0.1 floor",
   "vectors": [
     {
