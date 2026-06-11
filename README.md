@@ -1,10 +1,10 @@
 # PEAC Protocol
 
-**Portable signed records for automated interactions.**
+> Signed action records for AI agents, APIs, and MCP tools.
 
-When logs are not enough, PEAC gives teams records another party can verify outside the system that produced them.
+AI agents are starting to do real work: call APIs, run MCP tools, change data, trigger payments, and provision resources.
 
-PEAC records what APIs, MCP tools, agent workflows, gateways, payment-adjacent flows, provisioning systems, runtimes, and audit systems report. It does not run those systems or make their decisions.
+PEAC creates a signed record for those actions, so another system can verify what happened later without trusting screenshots, private logs, or "the agent said so."
 
 **Record locally. Verify across boundaries.**
 
