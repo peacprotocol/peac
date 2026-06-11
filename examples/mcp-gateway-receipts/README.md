@@ -56,6 +56,6 @@ Tamper check 1 is the important lesson: a valid signature proves the record was 
 ## Notes
 
 - Demo keys are generated in-process; nothing here is production key management. In production, keys are `kid`-scoped and discovered via the issuer configuration (`/.well-known/peac-issuer.json`).
-- The demo hashes `JSON.stringify` output for brevity. Production profiles should hash a canonical serialization so independently produced JSON verifies identically.
-- Gateway-specific facts travel in an integrator-defined extension group (`com.example/gateway`). Verification preserves unknown extension groups and surfaces an informational `unknown_extension_preserved` warning; nothing fails silently.
+- Digests are taken over a deterministic serialization (the example ships a small recursive key-sorting `stableStringify`) so an independent party recomputes the same bytes. A production profile should pin a canonicalization rule such as RFC 8785 JCS.
+- `org.peacprotocol/access` and `org.peacprotocol/correlation` are registered extension groups. `org.peacprotocol/mcp` and `com.example/gateway` are well-formed but unregistered groups: verification preserves them and surfaces an informational `unknown_extension_preserved` warning; nothing fails silently.
 - See `docs/SOLUTIONS/mcp-gateway-receipts.md` for the pattern write-up, and `examples/mcp-tool-call` for the minimal single-server carrier flow.

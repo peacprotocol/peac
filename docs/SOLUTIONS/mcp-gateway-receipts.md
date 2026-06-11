@@ -76,16 +76,20 @@ pnpm demo:tamper        # digest mismatch + invalid signature, both detected
 pnpm demo:show-record   # decoded record header and payload
 ```
 
+## Extension groups used
+
+- `org.peacprotocol/access` and `org.peacprotocol/correlation` are registered extension groups; verification validates them.
+- `org.peacprotocol/mcp` (server and tool labels) and `com.example/gateway` (digests, policy reference, `tool_definition_ref`) are well-formed but unregistered extension groups. Verification preserves them and surfaces an informational `unknown_extension_preserved` warning; nothing fails silently. Operators who want registered semantics for gateway facts should propose a profile and registry entry.
+
 ## Production notes
 
-- Hash a canonical serialization (not plain `JSON.stringify`) so independently produced JSON verifies identically.
+- Digests are taken over a deterministic serialization so an independent party recomputes the same bytes. The example ships a small `stableStringify` helper (recursive key sort); a production profile should pin a canonicalization rule such as RFC 8785 JCS.
 - Scope keys per gateway (`kid`), publish rotation through issuer discovery (`/.well-known/peac-issuer.json`), and pin a public key for air-gapped verification.
-- The integrator extension group in the example (`com.example/gateway`) is intentionally unregistered: verification preserves it and surfaces an informational `unknown_extension_preserved` warning. Operators who want registered semantics for gateway facts should propose a registry entry and profile.
 - For disputes spanning many calls, export a signed bundle for the window (`peac_create_bundle` on the MCP server, or the CLI bundle tooling) instead of shipping individual records.
 
 ## Related
 
-- `examples/mcp-gateway-receipts` — the runnable example for this pattern.
-- `docs/SOLUTIONS/mcp-tool-call-receipts.md` — the single-server carrier recipe.
-- `docs/SOLUTIONS/verify-gateway-export.md` — verifying gateway-exported payment observations.
-- `docs/specs/INTEROP.md` — the Evidence Carrier Contract and MCP `_meta` keys.
+- `examples/mcp-gateway-receipts`: the runnable example for this pattern.
+- `docs/SOLUTIONS/mcp-tool-call-receipts.md`: the single-server carrier recipe.
+- `docs/SOLUTIONS/verify-gateway-export.md`: verifying gateway-exported payment observations.
+- `docs/specs/INTEROP.md`: the Evidence Carrier Contract and MCP `_meta` keys.

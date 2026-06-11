@@ -14,18 +14,23 @@
  * 3. Content digests: the record binds sha256 digests of the (redacted)
  *    input and result, never the raw payloads. A verifier can detect a
  *    modified result even though the signature still verifies, because the
- *    delivered content no longer matches the bound digest.
+ *    delivered content no longer matches the bound digest. Digests are taken
+ *    over a deterministic serialization (stableStringify) so an independent
+ *    party recomputes the same bytes.
  * 4. Redaction as a recorded fact: the gateway redacts PII before hashing,
  *    and the record states redaction_applied so the verifier knows what the
  *    digest covers.
  *
- * The per-call record uses the registered type URI
- * org.peacprotocol/access-decision (the tool-definition record uses
- * org.peacprotocol/provenance-record) and the registered access and
- * correlation extension groups. Gateway-specific
- * facts (digests, policy reference, tool_definition_ref) travel in an
- * integrator-defined extension group (com.example/gateway); verification
- * surfaces informational warnings for keys outside the registry.
+ * Record types and extension groups used here:
+ * - The per-call record uses the registered type org.peacprotocol/access-decision;
+ *   the tool-definition record uses the registered type org.peacprotocol/provenance-record.
+ * - org.peacprotocol/access and org.peacprotocol/correlation are registered
+ *   extension groups.
+ * - org.peacprotocol/mcp (server/tool labels) and com.example/gateway
+ *   (digests, policy reference, tool_definition_ref) are well-formed but
+ *   unregistered extension groups: verification preserves them and surfaces an
+ *   informational unknown_extension_preserved warning. Operators who want
+ *   registered semantics should propose a profile and registry entry.
  *
  * This example uses local stubs - no network, no external services.
  *
@@ -47,6 +52,28 @@ const KID = 'gateway-key-2026';
 const GATEWAY_EXT = 'com.example/gateway';
 const TRACE_ID = '6e7a364be19c40c0a4f4ba9a7f9622d1';
 const WORKFLOW_ID = 'wf-support-4711';
+
+/**
+ * Deterministic JSON serialization for digest inputs: object keys are sorted
+ * recursively, array order is preserved. Two parties that serialize the same
+ * value this way produce byte-identical input to sha256, so an independent
+ * verifier recomputes the same digest. Production profiles should pin a
+ * canonicalization rule (for example RFC 8785 JCS) rather than rely on this
+ * local helper.
+ */
+function stableStringify(value: unknown): string {
+  if (value === null || typeof value !== 'object') {
+    return JSON.stringify(value) ?? 'null';
+  }
+  if (Array.isArray(value)) {
+    return '[' + value.map((v) => stableStringify(v)).join(',') + ']';
+  }
+  const obj = value as Record<string, unknown>;
+  const entries = Object.keys(obj)
+    .sort()
+    .map((k) => JSON.stringify(k) + ':' + stableStringify(obj[k]));
+  return '{' + entries.join(',') + '}';
+}
 
 /** MCP CallToolResult-shaped response with the top-level _meta carrier. */
 interface McpToolCallResult {
@@ -119,8 +146,7 @@ async function issueToolDefinitionRecord(privateKey: Uint8Array): Promise<{
   receiptRef: string;
   manifestSha256: string;
 }> {
-  const manifestJson = JSON.stringify(TOOL_DEFINITIONS);
-  const manifestSha256 = await sha256Hex(manifestJson);
+  const manifestSha256 = await sha256Hex(stableStringify(TOOL_DEFINITIONS));
   const { jws } = await issue({
     iss: ISSUER_URL,
     kind: 'evidence',
@@ -152,8 +178,7 @@ async function gatewayToolCall(params: {
   privateKey: Uint8Array;
 }): Promise<{ response: McpToolCallResult; resultJson: string }> {
   const policy = POLICY[params.tool];
-  const inputJson = JSON.stringify(params.args);
-  const inputSha256 = await sha256Hex(inputJson);
+  const inputSha256 = await sha256Hex(stableStringify(params.args));
 
   if (policy.decision === 'deny') {
     const { jws } = await issue({
@@ -198,7 +223,7 @@ async function gatewayToolCall(params: {
 
   const raw = readCustomerProfile(String(params.args.customer_id ?? 'cus_0000'));
   const delivered = policy.redact ? redactProfile(raw) : raw;
-  const resultJson = JSON.stringify(delivered);
+  const resultJson = stableStringify(delivered);
   const resultSha256 = await sha256Hex(resultJson);
 
   const { jws } = await issue({
@@ -269,56 +294,100 @@ type GatewayExtension = {
   tool_definition_ref?: string;
 };
 
-async function main(): Promise<void> {
-  const tamperMode = process.argv.includes('--tamper');
-  const showRecord = process.argv.includes('--show-record');
+export interface GatewayDemoResult {
+  ok: boolean;
+  toolDefinitionRef: string;
+  call: {
+    signatureValid: boolean;
+    decision?: string;
+    policyRef?: string;
+    redactionApplied?: string;
+    digestMatches: boolean;
+    defRefMatches: boolean;
+    warnings: string[];
+  };
+  deny: { decision: string; verified: boolean };
+  tamper?: {
+    signatureStillValid: boolean;
+    digestMatchesAfterTamper: boolean;
+    payloadTamperValid: boolean;
+    payloadTamperCode?: string;
+  };
+  piiLeak: boolean;
+}
+
+export interface RunOptions {
+  tamper?: boolean;
+  showRecord?: boolean;
+  quiet?: boolean;
+}
+
+/**
+ * Run the full gateway demo and return a structured result. Prints a stage
+ * report unless quiet. Importing this module does not run anything; only the
+ * guarded main() at the bottom invokes it when the file is run directly.
+ */
+export async function runGatewayDemo(opts: RunOptions = {}): Promise<GatewayDemoResult> {
+  const { tamper = false, showRecord = false, quiet = false } = opts;
+  const log = quiet ? () => undefined : (msg = '') => console.log(msg);
   const { privateKey, publicKey } = await generateKeypair();
 
-  console.log('\n=== PEAC MCP Gateway Receipts Demo ===\n');
+  log('\n=== PEAC MCP Gateway Receipts Demo ===\n');
 
   // 1. The gateway publishes a signed record of its tool definitions.
   const toolDef = await issueToolDefinitionRecord(privateKey);
-  console.log('1. Gateway publishes a signed tool-definition record:');
-  console.log(`   tools: ${TOOL_DEFINITIONS.map((t) => t.name).join(', ')}`);
-  console.log(`   manifest sha256     = ${toolDef.manifestSha256.slice(0, 20)}...`);
-  console.log(`   tool_definition_ref = ${toolDef.receiptRef.slice(0, 27)}...`);
+  log('1. Gateway publishes a signed tool-definition record:');
+  log(`   tools: ${TOOL_DEFINITIONS.map((t) => t.name).join(', ')}`);
+  log(`   manifest sha256     = ${toolDef.manifestSha256.slice(0, 20)}...`);
+  log(`   tool_definition_ref = ${toolDef.receiptRef.slice(0, 27)}...`);
 
   // 2. A gateway-mediated tool call with redaction and digests.
   const args = { customer_id: 'cus_1042' };
-  const { response, resultJson } = await gatewayToolCall({
+  const { response } = await gatewayToolCall({
     tool: 'read_customer_profile',
     args,
     toolDefinitionRef: toolDef.receiptRef,
     privateKey,
   });
-  console.log(`\n2. Tool call via gateway: read_customer_profile(${JSON.stringify(args)})`);
-  console.log('   policy pii.redact.v1: decision = allow, redaction applied (email masked)');
+  log(`\n2. Tool call via gateway: read_customer_profile(${JSON.stringify(args)})`);
+  log('   policy pii.redact.v1: decision = allow, redaction applied (email masked)');
 
   const refKey = 'org.peacprotocol/receipt_ref';
   const jwsKey = 'org.peacprotocol/receipt_jws';
-  console.log('\n3. Record attached via top-level _meta carrier keys:');
-  console.log(`   ${refKey} = ${String(response._meta?.[refKey]).slice(0, 24)}...`);
-  console.log(`   ${jwsKey} = ${String(response._meta?.[jwsKey]).slice(0, 24)}...`);
+  log('\n3. Record attached via top-level _meta carrier keys:');
+  log(`   ${refKey} = ${String(response._meta?.[refKey]).slice(0, 24)}...`);
+  log(`   ${jwsKey} = ${String(response._meta?.[jwsKey]).slice(0, 24)}...`);
+
+  const failed = (): GatewayDemoResult => ({
+    ok: false,
+    toolDefinitionRef: toolDef.receiptRef,
+    call: {
+      signatureValid: false,
+      digestMatches: false,
+      defRefMatches: false,
+      warnings: [],
+    },
+    deny: { decision: 'unverified', verified: false },
+    piiLeak: false,
+  });
 
   // 3. Counterparty: extract, verify offline, and check the content binding.
   const extracted = await extractReceiptFromMetaAsync(response);
   if (!extracted || extracted.receipts.length === 0) {
     console.error(`   Extraction failed: ${extracted?.violations.join('; ') ?? 'no carrier'}`);
-    process.exitCode = 1;
-    return;
+    return failed();
   }
   const carrierJws = extracted.receipts[0].receipt_jws!;
 
   if (showRecord) {
-    console.log('\n   Decoded record:');
-    console.log(JSON.stringify(decodeJws(carrierJws), null, 2));
+    log('\n   Decoded record:');
+    log(JSON.stringify(decodeJws(carrierJws), null, 2));
   }
 
   const verifyResult = await verifyLocal(carrierJws, publicKey, { issuer: ISSUER_URL });
   if (!verifyResult.valid) {
     console.error(`4. Offline verification FAILED: ${verifyResult.code} ${verifyResult.message}`);
-    process.exitCode = 1;
-    return;
+    return failed();
   }
   const ext = (verifyResult.claims.extensions as Record<string, unknown> | undefined)?.[
     GATEWAY_EXT
@@ -327,29 +396,24 @@ async function main(): Promise<void> {
     'org.peacprotocol/access'
   ] as { decision?: string } | undefined;
 
-  const deliveredJson = JSON.stringify(
+  const deliveredJson = stableStringify(
     (response.structuredContent as { result?: unknown } | undefined)?.result
   );
   const deliveredSha256 = await sha256Hex(deliveredJson);
   const digestMatches = deliveredSha256 === ext?.result_sha256;
   const defRefMatches = ext?.tool_definition_ref === toolDef.receiptRef;
+  const warnings = verifyResult.warnings.map((w) => w.code);
 
-  console.log('\n4. Counterparty verification (offline, public key only):');
-  console.log('   carrier consistency OK (0 violations)');
-  console.log('   signature valid = true');
-  console.log(
+  log('\n4. Counterparty verification (offline, public key only):');
+  log('   carrier consistency OK (0 violations)');
+  log('   signature valid = true');
+  log(
     `   decision = ${access?.decision}, policy = ${ext?.policy_ref}, redaction_applied = ${ext?.redaction_applied}`
   );
-  console.log(`   delivered result digest matches bound result_sha256 = ${digestMatches}`);
-  console.log(`   tool_definition_ref matches published manifest record = ${defRefMatches}`);
-  if (verifyResult.warnings.length > 0) {
-    console.log(
-      `   informational warnings: ${verifyResult.warnings.map((w) => w.code).join(', ')}`
-    );
-  }
-  if (!digestMatches || !defRefMatches) {
-    process.exitCode = 1;
-    return;
+  log(`   delivered result digest matches bound result_sha256 = ${digestMatches}`);
+  log(`   tool_definition_ref matches published manifest record = ${defRefMatches}`);
+  if (warnings.length > 0) {
+    log(`   informational warnings: ${warnings.join(', ')}`);
   }
 
   // 4. A denied call is also evidence: the gateway records what it refused.
@@ -365,22 +429,32 @@ async function main(): Promise<void> {
     ? await verifyLocal(deniedJws, publicKey, { issuer: ISSUER_URL })
     : { valid: false as const, code: 'E_NO_CARRIER', message: 'no carrier' };
   const deniedDecision = deniedVerify.valid
-    ? (
+    ? ((
         (deniedVerify.claims.extensions as Record<string, unknown>)['org.peacprotocol/access'] as {
           decision?: string;
         }
-      )?.decision
+      )?.decision ?? 'unverified')
     : 'unverified';
-  console.log('\n5. Denied call is also evidence: deploy_config_change');
-  console.log(
-    `   decision = ${deniedDecision}, signed deny record verified = ${deniedVerify.valid}`
-  );
-  if (!deniedVerify.valid || deniedDecision !== 'deny') {
-    process.exitCode = 1;
-    return;
-  }
+  log('\n5. Denied call is also evidence: deploy_config_change');
+  log(`   decision = ${deniedDecision}, signed deny record verified = ${deniedVerify.valid}`);
 
-  if (tamperMode) {
+  const result: GatewayDemoResult = {
+    ok: true,
+    toolDefinitionRef: toolDef.receiptRef,
+    call: {
+      signatureValid: true,
+      decision: access?.decision,
+      policyRef: ext?.policy_ref,
+      redactionApplied: ext?.redaction_applied,
+      digestMatches,
+      defRefMatches,
+      warnings,
+    },
+    deny: { decision: deniedDecision, verified: deniedVerify.valid === true },
+    piiLeak: denied.resultJson.includes('asha.rao@example.com'),
+  };
+
+  if (tamper) {
     // Tamper check 1: modify the delivered result AFTER signing. The
     // signature still verifies (the record was not changed), but the
     // delivered content no longer matches the bound result_sha256 digest.
@@ -389,43 +463,66 @@ async function main(): Promise<void> {
       email: '[redacted]',
       plan: 'free',
     };
-    const tamperedJson = JSON.stringify(tamperedResult);
-    const tamperedSha256 = await sha256Hex(tamperedJson);
+    const tamperedSha256 = await sha256Hex(stableStringify(tamperedResult));
     const reVerify = await verifyLocal(carrierJws, publicKey, { issuer: ISSUER_URL });
-    const stillValid = reVerify.valid === true;
-    const tamperedMatches = tamperedSha256 === ext?.result_sha256;
-    console.log('\n6. Tamper check 1 (modify the delivered result, keep the record):');
-    console.log(`   signature still valid = ${stillValid}`);
-    console.log(`   delivered result digest matches bound result_sha256 = ${tamperedMatches}`);
-    console.log('   detected: the content binding fails even though the signature holds');
+    const signatureStillValid = reVerify.valid === true;
+    const digestMatchesAfterTamper = tamperedSha256 === ext?.result_sha256;
+    log('\n6. Tamper check 1 (modify the delivered result, keep the record):');
+    log(`   signature still valid = ${signatureStillValid}`);
+    log(`   delivered result digest matches bound result_sha256 = ${digestMatchesAfterTamper}`);
+    log('   detected: the content binding fails even though the signature holds');
 
     // Tamper check 2: modify the record payload and keep the signature.
     const tamperedJws = tamperPayload(carrierJws);
     const tamperedVerify = await verifyLocal(tamperedJws, publicKey, { issuer: ISSUER_URL });
-    console.log('\n7. Tamper check 2 (modify the record payload, keep signature):');
-    console.log(`   valid = ${tamperedVerify.valid}`);
+    log('\n7. Tamper check 2 (modify the record payload, keep signature):');
+    log(`   valid = ${tamperedVerify.valid}`);
     if (!tamperedVerify.valid) {
-      console.log(`   code  = ${tamperedVerify.code}`);
+      log(`   code  = ${tamperedVerify.code}`);
     }
-    const bothDetected = stillValid && !tamperedMatches && !tamperedVerify.valid;
-    if (!bothDetected) {
-      process.exitCode = 1;
-      return;
-    }
+    result.tamper = {
+      signatureStillValid,
+      digestMatchesAfterTamper,
+      payloadTamperValid: tamperedVerify.valid === true,
+      payloadTamperCode: tamperedVerify.valid ? undefined : tamperedVerify.code,
+    };
   }
 
-  // Demo invariant: unverified usage of resultJson keeps TypeScript honest
-  // about the value the digest covers (the redacted JSON, not the raw one).
-  if (resultJson.includes('asha.rao@example.com')) {
-    console.error('   PII leaked into the hashed result payload');
-    process.exitCode = 1;
-    return;
-  }
+  // Verdict: every check the demo makes must hold.
+  result.ok =
+    result.call.signatureValid &&
+    result.call.digestMatches &&
+    result.call.defRefMatches &&
+    result.deny.verified &&
+    result.deny.decision === 'deny' &&
+    !result.piiLeak &&
+    (!tamper ||
+      (result.tamper!.signatureStillValid &&
+        !result.tamper!.digestMatchesAfterTamper &&
+        !result.tamper!.payloadTamperValid &&
+        result.tamper!.payloadTamperCode === 'E_INVALID_SIGNATURE'));
 
-  console.log('\n=== Demo Complete ===\n');
+  if (result.ok) {
+    log('\n=== Demo Complete ===\n');
+  }
+  return result;
 }
 
-main().catch((err) => {
-  console.error('Demo failed:', err);
-  process.exitCode = 1;
-});
+async function main(): Promise<void> {
+  const result = await runGatewayDemo({
+    tamper: process.argv.includes('--tamper'),
+    showRecord: process.argv.includes('--show-record'),
+  });
+  if (!result.ok) {
+    process.exitCode = 1;
+  }
+}
+
+// Run only when executed directly (pnpm demo), not when imported by a test.
+const invokedDirectly = process.argv[1] !== undefined && /demo\.ts$/.test(process.argv[1]);
+if (invokedDirectly) {
+  main().catch((err) => {
+    console.error('Demo failed:', err);
+    process.exitCode = 1;
+  });
+}
