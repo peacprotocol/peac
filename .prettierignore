@@ -43,3 +43,6 @@ docs/evidence-pack/
 
 # example generated outputs (canonical bytes must not be reformatted)
 examples/erc8004-feedback/generated/
+
+# Local state artifacts (not part of the published protocol surface)
+/state/
