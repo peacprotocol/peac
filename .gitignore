@@ -86,3 +86,6 @@ examples/*/generated/
 # Backup files
 *.bak
 *.backup
+
+# Local state artifacts (not part of the published protocol surface)
+/state/
