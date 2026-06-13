@@ -197,6 +197,28 @@
       "owner": "jithinraj",
       "added_at": "2026-04-07",
       "reviewed_at": "2026-06-07"
+    },
+    {
+      "advisory_id": "GHSA-gv7w-rqvm-qjhr",
+      "package": "esbuild",
+      "reason": "esbuild dev server allows any website to send requests and read responses (HIGH, GHSA-gv7w-rqvm-qjhr). esbuild >=0.17.0 <0.28.1; current resolved 0.27.3 pulled transitively by the test toolchain (vitest -> vite -> tsx -> esbuild, and tsx -> esbuild).",
+      "why_not_exploitable": "The advisory affects esbuild's HTTP dev server (serve mode). PEAC never runs esbuild's serve mode; esbuild is used only as a transpiler/bundler by tsx and vite during local test and dev runs. No published @peac/* package depends on esbuild (prod audit shows no high), so there is no production code path or shipped artifact exposure.",
+      "where_used": "devDependencies only: @vitest/coverage-v8 -> vitest -> vite -> tsx -> esbuild; and tsx -> esbuild.",
+      "expires_at": "2026-09-11",
+      "remediation": "Adopt the patched esbuild (>=0.28.1) when tsx/vite/vitest bump their transitive esbuild, or add a pnpm.overrides pin once toolchain compatibility with esbuild 0.28.x is confirmed.",
+      "issue_url": "https://github.com/advisories/GHSA-gv7w-rqvm-qjhr",
+      "scope": "dev",
+      "dependency_chain": [
+        "@vitest/coverage-v8@4.1.8",
+        "vitest@4.1.8",
+        "vite@8.0.16",
+        "tsx@4.21.0",
+        "esbuild@0.27.3"
+      ],
+      "verified_by": "pnpm audit --prod shows no high advisories; pnpm why esbuild confirms the tsx/vite/vitest dev-only resolution path.",
+      "owner": "jithinraj",
+      "added_at": "2026-06-13",
+      "reviewed_at": "2026-06-13"
     }
   ]
 }
