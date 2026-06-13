@@ -5,6 +5,22 @@ All notable changes to PEAC Protocol will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Security
+
+- TAP verification now derives the issuer strictly from the `keyid` and fails
+  closed when the `keyid` is not an absolute `https` URL. The issuer is no
+  longer derived from the request URL or `Host` header, and a malformed `keyid`
+  is never passed through unchanged. This removes a trust-boundary weakness in
+  which a non-URL `keyid` could steer JWKS key resolution, issuer-allowlist
+  checks, or replay namespacing to a request-controlled origin. Key-to-issuer
+  derivation is centralized in `@peac/mappings-tap` (`issuerFromKeyid`) and
+  reused by the worker and middleware verification surfaces. New error
+  `E_TAP_KEYID_INVALID` (401). Behavior change for invalid input only: valid
+  `https` JWKS-URI keyids are unaffected. No wire format, schema, or signing
+  change.
+
 ## [0.15.1] - 2026-06-11
 
 Samples and offline verification.

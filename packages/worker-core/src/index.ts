@@ -76,7 +76,6 @@ export {
 
 export {
   hasTapHeaders,
-  extractIssuerFromKeyid,
   headersToPlainObject,
   verifyTap,
   handleVerification,

@@ -15,6 +15,8 @@ export const ErrorCodes = {
   TAP_TAG_UNKNOWN: 'E_TAP_TAG_UNKNOWN',
   /** Signature verification failed */
   TAP_SIGNATURE_INVALID: 'E_TAP_SIGNATURE_INVALID',
+  /** keyid is not an absolute https URL identifying the issuer */
+  TAP_KEYID_INVALID: 'E_TAP_KEYID_INVALID',
 } as const;
 
 export type ErrorCode = (typeof ErrorCodes)[keyof typeof ErrorCodes];
@@ -28,6 +30,7 @@ export const ErrorHttpStatus: Record<ErrorCode, number> = {
   [ErrorCodes.TAP_ALGORITHM_INVALID]: 400,
   [ErrorCodes.TAP_TAG_UNKNOWN]: 400,
   [ErrorCodes.TAP_SIGNATURE_INVALID]: 401,
+  [ErrorCodes.TAP_KEYID_INVALID]: 401,
 };
 
 /**

@@ -34,6 +34,7 @@ export const ErrorCodes = {
   TAP_TAG_UNKNOWN: 'E_TAP_TAG_UNKNOWN',
   TAP_ALGORITHM_INVALID: 'E_TAP_ALGORITHM_INVALID',
   TAP_KEY_NOT_FOUND: 'E_TAP_KEY_NOT_FOUND',
+  TAP_KEYID_INVALID: 'E_TAP_KEYID_INVALID',
 
   // Replay error (409 - Conflict)
   TAP_NONCE_REPLAY: 'E_TAP_NONCE_REPLAY',
@@ -77,6 +78,7 @@ const ErrorHttpStatus: Record<ErrorCode, number> = {
   [ErrorCodes.TAP_SIGNATURE_INVALID]: 401,
   [ErrorCodes.TAP_TIME_INVALID]: 401,
   [ErrorCodes.TAP_KEY_NOT_FOUND]: 401,
+  [ErrorCodes.TAP_KEYID_INVALID]: 401,
   [ErrorCodes.TAP_REPLAY_PROTECTION_REQUIRED]: 401,
 
   // 400 - Client errors (malformed)
@@ -110,6 +112,7 @@ const ErrorTitles: Record<ErrorCode, string> = {
   [ErrorCodes.TAP_TAG_UNKNOWN]: 'Unknown TAP Tag',
   [ErrorCodes.TAP_ALGORITHM_INVALID]: 'Invalid Algorithm',
   [ErrorCodes.TAP_KEY_NOT_FOUND]: 'Key Not Found',
+  [ErrorCodes.TAP_KEYID_INVALID]: 'Invalid Key ID',
   [ErrorCodes.TAP_NONCE_REPLAY]: 'Nonce Replay Detected',
   [ErrorCodes.TAP_REPLAY_PROTECTION_REQUIRED]: 'Replay Protection Required',
 

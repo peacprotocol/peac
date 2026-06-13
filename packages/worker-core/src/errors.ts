@@ -156,6 +156,7 @@ export function mapTapErrorCode(tapErrorCode: string | undefined): PeacErrorCode
     E_TAP_TAG_UNKNOWN: ErrorCodes.TAP_TAG_UNKNOWN,
     E_SIGNATURE_INVALID: ErrorCodes.TAP_SIGNATURE_INVALID,
     E_KEY_NOT_FOUND: ErrorCodes.TAP_KEY_NOT_FOUND,
+    E_TAP_KEYID_INVALID: ErrorCodes.TAP_KEYID_INVALID,
     E_TAP_SIGNATURE_MISSING: ErrorCodes.TAP_SIGNATURE_MISSING,
 
     // Legacy snake_case compatibility (pre-v0.9.28)
