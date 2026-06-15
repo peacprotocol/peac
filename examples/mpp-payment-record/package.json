@@ -1,0 +1,25 @@
+{
+  "name": "@peac/example-mpp-payment-record",
+  "version": "0.0.0",
+  "private": true,
+  "description": "PEAC example: record an MPP/paymentauth Payment-Receipt as a portable signed payment record (org.peacprotocol/payment) with offline verification and MCP _meta coexistence",
+  "type": "module",
+  "scripts": {
+    "demo": "tsx demo.ts",
+    "demo:tamper": "tsx demo.ts --tamper",
+    "demo:show-record": "tsx demo.ts --show-record",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@peac/crypto": "workspace:*",
+    "@peac/mappings-mcp": "workspace:*",
+    "@peac/mappings-paymentauth": "workspace:*",
+    "@peac/protocol": "workspace:*",
+    "@peac/schema": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "^4.21.0",
+    "typescript": "^5.3.3"
+  }
+}
