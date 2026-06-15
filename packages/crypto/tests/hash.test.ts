@@ -36,6 +36,15 @@ describe('Hash Utilities', () => {
       const result = await sha256Hex('');
       expect(result).toBe('e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855');
     });
+
+    it('returns bare hex without the sha256: reference prefix (digest contract)', async () => {
+      // sha256Hex is the canonical bare-hex digest helper: it returns bare hex.
+      // The `sha256:` reference prefix is applied only at the receipt_ref /
+      // digest-reference boundary (e.g. computeReceiptRef), never inside the hash.
+      const result = await sha256Hex('hello');
+      expect(result.startsWith('sha256:')).toBe(false);
+      expect(result).toMatch(/^[0-9a-f]{64}$/);
+    });
   });
 
   describe('sha256Bytes', () => {
