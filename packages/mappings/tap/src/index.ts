@@ -31,6 +31,9 @@ export {
 // Helpers
 export { headersToRecord, getHeader } from './helpers.js';
 
+// Keyid trust boundary (single source of truth for keyid -> issuer origin)
+export { issuerFromKeyid } from './keyid.js';
+
 // Errors
 export { ErrorCodes, ErrorHttpStatus, TapError } from './errors.js';
 export type { ErrorCode } from './errors.js';

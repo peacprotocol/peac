@@ -54,7 +54,6 @@ export { hashReplayKey } from './hash.js';
 // Verification logic
 export {
   hasTapHeaders,
-  extractIssuerFromKeyid,
   headersToPlainObject,
   verifyTap,
   handleVerification,

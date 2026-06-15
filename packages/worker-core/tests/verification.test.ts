@@ -5,7 +5,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import {
   hasTapHeaders,
-  extractIssuerFromKeyid,
   headersToPlainObject,
   verifyTap,
   handleVerification,
@@ -58,25 +57,9 @@ describe('hasTapHeaders', () => {
   });
 });
 
-describe('extractIssuerFromKeyid', () => {
-  it('should extract origin from JWKS URL', () => {
-    const keyid = 'https://issuer.example.com/.well-known/jwks.json#key-1';
-
-    expect(extractIssuerFromKeyid(keyid)).toBe('https://issuer.example.com');
-  });
-
-  it('should handle URL with port', () => {
-    const keyid = 'https://issuer.example.com:8443/.well-known/jwks.json#key-1';
-
-    expect(extractIssuerFromKeyid(keyid)).toBe('https://issuer.example.com:8443');
-  });
-
-  it('should return keyid as-is for non-URL', () => {
-    const keyid = 'key-identifier-123';
-
-    expect(extractIssuerFromKeyid(keyid)).toBe('key-identifier-123');
-  });
-});
+// keyid -> issuer derivation is centralized in @peac/mappings-tap as
+// issuerFromKeyid and tested there (see packages/mappings/tap/tests/keyid.test.ts);
+// the worker fails closed on a null result in the replay and allowlist paths.
 
 describe('headersToPlainObject', () => {
   it('should convert Headers-like to Record', () => {
@@ -277,6 +260,31 @@ describe('handleVerification', () => {
         expect(result.status).toBe(401);
         expect(result.errorCode).toBe(ErrorCodes.TAP_SIGNATURE_MISSING);
       }
+    });
+  });
+
+  describe('keyid trust boundary (security)', () => {
+    it('fails closed with E_TAP_KEYID_INVALID for an opaque keyid and never consults the replay store', async () => {
+      // An opaque (non-https-URL) keyid is rejected before key resolution and
+      // before the replay store is touched, so the request fails closed.
+      const now = Math.floor(Date.now() / 1000);
+      const seen = vi.fn().mockResolvedValue(false);
+      const replayStore: ReplayStore = { seen };
+      const request = createRequest({
+        'signature-input': `sig1=("@method");created=${now - 60};expires=${now + 360};keyid="agent-key-1";alg="ed25519";tag="agent-browser-auth";nonce="n1"`,
+        signature: 'sig1=:dGVzdA==:',
+      });
+
+      const result = await handleVerification(request, createConfig(), {
+        keyResolver: mockKeyResolver,
+        replayStore,
+        unsafeAllowUnknownTags: false,
+        unsafeAllowNoReplay: false,
+      });
+
+      expect(result.action).toBe('error');
+      expect(result.errorCode).toBe(ErrorCodes.TAP_KEYID_INVALID);
+      expect(seen).not.toHaveBeenCalled();
     });
   });
 

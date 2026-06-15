@@ -21,10 +21,16 @@ vi.mock('@peac/jwks-cache', () => ({
 }));
 
 // Mock TAP verification
-vi.mock('@peac/mappings-tap', () => ({
-  verifyTapProof: mockVerifyTapProof,
-  TAP_CONSTANTS: { MAX_WINDOW_SECONDS: 480 },
-}));
+vi.mock('@peac/mappings-tap', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@peac/mappings-tap')>();
+  return {
+    // Use the real issuerFromKeyid (the keyid trust boundary under test); only
+    // the proof verification itself is mocked.
+    issuerFromKeyid: actual.issuerFromKeyid,
+    verifyTapProof: mockVerifyTapProof,
+    TAP_CONSTANTS: { MAX_WINDOW_SECONDS: 480 },
+  };
+});
 
 describe('handleRequest', () => {
   const baseConfig: MiddlewareConfig = {
@@ -203,6 +209,35 @@ describe('handleRequest', () => {
       expect(JSON.parse(result!.body!).code).toBe(ErrorCodes.ISSUER_NOT_ALLOWED);
     });
 
+    it('returns 401 E_TAP_KEYID_INVALID for a non-https keyid (fail closed)', async () => {
+      // A keyid that is not an absolute https URL must fail closed at the
+      // allowlist gate rather than being string-compared against the allowlist.
+      mockVerifyTapProof.mockResolvedValue({
+        valid: true,
+        controlEntry: {
+          engine: 'tap',
+          result: 'allow',
+          evidence: {
+            protocol: 'visa-tap',
+            tag: 'agent-browser-auth',
+            keyid: 'agent-key-1',
+            created: 1234567890,
+            expires: 1234568370,
+            coveredComponents: ['@method', '@target-uri'],
+            signatureBase64: 'base64',
+            verified: true,
+            jwksSource: '/.well-known/jwks',
+          },
+        },
+      });
+
+      const result = await handleRequest(tapRequest, baseConfig);
+
+      expect(result).not.toBeNull();
+      expect(result!.status).toBe(401);
+      expect(JSON.parse(result!.body!).code).toBe(ErrorCodes.TAP_KEYID_INVALID);
+    });
+
     it('returns null (forward) when TAP is valid and issuer allowed', async () => {
       mockVerifyTapProof.mockResolvedValue({
         valid: true,
@@ -265,6 +300,41 @@ describe('handleRequest', () => {
       expect(result).not.toBeNull();
       expect(result!.status).toBe(401);
       expect(JSON.parse(result!.body!).code).toBe(ErrorCodes.TAP_REPLAY_PROTECTION_REQUIRED);
+    });
+
+    it('fails closed with E_TAP_KEYID_INVALID for an opaque keyid and never consults the replay store', async () => {
+      const seen = vi.fn().mockResolvedValue(false);
+      const replayStore: ReplayStore = { seen };
+
+      mockVerifyTapProof.mockResolvedValue({
+        valid: true,
+        controlEntry: {
+          engine: 'tap',
+          result: 'allow',
+          evidence: {
+            protocol: 'visa-tap',
+            tag: 'agent-browser-auth',
+            keyid: 'agent-key-1',
+            created: 1234567890,
+            expires: 1234568370,
+            nonce: 'abc123',
+            coveredComponents: ['@method'],
+            signatureBase64: 'base64',
+            verified: true,
+            jwksSource: '/.well-known/jwks',
+          },
+        },
+      });
+
+      const result = await handleRequest(tapRequestWithNonce, {
+        ...baseConfig,
+        replayStore,
+      });
+
+      expect(result).not.toBeNull();
+      expect(result!.status).toBe(401);
+      expect(JSON.parse(result!.body!).code).toBe(ErrorCodes.TAP_KEYID_INVALID);
+      expect(seen).not.toHaveBeenCalled();
     });
 
     it('returns 409 when replay detected', async () => {

@@ -7,7 +7,12 @@
  * @packageDocumentation
  */
 
-import { verifyTapProof, TAP_CONSTANTS, type TapRequest } from '@peac/mappings-tap';
+import {
+  verifyTapProof,
+  TAP_CONSTANTS,
+  issuerFromKeyid,
+  type TapRequest,
+} from '@peac/mappings-tap';
 import type {
   WorkerConfig,
   RequestLike,
@@ -26,21 +31,6 @@ export function hasTapHeaders(headers: Record<string, string>): boolean {
   const signatureInput = headers['signature-input'] ?? headers['Signature-Input'];
   const signature = headers['signature'] ?? headers['Signature'];
   return Boolean(signatureInput && signature);
-}
-
-/**
- * Extract issuer origin from keyid.
- *
- * TAP keyid is typically a JWKS URI like "https://issuer.example.com/.well-known/jwks.json#key-1"
- */
-export function extractIssuerFromKeyid(keyid: string): string {
-  try {
-    const url = new URL(keyid);
-    return url.origin;
-  } catch {
-    // If keyid is not a URL, use it as-is
-    return keyid;
-  }
 }
 
 /**
@@ -119,9 +109,21 @@ export async function verifyTap(
   // Check nonce replay protection
   const evidence = result.controlEntry?.evidence;
   if (evidence?.nonce && evidence?.keyid) {
+    // Derive the replay namespace issuer from the keyid only. A malformed
+    // keyid must never reach the replay store (it would let an attacker
+    // fragment or collide the replay namespace), so fail closed here too.
+    const replayIssuer = issuerFromKeyid(evidence.keyid);
+    if (!replayIssuer) {
+      return {
+        valid: false,
+        isTap: true,
+        errorCode: ErrorCodes.TAP_KEYID_INVALID,
+        errorMessage: 'TAP keyid must be an absolute https URL identifying the issuer',
+      };
+    }
     if (replayStore) {
       const replayCtx: ReplayContext = {
-        issuer: extractIssuerFromKeyid(evidence.keyid),
+        issuer: replayIssuer,
         keyid: evidence.keyid,
         nonce: evidence.nonce,
         ttlSeconds: TAP_CONSTANTS.MAX_WINDOW_SECONDS,
@@ -256,7 +258,25 @@ export async function handleVerification(
   // (Skip if UNSAFE_ALLOW_ANY_ISSUER is set)
   if (result.controlEntry?.evidence.keyid && !config.unsafeAllowAnyIssuer) {
     const keyid = result.controlEntry.evidence.keyid;
-    if (!isIssuerAllowed(keyid, config.issuerAllowlist)) {
+    // Derive the issuer from the keyid (absolute https URL) before the
+    // allowlist check. A malformed keyid fails closed rather than being
+    // string-compared against allowlist entries.
+    const issuer = issuerFromKeyid(keyid);
+    if (!issuer) {
+      const problem = createProblemDetails(
+        ErrorCodes.TAP_KEYID_INVALID,
+        'TAP keyid must be an absolute https URL identifying the issuer',
+        request.url
+      );
+      return {
+        action: 'error',
+        status: problem.status,
+        errorCode: ErrorCodes.TAP_KEYID_INVALID,
+        problem,
+        requestUrl: request.url,
+      };
+    }
+    if (!isIssuerAllowed(issuer, config.issuerAllowlist)) {
       const problem = createProblemDetails(
         ErrorCodes.ISSUER_NOT_ALLOWED,
         'Issuer not in allowlist',

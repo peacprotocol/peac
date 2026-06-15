@@ -17,6 +17,7 @@ import { TAP_CONSTANTS } from './types.js';
 import { ErrorCodes, TapError } from './errors.js';
 import { validateTapTimeConstraints, validateTapAlgorithm, validateTapTag } from './validator.js';
 import { getHeader } from './helpers.js';
+import { issuerFromKeyid } from './keyid.js';
 
 /**
  * Verify TAP proof and map to PEAC control evidence.
@@ -57,9 +58,18 @@ export async function verifyTapProof(
     validateTapTimeConstraints(parsed.params, now);
     validateTapTag(parsed.params.tag, allowUnknownTags);
 
-    // Extract issuer from keyid (format: https://issuer.example.com/keys/keyid)
-    // For TAP, keyid often includes the issuer URL
-    const issuer = extractIssuerFromKeyid(parsed.params.keyid, request);
+    // Resolve the issuer from the keyid before any key resolution. The keyid
+    // must be an absolute https URL identifying the issuer; the issuer is never
+    // derived from request-controlled data (URL or Host header). Fail closed so
+    // an attacker cannot steer key resolution to an origin they control.
+    const issuer = issuerFromKeyid(parsed.params.keyid);
+    if (!issuer) {
+      return {
+        valid: false,
+        errorCode: ErrorCodes.TAP_KEYID_INVALID,
+        errorMessage: 'TAP keyid must be an absolute https URL identifying the issuer',
+      };
+    }
 
     // Resolve key via JWKS
     const verifier = await keyResolver(issuer, parsed.params.keyid);
@@ -130,40 +140,6 @@ export async function verifyTapProof(
     // Re-throw unexpected errors
     throw error;
   }
-}
-
-/**
- * Extract issuer from keyid or request.
- *
- * TAP keyids may be:
- * - Full URL: https://issuer.example.com/.well-known/jwks#key1
- * - Plain keyid: key1 (issuer from request host)
- */
-function extractIssuerFromKeyid(keyid: string, request: TapRequest): string {
-  // If keyid looks like a URL, extract origin
-  if (keyid.startsWith('https://') || keyid.startsWith('http://')) {
-    try {
-      const url = new URL(keyid);
-      return url.origin;
-    } catch {
-      // Fall through to request-based extraction
-    }
-  }
-
-  // Extract from request URL or host header
-  try {
-    const url = new URL(request.url);
-    return url.origin;
-  } catch {
-    // Try host header
-    const host = getHeader(request.headers, 'host');
-    if (host) {
-      return `https://${host}`;
-    }
-  }
-
-  // Last resort: return keyid as-is
-  return keyid;
 }
 
 /**
