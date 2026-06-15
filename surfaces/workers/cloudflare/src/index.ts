@@ -75,7 +75,11 @@ function resultToResponse(result: HandlerResult): Response {
 async function handleRequest(request: Request, env: Env): Promise<Response> {
   const config = parseConfig(env);
 
-  // Create JWKS resolver with issuer allowlist (or allow all if UNSAFE mode)
+  // JWKS-fetch host allowlist (SSRF fetch guard). @peac/jwks-cache passes this
+  // callback only the parsed JWKS hostname, so it is host-only by contract and
+  // is NOT the issuer-origin trust decision. Issuer-origin allowlist enforcement
+  // happens in @peac/worker-shared handleVerification via @peac/contracts
+  // isAllowedIssuerOrigin.
   const keyResolver = createResolver({
     isAllowedHost: (host) => {
       if (config.unsafeAllowAnyIssuer) {

@@ -11,6 +11,9 @@
 export { CANONICAL_ERROR_CODES, type PeacErrorCode } from './codes.js';
 import { CANONICAL_ERROR_CODES, type PeacErrorCode } from './codes.js';
 
+// Canonical issuer-origin allowlist check shared across surfaces.
+export { isAllowedIssuerOrigin } from './issuer-origin.js';
+
 /**
  * Base URI for RFC 9457 Problem Details type field.
  */

@@ -6,6 +6,8 @@
  * @packageDocumentation
  */
 
+import { isAllowedIssuerOrigin } from '@peac/contracts';
+
 import type { WorkerConfig } from './types.js';
 
 /**
@@ -113,23 +115,8 @@ function matchGlob(path: string, pattern: string): boolean {
  * @returns true if issuer is in allowlist
  */
 export function isIssuerAllowed(issuer: string, allowlist: string[]): boolean {
-  // Empty allowlist should be handled by caller before reaching here
-  if (allowlist.length === 0) {
-    return false;
-  }
-
-  // Normalize issuer to origin
-  try {
-    const issuerOrigin = new URL(issuer).origin;
-    return allowlist.some((allowed) => {
-      try {
-        const allowedOrigin = new URL(allowed).origin;
-        return issuerOrigin === allowedOrigin;
-      } catch {
-        return false;
-      }
-    });
-  } catch {
-    return false;
-  }
+  // Delegates to the single canonical issuer-origin allowlist check so the
+  // trust decision cannot drift across surfaces. Fails closed on an empty
+  // allowlist, a malformed issuer, or a non-https / userinfo-bearing issuer.
+  return isAllowedIssuerOrigin(issuer, allowlist);
 }
