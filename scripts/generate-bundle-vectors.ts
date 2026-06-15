@@ -8,7 +8,9 @@
  *
  * Usage: npx tsx scripts/generate-bundle-vectors.ts
  *
- * CI should run this and assert `git diff --exit-code` to detect drift.
+ * Drift checks should compare extracted bundle contents and expected report
+ * hashes. Raw ZIP container bytes are not currently the semantic drift boundary
+ * because ZIP metadata can vary even when bundle contents are unchanged.
  */
 
 import * as fs from 'fs';
@@ -19,6 +21,7 @@ import { createHash } from 'crypto';
 const cryptoModule = require('../packages/crypto/dist/index.cjs') as {
   sign: (payload: unknown, privateKey: Uint8Array, kid: string) => Promise<string>;
   canonicalize: (obj: unknown) => string;
+  sha256Hex: (data: Uint8Array | string) => Promise<string>;
 };
 
 // Import test-only utilities from testkit (separate export for tree-shaking)
@@ -37,15 +40,21 @@ const auditModule = require('../packages/audit/dist/index.cjs') as {
   serializeReport: (report: VerificationReport, pretty?: boolean) => string;
 };
 
-const { sign, canonicalize } = cryptoModule;
+const { sign, canonicalize, sha256Hex } = cryptoModule;
 const { generateKeypairFromSeed } = testkitModule;
 const { createDisputeBundle, verifyBundle } = auditModule;
 
 /**
- * Compute SHA-256 hash with sha256:<hex> prefix format.
+ * Digest-reference value in `sha256:<hex>` form (the bundle digest /
+ * `receipt_ref` reference format).
+ *
+ * The bundle digest fields use the same bare-hex SHA-256 contract as
+ * `@peac/crypto.sha256Hex` (imported above): `sha256Hex` returns bare hex, and
+ * this helper applies the `sha256:` reference prefix only at the bundle
+ * digest-reference boundary, mirroring `computeReceiptRef` in `@peac/schema`.
  */
-function sha256Hex(data: Buffer | string): string {
-  return `sha256:${createHash('sha256').update(data).digest('hex')}`;
+async function digestRef(data: Buffer | string): Promise<string> {
+  return `sha256:${await sha256Hex(data)}`;
 }
 
 // Type definitions
@@ -523,11 +532,12 @@ async function generateDuplicateReceiptBundle(
   const keysJson = Buffer.from(JSON.stringify(jwks, null, 2));
 
   // Compute file hashes
-  const receiptsHash = sha256Hex(receiptsNdjson);
-  const keysHash = sha256Hex(keysJson);
+  const receiptsHash = await digestRef(receiptsNdjson);
+  const keysHash = await digestRef(keysJson);
 
   // Build the ZIP manually to bypass createDisputeBundle's validation
-  // Disable compression to ensure byte-identical output across platforms
+  // Disable compression and set a fixed mtime to reduce ZIP-container variability.
+  // Semantic drift is checked against extracted bundle contents, not raw ZIP bytes.
   const mtime = new Date(FIXED_CREATED_AT);
   const zipOptions = { mtime, compress: false };
   const zipfile = new yazl.ZipFile();
@@ -544,12 +554,12 @@ async function generateDuplicateReceiptBundle(
       {
         receipt_id: 'duplicate-receipt-id',
         issued_at: FIXED_ISSUED_AT_1,
-        receipt_hash: sha256Hex(receipt1),
+        receipt_hash: await digestRef(receipt1),
       },
       {
         receipt_id: 'duplicate-receipt-id', // Same receipt_id!
         issued_at: FIXED_ISSUED_AT_2,
-        receipt_hash: sha256Hex(receipt2),
+        receipt_hash: await digestRef(receipt2),
       },
     ],
     keys: [{ kid: 'key-001', alg: 'EdDSA' }],
@@ -560,7 +570,7 @@ async function generateDuplicateReceiptBundle(
   };
 
   // Compute content_hash = SHA-256 of JCS(manifest without content_hash)
-  const contentHash = sha256Hex(canonicalize(manifestWithoutHash));
+  const contentHash = await digestRef(canonicalize(manifestWithoutHash));
 
   const manifest = {
     ...manifestWithoutHash,

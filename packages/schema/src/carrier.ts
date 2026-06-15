@@ -111,11 +111,20 @@ export const CarrierMetaSchema = z.object({
 // ---------------------------------------------------------------------------
 
 /**
- * Canonical receipt_ref computation (single source of truth).
+ * Canonical receipt_ref boundary helper.
  *
- * Computes SHA-256 of the UTF-8 bytes of the compact JWS string as emitted.
- * All carrier adapters MUST use this function rather than computing SHA-256
- * locally, to ensure consistency across protocols (correction item 4).
+ * Computes SHA-256 over the UTF-8 bytes of the compact JWS string as emitted,
+ * then applies the `sha256:` reference prefix at the receipt_ref boundary. The
+ * digest body is bare lowercase hex; the prefix is part of the reference format,
+ * not the hash primitive.
+ *
+ * Carrier adapters should use this helper rather than recomputing receipt_ref
+ * locally, so receipt references stay byte-identical across transports.
+ *
+ * SHA-256 is implemented here directly via `crypto.subtle` because
+ * `@peac/schema` is Layer 1 and depends only on `@peac/kernel`; importing
+ * `@peac/crypto` would introduce an up-layer dependency. The schema and crypto
+ * digest paths are locked together by the SHA-256 boundary-contract tooling test.
  */
 export async function computeReceiptRef(jws: string): Promise<ReceiptRef> {
   if (!globalThis.crypto?.subtle) {
