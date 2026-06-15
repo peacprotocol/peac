@@ -5,6 +5,7 @@
  * Runtime-neutral for testability.
  */
 
+import { isAllowedIssuerOrigin } from '@peac/contracts';
 import { createResolver, type JwksKeyResolver } from '@peac/jwks-cache';
 import {
   verifyTapProof,
@@ -36,24 +37,6 @@ function hasTapHeaders(headers: Record<string, string>): boolean {
     headers['signature-input'] ?? headers['Signature-Input'] ?? headers['SIGNATURE-INPUT'];
   const signature = headers['signature'] ?? headers['Signature'] ?? headers['SIGNATURE'];
   return Boolean(signatureInput && signature);
-}
-
-/**
- * Check if an issuer origin is in the allowlist.
- *
- * The issuer must already be a validated origin (see issuerFromKeyid); this
- * compares it against allowlist entries by origin.
- */
-function isIssuerAllowed(issuerOrigin: string, allowlist: string[]): boolean {
-  return allowlist.some((allowed) => {
-    try {
-      const allowedOrigin = new URL(allowed).origin;
-      return allowedOrigin === issuerOrigin;
-    } catch {
-      // If allowed entry is not a valid URL, compare as-is
-      return allowed === issuerOrigin;
-    }
-  });
 }
 
 /**
@@ -251,7 +234,10 @@ export async function handleRequest(
     );
   }
 
-  // Create JWKS resolver with issuer allowlist
+  // JWKS-fetch host allowlist (SSRF fetch guard). @peac/jwks-cache passes this
+  // callback only the parsed JWKS hostname, so it is host-only by contract and is
+  // NOT the issuer-origin trust decision; issuer-origin allowlist enforcement uses
+  // @peac/contracts isAllowedIssuerOrigin below.
   const keyResolver = createResolver({
     isAllowedHost: (host) => {
       if (config.unsafeAllowAnyIssuer) {
@@ -312,7 +298,7 @@ export async function handleRequest(
         'TAP keyid must be an absolute https URL identifying the issuer'
       );
     }
-    if (!isIssuerAllowed(issuer, config.issuerAllowlist)) {
+    if (!isAllowedIssuerOrigin(issuer, config.issuerAllowlist)) {
       return createErrorHandlerResponse(ErrorCodes.ISSUER_NOT_ALLOWED, 'Issuer not in allowlist');
     }
   }
