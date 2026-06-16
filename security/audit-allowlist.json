@@ -219,6 +219,22 @@
       "owner": "jithinraj",
       "added_at": "2026-06-13",
       "reviewed_at": "2026-06-13"
+    },
+    {
+      "advisory_id": "GHSA-96hv-2xvq-fx4p",
+      "package": "ws",
+      "reason": "ws memory-exhaustion DoS from tiny fragments/data chunks (HIGH, GHSA-96hv-2xvq-fx4p). ws >=8.0.0 <8.21.0; resolved 8.18.0 via the Cloudflare Workers local dev simulator (wrangler -> miniflare) and 8.18.3 via the erc8004-feedback example. No published @peac/* package depends on ws.",
+      "why_not_exploitable": "ws is used only by miniflare (the local Cloudflare Workers simulator) during development and by one example. It is not in any published package and processes no untrusted production traffic (prod audit shows no high). Patched in ws >= 8.21.0; wrangler 3.x pins the transitive ws version.",
+      "where_used": "surfaces/workers/cloudflare devDependency: wrangler@3.114.17 -> miniflare -> ws@8.18.0; examples/erc8004-feedback -> viem -> ws@8.18.3",
+      "expires_at": "2026-09-13",
+      "remediation": "Adopt ws >= 8.21.0 when wrangler/miniflare bump their transitive ws, or evaluate wrangler 4.x.",
+      "issue_url": "https://github.com/advisories/GHSA-96hv-2xvq-fx4p",
+      "scope": "dev",
+      "dependency_chain": ["wrangler@3.114.17", "miniflare", "ws@8.18.0"],
+      "verified_by": "pnpm audit --prod shows no high advisories; pnpm why ws confirms the wrangler/miniflare dev path and the erc8004-feedback example path.",
+      "owner": "jithinraj",
+      "added_at": "2026-06-16",
+      "reviewed_at": "2026-06-16"
     }
   ]
 }
