@@ -109,7 +109,8 @@ export async function verifyTapProof(
       protocol: 'visa-tap',
       tag: parsed.params.tag ?? 'unknown',
       keyid: parsed.params.keyid,
-      created: parsed.params.created,
+      // validateTapTimeConstraints has already guaranteed both are present.
+      created: parsed.params.created!,
       expires: parsed.params.expires!,
       nonce: parsed.params.nonce,
       coveredComponents: parsed.params.coveredComponents,

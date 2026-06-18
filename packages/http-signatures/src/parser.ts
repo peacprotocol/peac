@@ -23,10 +23,24 @@ export function parseSignatureInput(headerValue: string): Map<string, ParsedSign
   const members = splitDictionaryMembers(headerValue);
 
   for (const member of members) {
+    // Structured-field parsing is not best-effort: a malformed member fails the
+    // whole header rather than being skipped.
     const parsed = parseDictionaryMember(member.trim());
-    if (parsed) {
-      results.set(parsed.label, parsed.params);
+    if (!parsed) {
+      throw new HttpSignatureError(
+        ErrorCodes.SIGNATURE_INPUT_MALFORMED,
+        `Malformed Signature-Input member: ${member.trim()}`
+      );
     }
+    // RFC 9421: signature labels must be unique. Fail closed on a duplicate
+    // rather than silently overwriting an earlier definition.
+    if (results.has(parsed.label)) {
+      throw new HttpSignatureError(
+        ErrorCodes.SIGNATURE_INPUT_MALFORMED,
+        `Duplicate signature label in Signature-Input: ${parsed.label}`
+      );
+    }
+    results.set(parsed.label, parsed.params);
   }
 
   return results;
@@ -46,22 +60,48 @@ export function parseSignatureHeader(
   const results = new Map<string, { bytes: Uint8Array; base64: string }>();
 
   const members = splitDictionaryMembers(headerValue);
+  const seenLabels = new Set<string>();
 
   for (const member of members) {
-    const [label, value] = splitKeyValue(member.trim());
-    if (!label || !value) continue;
+    const trimmed = member.trim();
+    const [label, value] = splitKeyValue(trimmed);
+    // Fail closed on a malformed member rather than skipping it.
+    if (!label || !value) {
+      throw new HttpSignatureError(
+        ErrorCodes.SIGNATURE_INPUT_MALFORMED,
+        `Malformed Signature member: ${trimmed}`
+      );
+    }
 
-    // Extract base64 from :...: byte sequence format
+    // RFC 9421: a label may appear at most once in the Signature header.
+    if (seenLabels.has(label)) {
+      throw new HttpSignatureError(
+        ErrorCodes.SIGNATURE_INPUT_MALFORMED,
+        `Duplicate signature label in Signature: ${label}`
+      );
+    }
+    seenLabels.add(label);
+
+    // The value MUST be a structured-field byte sequence (:base64:).
     const match = value.match(/^:([A-Za-z0-9+/=_-]+):$/);
-    if (!match) continue;
+    if (!match) {
+      throw new HttpSignatureError(
+        ErrorCodes.SIGNATURE_INPUT_MALFORMED,
+        `Malformed Signature byte sequence for label "${label}"`
+      );
+    }
 
     const base64 = match[1];
+    let bytes: Uint8Array;
     try {
-      const bytes = base64ToBytes(base64);
-      results.set(label, { bytes, base64 });
+      bytes = base64ToBytes(base64);
     } catch {
-      // Skip invalid base64
+      throw new HttpSignatureError(
+        ErrorCodes.SIGNATURE_INPUT_MALFORMED,
+        `Invalid base64 in Signature for label "${label}"`
+      );
     }
+    results.set(label, { bytes, base64 });
   }
 
   return results;
@@ -78,8 +118,11 @@ export function parseSignatureHeader(
 export function parseSignature(
   signatureInput: string,
   signature: string,
-  label?: string
+  label?: string,
+  options: { requireAlg?: boolean; requireCreated?: boolean } = {}
 ): ParsedSignature {
+  const { requireAlg = true, requireCreated = true } = options;
+
   if (!signatureInput) {
     throw new HttpSignatureError(
       ErrorCodes.SIGNATURE_INPUT_MALFORMED,
@@ -131,14 +174,14 @@ export function parseSignature(
     );
   }
 
-  if (!params.alg) {
+  if (requireAlg && !params.alg) {
     throw new HttpSignatureError(
       ErrorCodes.SIGNATURE_PARAM_MISSING,
       'Missing required parameter: alg'
     );
   }
 
-  if (params.created === undefined || params.created === null) {
+  if (requireCreated && (params.created === undefined || params.created === null)) {
     throw new HttpSignatureError(
       ErrorCodes.SIGNATURE_PARAM_MISSING,
       'Missing required parameter: created'
@@ -233,10 +276,23 @@ function parseDictionaryMember(
 
   const params: ParsedSignatureParams = {
     keyid: String(rawParams.keyid ?? ''),
-    alg: String(rawParams.alg ?? ''),
-    created: rawParams.created !== undefined ? Number(rawParams.created) : 0,
     coveredComponents,
+    // Preserve the exact serialized inner-list-plus-parameters for this label so
+    // callers can build an RFC 9421-faithful @signature-params line. `rest` is
+    // the dictionary member value (everything after `label=`), already trimmed.
+    signatureParamsValue: rest,
   };
+
+  // alg and created are optional at the parse layer (RFC 9421). When absent they
+  // stay undefined rather than defaulting to '' / 0, so a profile that omits them
+  // (e.g. UCP) is represented faithfully and never fabricates a created=0 base.
+  if (rawParams.alg !== undefined) {
+    params.alg = String(rawParams.alg);
+  }
+
+  if (rawParams.created !== undefined) {
+    params.created = Number(rawParams.created);
+  }
 
   if (rawParams.expires !== undefined) {
     params.expires = Number(rawParams.expires);
@@ -254,14 +310,38 @@ function parseDictionaryMember(
 }
 
 /**
- * Parse inner list content (space-separated quoted strings).
+ * Parse inner list content: space-separated quoted strings (the covered
+ * components). Fail closed on anything else (a bare/unquoted token, component
+ * parameters, or trailing garbage) rather than silently extracting only the
+ * quoted parts.
  */
 function parseInnerList(content: string): string[] {
+  const trimmed = content.trim();
+  if (trimmed === '') {
+    return [];
+  }
   const items: string[] = [];
-  const regex = /"([^"]*)"/g;
-  let match;
-  while ((match = regex.exec(content)) !== null) {
-    items.push(match[1]);
+  let pos = 0;
+  while (pos < trimmed.length) {
+    if (trimmed[pos] === ' ') {
+      pos++;
+      continue;
+    }
+    if (trimmed[pos] !== '"') {
+      throw new HttpSignatureError(
+        ErrorCodes.SIGNATURE_INPUT_MALFORMED,
+        `Malformed covered-component list near: ${trimmed.slice(pos)}`
+      );
+    }
+    const end = trimmed.indexOf('"', pos + 1);
+    if (end === -1) {
+      throw new HttpSignatureError(
+        ErrorCodes.SIGNATURE_INPUT_MALFORMED,
+        'Unterminated quoted string in covered-component list'
+      );
+    }
+    items.push(trimmed.slice(pos + 1, end));
+    pos = end + 1;
   }
   return items;
 }

@@ -139,6 +139,10 @@ export function isCreatedInFuture(
   now: number = Math.floor(Date.now() / 1000),
   skewSeconds: number = 60
 ): boolean {
+  // A signature with no `created` parameter cannot be classified as future-dated.
+  if (params.created === undefined) {
+    return false;
+  }
   return params.created > now + skewSeconds;
 }
 

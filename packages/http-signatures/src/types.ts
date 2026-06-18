@@ -24,10 +24,19 @@ export type KeyResolver = (keyid: string) => Promise<SignatureVerifier | null>;
 export interface ParsedSignatureParams {
   /** Key identifier */
   keyid: string;
-  /** Algorithm (must be "ed25519" for PEAC) */
-  alg: string;
-  /** Unix timestamp when signature was created */
-  created: number;
+  /**
+   * Algorithm. Optional per RFC 9421: some profiles omit `alg` from
+   * Signature-Input and derive the algorithm from the resolved key (e.g. UCP
+   * derives ES256/ES384 from the JWK `crv`). The PEAC/TAP path requires it via
+   * `parseSignature(..., { requireAlg: true })`, which is the default.
+   */
+  alg?: string;
+  /**
+   * Unix timestamp when the signature was created. Optional per RFC 9421;
+   * some profiles (e.g. UCP) omit it and handle replay at the business layer.
+   * Required for the PEAC/TAP path via the default `requireCreated: true`.
+   */
+  created?: number;
   /** Unix timestamp when signature expires (optional) */
   expires?: number;
   /** Nonce for replay prevention (optional) */
@@ -36,6 +45,14 @@ export interface ParsedSignatureParams {
   tag?: string;
   /** Covered component identifiers */
   coveredComponents: string[];
+  /**
+   * Exact serialized `@signature-params` value (the inner list plus parameters)
+   * for this label, as received in Signature-Input. RFC 9421 requires the
+   * signature base to reuse this exact serialization rather than a reconstructed
+   * one; `buildSignatureBase(..., { preferSerializedParams: true })` uses it when
+   * present. Populated by the parser; absent for programmatically built params.
+   */
+  signatureParamsValue?: string;
 }
 
 /**
