@@ -345,6 +345,129 @@ export interface VerifyUcpWebhookResult {
   error_message?: string;
 }
 
+// ---------------------------------------------------------------------------
+// RFC 9421 HTTP Message Signature verification (current UCP signing model)
+// ---------------------------------------------------------------------------
+
+/**
+ * HTTP Message Signature algorithm (RFC 9421) supported for UCP.
+ *
+ * UCP requires ES256 (P-256); ES384 (P-384) is OPTIONAL. Ed25519 is not used
+ * at the UCP wire layer, so it is intentionally excluded here.
+ *
+ * This is the algorithm RESOLVED from the signing key's curve (P-256 -> ES256,
+ * P-384 -> ES384), not a value read from the `Signature-Input` `alg` parameter:
+ * UCP does not include `alg` in `Signature-Input`.
+ */
+export type UcpHttpSignatureAlgorithm = 'ES256' | 'ES384';
+
+/**
+ * Required signed-component policy for UCP HTTP Message Signature verification.
+ *
+ * - `ucp-request` (default): the full UCP request policy. Always requires
+ *   `@method`, `@authority`, `@path`; `@query` when the URL has a query string;
+ *   `ucp-agent` when a `UCP-Agent` header is present; `idempotency-key` for
+ *   state-changing methods (POST/PUT/DELETE/PATCH); and `content-digest` +
+ *   `content-type` when a body is present. This also applies to webhook
+ *   deliveries: UCP does not define a separate webhook component set, and
+ *   webhook POSTs are not exempt from the idempotency-key requirement.
+ * - `signature-only`: low-level mode. Verifies the signature and, when a body is
+ *   present and covered, the Content-Digest, but does NOT enforce the required
+ *   component set. Use only when the caller enforces component coverage itself.
+ *
+ * Note: UCP response signatures use `@status` instead of `@method` and are a
+ * separate component model; this verifier covers request-shaped signatures only.
+ */
+export type UcpComponentPolicy = 'ucp-request' | 'signature-only';
+
+/**
+ * Options for verifying a UCP request/webhook RFC 9421 HTTP Message Signature.
+ *
+ * This is the current UCP signing model (`Signature-Input` / `Signature` /
+ * `Content-Digest` over raw body bytes), distinct from the legacy
+ * `Request-Signature` detached-JWS path verified by `verifyUcpWebhookSignature`.
+ * There is no silent fallback between the two: the caller selects the scheme.
+ */
+export interface VerifyUcpHttpSignatureOptions {
+  /** RFC 9421 `Signature-Input` header value. */
+  signature_input: string;
+
+  /** RFC 9421 `Signature` header value. */
+  signature: string;
+
+  /** HTTP method (e.g. 'POST'). */
+  method: string;
+
+  /** Absolute request URL (used for `@authority` / `@path` / `@query` derived components). */
+  url: string;
+
+  /** Request headers (case-insensitive lookup; e.g. `content-digest`, `ucp-agent`). */
+  headers: Record<string, string>;
+
+  /**
+   * Raw request body bytes. Required (and bound via `content-digest`) whenever a
+   * body is present; never JSON-canonicalized before digesting (UCP binds raw bytes).
+   */
+  body_bytes?: Uint8Array;
+
+  /**
+   * Pre-resolved UCP party profile (the `/.well-known/ucp` document). Resolving it
+   * is the caller's responsibility (SSRF-safe, host-allowlisted); tests pass a fixture.
+   * No network I/O happens inside this function.
+   */
+  profile: UcpProfile;
+
+  /** Optional specific signature label to verify (defaults to the first in `Signature-Input`). */
+  label?: string;
+
+  /**
+   * Required signed-component policy. Defaults to `'ucp-request'` (strict). Use
+   * `'signature-only'` for low-level verification without component enforcement.
+   */
+  component_policy?: UcpComponentPolicy;
+
+  /**
+   * Optional expected signer profile URL to bind. When provided, the `ucp-agent`
+   * component MUST be signed, the `UCP-Agent` header MUST be present and parse as
+   * an RFC 8941 dictionary with a quoted HTTPS `profile` member, and that profile
+   * URL MUST equal this value; otherwise verification fails. An unsigned component
+   * is never trusted. This verifier never fetches the profile URL (SSRF stays out).
+   */
+  expected_profile_url?: string;
+}
+
+/**
+ * Result of verifying a UCP RFC 9421 HTTP Message Signature.
+ */
+export interface VerifyUcpHttpSignatureResult {
+  /** Whether the signature (and `Content-Digest`, when present) verified. */
+  valid: boolean;
+
+  /** Algorithm resolved from the signing key's curve (P-256 -> ES256, P-384 -> ES384). */
+  alg?: UcpHttpSignatureAlgorithm;
+
+  /** `keyid` from `Signature-Input`, matched against `signing_keys[].kid`. */
+  keyid?: string;
+
+  /** Covered components from `Signature-Input` (for evidence capture). */
+  covered_components?: string[];
+
+  /** Whether a `Content-Digest` was present and verified over the raw body bytes. */
+  content_digest_verified?: boolean;
+
+  /**
+   * The signer profile URL parsed from a signed `UCP-Agent` header, when one was
+   * present and validated (evidence for the caller; never fetched here).
+   */
+  signer_profile_url?: string;
+
+  /** Error code (`E_UCP_*`) when invalid. */
+  error_code?: string;
+
+  /** Error message when invalid. */
+  error_message?: string;
+}
+
 /**
  * UCP order line item for receipt mapping.
  */

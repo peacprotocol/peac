@@ -20,7 +20,11 @@ import { ErrorCodes, TapError } from './errors.js';
  * @throws TapError if validation fails
  */
 export function validateTapTimeConstraints(params: ParsedSignatureParams, now: number): void {
-  // Validate expires is present for TAP
+  // Validate created and expires are present for TAP. They are optional at the
+  // RFC 9421 parse layer, but TAP requires both (window + freshness). Fail closed.
+  if (params.created === undefined) {
+    throw new TapError(ErrorCodes.TAP_TIME_INVALID, 'TAP signatures must have created parameter');
+  }
   if (params.expires === undefined) {
     throw new TapError(ErrorCodes.TAP_TIME_INVALID, 'TAP signatures must have expires parameter');
   }
@@ -54,10 +58,11 @@ export function validateTapTimeConstraints(params: ParsedSignatureParams, now: n
 /**
  * Validate TAP algorithm.
  *
- * @param alg - Algorithm from signature params
- * @throws TapError if algorithm is not ed25519
+ * @param alg - Algorithm from signature params (optional at the parse layer; TAP
+ *   requires it, so an absent algorithm fails closed here).
+ * @throws TapError if algorithm is missing or not ed25519
  */
-export function validateTapAlgorithm(alg: string): void {
+export function validateTapAlgorithm(alg: string | undefined): void {
   if (alg !== TAP_CONSTANTS.REQUIRED_ALGORITHM) {
     throw new TapError(
       ErrorCodes.TAP_ALGORITHM_INVALID,

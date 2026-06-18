@@ -15,6 +15,24 @@ export const ErrorCodes = {
   SIGNATURE_ALGORITHM_UNSUPPORTED: 'E_UCP_SIGNATURE_ALGORITHM_UNSUPPORTED',
   SIGNATURE_B64_INVALID: 'E_UCP_SIGNATURE_B64_INVALID',
 
+  // RFC 9421 HTTP Message Signature errors (400 - malformed)
+  HTTP_SIGNATURE_INPUT_MISSING: 'E_UCP_HTTP_SIGNATURE_INPUT_MISSING',
+  HTTP_SIGNATURE_MISSING: 'E_UCP_HTTP_SIGNATURE_MISSING',
+  HTTP_SIGNATURE_MALFORMED: 'E_UCP_HTTP_SIGNATURE_MALFORMED',
+  HTTP_SIGNATURE_COMPONENT_MISSING: 'E_UCP_HTTP_SIGNATURE_COMPONENT_MISSING',
+
+  // RFC 9530 Content-Digest errors (all 400: malformed request / integrity)
+  CONTENT_DIGEST_MISSING: 'E_UCP_CONTENT_DIGEST_MISSING',
+  CONTENT_DIGEST_MALFORMED: 'E_UCP_CONTENT_DIGEST_MALFORMED',
+  CONTENT_DIGEST_UNSUPPORTED: 'E_UCP_CONTENT_DIGEST_UNSUPPORTED',
+  CONTENT_DIGEST_MISMATCH: 'E_UCP_CONTENT_DIGEST_MISMATCH',
+
+  // Body required to verify a digest-covered request (400 - malformed)
+  BODY_REQUIRED: 'E_UCP_BODY_REQUIRED',
+
+  // Signer identity binding (401 - auth failure)
+  AGENT_MISMATCH: 'E_UCP_AGENT_MISMATCH',
+
   // Key errors (401 - auth failure)
   KEY_NOT_FOUND: 'E_UCP_KEY_NOT_FOUND',
   KEY_ALGORITHM_MISMATCH: 'E_UCP_KEY_ALGORITHM_MISMATCH',
@@ -55,6 +73,15 @@ export const ErrorHttpStatus: Record<ErrorCode, number> = {
   [ErrorCodes.SIGNATURE_MALFORMED]: 400,
   [ErrorCodes.SIGNATURE_ALGORITHM_UNSUPPORTED]: 400,
   [ErrorCodes.SIGNATURE_B64_INVALID]: 400,
+  // UCP maps a malformed/incomplete signed request to 400.
+  [ErrorCodes.HTTP_SIGNATURE_MALFORMED]: 400,
+  [ErrorCodes.HTTP_SIGNATURE_COMPONENT_MISSING]: 400,
+  [ErrorCodes.CONTENT_DIGEST_MISSING]: 400,
+  [ErrorCodes.CONTENT_DIGEST_MALFORMED]: 400,
+  [ErrorCodes.CONTENT_DIGEST_UNSUPPORTED]: 400,
+  // UCP: digest_mismatch is a request-integrity (400) error, not 401.
+  [ErrorCodes.CONTENT_DIGEST_MISMATCH]: 400,
+  [ErrorCodes.BODY_REQUIRED]: 400,
   [ErrorCodes.PAYLOAD_EMPTY]: 400,
   [ErrorCodes.PAYLOAD_NOT_JSON]: 400,
   [ErrorCodes.PAYLOAD_TOO_LARGE]: 400,
@@ -64,11 +91,16 @@ export const ErrorHttpStatus: Record<ErrorCode, number> = {
   [ErrorCodes.ORDER_MISSING_TOTALS]: 400,
 
   // 401 - Unauthorized (auth failure)
+  // UCP maps signature_missing to 401 (missing credentials), so the RFC 9421
+  // missing-header codes are 401, not 400.
+  [ErrorCodes.HTTP_SIGNATURE_INPUT_MISSING]: 401,
+  [ErrorCodes.HTTP_SIGNATURE_MISSING]: 401,
   [ErrorCodes.KEY_NOT_FOUND]: 401,
   [ErrorCodes.KEY_ALGORITHM_MISMATCH]: 401,
   [ErrorCodes.KEY_CURVE_MISMATCH]: 401,
   [ErrorCodes.SIGNATURE_INVALID]: 401,
   [ErrorCodes.VERIFICATION_FAILED]: 401,
+  [ErrorCodes.AGENT_MISMATCH]: 401,
 
   // 500 - Internal Server Error
   [ErrorCodes.EVIDENCE_SERIALIZATION_FAILED]: 500,

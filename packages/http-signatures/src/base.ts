@@ -6,6 +6,7 @@
  */
 
 import { ParsedSignatureParams, SignatureRequest } from './types.js';
+import { ErrorCodes, HttpSignatureError } from './errors.js';
 
 /**
  * Build signature base string for verification.
@@ -16,18 +17,35 @@ import { ParsedSignatureParams, SignatureRequest } from './types.js';
  */
 export function buildSignatureBase(
   request: SignatureRequest,
-  params: ParsedSignatureParams
+  params: ParsedSignatureParams,
+  options: { preferSerializedParams?: boolean } = {}
 ): string {
   const lines: string[] = [];
 
-  // Add each covered component
+  // Add each covered component. RFC 9421 Section 2.5: if a component identifier
+  // has already been added to the signature base, base generation MUST fail.
+  const seenComponents = new Set<string>();
   for (const component of params.coveredComponents) {
+    if (seenComponents.has(component)) {
+      throw new HttpSignatureError(
+        ErrorCodes.SIGNATURE_INPUT_MALFORMED,
+        `Duplicate covered component: ${component}`
+      );
+    }
+    seenComponents.add(component);
     const value = getComponentValue(request, component);
     lines.push(`"${component}": ${value}`);
   }
 
-  // Add signature params line
-  const paramsLine = buildSignatureParamsLine(params);
+  // Add signature params line. RFC 9421 requires the @signature-params value to
+  // be byte-identical to the serialized Signature-Input member that was signed.
+  // When the caller opts in and the parser captured that exact serialization,
+  // reuse it verbatim; otherwise reconstruct it (the default, and the only option
+  // for programmatically built params that have no serialized form).
+  const paramsLine =
+    options.preferSerializedParams && params.signatureParamsValue !== undefined
+      ? params.signatureParamsValue
+      : buildSignatureParamsLine(params);
   lines.push(`"@signature-params": ${paramsLine}`);
 
   return lines.join('\n');
@@ -137,8 +155,12 @@ function buildSignatureParamsLine(params: ParsedSignatureParams): string {
   const components = params.coveredComponents.map((c) => `"${c}"`).join(' ');
   let line = `(${components})`;
 
-  // Add required parameters in canonical order
-  line += `;created=${params.created}`;
+  // Emit parameters in canonical order, skipping optional ones that are absent.
+  // For the PEAC/TAP path created and alg are always present, so this is
+  // byte-identical to the previous unconditional output.
+  if (params.created !== undefined) {
+    line += `;created=${params.created}`;
+  }
 
   if (params.expires !== undefined) {
     line += `;expires=${params.expires}`;
@@ -149,7 +171,10 @@ function buildSignatureParamsLine(params: ParsedSignatureParams): string {
   }
 
   line += `;keyid="${params.keyid}"`;
-  line += `;alg="${params.alg}"`;
+
+  if (params.alg !== undefined) {
+    line += `;alg="${params.alg}"`;
+  }
 
   if (params.tag !== undefined) {
     line += `;tag="${params.tag}"`;

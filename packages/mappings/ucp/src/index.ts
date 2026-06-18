@@ -1,13 +1,20 @@
 /**
  * @peac/mappings-ucp
  *
- * Google Universal Commerce Protocol (UCP) mapping to PEAC receipts
- * and dispute evidence.
+ * Universal Commerce Protocol (UCP) mapping to PEAC receipts and dispute
+ * evidence.
  *
- * Features:
- * - Webhook signature verification (raw-first, JCS fallback)
- * - UCP order to PEAC receipt mapping
- * - Dispute evidence generation for @peac/audit bundles
+ * Signature verification:
+ * - `verifyUcpHttpSignature` verifies the current UCP signing model:
+ *   request-shaped RFC 9421 HTTP Message Signatures (ES256/ES384) with an
+ *   RFC 9530 Content-Digest over raw body bytes. Response signatures (which use
+ *   `@status`) are out of scope.
+ * - `verifyUcpWebhookSignature` remains for the legacy `Request-Signature`
+ *   detached-JWS (RFC 7797) compatibility path; the two never silently fall back
+ *   to each other.
+ *
+ * Also: UCP order to PEAC receipt mapping and dispute evidence generation for
+ * @peac/audit bundles.
  *
  * @example
  * ```ts
@@ -76,6 +83,11 @@ export type {
   // Verification types
   VerifyUcpWebhookOptions,
   VerifyUcpWebhookResult,
+  // RFC 9421 HTTP Message Signature verification types
+  UcpHttpSignatureAlgorithm,
+  UcpComponentPolicy,
+  VerifyUcpHttpSignatureOptions,
+  VerifyUcpHttpSignatureResult,
   // Order types
   UcpLineItem,
   UcpOrder,
@@ -92,8 +104,11 @@ export { UCP_EVIDENCE_VERSION } from './types.js';
 export { ErrorCodes, ErrorHttpStatus, UcpError, ucpError } from './errors.js';
 export type { ErrorCode } from './errors.js';
 
-// Verification
+// Verification (legacy Request-Signature / RFC 7797 detached JWS)
 export { verifyUcpWebhookSignature, parseDetachedJws, findSigningKey } from './verify.js';
+
+// Verification (current UCP model: RFC 9421 HTTP Message Signatures)
+export { verifyUcpHttpSignature } from './http-signature.js';
 
 // Mapping
 export { mapUcpOrderToReceipt, extractLineItemSummary, calculateOrderStats } from './mapper.js';

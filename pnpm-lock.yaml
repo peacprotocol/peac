@@ -1667,6 +1667,9 @@ importers:
       '@peac/adapter-core':
         specifier: workspace:*
         version: link:../../adapters/core
+      '@peac/http-signatures':
+        specifier: workspace:*
+        version: link:../../http-signatures
       '@peac/kernel':
         specifier: workspace:*
         version: link:../../kernel
