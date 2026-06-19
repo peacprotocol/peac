@@ -23,7 +23,8 @@ import type {
   UcpSigningKey,
 } from './types.js';
 import { UCP_EVIDENCE_VERSION } from './types.js';
-import { sha256Hex, sha256Bytes, base64urlEncode, jcsCanonicalizeSync } from './util.js';
+import { base64urlEncode, canonicalize } from '@peac/crypto';
+import { sha256Hex, sha256Bytes } from './util.js';
 
 /**
  * Maximum body size to include as base64url in evidence (256KB).
@@ -257,7 +258,7 @@ export function createPayloadEvidence(
     jsonParseable = true;
 
     // JCS canonicalize
-    const canonicalized = jcsCanonicalizeSync(parsed);
+    const canonicalized = canonicalize(parsed);
     jcsSha256Hex = sha256Hex(new TextEncoder().encode(canonicalized));
 
     if (includeJcsText) {
@@ -308,7 +309,7 @@ export function createProfileSnapshot(
   fetchedAt: string
 ): ProfileSnapshot {
   // JCS canonicalize the profile
-  const canonicalized = jcsCanonicalizeSync(profile);
+  const canonicalized = canonicalize(profile);
   const profileJcsSha256Hex = sha256Hex(new TextEncoder().encode(canonicalized));
 
   // Compute JWK thumbprint (SHA-256 of JCS-canonicalized required members)
@@ -319,7 +320,7 @@ export function createProfileSnapshot(
     y: keyUsed.y,
   };
   const thumbprint = base64urlEncode(
-    sha256Bytes(new TextEncoder().encode(jcsCanonicalizeSync(thumbprintInput)))
+    sha256Bytes(new TextEncoder().encode(canonicalize(thumbprintInput)))
   );
 
   return {
@@ -330,6 +331,3 @@ export function createProfileSnapshot(
     key_jwk: keyUsed,
   };
 }
-
-// Re-export utilities for backwards compatibility
-export { sha256Hex, sha256Bytes, base64urlEncode, jcsCanonicalizeSync } from './util.js';

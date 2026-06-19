@@ -1670,6 +1670,9 @@ importers:
       '@peac/adapter-core':
         specifier: workspace:*
         version: link:../../adapters/core
+      '@peac/crypto':
+        specifier: workspace:*
+        version: link:../../crypto
       '@peac/http-signatures':
         specifier: workspace:*
         version: link:../../http-signatures

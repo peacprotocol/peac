@@ -32,7 +32,7 @@ import type {
   UcpSignatureAlgorithm,
 } from './types.js';
 import { ErrorCodes, ucpError, UcpError } from './errors.js';
-import { jcsCanonicalizeSync, base64urlEncode } from './util.js';
+import { base64urlEncode, canonicalize } from '@peac/crypto';
 
 /**
  * Supported ECDSA algorithms and their curve mappings.
@@ -217,6 +217,21 @@ function validateKeyForAlgorithm(key: UcpSigningKey, alg: UcpSignatureAlgorithm)
   }
 }
 
+// Preserve the legacy detached-JWS payload encode guard from the pre-H2 UCP
+// helper. This limit applies only to the deprecated Request-Signature path. The
+// current RFC 9421 verifier uses raw-body Content-Digest and is not changed by H2.
+const MAX_DETACHED_JWS_ENCODE_BYTES = 16 * 1024 * 1024;
+
+function encodeDetachedJwsPayload(payloadBytes: Uint8Array): string {
+  if (payloadBytes.length > MAX_DETACHED_JWS_ENCODE_BYTES) {
+    throw ucpError(
+      ErrorCodes.SIGNATURE_MALFORMED,
+      `Input too large for base64url encoding: ${payloadBytes.length} bytes`
+    );
+  }
+  return base64urlEncode(payloadBytes);
+}
+
 /**
  * Verify a detached JWS signature against payload bytes.
  *
@@ -254,7 +269,7 @@ async function verifyDetachedSignature(
     protected: parsed.protected_b64url,
     // For b64=false: pass raw bytes directly (jose handles RFC 7797 semantics)
     // For standard JWS: pass base64url-encoded string
-    payload: parsed.is_unencoded_payload ? payloadBytes : base64urlEncode(payloadBytes),
+    payload: parsed.is_unencoded_payload ? payloadBytes : encodeDetachedJwsPayload(payloadBytes),
     signature: parsed.signature_b64url,
   };
 
@@ -402,7 +417,7 @@ export async function verifyUcpWebhookSignature(
   try {
     const bodyText = new TextDecoder('utf-8').decode(body_bytes);
     const parsed_body = JSON.parse(bodyText);
-    const canonicalized = jcsCanonicalizeSync(parsed_body);
+    const canonicalized = canonicalize(parsed_body);
     const canonicalizedBytes = new TextEncoder().encode(canonicalized);
 
     const jcsValid = await verifyDetachedSignature(parsed, canonicalizedBytes, key);
