@@ -117,6 +117,8 @@ function paymentStateToStatus(state: UcpPaymentState): 'completed' | 'pending' {
  *
  * @example
  * ```ts
+ * import { sign } from '@peac/crypto';
+ *
  * const claims = mapUcpOrderToReceipt({
  *   order: ucpOrder,
  *   issuer: 'https://merchant.example.com',
@@ -124,8 +126,8 @@ function paymentStateToStatus(state: UcpPaymentState): 'completed' | 'pending' {
  *   currency: 'USD',
  * });
  *
- * // Sign with @peac/protocol
- * const receipt = await issue(claims, privateKey, kid);
+ * // Sign the mapped claims into a JWS receipt (Ed25519 private key + kid)
+ * const receiptJws = await sign(claims, privateKey, kid);
  * ```
  */
 export function mapUcpOrderToReceipt(options: MapUcpOrderOptions): MappedReceiptClaims {

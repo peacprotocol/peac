@@ -3,20 +3,26 @@
  *
  * This example demonstrates:
  * 1. Receiving UCP order webhooks
- * 2. Verifying webhook signatures (raw-first, JCS fallback)
+ * 2. Verifying the current UCP signing model: RFC 9421 HTTP Message Signatures
+ *    (`Signature-Input` / `Signature`) with an RFC 9530 `Content-Digest` over the
+ *    raw request body bytes
  * 3. Mapping UCP orders to PEAC receipts
- * 4. Creating dispute evidence for offline verification
+ * 4. Issuing a signed PEAC receipt for the observed order
+ *
+ * PEAC can record and bind the facts of UCP signature verification. This example
+ * rejects failed or absent UCP signatures before mapping the order; it does not
+ * authenticate, authorize, settle, or execute the order.
+ *
+ * The earlier `Request-Signature` detached JWS (RFC 7797) scheme is deprecated;
+ * see the "Legacy compatibility" section of the README for `verifyUcpWebhookSignature`.
  *
  * Run with: pnpm start
  */
 
 import express from 'express';
-import type { Request, Response } from 'express';
-import {
-  mapUcpOrderToReceipt,
-  createUcpDisputeEvidence,
-  ErrorHttpStatus,
-} from '@peac/mappings-ucp';
+import type { Request, RequestHandler, Response } from 'express';
+import { rateLimit } from 'express-rate-limit';
+import { verifyUcpHttpSignature, mapUcpOrderToReceipt, ErrorHttpStatus } from '@peac/mappings-ucp';
 import type { UcpOrder, UcpProfile } from '@peac/mappings-ucp';
 import { generateKeypair, sign } from '@peac/crypto';
 
@@ -50,10 +56,30 @@ const PORT = process.env.PORT || 3000;
 const ISSUER = process.env.ISSUER || 'https://platform.example.com';
 const CURRENCY = process.env.CURRENCY || 'USD';
 
+/**
+ * Canonical public HTTPS URL this endpoint is reachable at. UCP signs the
+ * `@authority` / `@path` derived components over the canonical request URL, so
+ * verification MUST use that URL, not the raw socket address. In this local demo
+ * the server listens on http://localhost but is addressed as PUBLIC_URL; behind a
+ * TLS-terminating proxy in production you would derive the public URL from your
+ * deployment configuration (never from caller-controlled Host headers).
+ */
+const PUBLIC_URL = process.env.PUBLIC_URL || 'https://platform.example.com';
+const WEBHOOK_PATH = '/webhooks/ucp/orders';
+
+/**
+ * Expected signer identity profile. This is the signer's `/.well-known/ucp`
+ * profile URL (distinct from PUBLIC_URL, which is the receiver endpoint). When
+ * passed as `expected_profile_url`, the verifier requires a signed `UCP-Agent`
+ * whose profile equals this value, binding the signature to a known signer.
+ */
+const SIGNER_PROFILE_URL = 'https://demo.business.example.com/.well-known/ucp';
+
 // In production, load from secure storage
 let signingKeypair: { privateKey: Uint8Array; publicKey: Uint8Array } | undefined;
 
-// Mock UCP profile for demo (in production, this is fetched from /.well-known/ucp)
+// Mock UCP profile for demo (in production, this is fetched from /.well-known/ucp
+// over an SSRF-safe, host-allowlisted path and passed to the verifier).
 const MOCK_PROFILE: UcpProfile = {
   version: '2026-01-11',
   business_id: 'demo_business',
@@ -62,14 +88,25 @@ const MOCK_PROFILE: UcpProfile = {
       kty: 'EC',
       crv: 'P-256',
       kid: 'demo-key-001',
-      x: 'WbbYvAT6hxoZn-zSA7h3JXQlTFGPMCx2MxZ2SjCNrYo',
-      y: 'JWYUg4z0JJyIOl2lKN3JCB6HWBGtS-31X7WQWFZ7OTI',
+      x: '1r5jSqODThl8JfPN0o7y6T24x3GsQvv30byrvCGR-Bs',
+      y: 'tnZaWtpX8uUi511v2QFFLY8rzSPhFqGKyd-tOvJoM4k',
       alg: 'ES256',
     },
   ],
 };
 
 const app = express();
+
+// Rate limiter for the webhook endpoint. The handler verifies signatures and
+// issues receipts, so cap requests per client to blunt brute-force and abuse.
+// Cast bridges a types-only skew: express-rate-limit v8 ships Express 5 core
+// types, while this example pins Express 4; the middleware is runtime-compatible.
+const webhookLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  limit: 100, // per IP per window
+  standardHeaders: 'draft-7', // RateLimit-* response headers
+  legacyHeaders: false,
+}) as unknown as RequestHandler;
 
 // Raw body parser for webhook signature verification
 app.use('/webhooks', express.raw({ type: 'application/json' }));
@@ -96,23 +133,23 @@ function toBuffer(body: unknown): Buffer | null {
 }
 
 /**
+ * Read the first value of a possibly-repeated header.
+ */
+function firstHeader(value: string | string[] | undefined): string | undefined {
+  if (Array.isArray(value)) {
+    return value[0];
+  }
+  return value;
+}
+
+/**
  * UCP Order Webhook Endpoint
  *
- * Receives order events from UCP-compliant businesses.
- * Verifies the signature and issues a PEAC receipt.
+ * Receives order events from UCP-compliant businesses and verifies them with the
+ * current UCP signing model (RFC 9421 HTTP Message Signatures), then issues a
+ * PEAC receipt for the observed order.
  */
-app.post('/webhooks/ucp/orders', async (req: Request, res: Response) => {
-  // Handle header that may be string or array (if sent multiple times)
-  const rawSignatureHeader = req.headers['request-signature'];
-  let signatureHeader: string | undefined;
-  if (Array.isArray(rawSignatureHeader)) {
-    signatureHeader = rawSignatureHeader[0];
-  } else if (typeof rawSignatureHeader === 'string') {
-    signatureHeader = rawSignatureHeader;
-  } else {
-    signatureHeader = undefined;
-  }
-
+app.post(WEBHOOK_PATH, webhookLimiter, async (req: Request, res: Response) => {
   // Convert body to Buffer using helper (breaks taint tracking)
   const bodyBytes = toBuffer(req.body);
   if (bodyBytes === null) {
@@ -122,61 +159,69 @@ app.post('/webhooks/ucp/orders', async (req: Request, res: Response) => {
     });
   }
 
-  // Safely get content length for logging
-  const contentLength = bodyBytes.byteLength;
-
   console.log('Received UCP webhook');
-  console.log('  Content-Length:', sanitizeForLog(contentLength));
-  console.log('  Request-Signature:', signatureHeader ? 'present' : 'missing');
+  console.log('  Content-Length:', sanitizeForLog(bodyBytes.byteLength));
+  console.log(
+    '  Signature-Input:',
+    firstHeader(req.headers['signature-input']) ? 'present' : 'missing'
+  );
 
-  // Check for signature header
-  if (!signatureHeader) {
-    console.log('  Error: Missing Request-Signature header');
-    return res.status(400).json({
-      error: 'E_UCP_SIGNATURE_MISSING',
-      message: 'Request-Signature header is required',
-    });
+  // Collect the signed request components the verifier needs (case-insensitive).
+  const headers: Record<string, string> = {};
+  for (const name of ['content-type', 'content-digest', 'idempotency-key', 'ucp-agent']) {
+    const value = firstHeader(req.headers[name]);
+    if (value !== undefined) {
+      headers[name] = value;
+    }
   }
 
-  const receivedAt = new Date().toISOString();
-  const profileFetchedAt = receivedAt; // In production, track actual fetch time
-
   try {
-    // Create dispute evidence (includes signature verification)
-    const evidence = await createUcpDisputeEvidence({
-      signature_header: signatureHeader,
-      body_bytes: new Uint8Array(bodyBytes),
+    // Verify the RFC 9421 signature. The profile is supplied here (no network
+    // I/O happens inside the verifier); `url` is the canonical public URL the
+    // signer signed over, not the raw socket address.
+    const result = await verifyUcpHttpSignature({
+      signature_input: firstHeader(req.headers['signature-input']) ?? '',
+      signature: firstHeader(req.headers['signature']) ?? '',
       method: 'POST',
-      path: '/webhooks/ucp/orders',
-      received_at: receivedAt,
-      profile_url: 'https://demo.business.example.com/.well-known/ucp',
-      profile_fetched_at: profileFetchedAt,
-      profile: MOCK_PROFILE, // In production, fetch from profile_url
+      url: `${PUBLIC_URL}${WEBHOOK_PATH}`,
+      headers,
+      body_bytes: new Uint8Array(bodyBytes),
+      profile: MOCK_PROFILE, // In production, resolve from the signer's /.well-known/ucp
+      expected_profile_url: SIGNER_PROFILE_URL, // bind the signed UCP-Agent to a known signer
     });
 
-    console.log('  Signature verification:', evidence.signature_valid ? 'PASSED' : 'FAILED');
-    console.log('  Verification mode:', evidence.verification.mode_used || 'none');
+    console.log('  Signature verification:', result.valid ? 'PASSED' : 'FAILED');
 
-    if (!evidence.signature_valid) {
-      console.log('  Error:', evidence.verification.error_code);
-      console.log('  Attempts:', evidence.verification.attempts);
+    if (!result.valid) {
+      console.log('  Error:', result.error_code);
 
-      const httpStatus = evidence.verification.error_code
-        ? ErrorHttpStatus[evidence.verification.error_code as keyof typeof ErrorHttpStatus] || 401
+      const httpStatus = result.error_code
+        ? ErrorHttpStatus[result.error_code as keyof typeof ErrorHttpStatus] || 401
         : 401;
 
       return res.status(httpStatus).json({
-        error: evidence.verification.error_code,
-        message: evidence.verification.error_message,
-        attempts: evidence.verification.attempts,
+        error: result.error_code,
+        message: result.error_message,
       });
     }
 
-    // Parse the webhook payload
-    const payload = JSON.parse(bodyBytes.toString()) as {
-      event_type: string;
-      order: UcpOrder;
-    };
+    console.log('  Algorithm:', result.alg);
+    console.log('  Content-Digest verified:', result.content_digest_verified ? 'yes' : 'n/a');
+    if (result.signer_profile_url) {
+      console.log('  Signer profile:', sanitizeForLog(result.signer_profile_url));
+    }
+
+    // Parse the webhook payload. The body is signature- and digest-verified at
+    // this point, so a parse failure means malformed JSON (client error -> 400).
+    let payload: { event_type: string; order: UcpOrder };
+    try {
+      payload = JSON.parse(bodyBytes.toString());
+    } catch {
+      return res.status(400).json({
+        error: 'E_UCP_PAYLOAD_NOT_JSON',
+        message: 'Request body is not valid JSON',
+      });
+    }
 
     console.log('  Event type:', sanitizeForLog(payload.event_type));
     console.log('  Order ID:', sanitizeForLog(payload.order.id));
@@ -187,7 +232,7 @@ app.post('/webhooks/ucp/orders', async (req: Request, res: Response) => {
       issuer: ISSUER,
       subject: `buyer:${payload.order.checkout_id || 'unknown'}`,
       currency: CURRENCY,
-      issued_at: receivedAt,
+      issued_at: new Date().toISOString(),
     });
 
     console.log('  Receipt claims mapped');
@@ -207,10 +252,6 @@ app.post('/webhooks/ucp/orders', async (req: Request, res: Response) => {
 
     console.log('  Receipt issued:', claims.jti);
 
-    // Store evidence for potential disputes (in production, persist to database)
-    console.log('  Evidence YAML stored for dispute bundle');
-    // evidence.evidence_yaml can be passed to createDisputeBundle()
-
     // Respond with receipt info
     res.status(200).json({
       status: 'processed',
@@ -220,7 +261,10 @@ app.post('/webhooks/ucp/orders', async (req: Request, res: Response) => {
       order_id: payload.order.id,
     });
   } catch (error) {
-    console.error('  Error processing webhook:', error);
+    console.error(
+      '  Error processing webhook:',
+      sanitizeForLog(error instanceof Error ? error.message : 'unknown error')
+    );
     res.status(500).json({
       error: 'E_INTERNAL',
       message: 'Failed to process webhook',
@@ -247,7 +291,7 @@ app.listen(PORT, () => {
   console.log(`UCP Webhook Example Server running on port ${PORT}`);
   console.log('');
   console.log('Endpoints:');
-  console.log(`  POST http://localhost:${PORT}/webhooks/ucp/orders - Receive UCP order webhooks`);
+  console.log(`  POST http://localhost:${PORT}${WEBHOOK_PATH} - Receive UCP order webhooks`);
   console.log(`  GET  http://localhost:${PORT}/health - Health check`);
   console.log(`  GET  http://localhost:${PORT}/.well-known/ucp - Mock UCP profile`);
   console.log('');

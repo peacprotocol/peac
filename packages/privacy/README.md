@@ -17,9 +17,9 @@ pnpm add @peac/privacy
 ### Issue a privacy-tagged receipt
 
 ```typescript
-import { issueWire02 } from '@peac/protocol';
+import { issue } from '@peac/protocol';
 
-const receipt = await issueWire02({
+const receipt = await issue({
   iss: 'https://issuer.example.com',
   kind: 'evidence',
   type: 'org.peacprotocol/privacy',

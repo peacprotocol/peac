@@ -18,17 +18,26 @@
  *
  * @example
  * ```ts
- * import {
- *   verifyUcpWebhookSignature,
- *   mapUcpOrderToReceipt,
- *   createUcpDisputeEvidence,
- * } from '@peac/mappings-ucp';
+ * import { verifyUcpHttpSignature, mapUcpOrderToReceipt } from '@peac/mappings-ucp';
+ * import { sign } from '@peac/crypto';
  *
- * // Verify webhook signature
- * const result = await verifyUcpWebhookSignature({
- *   signature_header: req.headers['request-signature'],
+ * // Verify the current UCP signing model (RFC 9421 HTTP Message Signature).
+ * // The /.well-known/ucp profile is resolved by the caller (SSRF-safe) and
+ * // passed in; this function performs no network I/O.
+ * const result = await verifyUcpHttpSignature({
+ *   signature_input: req.headers['signature-input'],
+ *   signature: req.headers['signature'],
+ *   method: 'POST',
+ *   url: 'https://platform.example.com/webhooks/ucp/orders',
+ *   headers: {
+ *     'content-type': req.headers['content-type'],
+ *     'content-digest': req.headers['content-digest'],
+ *     'idempotency-key': req.headers['idempotency-key'],
+ *     'ucp-agent': req.headers['ucp-agent'],
+ *   },
  *   body_bytes: rawBody,
- *   profile_url: 'https://business.example.com/.well-known/ucp',
+ *   profile: ucpProfile,
+ *   expected_profile_url: 'https://business.example.com/.well-known/ucp', // bind the signer
  * });
  *
  * if (result.valid) {
@@ -40,8 +49,8 @@
  *     currency: 'USD',
  *   });
  *
- *   // Sign with @peac/protocol
- *   const receipt = await issue(claims, privateKey, kid);
+ *   // Sign the mapped claims into a JWS receipt
+ *   const receiptJws = await sign(claims, privateKey, kid);
  * }
  * ```
  */

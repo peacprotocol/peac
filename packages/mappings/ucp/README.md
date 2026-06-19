@@ -10,7 +10,7 @@ pnpm add @peac/mappings-ucp
 
 ## What It Does
 
-`@peac/mappings-ucp` maps UCP order data to PEAC receipt claims, verifies UCP webhook signatures using detached JWS (RFC 7797), and generates structured dispute evidence bundles. Order state is kept distinct from payment state: the `payment_state_source` field marks whether payment status was explicitly provided or derived from order fulfillment, so downstream consumers can distinguish observed payment evidence from inferred status.
+`@peac/mappings-ucp` maps UCP order data to PEAC receipt claims, verifies UCP request and webhook signatures, and generates structured dispute evidence bundles. The current UCP signing model is RFC 9421 HTTP Message Signatures (`Signature-Input` / `Signature` with an RFC 9530 `Content-Digest` over the raw body bytes), verified by `verifyUcpHttpSignature`. The earlier `Request-Signature` detached JWS (RFC 7797) path remains available for backward compatibility, deprecated, via `verifyUcpWebhookSignature`; the two schemes never silently fall back to each other. Order state is kept distinct from payment state: the `payment_state_source` field marks whether payment status was explicitly provided or derived from order fulfillment, so downstream consumers can distinguish observed payment evidence from inferred status.
 
 ## How Do I Use It?
 
@@ -18,6 +18,7 @@ pnpm add @peac/mappings-ucp
 
 ```typescript
 import { mapUcpOrderToReceipt } from '@peac/mappings-ucp';
+import { sign } from '@peac/crypto';
 
 const claims = mapUcpOrderToReceipt({
   order: ucpOrder,
@@ -26,15 +27,64 @@ const claims = mapUcpOrderToReceipt({
   currency: 'USD',
 });
 
-// Sign with @peac/protocol
-const receipt = await issue(claims, privateKey, kid);
+// Sign the mapped claims into a JWS receipt (Ed25519 private key + kid)
+const receiptJws = await sign(claims, privateKey, kid);
 ```
 
-### Verify a UCP webhook signature
+### Verify a UCP request or webhook signature (RFC 9421)
+
+`verifyUcpHttpSignature` is the current signing model. It verifies the RFC 9421
+`Signature-Input` / `Signature` and, when a body is present, an RFC 9530
+`Content-Digest` over the raw request body bytes. The algorithm (ES256 for P-256,
+ES384 for P-384) is resolved from the signing key's curve; UCP does not put `alg`
+in `Signature-Input`. The UCP party profile is resolved by the caller (SSRF-safe,
+host-allowlisted) and passed in; this function performs no network I/O.
+
+The verifier parses a signed `UCP-Agent` header and returns its profile as
+`signer_profile_url`. When you supply `expected_profile_url`, it also binds that
+signed profile to the expected signer: the `UCP-Agent` component MUST be signed
+and its profile MUST equal the expected URL, or verification fails. An unsigned
+component is never trusted.
+
+```typescript
+import { verifyUcpHttpSignature } from '@peac/mappings-ucp';
+
+const result = await verifyUcpHttpSignature({
+  signature_input: req.headers['signature-input'],
+  signature: req.headers['signature'],
+  method: 'POST',
+  url: 'https://platform.example.com/webhooks/ucp/orders',
+  headers: {
+    'content-type': req.headers['content-type'],
+    'content-digest': req.headers['content-digest'],
+    'idempotency-key': req.headers['idempotency-key'],
+    'ucp-agent': req.headers['ucp-agent'],
+  },
+  body_bytes: rawBody,
+  profile: ucpProfile, // the /.well-known/ucp document, resolved by the caller
+  expected_profile_url: 'https://business.example.com/.well-known/ucp', // bind the signer
+});
+
+if (result.valid) {
+  // Signature verified and Content-Digest bound the raw body; proceed with mapping.
+  // result.signer_profile_url is the bound UCP-Agent profile.
+}
+```
+
+This verifier covers request-shaped UCP signatures; UCP response signatures use
+`@status` and are a separate component model, out of scope here.
+
+### Legacy: verify a Request-Signature detached JWS (deprecated)
+
+Earlier UCP integrations used a `Request-Signature` detached JWS (RFC 7797). That
+path remains exported as `verifyUcpWebhookSignature` for backward compatibility
+and is deprecated; new integrations should use `verifyUcpHttpSignature`. There is
+no silent fallback between the two schemes: the caller selects one explicitly.
 
 ```typescript
 import { verifyUcpWebhookSignature } from '@peac/mappings-ucp';
 
+// Deprecated: legacy Request-Signature / RFC 7797 path.
 const result = await verifyUcpWebhookSignature({
   signature_header: req.headers['request-signature'],
   body_bytes: rawBody,
@@ -85,14 +135,14 @@ const extracted = adapter.extract(webhookPayload);
 
 - `@peac/kernel` (Layer 0): Evidence carrier types and constants
 - `@peac/schema` (Layer 1): Receipt schemas and carrier validation
-- `@peac/protocol` (Layer 3): Sign mapped claims into receipts with `issue()`
+- `@peac/crypto` (Layer 2): Sign mapped receipt claims into JWS receipts with `sign()`
 
 ## For Agent Developers
 
 If you are building an AI agent that interacts with UCP-based commerce platforms:
 
 - Use `mapUcpOrderToReceipt()` to produce signed evidence of order observations
-- Use `verifyUcpWebhookSignature()` to validate incoming webhook authenticity before mapping
+- Use `verifyUcpHttpSignature()` to verify the RFC 9421 signature on incoming UCP requests and webhooks before mapping (the legacy `verifyUcpWebhookSignature()` covers the deprecated `Request-Signature` path)
 - Order status reflects fulfillment state; payment status requires explicit `payment_state` when the upstream source provides it
 - See the [llms.txt](https://github.com/peacprotocol/peac/blob/main/llms.txt) for a concise protocol overview
 

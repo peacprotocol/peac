@@ -12,6 +12,8 @@ pnpm add @peac/receipts
 
 `@peac/receipts` provides a fluent `ReceiptBuilder` for constructing valid PEAC receipts, validation functions for conditional field enforcement (such as payment fields for HTTP 402), and content negotiation support for JSON and CBOR serialization. It operates on the receipt payload structure before signing.
 
+> Note: `ReceiptBuilder` constructs the Wire 0.1 receipt payload model (`peac-receipt/0.1`, with the crawler/AIPREF fields shown below). The current stable signed-record format is Wire 0.2 (`interaction-record+jwt`); issue those records with `issue()` from [`@peac/protocol`](https://www.npmjs.com/package/@peac/protocol).
+
 ## How Do I Use It?
 
 ### Build a receipt with the fluent builder

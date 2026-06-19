@@ -1,60 +1,121 @@
 /**
  * UCP Webhook Demo Script
  *
- * Sends a mock UCP order webhook to the local server.
- * Demonstrates signature verification and receipt issuance.
+ * Sends a mock UCP order webhook to the local server, signed with the current UCP
+ * signing model: an RFC 9421 HTTP Message Signature (`Signature-Input` /
+ * `Signature`) plus an RFC 9530 `Content-Digest` over the raw body bytes.
+ * Demonstrates signature verification and receipt issuance, then a tamper case.
  *
  * Prerequisites:
  * 1. Start the server: pnpm start
  * 2. Run this demo: pnpm demo
+ *
+ * The signature base is built with `@peac/http-signatures` (the same RFC 9421
+ * mechanics the verifier uses), so the signer and verifier cannot drift. PEAC
+ * verifies the result with `verifyUcpHttpSignature`.
  */
 
 import * as crypto from 'node:crypto';
+import {
+  buildSignatureBase,
+  signatureBaseToBytes,
+  type ParsedSignatureParams,
+  type SignatureRequest,
+} from '@peac/http-signatures';
 
-// Server configuration
+// Transport address of the local server (HTTP). The signature is computed over
+// the canonical PUBLIC_URL below, matching what the server verifies against.
 const SERVER_URL = process.env.SERVER_URL || 'http://localhost:3000';
+const PUBLIC_URL = process.env.PUBLIC_URL || 'https://platform.example.com';
+const WEBHOOK_PATH = '/webhooks/ucp/orders';
 
-// Demo EC keypair (P-256 curve for ES256)
-// In production, this would be the business's signing key
+const KID = 'demo-key-001';
+const IDEMPOTENCY_KEY = 'demo-idem-001';
+// Signer identity profile, bound by the verifier via expected_profile_url.
+const SIGNER_PROFILE_URL = 'https://demo.business.example.com/.well-known/ucp';
+const UCP_AGENT = `profile="${SIGNER_PROFILE_URL}"`;
+
+// Demo EC keypair (P-256 curve for ES256). In production this is the signer's key,
+// published as a JWK in their /.well-known/ucp profile (public x/y only).
+// Demo-only keypair. Do not reuse this private key outside this example.
 const DEMO_PRIVATE_KEY = crypto.createPrivateKey({
   key: {
     kty: 'EC',
     crv: 'P-256',
-    x: 'WbbYvAT6hxoZn-zSA7h3JXQlTFGPMCx2MxZ2SjCNrYo',
-    y: 'JWYUg4z0JJyIOl2lKN3JCB6HWBGtS-31X7WQWFZ7OTI',
-    d: 'uFZ3pQlcyf4oCK2I9qZm9r3vJ9hCfTX2_F3yVl5QYQI',
+    x: '1r5jSqODThl8JfPN0o7y6T24x3GsQvv30byrvCGR-Bs',
+    y: 'tnZaWtpX8uUi511v2QFFLY8rzSPhFqGKyd-tOvJoM4k',
+    d: 'QdOJRxCr_fsTKG2fno__oWWOIuXQnFyPMz4XiHoYMUw',
   },
   format: 'jwk',
 });
 
+// Covered components for a UCP request POST with a body. Order is significant: it
+// is the order serialized into Signature-Input and reflected in the signature base.
+const COVERED_COMPONENTS = [
+  '@method',
+  '@authority',
+  '@path',
+  'content-digest',
+  'content-type',
+  'idempotency-key',
+  'ucp-agent',
+] as const;
+
 /**
- * Create a detached JWS signature for UCP webhook
+ * Compute an RFC 9530 Content-Digest header value over raw bytes (sha-256).
  */
-function signDetachedJws(payload: Buffer, kid: string): string {
-  // Create protected header
-  const header = {
-    alg: 'ES256',
-    kid,
+function contentDigest(body: Buffer): string {
+  const digest = crypto.createHash('sha256').update(body).digest('base64');
+  return `sha-256=:${digest}:`;
+}
+
+/**
+ * Sign a UCP request with an RFC 9421 HTTP Message Signature. Returns the headers
+ * to send alongside the body: Signature-Input, Signature, and Content-Digest.
+ *
+ * The signature base is built with `@peac/http-signatures` buildSignatureBase
+ * (preferSerializedParams), the exact mechanics the verifier uses, so the signed
+ * value cannot drift from what is verified. UCP omits `alg`/`created`.
+ */
+function signUcpRequest(body: Buffer): Record<string, string> {
+  const digest = contentDigest(body);
+  const request: SignatureRequest = {
+    method: 'POST',
+    url: `${PUBLIC_URL}${WEBHOOK_PATH}`,
+    headers: {
+      'content-digest': digest,
+      'content-type': 'application/json',
+      'idempotency-key': IDEMPOTENCY_KEY,
+      'ucp-agent': UCP_AGENT,
+    },
   };
 
-  const headerB64 = Buffer.from(JSON.stringify(header)).toString('base64url');
-  const payloadB64 = payload.toString('base64url');
+  // Serialized Signature-Input value (inner list + parameters; UCP omits alg/created).
+  const innerList = COVERED_COMPONENTS.map((c) => `"${c}"`).join(' ');
+  const signatureParamsValue = `(${innerList});keyid="${KID}"`;
 
-  // Create signing input
-  const signingInput = `${headerB64}.${payloadB64}`;
+  const params: ParsedSignatureParams = {
+    keyid: KID,
+    coveredComponents: [...COVERED_COMPONENTS],
+    signatureParamsValue,
+  };
 
-  // Sign with ES256
-  // IMPORTANT: Use 'ieee-p1363' dsaEncoding for JWS-compatible signatures
-  // Default is 'der' which produces DER-encoded signatures, but JWS ES256/384/512
-  // requires raw R||S concatenation (IEEE P1363 format)
-  const signature = crypto.sign('sha256', Buffer.from(signingInput), {
+  const base = buildSignatureBase(request, params, { preferSerializedParams: true });
+
+  // ES256 raw (r||s, IEEE P1363) signature, base64 byte-sequence per RFC 8941.
+  const signatureBytes = crypto.sign('sha256', signatureBaseToBytes(base), {
     key: DEMO_PRIVATE_KEY,
     dsaEncoding: 'ieee-p1363',
   });
-  const signatureB64 = signature.toString('base64url');
 
-  // Return detached JWS (empty payload section)
-  return `${headerB64}..${signatureB64}`;
+  return {
+    'Content-Type': 'application/json',
+    'Content-Digest': digest,
+    'Idempotency-Key': IDEMPOTENCY_KEY,
+    'UCP-Agent': UCP_AGENT,
+    'Signature-Input': `sig1=${signatureParamsValue}`,
+    Signature: `sig1=:${signatureBytes.toString('base64')}:`,
+  };
 }
 
 /**
@@ -128,24 +189,22 @@ async function main() {
   );
   console.log('');
 
-  // Sign the payload
-  console.log('2. Signing payload with ES256 (detached JWS)');
-  const signature = signDetachedJws(payloadBytes, 'demo-key-001');
-  console.log('   Request-Signature:', signature.substring(0, 50) + '...');
+  // Sign the payload (RFC 9421 HTTP Message Signature + RFC 9530 Content-Digest)
+  console.log('2. Signing request with ES256 (RFC 9421 HTTP Message Signature)');
+  const signedHeaders = signUcpRequest(payloadBytes);
+  console.log('   Content-Digest:', signedHeaders['Content-Digest']);
+  console.log('   Signature-Input:', signedHeaders['Signature-Input']);
   console.log('');
 
   // Send webhook
-  console.log('3. Sending webhook to server');
-  console.log('   URL:', `${SERVER_URL}/webhooks/ucp/orders`);
+  console.log('3. Sending signed webhook to server');
+  console.log('   URL:', `${SERVER_URL}${WEBHOOK_PATH}`);
   console.log('');
 
   try {
-    const response = await fetch(`${SERVER_URL}/webhooks/ucp/orders`, {
+    const response = await fetch(`${SERVER_URL}${WEBHOOK_PATH}`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Request-Signature': signature,
-      },
+      headers: signedHeaders,
       body: payloadJson,
     });
 
@@ -157,7 +216,7 @@ async function main() {
     console.log('');
 
     if (response.ok) {
-      console.log('SUCCESS: Webhook processed and PEAC receipt issued');
+      console.log('SUCCESS: Webhook verified and PEAC receipt issued');
       console.log('');
       console.log('Receipt details:');
       console.log('  ID:', result.receipt_id);
@@ -167,12 +226,39 @@ async function main() {
       console.log('ERROR: Webhook processing failed');
       console.log('  Code:', result.error);
       console.log('  Message:', result.message);
+      return;
     }
   } catch (error) {
     console.error('ERROR: Failed to send webhook');
     console.error(error);
     console.log('');
     console.log('Make sure the server is running: pnpm start');
+    return;
+  }
+
+  // Tamper case: reuse the valid signature/digest but mutate the body. The
+  // Content-Digest no longer matches the raw bytes, so the server rejects it.
+  console.log('');
+  console.log('5. Tamper check: resending with a mutated body and the same signature');
+  const tamperedPayload = payloadJson.replace('order_demo_12345', 'order_TAMPERED');
+  try {
+    const signedHeaders = signUcpRequest(payloadBytes); // signature/digest of the ORIGINAL body
+    const response = await fetch(`${SERVER_URL}${WEBHOOK_PATH}`, {
+      method: 'POST',
+      headers: signedHeaders,
+      body: tamperedPayload,
+    });
+    const result = await response.json();
+    console.log('   Status:', response.status);
+    console.log('   Code:', result.error);
+    if (!response.ok) {
+      console.log('EXPECTED: tampered body rejected (Content-Digest binds the raw bytes)');
+    } else {
+      console.log('UNEXPECTED: tampered body was accepted');
+    }
+  } catch (error) {
+    console.error('ERROR: Failed to send tamper request');
+    console.error(error);
   }
 }
 

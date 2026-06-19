@@ -1,8 +1,15 @@
 /**
  * @peac/mappings-ucp - Type definitions
  *
- * Google Universal Commerce Protocol (UCP) types and evidence schema.
- * UCP webhooks use detached JWS (RFC 7797) with ES256/ES384/ES512.
+ * Universal Commerce Protocol (UCP) types and evidence schema.
+ *
+ * The current UCP signing model is RFC 9421 HTTP Message Signatures
+ * (`Signature-Input` / `Signature` with an RFC 9530 `Content-Digest` over the
+ * raw body bytes; ES256 for P-256, ES384 for P-384), modeled by the
+ * `VerifyUcpHttpSignature*` types and verified by `verifyUcpHttpSignature`.
+ * The detached JWS (RFC 7797) `Request-Signature` types below model the legacy,
+ * deprecated `verifyUcpWebhookSignature` path; the two never silently fall back
+ * to each other.
  */
 
 /**

@@ -1,7 +1,7 @@
 {
   "name": "@peac/mappings-ucp",
   "version": "0.15.1",
-  "description": "Google Universal Commerce Protocol (UCP) mapping to PEAC receipts and dispute evidence",
+  "description": "Universal Commerce Protocol (UCP) mapping to PEAC receipts and dispute evidence",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

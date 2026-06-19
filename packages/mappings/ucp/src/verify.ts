@@ -1,5 +1,11 @@
 /**
- * @peac/mappings-ucp - Webhook signature verification
+ * @peac/mappings-ucp - Legacy webhook signature verification (deprecated)
+ *
+ * This module verifies the legacy UCP `Request-Signature` detached JWS (RFC 7797)
+ * scheme. The current UCP signing model is RFC 9421 HTTP Message Signatures; use
+ * `verifyUcpHttpSignature` from `./http-signature.js` for new integrations. These
+ * exports remain for backward compatibility and never silently fall back to (or
+ * from) the RFC 9421 path.
  *
  * Verifies UCP webhook signatures using detached JWS (RFC 7797).
  * Supports ES256, ES384, ES512 algorithms with ECDSA keys.
@@ -46,6 +52,10 @@ const UNDERSTOOD_CRIT_PARAMS = new Set(['b64']);
 /**
  * Parse a detached JWS from the Request-Signature header.
  * Format: <protected>..<signature> (empty payload section)
+ *
+ * @deprecated Part of the legacy UCP `Request-Signature` (RFC 7797) path. The
+ * current UCP signing model is RFC 9421 HTTP Message Signatures; prefer
+ * `verifyUcpHttpSignature`. Retained for backward compatibility.
  */
 export function parseDetachedJws(headerValue: string): ParsedDetachedJws {
   const trimmed = headerValue.trim();
@@ -260,7 +270,12 @@ async function verifyDetachedSignature(
 }
 
 /**
- * Verify a UCP webhook signature.
+ * Verify a UCP webhook signature (legacy `Request-Signature` / RFC 7797 path).
+ *
+ * @deprecated The current UCP signing model is RFC 9421 HTTP Message Signatures;
+ * use `verifyUcpHttpSignature` for new integrations. This legacy detached-JWS
+ * path remains exported for backward compatibility and never silently falls back
+ * to (or from) the RFC 9421 path.
  *
  * Strategy: raw-first, JCS fallback
  * 1. Parse the detached JWS from Request-Signature header
