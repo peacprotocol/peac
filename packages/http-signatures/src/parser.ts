@@ -349,9 +349,15 @@ function parseInnerList(content: string): string[] {
 /**
  * Parse parameters from ;key=value;key2=value2 format.
  */
+
+// The closed set of RFC 9421 signature parameters consumed by callers. Only these
+// names are stored, so a caller-controlled parameter name from the header is never
+// written to an arbitrary (or prototype-polluting) property. Unknown parameters are
+// ignored, which is already how the consumer treats them.
+const ALLOWED_PARAMS = new Set(['keyid', 'alg', 'created', 'expires', 'nonce', 'tag']);
+
 function parseParameters(paramsString: string): Record<string, string | number> {
-  // Null-prototype map so a caller-controlled parameter name can never reach
-  // Object.prototype, defense in depth alongside the explicit key guard below.
+  // Null-prototype map, defense in depth alongside the allowlist guard below.
   const params: Record<string, string | number> = Object.create(null);
 
   // Split by semicolon
@@ -361,11 +367,9 @@ function parseParameters(paramsString: string): Record<string, string | number> 
     const [key, value] = splitKeyValue(part.trim());
     if (!key) continue;
 
-    // Never write a prototype-polluting property name from caller-controlled
-    // header input. Legitimate RFC 9421 parameters (created, expires, nonce,
-    // keyid, alg, tag) are never these, so skipping them changes nothing for
-    // valid input and is the only consumer-visible effect.
-    if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue;
+    // Only store known RFC 9421 parameters; the write target is constrained to a
+    // constant allowlist rather than caller-controlled input.
+    if (!ALLOWED_PARAMS.has(key)) continue;
 
     // Parse value - could be integer, string, or token
     if (!value) {
