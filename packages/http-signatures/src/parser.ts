@@ -350,7 +350,9 @@ function parseInnerList(content: string): string[] {
  * Parse parameters from ;key=value;key2=value2 format.
  */
 function parseParameters(paramsString: string): Record<string, string | number> {
-  const params: Record<string, string | number> = {};
+  // Null-prototype map so a caller-controlled parameter name can never reach
+  // Object.prototype, defense in depth alongside the explicit key guard below.
+  const params: Record<string, string | number> = Object.create(null);
 
   // Split by semicolon
   const parts = paramsString.split(';').filter((p) => p.trim());
@@ -358,6 +360,12 @@ function parseParameters(paramsString: string): Record<string, string | number> 
   for (const part of parts) {
     const [key, value] = splitKeyValue(part.trim());
     if (!key) continue;
+
+    // Never write a prototype-polluting property name from caller-controlled
+    // header input. Legitimate RFC 9421 parameters (created, expires, nonce,
+    // keyid, alg, tag) are never these, so skipping them changes nothing for
+    // valid input and is the only consumer-visible effect.
+    if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue;
 
     // Parse value - could be integer, string, or token
     if (!value) {
