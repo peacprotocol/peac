@@ -47,6 +47,7 @@
   },
   "dependencies": {
     "@peac/adapter-core": "workspace:*",
+    "@peac/crypto": "workspace:*",
     "@peac/http-signatures": "workspace:*",
     "@peac/kernel": "workspace:*",
     "@peac/schema": "workspace:*",
