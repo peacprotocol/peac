@@ -6,6 +6,11 @@
  *
  * Evidence is stored in policy/policy.yaml with a hardened schema
  * that cannot be misinterpreted as executable policy.
+ *
+ * Note: these helpers verify the legacy `Request-Signature` detached JWS
+ * (RFC 7797) path via `verifyUcpWebhookSignature`. The current UCP signing model
+ * is RFC 9421 HTTP Message Signatures (`verifyUcpHttpSignature`); a request-shaped
+ * dispute-evidence helper for that path is not yet provided here.
  */
 
 import type {

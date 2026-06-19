@@ -82,6 +82,7 @@ HTTP `Payment` authentication scheme, aligned with the active Internet-Draft `dr
 - **Approach**: order-vs-payment separation; order state distinct from payment state
 - **Package**: `@peac/mappings-ucp`
 - **Boundary**: `payment_state_source` marker distinguishes `explicit` from `derived_order_fallback`
+- **Signing model**: the current UCP signing model is RFC 9421 HTTP Message Signatures (`Signature-Input` / `Signature`) with an RFC 9530 `Content-Digest` computed over the raw request body bytes (no JSON canonicalization), verified by `verifyUcpHttpSignature`. The algorithm is resolved from the signing key curve (ES256 for P-256, ES384 for P-384); UCP omits `alg` from `Signature-Input`. PEAC observes and binds the UCP signature facts (covered components, `Content-Digest`, `keyid`, and any signed `UCP-Agent` profile); it does not assert UCP conformance or re-sign UCP messages. The earlier `Request-Signature` detached JWS (RFC 7797) path remains available, deprecated, as `verifyUcpWebhookSignature`; the two schemes never silently fall back to each other.
 
 ## Cross-Ecosystem Evidence
 

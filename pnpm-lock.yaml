@@ -842,6 +842,9 @@ importers:
       '@peac/crypto':
         specifier: workspace:*
         version: link:../../packages/crypto
+      '@peac/http-signatures':
+        specifier: workspace:*
+        version: link:../../packages/http-signatures
       '@peac/mappings-ucp':
         specifier: workspace:*
         version: link:../../packages/mappings/ucp
