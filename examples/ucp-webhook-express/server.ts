@@ -20,7 +20,8 @@
  */
 
 import express from 'express';
-import type { Request, Response } from 'express';
+import type { Request, RequestHandler, Response } from 'express';
+import { rateLimit } from 'express-rate-limit';
 import { verifyUcpHttpSignature, mapUcpOrderToReceipt, ErrorHttpStatus } from '@peac/mappings-ucp';
 import type { UcpOrder, UcpProfile } from '@peac/mappings-ucp';
 import { generateKeypair, sign } from '@peac/crypto';
@@ -96,6 +97,17 @@ const MOCK_PROFILE: UcpProfile = {
 
 const app = express();
 
+// Rate limiter for the webhook endpoint. The handler verifies signatures and
+// issues receipts, so cap requests per client to blunt brute-force and abuse.
+// Cast bridges a types-only skew: express-rate-limit v8 ships Express 5 core
+// types, while this example pins Express 4; the middleware is runtime-compatible.
+const webhookLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  limit: 100, // per IP per window
+  standardHeaders: 'draft-7', // RateLimit-* response headers
+  legacyHeaders: false,
+}) as unknown as RequestHandler;
+
 // Raw body parser for webhook signature verification
 app.use('/webhooks', express.raw({ type: 'application/json' }));
 
@@ -137,7 +149,7 @@ function firstHeader(value: string | string[] | undefined): string | undefined {
  * current UCP signing model (RFC 9421 HTTP Message Signatures), then issues a
  * PEAC receipt for the observed order.
  */
-app.post(WEBHOOK_PATH, async (req: Request, res: Response) => {
+app.post(WEBHOOK_PATH, webhookLimiter, async (req: Request, res: Response) => {
   // Convert body to Buffer using helper (breaks taint tracking)
   const bodyBytes = toBuffer(req.body);
   if (bodyBytes === null) {

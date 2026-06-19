@@ -99,4 +99,3 @@ Earlier UCP integrations used a `Request-Signature` detached JWS (RFC 7797). Tha
 - `@peac/mappings-ucp` - UCP to PEAC mapping and signature verification
 - `@peac/crypto` - Demo key generation and JWS receipt signing
 - `@peac/http-signatures` - RFC 9421 signature-base construction (demo signer)
-- `@peac/audit` - Dispute bundle creation (legacy compatibility path)

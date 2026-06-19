@@ -11,11 +11,11 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@peac/audit": "workspace:*",
     "@peac/crypto": "workspace:*",
     "@peac/http-signatures": "workspace:*",
     "@peac/mappings-ucp": "workspace:*",
-    "express": "^4.22.1"
+    "express": "^4.22.1",
+    "express-rate-limit": "^8.2.2"
   },
   "devDependencies": {
     "@types/express": "^4.17.21",

@@ -37,6 +37,7 @@ const UCP_AGENT = `profile="${SIGNER_PROFILE_URL}"`;
 
 // Demo EC keypair (P-256 curve for ES256). In production this is the signer's key,
 // published as a JWK in their /.well-known/ucp profile (public x/y only).
+// Demo-only keypair. Do not reuse this private key outside this example.
 const DEMO_PRIVATE_KEY = crypto.createPrivateKey({
   key: {
     kty: 'EC',
