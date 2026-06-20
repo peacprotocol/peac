@@ -134,8 +134,19 @@ function parseSfDictionary(input: string): SfDictionaryMember[] {
 }
 
 /**
- * Strip SF parameters from a value or bare key.
- * Parameters start with ';' and are key=value or key pairs.
+ * Strip SF parameters from a value or bare key by truncating at the first ';'.
+ *
+ * This parser intentionally implements only the Content-Usage subset used by
+ * AIPREF tokens. It does not attempt full quoted-string delimiter handling.
+ * That is acceptable here because allow/deny decisions are produced only by
+ * bare `y` / `n` Tokens. Parameters on those tokens are stripped while
+ * preserving the decision; quoted Strings remain non-decision values and
+ * resolve to `unspecified`.
+ *
+ * Full RFC 9651 quoted-string delimiter handling would be a broader
+ * standards-correctness enhancement, not a security fix. The no-decision-flip
+ * invariant is locked by the parameter-stripping tests in
+ * tests/content-usage.test.ts.
  */
 function stripParams(s: string): string {
   const semiIdx = s.indexOf(';');
