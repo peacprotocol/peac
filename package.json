@@ -165,7 +165,7 @@
       "@protobufjs/utf8": "1.1.1",
       "defu": ">=6.1.5",
       "esbuild@<0.25.0": ">=0.25.0",
-      "undici@<6.24.0": ">=6.24.0",
+      "undici@<6.27.0": "6.27.0",
       "postcss@<8.5.10": ">=8.5.10",
       "form-data@<4.0.6": ">=4.0.6",
       "vite@<6.4.2": ">=8.0.16"
@@ -184,7 +184,7 @@
       "@protobufjs/utf8": "Defensive pin to 1.1.1 (fixes GHSA-q6x5-8v7m-xcrf in @protobufjs/utf8@<=1.1.0). protobufjs@8.0.2 no longer resolves the prior @protobufjs/* subtree in the current lockfile; this override prevents the vulnerable utf8 helper from re-entering through another transitive path. No published runtime package depends on it.",
       "defu": "Override to >=6.1.5 (fixes GHSA-737v-mqg7-c878 prototype pollution via __proto__ in defaults argument). Dev-only via wrangler -> @cloudflare/unenv-preset / unenv. Wrangler 3.x bundles defu 6.1.4; Wrangler 4 (latest) is a major bump deferred for separate review.",
       "esbuild@<0.25.0": "Range-scoped to <0.25.0 only (forces patched 0.25.0+, fixes GHSA-67mh-4wv8-2f99 dev-server CORS bypass). Dev-only via wrangler / @esbuild-plugins/node-globals-polyfill peer / @esbuild-plugins/node-modules-polyfill peer (all ship esbuild 0.17.19). Newer esbuild instances at 0.25.12+ already pulled by vitest/tsx are unaffected.",
-      "undici@<6.24.0": "Range-scoped to <6.24.0 only (forces patched 6.24.0+, fixes GHSA-4992-7rv2-5pvq CRLF injection via upgrade and GHSA-2mjp-6q6p-2qxm HTTP request/response smuggling). Dev-only via wrangler -> miniflare which bundles undici 5.29.0. @peac/net-node already uses undici 6.24.0+ (production path unaffected).",
+      "undici@<6.27.0": "Range-scoped to <6.27.0 only, pinned to exact 6.27.0 to stay on the undici v6 line (avoids floating to v7/v8). Fixes GHSA-vxpw-j846-p89q (WebSocket client DoS via fragment count bypass, affects 6.17.0..<6.27.0) and retains the prior GHSA-4992-7rv2-5pvq (CRLF injection) and GHSA-2mjp-6q6p-2qxm (request/response smuggling) patches from the earlier <6.24.0 floor. Prod path: apps/api -> @peac/resolver-http -> @peac/net-node, which now declares undici ^6.27.0 directly; also forces the dev wrangler -> miniflare undici onto the patched 6.27.0.",
       "postcss@<8.5.10": "Range-scoped to <8.5.10 only (forces patched 8.5.10+, fixes GHSA-qx2v-qp2m-jg93 XSS via unescaped </style> in CSS Stringify output). Dev-only via next 15.5.x (bundles postcss 8.4.31 internally) and vite. Workspace doesn't import postcss directly; affects build tooling only.",
       "form-data@<4.0.6": "Range-scoped to <4.0.6 only (forces patched 4.0.6+, fixes GHSA-hmw2-7cc7-3qxx CRLF injection via unescaped multipart field/filename). Dev-only via the supertest/superagent HTTP test client used by @peac/middleware-express tests; not in any published package.",
       "vite@<6.4.2": "Range-scoped to <6.4.2 only (forces patched, now floored at >=8.0.16, fixes GHSA-p9ff-h696-f583 arbitrary file read via dev server WebSocket, GHSA-4w7w-66w2-5vf9 path traversal in optimized deps .map handling, and GHSA-fx2h-pf6j-xcff server.fs.deny bypass on Windows alternate paths). Dev-only via vitest/@vitest/coverage-v8 and apps/verifier (internal app); pnpm resolves the override to vite 8.0.16; full test suite passes.",
