@@ -225,3 +225,63 @@ describe('parseContentUsage', () => {
     expect(training?.raw_value).toBeDefined();
   });
 });
+
+// ---------------------------------------------------------------------------
+// Parameter stripping (stripParams): locks the no-decision-flip invariant.
+//
+// stripParams() truncates a member value/key at the first ';'. These tests
+// characterize that behavior and prove it can never turn one AIPREF decision
+// (allow/deny) into another: allow/deny come only from a bare `y`/`n` Token.
+// Parameters on those tokens are stripped while preserving the decision;
+// quoted Strings remain non-decision values.
+// ---------------------------------------------------------------------------
+
+describe('parseContentUsage: parameter stripping (no decision flip)', () => {
+  const decisionFor = (header: string, purpose: string) =>
+    parseContentUsage(header).entries.find((e) => e.purpose === purpose)?.decision;
+
+  it('strips a parameter from a deny token', () => {
+    const result = parseContentUsage('train-ai=n;q=0.5');
+    expect(result.parsed[0].tokenValue).toBe('n');
+    expect(decisionFor('train-ai=n;q=0.5', 'ai-training')).toBe('deny');
+  });
+
+  it('keeps an allow token without parameters', () => {
+    expect(decisionFor('train-ai=y', 'ai-training')).toBe('allow');
+  });
+
+  it('strips a spaced parameter and preserves the token', () => {
+    expect(decisionFor('train-ai= y ; q=1', 'ai-training')).toBe('allow');
+  });
+
+  it('strips trailing/empty parameters and preserves the token', () => {
+    expect(decisionFor('train-ai=n;;;', 'ai-training')).toBe('deny');
+    expect(decisionFor('train-ai=n;', 'ai-training')).toBe('deny');
+  });
+
+  it('does not let a ";" inside a quoted String flip a decision', () => {
+    const result = parseContentUsage('train-ai="a;b"');
+    expect(result.parsed[0].valueType).toBe('string');
+    expect(result.parsed[0].tokenValue).toBeNull();
+    expect(decisionFor('train-ai="a;b"', 'ai-training')).toBeUndefined();
+  });
+
+  it('treats quoted "y"/"n" as unspecified (never allow/deny)', () => {
+    expect(decisionFor('train-ai="y"', 'ai-training')).toBeUndefined();
+    expect(decisionFor('search="n"', 'ai-search')).toBeUndefined();
+  });
+
+  it('routes an unknown key with parameters to extensions, not entries', () => {
+    const result = parseContentUsage('x-custom=n;q=1');
+    expect(result.extensions.some((m) => m.key === 'x-custom')).toBe(true);
+    expect(result.entries).toEqual([]);
+  });
+
+  it('does not flip a sibling decision when a bare key carries a parameter', () => {
+    expect(decisionFor('bots;foo=bar, train-ai=n', 'ai-training')).toBe('deny');
+  });
+
+  it('does not let a quoted decoy upgrade a later deny (last value wins)', () => {
+    expect(decisionFor('train-ai="allow";q=1, train-ai=n', 'ai-training')).toBe('deny');
+  });
+});
