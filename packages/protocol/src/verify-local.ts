@@ -30,6 +30,7 @@ import { runBoundedValidatorShadow } from './_internal/record-core/bounded-valid
 import { runBoundedValidationGate } from './_internal/record-core/validation-gate.js';
 import { isShadowEnabled, scheduleShadow, type ShadowEnableOptions } from './_internal/shadow.js';
 import { readLegacyPathFlag, type LegacyPathOptions } from './_internal/legacy-path.js';
+import { ED25519_SIGNATURE_BYTES, ed25519SignatureByteLength } from './_internal/signature.js';
 import {
   realObservationForVerifyLocalSuccess,
   shadowObservationFromBounded,
@@ -759,13 +760,27 @@ export async function verifyLocal(
       };
     }
 
+    // A wrong-length Ed25519 signature throws an untyped error inside the
+    // verifier (not a typed CryptoError, so it is not handled above). Classify
+    // it deterministically as an invalid signature rather than letting it fall
+    // through to E_INTERNAL. Typed format errors are handled earlier, so a
+    // malformed header/payload still maps to E_INVALID_FORMAT (format-first).
+    const signatureBytes = ed25519SignatureByteLength(jws);
+    if (signatureBytes !== null && signatureBytes !== ED25519_SIGNATURE_BYTES) {
+      return {
+        valid: false,
+        code: 'E_INVALID_SIGNATURE',
+        message: 'Ed25519 signature has invalid length',
+      };
+    }
+
     // All other errors -> E_INTERNAL
-    // No message parsing - code-based mapping only
-    const message = err instanceof Error ? err.message : String(err);
+    // No message parsing - code-based mapping only; do not surface raw
+    // exception text to callers (avoids leaking internal paths/state).
     return {
       valid: false,
       code: 'E_INTERNAL',
-      message: `Unexpected verification error: ${message}`,
+      message: 'Unexpected verification error.',
     };
   }
 }
