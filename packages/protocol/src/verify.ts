@@ -17,6 +17,7 @@ import {
 import { resolveJWKS, type JWK } from './jwks-resolver.js';
 import { hashReceipt, fireTelemetryHook, type TelemetryHook } from './telemetry.js';
 import { readLegacyPathFlag, type LegacyPathOptions } from './_internal/legacy-path.js';
+import { ED25519_SIGNATURE_BYTES, ed25519SignatureByteLength } from './_internal/signature.js';
 
 /**
  * Convert JWK x coordinate to Ed25519 public key
@@ -211,6 +212,29 @@ export async function verifyReceipt(
     // Convert JWK to public key
     const publicKey = jwkToPublicKey(jwk);
 
+    // Reject fixed-width-violating Ed25519 signatures deterministically as an
+    // invalid signature, immediately before cryptographic verification (after
+    // key resolution/conversion). Placing it here -- rather than in the outer
+    // catch -- ensures an unexpected failure in an earlier stage (JWKS, key
+    // conversion, etc.) is never masked as invalid_signature.
+    const signatureBytes = ed25519SignatureByteLength(receiptJws);
+    if (signatureBytes !== null && signatureBytes !== ED25519_SIGNATURE_BYTES) {
+      const durationMs = performance.now() - startTime;
+      fireTelemetryHook(telemetry?.onReceiptVerified, {
+        receiptHash: hashReceipt(receiptJws),
+        valid: false,
+        reasonCode: 'invalid_signature',
+        issuer: payload.iss,
+        kid: header.kid,
+        durationMs,
+      });
+      return {
+        ok: false,
+        reason: 'invalid_signature',
+        details: 'Ed25519 signature has invalid length',
+      };
+    }
+
     // Verify signature
     const result = await jwsVerify<PEACReceiptClaims>(receiptJws, publicKey);
 
@@ -255,7 +279,7 @@ export async function verifyReceipt(
         ...(jwksFetchTime && { jwks_fetch_ms: jwksFetchTime }),
       },
     };
-  } catch (err) {
+  } catch {
     const durationMs = performance.now() - startTime;
     fireTelemetryHook(telemetry?.onReceiptVerified, {
       receiptHash: hashReceipt(receiptJws),
@@ -263,10 +287,12 @@ export async function verifyReceipt(
       reasonCode: 'verification_error',
       durationMs,
     });
+    // Do not surface raw exception text to callers (avoids leaking internal
+    // paths/state); the stable reason carries the classification.
     return {
       ok: false,
       reason: 'verification_error',
-      details: err instanceof Error ? err.message : String(err),
+      details: 'Unexpected verification error.',
     };
   }
 }

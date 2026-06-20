@@ -9,6 +9,7 @@
  */
 
 import { verify as jwsVerify } from '@peac/crypto';
+import { ED25519_SIGNATURE_BYTES, ed25519SignatureByteLength } from './_internal/signature.js';
 import type { VerificationStrictness, VerificationWarning } from '@peac/kernel';
 import {
   parseReceiptClaims,
@@ -313,11 +314,25 @@ export async function verifyLocalWire01(
       };
     }
 
-    const message = err instanceof Error ? err.message : String(err);
+    // A wrong-length Ed25519 signature throws an untyped error inside the
+    // verifier (not a typed CryptoError); classify it deterministically as an
+    // invalid signature rather than letting it fall through to E_INTERNAL.
+    // Typed format errors are handled earlier (format-first).
+    const signatureBytes = ed25519SignatureByteLength(jws);
+    if (signatureBytes !== null && signatureBytes !== ED25519_SIGNATURE_BYTES) {
+      return {
+        valid: false,
+        code: 'E_INVALID_SIGNATURE',
+        message: 'Ed25519 signature has invalid length',
+      };
+    }
+
+    // No message parsing - code-based mapping only; do not surface raw
+    // exception text to callers (avoids leaking internal paths/state).
     return {
       valid: false,
       code: 'E_INTERNAL',
-      message: `Unexpected verification error: ${message}`,
+      message: 'Unexpected verification error.',
     };
   }
 }
