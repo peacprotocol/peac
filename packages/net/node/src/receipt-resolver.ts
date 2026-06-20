@@ -183,6 +183,10 @@ export async function resolveReceiptUrl(
  * @returns true if the JWS matches the receipt_ref
  */
 export function verifyReceiptRef(jws: string, receiptRef: string): boolean {
+  // Intentionally sync: this Node-only resolver helper mirrors
+  // @peac/schema.computeReceiptRef's sha256:<hex> contract without changing the
+  // exported verifyReceiptRef(...) API to async. Locked by the SHA-256 boundary
+  // test (tests/tooling/sha256-boundary-contract.test.ts).
   const hash = createHash('sha256').update(jws).digest('hex');
   const computed = `sha256:${hash}`;
   return computed === receiptRef;

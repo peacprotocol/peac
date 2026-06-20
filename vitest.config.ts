@@ -40,6 +40,10 @@ export default defineConfig({
         find: '@peac/transport-grpc',
         replacement: resolve(__dirname, 'packages/transport/grpc/src/index.ts'),
       },
+      {
+        find: '@peac/net-node',
+        replacement: resolve(__dirname, 'packages/net/node/src/index.ts'),
+      },
     ],
   },
   server: {
