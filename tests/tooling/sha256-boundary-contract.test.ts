@@ -31,6 +31,7 @@ import { describe, it, expect } from 'vitest';
 
 import { sha256Hex } from '@peac/crypto';
 import { computeReceiptRef } from '@peac/schema';
+import { verifyReceiptRef } from '@peac/net-node';
 
 // Inputs intentionally include compact-JWS-shaped strings and non-JWS strings.
 // This parity test only requires byte-identical SHA-256 input handling across
@@ -63,5 +64,35 @@ describe('SHA-256 boundary contract: computeReceiptRef matches crypto.sha256Hex'
 
   it('sha256Hex itself never carries the reference prefix', async () => {
     expect((await sha256Hex(INPUTS[0])).startsWith('sha256:')).toBe(false);
+  });
+});
+
+// `@peac/net-node` `verifyReceiptRef` (Layer 5, Node-only) is a third SHA-256
+// site: it derives `sha256:<hex>` synchronously via `node:crypto` and compares it
+// to an expected receipt_ref. It stays sync by design (exported Node-only resolver
+// API). This block locks it to the same contract so the sync derivation can never
+// drift from the async `computeReceiptRef` / `sha256Hex` paths. The full invariant:
+//   receipt_ref = "sha256:" + lowercase_hex(SHA-256(UTF-8(compact_jws)))
+describe('SHA-256 boundary contract: net-node.verifyReceiptRef matches computeReceiptRef', () => {
+  it.each(INPUTS)(
+    'verifyReceiptRef(input, computeReceiptRef(input)) === true [len %#]',
+    async (input) => {
+      const ref = await computeReceiptRef(input);
+      expect(ref).toBe(`sha256:${await sha256Hex(input)}`);
+      expect(verifyReceiptRef(input, ref)).toBe(true);
+    }
+  );
+
+  it('verifyReceiptRef rejects a tampered JWS against the original ref', async () => {
+    const jws = INPUTS[0];
+    const ref = await computeReceiptRef(jws);
+    expect(verifyReceiptRef(`${jws}.tampered`, ref)).toBe(false);
+  });
+
+  it('verifyReceiptRef rejects a valid-shaped ref whose digest does not match', () => {
+    // Valid sha256:<64 lowercase hex> shape, but not the digest of any input:
+    // this proves a digest MISMATCH is rejected, not merely a malformed ref.
+    const wrongRef = 'sha256:0000000000000000000000000000000000000000000000000000000000000000';
+    expect(verifyReceiptRef(INPUTS[0], wrongRef)).toBe(false);
   });
 });
