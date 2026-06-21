@@ -19,6 +19,6 @@
     "required_headers": ["Signature-Input", "Signature"],
     "conditional_headers": ["Content-Digest", "UCP-Agent", "Idempotency-Key"],
     "key_discovery": ["signing_keys", "/.well-known/ucp", "kid"],
-    "content_digest_semantics": ["raw body bytes", "no canonicalization"]
+    "content_digest_semantics": ["raw body bytes", "No JSON canonicalization is required."]
   }
 }
