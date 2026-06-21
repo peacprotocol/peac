@@ -1,0 +1,33 @@
+name: UCP Signing-Spec Drift Check
+
+# Scheduled check for upstream UCP signing-specification changes.
+# Compares the vendored snapshot of signing-critical invariants
+# (specs/upstream/ucp/signatures-snapshot.json) against the pinned upstream
+# signing spec, and fails when a newer upstream release tag appears.
+# Not a required PR check; makes no claim of official UCP conformance.
+
+on:
+  schedule:
+    - cron: '0 9 * * 1' # Every Monday at 09:00 UTC
+  workflow_dispatch: # Manual trigger
+
+permissions:
+  contents: read
+
+jobs:
+  check-drift:
+    name: UCP Signing-Spec Drift
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Setup Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: '.node-version'
+
+      - name: Check UCP signing-spec drift
+        run: node scripts/verify-ucp-drift-snapshot.mjs --live
