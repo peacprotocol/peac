@@ -124,16 +124,44 @@ function hasQueryString(url: string): boolean {
   }
 }
 
+// Standard base64 alphabet (RFC 4648 Section 4), with optional terminal
+// padding only (not base64url). Used by the RFC 9530 Content-Digest value.
+const SF_BASE64_ALPHABET = /^[A-Za-z0-9+/]*={0,2}$/;
+const SF_BASE64_CANONICAL_PADDED =
+  /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/;
+
 /**
- * Decode standard or URL-safe base64 to bytes. Returns null on failure.
+ * Validate a Structured Field Byte Sequence value (RFC 9651 Section 3.3.5).
+ *
+ * Uses the RFC 4648 Section 4 base64 alphabet, not base64url. Per RFC 9651
+ * parsing, absent padding may be synthesized on decode; characters outside the
+ * base64 alphabet remain invalid. Accepts valid unpadded standard base64;
+ * rejects base64url (`-`/`_`), misplaced/excess `=`, `length % 4 === 1`,
+ * whitespace, and the empty string. Keep separate from JOSE/JWS handling.
+ */
+function isValidSfBase64(value: string): boolean {
+  if (value.length === 0) return false;
+  if (!SF_BASE64_ALPHABET.test(value)) return false;
+  if (value.includes('=')) {
+    return SF_BASE64_CANONICAL_PADDED.test(value);
+  }
+  return value.length % 4 !== 1;
+}
+
+/**
+ * Decode an RFC 4648 Section 4 base64 string to bytes, synthesizing absent
+ * padding per RFC 9651 byte-sequence parsing. Returns null on failure. Callers
+ * validate the input with {@link isValidSfBase64} first; this does not accept
+ * base64url. Keep separate from JOSE/JWS handling.
  */
 function base64ToBytes(b64: string): Uint8Array | null {
   try {
+    const padded = b64.includes('=')
+      ? b64
+      : b64.padEnd(b64.length + ((4 - (b64.length % 4)) % 4), '=');
     if (typeof Buffer !== 'undefined' && typeof Buffer.from === 'function') {
-      return new Uint8Array(Buffer.from(b64, 'base64'));
+      return new Uint8Array(Buffer.from(padded, 'base64'));
     }
-    const normalized = b64.replace(/-/g, '+').replace(/_/g, '/');
-    const padded = normalized.padEnd(normalized.length + ((4 - (normalized.length % 4)) % 4), '=');
     const binary = atob(padded);
     const bytes = new Uint8Array(binary.length);
     for (let i = 0; i < binary.length; i++) {
@@ -183,8 +211,10 @@ function parseContentDigestStrict(headerValue: string): DigestParse {
         message: 'Content-Digest contains an empty member',
       };
     }
-    const match = member.match(/^([A-Za-z0-9-]+)=:([A-Za-z0-9+/=]+):$/);
-    if (!match) {
+    // The value is a Structured Field Byte Sequence (RFC 9651 Section 3.3.5):
+    // RFC 4648 Section 4 standard base64; absent padding may be synthesized during parsing.
+    const match = member.match(/^([A-Za-z0-9-]+)=:([^:]*):$/);
+    if (!match || !isValidSfBase64(match[2])) {
       return {
         ok: false,
         code: ErrorCodes.CONTENT_DIGEST_MALFORMED,
