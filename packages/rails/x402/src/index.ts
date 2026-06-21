@@ -13,7 +13,18 @@ import type { PaymentEvidence, PaymentSplit } from '@peac/schema';
 // Re-export types and constants for consumers
 export * from './constants';
 export * from './types';
-export * from './helpers';
+// Re-export the public helpers explicitly; the internal test reset hook
+// (_resetWarnedNetworks) is intentionally NOT part of the public API
+// (import it from './helpers' inside the package's own tests).
+export {
+  logUnknownNetworkWarning,
+  detectDialect,
+  resolveDialectFromInvoice,
+  normalizeNetworkId,
+  getNetworkLabel,
+  getHeaders,
+  isTestnet,
+} from './helpers';
 export * from './payment-headers';
 
 import type { X402Dialect } from './constants';

@@ -144,7 +144,8 @@ export function isTestnet(networkId: string): boolean {
 }
 
 /**
- * Clear warned networks set (for testing)
+ * Clear warned networks set (for testing).
+ * @internal Package-internal test hook; not part of the public API.
  */
 export function _resetWarnedNetworks(): void {
   warnedNetworks.clear();
