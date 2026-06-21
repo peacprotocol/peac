@@ -12,6 +12,7 @@
  *
  * @param headers - Headers-like object
  * @returns Record<string, string>
+ * @internal Package-internal helper; not part of the public API.
  */
 export function headersToRecord(
   headers:
@@ -37,6 +38,7 @@ export function headersToRecord(
  * @param headers - Headers as Record
  * @param name - Header name
  * @returns Header value or empty string
+ * @internal Package-internal helper; not part of the public API.
  */
 export function getHeader(headers: Record<string, string>, name: string): string {
   const lowerName = name.toLowerCase();

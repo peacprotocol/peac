@@ -28,9 +28,6 @@ export {
   isKnownTapTag,
 } from './validator.js';
 
-// Helpers
-export { headersToRecord, getHeader } from './helpers.js';
-
 // Keyid trust boundary (single source of truth for keyid -> issuer origin)
 export { issuerFromKeyid } from './keyid.js';
 

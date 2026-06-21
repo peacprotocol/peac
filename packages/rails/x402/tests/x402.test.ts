@@ -18,7 +18,6 @@ import {
   normalizeNetworkId,
   getNetworkLabel,
   resolveDialectFromInvoice,
-  _resetWarnedNetworks,
   type X402Invoice,
   type X402Settlement,
   type X402WebhookEvent,
@@ -27,6 +26,7 @@ import {
   X402_HEADERS_V2,
   CAIP2_REGISTRY,
 } from '../src/index';
+import { _resetWarnedNetworks } from '../src/helpers';
 
 // =============================================================================
 // V1 TESTS (PRESERVED - ALL EXISTING BEHAVIOR)
