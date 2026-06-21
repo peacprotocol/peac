@@ -488,6 +488,56 @@ describe('verifyUcpHttpSignature: Content-Digest', () => {
     expect((await verify(fx, { headers })).error_code).toBe(ErrorCodes.CONTENT_DIGEST_MALFORMED);
   });
 
+  // Structured Field Byte Sequences are RFC 4648 Section 4 base64, not
+  // base64url, and invalid padding is rejected (RFC 9651 Section 3.3.5).
+  it('rejects a base64url ("-"/"_") Content-Digest value', async () => {
+    const fx = buildFixture();
+    for (const bad of ['sha-256=:ab-d:', 'sha-256=:ab_d:']) {
+      const headers = { ...fx.headers, 'content-digest': bad };
+      expect((await verify(fx, { headers })).error_code).toBe(ErrorCodes.CONTENT_DIGEST_MALFORMED);
+    }
+  });
+
+  it('rejects non-canonical padding in a Content-Digest value', async () => {
+    const fx = buildFixture();
+    // padding in the middle, length % 4 === 1, and too much padding
+    for (const bad of ['sha-256=:YW==YWI=:', 'sha-256=:YWJjZ:', 'sha-256=:YQ===:']) {
+      const headers = { ...fx.headers, 'content-digest': bad };
+      expect((await verify(fx, { headers })).error_code).toBe(ErrorCodes.CONTENT_DIGEST_MALFORMED);
+    }
+  });
+
+  it('accepts a valid unpadded Content-Digest signed over the exact header', async () => {
+    const fx = buildFixture();
+    const body = fx.body_bytes!;
+    // SHA-256 base64 carries one '=' pad; strip it for a valid unpadded value
+    // (RFC 9651 synthesizes the absent padding on decode).
+    const unpadded = createHash('sha256').update(body).digest('base64').replace(/=+$/g, '');
+    const headers = { ...fx.headers, 'content-digest': `sha-256=:${unpadded}:` };
+
+    // Re-sign over the exact updated headers so the covered-component binding holds.
+    const paramsValue = fx.signature_input.slice('sig1='.length);
+    const signerParams: ParsedSignatureParams = {
+      keyid: fx.kid,
+      coveredComponents: fx.covered,
+      signatureParamsValue: paramsValue,
+    };
+    const base = buildSignatureBase({ method: fx.method, url: fx.url, headers }, signerParams, {
+      preferSerializedParams: true,
+    });
+    const sig = nodeSign('sha256', signatureBaseToBytes(base), {
+      key: fx.privateKey,
+      dsaEncoding: 'ieee-p1363',
+    });
+
+    const result = await verify(fx, {
+      headers,
+      signature: `sig1=:${sig.toString('base64')}:`,
+    });
+    expect(result.valid).toBe(true);
+    expect(result.content_digest_verified).toBe(true);
+  });
+
   it('rejects a Content-Digest without sha-256 (only sha-512)', async () => {
     const fx = buildFixture();
     const headers = { ...fx.headers, 'content-digest': 'sha-512=:dGVzdA==:' };

@@ -65,6 +65,45 @@ describe('parseSignatureHeader', () => {
     expect(result.get('sig1')!.bytes).toEqual(new Uint8Array([97, 98, 99])); // "abc"
     expect(result.get('sig2')!.bytes).toEqual(new Uint8Array([100, 101, 102])); // "def"
   });
+
+  // The Signature value is a Structured Field Byte Sequence: the RFC 4648
+  // Section 4 base64 alphabet (RFC 9651 Section 3.3.5), NOT base64url. Per
+  // RFC 9651 parsing, absent padding is synthesized on decode, so valid
+  // unpadded standard base64 is accepted.
+  it('accepts valid standard base64, padded or unpadded', () => {
+    expect(parseSignatureHeader('sig1=:AAEC/w==:').get('sig1')!.bytes).toEqual(
+      new Uint8Array([0, 1, 2, 255])
+    );
+    expect(parseSignatureHeader('sig1=:YWJj:').get('sig1')!.bytes).toEqual(
+      new Uint8Array([97, 98, 99]) // "abc"
+    );
+    expect(parseSignatureHeader('sig1=:YWI:').get('sig1')!.bytes).toEqual(
+      new Uint8Array([97, 98]) // "ab", unpadded (RFC 9651 synthesizes padding)
+    );
+    expect(parseSignatureHeader('sig1=:YQ:').get('sig1')!.bytes).toEqual(
+      new Uint8Array([97]) // "a", unpadded
+    );
+  });
+
+  it('rejects base64url ("-" and "_") in the Signature value', () => {
+    for (const header of ['sig1=:ab-d:', 'sig1=:ab_d:']) {
+      expect(() => parseSignatureHeader(header)).toThrow(HttpSignatureError);
+    }
+  });
+
+  it('rejects malformed padding / length in the Signature value', () => {
+    const bad = [
+      'sig1=:YW==YWI=:', // padding in the middle
+      'sig1=:YQ===:', // too much padding
+      'sig1=:YWJjZ:', // length % 4 === 1 (unrepairable by synthesized padding)
+      'sig1=:Y:', // length % 4 === 1 (single char)
+      'sig1=:YW Jj:', // whitespace inside the byte sequence
+      'sig1=::', // empty byte sequence (no behavior widening)
+    ];
+    for (const header of bad) {
+      expect(() => parseSignatureHeader(header)).toThrow(HttpSignatureError);
+    }
+  });
 });
 
 describe('parseSignature', () => {

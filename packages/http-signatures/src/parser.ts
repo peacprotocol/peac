@@ -82,9 +82,11 @@ export function parseSignatureHeader(
     }
     seenLabels.add(label);
 
-    // The value MUST be a structured-field byte sequence (:base64:).
-    const match = value.match(/^:([A-Za-z0-9+/=_-]+):$/);
-    if (!match) {
+    // The value MUST be a Structured Field Byte Sequence (:base64:) using
+    // RFC 4648 Section 4 standard base64 (RFC 9651 Section 3.3.5), NOT
+    // base64url. Capture the inner value, then validate Structured Field base64.
+    const match = value.match(/^:([^:]*):$/);
+    if (!match || !isValidSfBase64(match[1])) {
       throw new HttpSignatureError(
         ErrorCodes.SIGNATURE_INPUT_MALFORMED,
         `Malformed Signature byte sequence for label "${label}"`
@@ -389,16 +391,44 @@ function parseParameters(paramsString: string): Record<string, string | number> 
   return params;
 }
 
+// Standard base64 alphabet (RFC 4648 Section 4), with optional terminal
+// padding only. Rejects base64url (`-`/`_`), whitespace, and any `=` that is
+// not part of trailing padding.
+const SF_BASE64_ALPHABET = /^[A-Za-z0-9+/]*={0,2}$/;
+// Canonical terminal padding when padding is present.
+const SF_BASE64_CANONICAL_PADDED =
+  /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/;
+
 /**
- * Decode base64 (standard or URL-safe) to bytes.
+ * Validate a Structured Field Byte Sequence value (RFC 9651 Section 3.3.5).
+ *
+ * Structured Field Byte Sequences use the RFC 4648 Section 4 base64 alphabet,
+ * not base64url. Per RFC 9651 parsing, absent padding may be synthesized on
+ * decode; characters outside the base64 alphabet remain invalid. So this
+ * accepts valid unpadded standard base64, but rejects base64url (`-`/`_`),
+ * misplaced/excess `=`, `length % 4 === 1`, whitespace, and the empty string
+ * (no behavior widening). Keep this separate from JOSE/JWS base64url handling.
+ */
+function isValidSfBase64(value: string): boolean {
+  if (value.length === 0) return false;
+  if (!SF_BASE64_ALPHABET.test(value)) return false;
+  if (value.includes('=')) {
+    // If padding is present, it must be canonical terminal padding.
+    return SF_BASE64_CANONICAL_PADDED.test(value);
+  }
+  // Absent padding is synthesized on decode; `length % 4 === 1` is unrepairable.
+  return value.length % 4 !== 1;
+}
+
+/**
+ * Decode an RFC 4648 Section 4 base64 string to bytes, synthesizing absent
+ * padding per RFC 9651 byte-sequence parsing. Callers MUST validate the input
+ * with {@link isValidSfBase64} first; this does not accept base64url.
  */
 function base64ToBytes(base64: string): Uint8Array {
-  // Handle URL-safe base64
-  const normalized = base64.replace(/-/g, '+').replace(/_/g, '/');
-
-  // Add padding if needed
-  const padded = normalized.padEnd(normalized.length + ((4 - (normalized.length % 4)) % 4), '=');
-
+  const padded = base64.includes('=')
+    ? base64
+    : base64.padEnd(base64.length + ((4 - (base64.length % 4)) % 4), '=');
   const binary = atob(padded);
   const bytes = new Uint8Array(binary.length);
   for (let i = 0; i < binary.length; i++) {
