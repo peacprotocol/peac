@@ -1,0 +1,24 @@
+{
+  "_comment": "Vendored snapshot of signing-critical UCP invariants for the scheduled drift guard (.github/workflows/ucp-drift.yml via scripts/verify-ucp-drift-snapshot.mjs). Not a protocol/runtime/conformance surface. Every invariants[] string was verified to appear verbatim in the pinned source markdown. When source.version_tag falls behind the latest upstream release, the drift job fails: review the upstream signing-spec changes and update this file.",
+  "source": {
+    "spec_url": "https://ucp.dev/specification/signatures/",
+    "repo": "Universal-Commerce-Protocol/ucp",
+    "path": "docs/specification/signatures.md",
+    "version_tag": "v2026-04-08",
+    "release_published_at": "2026-04-09T01:48:20Z",
+    "release_commit": "a2d8bf0b8f5a6fc790f677899c2c7da0684fe33d",
+    "raw_url": "https://raw.githubusercontent.com/Universal-Commerce-Protocol/ucp/v2026-04-08/docs/specification/signatures.md"
+  },
+  "invariants": {
+    "standards": ["RFC 9421", "RFC 9530", "RFC 7517"],
+    "required_signature_algorithms": ["ES256"],
+    "optional_signature_algorithms": ["ES384"],
+    "required_curves": ["P-256"],
+    "optional_curves": ["P-384"],
+    "required_digest_algorithms": ["sha-256"],
+    "required_headers": ["Signature-Input", "Signature"],
+    "conditional_headers": ["Content-Digest", "UCP-Agent", "Idempotency-Key"],
+    "key_discovery": ["signing_keys", "/.well-known/ucp", "kid"],
+    "content_digest_semantics": ["raw body bytes", "No JSON canonicalization is required."]
+  }
+}
