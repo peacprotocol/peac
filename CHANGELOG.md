@@ -5,23 +5,88 @@ All notable changes to PEAC Protocol will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.15.2] - 2026-06-22
+
+Verification and signing hardening.
+
+Hardens receipt verification and signing-related surfaces, aligns UCP HTTP
+Message Signature verification with RFC 9421 and RFC 9530, closes out current
+dependency advisories, and adds a check that keeps the README quickstart
+truthful against the shipped CLI.
+
+Public API: additive (`verifyUcpHttpSignature` added to `@peac/mappings-ucp`);
+internal helper exports removed from the `@peac/mappings-tap` and
+`@peac/rails-x402` package barrels.
+Wire format: unchanged (0.2).
+Public schema: unchanged.
+Registered extension groups: unchanged (19).
+Registered receipt types: unchanged (61).
+Conformance sections: unchanged (32).
+
+### Added
+
+- `@peac/mappings-ucp` `verifyUcpHttpSignature`: a request-shaped HTTP Message
+  Signature verifier (RFC 9421) reusing `@peac/http-signatures`, with RFC 9530
+  `Content-Digest` verification over raw body bytes and `UCP-Agent` profile
+  binding; the legacy detached-JWS webhook path is retained and deprecated with
+  no silent fallback (#848).
+- Scheduled UCP signing-reference drift check comparing a pinned upstream
+  snapshot against the latest published reference (#857).
+- README quickstart verification: a tooling check that the documented offline
+  quickstart (sample generation, then offline verification with a public key)
+  runs against the shipped `@peac/cli` and fails closed on a tampered record
+  (#858).
+- Boundary-contract test locking the `sha256:<hex>` receipt-reference contract
+  across the crypto, schema, and resolver surfaces (#852).
+- `examples/mpp-payment-record`: records a Payment-Receipt observation as a
+  signed payment record, verified offline (#845).
+
+### Changed
+
+- UCP documentation leads with the HTTP Message Signature verifier path; the
+  legacy webhook path is clearly marked deprecated (#849).
+- Structured Field byte-sequence parsing in `@peac/http-signatures` and the UCP
+  `Content-Digest` parser tightened to the RFC 9651 / RFC 4648 standard base64
+  alphabet: valid unpadded input is accepted, base64url and malformed padding
+  are rejected (#856).
+- Receipt verification failure handling hardened: generic unexpected-error
+  messages and deterministic rejection of wrong-length Ed25519 signatures
+  (#853).
+- Internal helper exports hidden from the `@peac/mappings-tap` and
+  `@peac/rails-x402` package barrels (#855); UCP base64url and JCS encoding
+  consolidated onto `@peac/crypto` (#850).
+- Content-Usage parameter-stripping behavior documented and locked by tests; no
+  parser change (#854).
+- README offline-verification one-liner documented (#839).
+
+### Fixed
+
+- Bundle-vector digest references aligned with the SHA-256 receipt-reference
+  contract (#842).
 
 ### Security
 
-- TAP verification now derives the issuer strictly from the `keyid` and fails
+- TAP verification derives the issuer strictly from the `keyid` and fails
   closed when the `keyid` is not an absolute `https` URL. The issuer is no
   longer derived from the request URL or `Host` header, and a malformed `keyid`
-  is never passed through unchanged. This removes a trust-boundary weakness in
+  is never passed through unchanged, removing a trust-boundary weakness in
   which a non-URL `keyid` could steer JWKS key resolution, issuer-allowlist
   checks, or replay namespacing to a request-controlled origin. Key-to-issuer
   derivation is centralized in `@peac/mappings-tap` (`issuerFromKeyid`) and
   reused by the worker and middleware verification surfaces. New error
   `E_TAP_KEYID_INVALID` (401). Behavior change for invalid input only: valid
-  `https` JWKS-URI keyids are unaffected. No wire format, schema, or signing
-  change.
+  `https` JWKS-URI keyids are unaffected; no wire format, schema, or signing
+  change (#841).
+- Strict issuer-origin allowlist checks centralized across verification
+  surfaces (#843).
+- Source-to-test import-direction guard added to keep test-only code out of the
+  source dependency graph (#844).
+- Production dependency-advisory closeout: `undici` patched (#851); the
+  dependency-audit gate cleared for current high advisories (#846); the
+  `esbuild` dev-server advisory recorded as a dev-only allowlist exception
+  (#840).
 
-## [0.15.1] - 2026-06-11
+## [0.15.1]
 
 Samples and offline verification.
 
