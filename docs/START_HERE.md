@@ -8,6 +8,8 @@ PEAC helps API, MCP, agent, gateway, payment-adjacent, provisioning, runtime, an
 
 Pick the path that matches what you are building.
 
+New here? [Try PEAC in 5 minutes](TRY.md) or [verify a record](VERIFY.md).
+
 ## I run an API or HTTP service
 
 You want to issue signed receipts proving what terms applied and what happened on every response.
