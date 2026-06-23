@@ -35,7 +35,13 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = join(__dirname, '..', '..');
 
 // The primary entry documents whose relative links must resolve.
-const REQUIRED_DOCS = ['README.md', 'docs/START_HERE.md', 'examples/README.md'];
+const REQUIRED_DOCS = [
+  'README.md',
+  'docs/START_HERE.md',
+  'examples/README.md',
+  'docs/TRY.md',
+  'docs/VERIFY.md',
+];
 
 // The seven "Choose your path" table targets in the README (one table row
 // carries two links). Pinned independently of the generic scan.
@@ -230,5 +236,38 @@ describe('link parser handles Markdown durability cases', () => {
     expect(isInsideRepo(resolveTarget(startHerePath, '../../outside.md'))).toBe(false);
     // A normal in-repo link stays inside.
     expect(isInsideRepo(resolveTarget(startHerePath, '../examples/README.md'))).toBe(true);
+  });
+});
+
+describe('entry guides reuse the README quickstart snippet', () => {
+  // The exact public offline copy-paste the README promises a new developer.
+  // Source of truth: tests/tooling/readme-quickstart-doc-truth.test.ts, which
+  // locks these strings against the README and the shipped CLI. The entry
+  // guides must reuse them verbatim so the guides cannot drift from the README.
+  const GENERATE_CMD = 'pnpm dlx @peac/cli samples generate -o ./s';
+  const VERIFY_CMD =
+    'pnpm dlx @peac/cli verify ./s/valid/basic-record.jws --public-key ./s/bundles/sandbox-jwks.json';
+  const SUCCESS_LITERAL = 'Signature valid (offline).';
+
+  it('docs/TRY.md uses the offline one-liner (generate before verify) and the success literal', () => {
+    const try_ = readFileSync(join(REPO_ROOT, 'docs/TRY.md'), 'utf8');
+    const gen = try_.indexOf(GENERATE_CMD);
+    const verify = try_.indexOf(VERIFY_CMD);
+    expect(gen, 'docs/TRY.md must contain the generate command').toBeGreaterThan(-1);
+    expect(verify, 'docs/TRY.md must contain the verify command').toBeGreaterThan(-1);
+    expect(gen, 'generate must appear before verify in docs/TRY.md').toBeLessThan(verify);
+    expect(try_, 'docs/TRY.md must state the success literal').toContain(SUCCESS_LITERAL);
+  });
+
+  it('docs/VERIFY.md is self-contained: generate before verify, plus the success literal', () => {
+    // VERIFY.md must be independently copy-pasteable, so it includes the
+    // generate command before the verify command (not only the verify line).
+    const verifyDoc = readFileSync(join(REPO_ROOT, 'docs/VERIFY.md'), 'utf8');
+    const gen = verifyDoc.indexOf(GENERATE_CMD);
+    const verify = verifyDoc.indexOf(VERIFY_CMD);
+    expect(gen, 'docs/VERIFY.md must contain the generate command').toBeGreaterThan(-1);
+    expect(verify, 'docs/VERIFY.md must contain the verify command').toBeGreaterThan(-1);
+    expect(gen, 'generate must appear before verify in docs/VERIFY.md').toBeLessThan(verify);
+    expect(verifyDoc, 'docs/VERIFY.md must state the success literal').toContain(SUCCESS_LITERAL);
   });
 });
