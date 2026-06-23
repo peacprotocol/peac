@@ -5,10 +5,15 @@
   "description": "Demo: cross-ecosystem commerce evidence bundle assembly",
   "scripts": {
     "demo": "tsx demo.ts",
+    "demo:tamper": "tsx demo.ts --tamper",
+    "demo:show-record": "tsx demo.ts --show-record",
     "build": "tsc --noEmit"
   },
   "dependencies": {
-    "@peac/audit": "workspace:*"
+    "@peac/audit": "workspace:*",
+    "@peac/crypto": "workspace:*",
+    "@peac/protocol": "workspace:*",
+    "@peac/schema": "workspace:*"
   },
   "devDependencies": {
     "tsx": "^4.21.0",

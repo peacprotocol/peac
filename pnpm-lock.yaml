@@ -367,6 +367,15 @@ importers:
       '@peac/audit':
         specifier: workspace:*
         version: link:../../packages/audit
+      '@peac/crypto':
+        specifier: workspace:*
+        version: link:../../packages/crypto
+      '@peac/protocol':
+        specifier: workspace:*
+        version: link:../../packages/protocol
+      '@peac/schema':
+        specifier: workspace:*
+        version: link:../../packages/schema
     devDependencies:
       tsx:
         specifier: ^4.21.0
