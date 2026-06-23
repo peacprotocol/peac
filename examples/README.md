@@ -79,6 +79,8 @@ Or run from the workspace root with a filter:
 pnpm --filter @peac/example-hello-world demo
 ```
 
+To build and run the start-here demos in sequence, use `pnpm demo:all` from the workspace root.
+
 Profile examples may expose profile-specific commands instead. For example:
 
 ```bash
