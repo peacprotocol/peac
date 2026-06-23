@@ -11,7 +11,7 @@
  * 4. Real Ed25519 signature verification
  */
 
-import { createHash } from 'node:crypto';
+import { createHash, randomBytes } from 'node:crypto';
 import { posix as pathPosix } from 'node:path';
 import { canonicalize } from '@peac/crypto';
 import { BUNDLE_ERRORS } from '@peac/kernel';
@@ -91,9 +91,10 @@ function generateBundleId(): string {
   }
 
   // Generate 80 bits of randomness (16 Crockford Base32 characters)
-  // Use crypto.randomBytes for cryptographic randomness
-  const { randomBytes: cryptoRandomBytes } = require('node:crypto') as typeof import('node:crypto');
-  const randBytes = cryptoRandomBytes(10); // 80 bits = 10 bytes
+  // Use crypto.randomBytes for cryptographic randomness. Imported statically at
+  // the top of the file so the built ESM bundle does not call require() (a
+  // dynamic require fails under ESM/tsx with "Dynamic require ... not supported").
+  const randBytes = randomBytes(10); // 80 bits = 10 bytes
   const randomChars: string[] = [];
 
   // Encode 10 bytes as 16 base32 characters
