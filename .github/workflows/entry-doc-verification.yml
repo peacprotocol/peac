@@ -1,0 +1,66 @@
+name: Entry Document Verification
+
+# Runs on every pull request (no top-level path filter) so it can be a required
+# status check without leaving PRs that touch no entry docs stuck "Pending":
+# a path-filtered workflow that is skipped never reports its required check.
+# Relevance is decided INSIDE the job via dorny/paths-filter; when nothing
+# relevant changed, the job exits 0 immediately without installing or building.
+on:
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: read # dorny/paths-filter reads changed files via the PR API
+
+jobs:
+  entry-doc-verification:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Detect relevant changes
+        id: filter
+        uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3
+        with:
+          filters: |
+            relevant:
+              - 'README.md'
+              - 'docs/**/*.md'
+              - 'examples/**'
+              - 'integrator-kits/**'
+              - 'surfaces/reference-verifier/**'
+              - 'packages/**/README.md'
+              - 'tests/tooling/**'
+              - '.github/workflows/docs-quality.yml'
+              - '.github/workflows/entry-doc-verification.yml'
+
+      - name: Skip when no entry-doc or linked target changed
+        if: steps.filter.outputs.relevant != 'true'
+        run: echo "No entry documents, linked targets, or tooling tests changed. Nothing to verify."
+
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+        if: steps.filter.outputs.relevant == 'true'
+
+      - name: Setup Node.js
+        if: steps.filter.outputs.relevant == 'true'
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        with:
+          node-version-file: '.node-version'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        if: steps.filter.outputs.relevant == 'true'
+        run: pnpm install --frozen-lockfile
+
+      - name: Build CLI (required by the README quickstart runtime check)
+        if: steps.filter.outputs.relevant == 'true'
+        run: pnpm --filter @peac/cli... build
+
+      - name: Verify entry-document links and README quickstart
+        if: steps.filter.outputs.relevant == 'true'
+        run: pnpm exec vitest run tests/tooling/entry-links-doc-truth.test.ts tests/tooling/readme-quickstart-doc-truth.test.ts
