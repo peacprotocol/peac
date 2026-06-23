@@ -205,6 +205,17 @@ Practical recipes under [`docs/SOLUTIONS/`](docs/SOLUTIONS/):
   pnpm dlx @peac/cli verify ./s/valid/basic-record.jws --public-key ./s/bundles/sandbox-jwks.json
   ```
 - Start the MCP server: `npx -y @peac/mcp-server`.
+
+The `pnpm dlx @peac/cli ...` and `npx ...` commands above run without cloning this repository. The examples below are repo-local: clone the repository first, then run:
+
+```bash
+pnpm install --frozen-lockfile
+pnpm build
+pnpm demo:all
+```
+
+`pnpm demo:all` runs the start-here examples end to end. The individual commands below are optional targeted demos you can run after that setup.
+
 - Run the minimal example: `pnpm --filter @peac/example-minimal demo`.
 - Run the MCP gateway records example:
   ```bash
