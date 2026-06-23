@@ -20,8 +20,9 @@ PEAC packages:
 - `@peac/adapter-x402` — x402 v1 and v2 settlement-proof extractor (dual-header precedence `PEAC-Receipt` > `PAYMENT-RESPONSE` > `X-PAYMENT-RESPONSE`).
 - `@peac/mappings-acp` — ACP delegated-payment observation mapper (`artifact_kind` discriminator).
 - `@peac/mappings-paymentauth` — paymentauth / MPP payment-attempt and settlement mappers.
-- `@peac/protocol` — issuance and offline verification.
-- `@peac/audit` — bundle builder.
+- `@peac/protocol` — record issuance.
+- `@peac/crypto` — key generation and the public-key JWKS the bundle travels with.
+- `@peac/audit` — signed dispute-bundle builder and offline bundle verifier.
 
 Prerequisites: Node 22+, pnpm 8+. The shipped conformance fixtures cover positive and negative vectors for each rail; no external rail is required to exercise this recipe.
 
@@ -30,7 +31,7 @@ Prerequisites: Node 22+, pnpm 8+. The shipped conformance fixtures cover positiv
 1. Install dependencies:
 
    ```bash
-   pnpm add @peac/adapter-core @peac/adapter-x402 @peac/mappings-acp @peac/mappings-paymentauth @peac/protocol @peac/audit
+   pnpm add @peac/adapter-core @peac/adapter-x402 @peac/mappings-acp @peac/mappings-paymentauth @peac/protocol @peac/crypto @peac/audit
    ```
 
 2. Map each rail's observation into a PEAC record. Each mapper preserves the upstream artifact verbatim under `upstream_artifact` and labels the observed state with the rail's own closed enum:
@@ -74,35 +75,46 @@ Prerequisites: Node 22+, pnpm 8+. The shipped conformance fixtures cover positiv
    }
    ```
 
-4. Build a bundle from the three records:
+4. Build a signed dispute bundle from the three records. The bundle travels with the
+   public-key JWKS, so a counterparty can verify it offline without contacting the issuer:
 
    ```typescript
-   import { buildBundle } from '@peac/audit';
+   import { createDisputeBundle } from '@peac/audit';
+   import { writeFile } from 'node:fs/promises';
 
-   const bundle = await buildBundle({
-     records: [x402Jws, acpJws, mppJws],
-     jwks_snapshot: currentJwksDocument,
-     policy: { uri: 'https://commerce.example.com/policies/default' },
+   // `jwks` is a JWKS document containing the public half of the issuing key
+   // (for example built from `@peac/crypto` `generateKeypair()` + `base64urlEncode`).
+   const bundleResult = await createDisputeBundle({
+     refs: [{ type: 'dispute', id: 'dispute_cross_ecosystem_demo' }],
+     created_by: 'https://commerce.example.com',
+     receipts: [x402Jws, acpJws, mppJws],
+     keys: jwks,
+     // Sign the bundle itself so the counterparty can confirm its integrity offline.
+     signing_key: privateKey,
+     signing_kid: 'commerce-evidence-key-2026',
    });
 
-   // Write the portable audit package.
-   await writeFile('commerce-evidence.peac-bundle', bundle.bytes);
+   if (!bundleResult.ok) throw new Error(bundleResult.error.code);
+
+   // Write the portable, signed audit package.
+   await writeFile('commerce-evidence.peac-bundle', bundleResult.value);
    ```
 
-5. Verify each record in the bundle offline:
+5. Verify the bundle offline with only the bundled public key:
 
    ```typescript
-   import { verifyLocal } from '@peac/protocol';
-   import { openBundle } from '@peac/audit';
+   import { verifyBundle } from '@peac/audit';
 
-   const open = await openBundle(bundle.bytes);
-   for (const record of open.records) {
-     const result = await verifyLocal(record, open.jwks, {
-       issuer: 'https://commerce.example.com',
-     });
-     console.log(result.valid, result.claims.type, result.claims.ext.commerce?.observed_state);
-   }
+   const report = await verifyBundle(bundleResult.value, { offline: true });
+   if (!report.ok) throw new Error(report.error.code);
+
+   const { summary } = report.value;
+   console.log(`${summary.valid}/${summary.total_receipts} receipts valid`);
+   console.log('recommendation:', report.value.auditor_summary.recommendation);
    ```
+
+   To inspect the bundle's manifest and receipts without verifying them, import
+   `readDisputeBundle` from `@peac/audit`.
 
 ## Evidence of output
 
