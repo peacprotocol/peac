@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions and usage help
+    url: https://github.com/peacprotocol/peac/discussions
+    about: Ask how to use PEAC, get integration help, or discuss design. Please use Discussions for questions rather than opening an issue.
+  - name: Contribution guide
+    url: https://github.com/peacprotocol/peac/blob/main/.github/CONTRIBUTING.md
+    about: Read the contributor workflow, testing expectations, and how to start.
+  - name: Security disclosure
+    url: https://github.com/peacprotocol/peac/security/policy
+    about: Report a security vulnerability privately. Do not open a public issue for security reports; see SECURITY.md.

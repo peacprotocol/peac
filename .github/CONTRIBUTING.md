@@ -1,10 +1,19 @@
 # Contributing to PEAC Protocol
 
-Thank you for your interest in contributing to the PEAC Protocol! This document outlines how to contribute effectively to our modern enterprise monorepo.
+Thank you for your interest in contributing to the PEAC Protocol! This document outlines how to contribute effectively to the PEAC open protocol repository.
 
 ## Code of Conduct
 
 By participating in this project, you agree to abide by our [Code of Conduct](CODE_OF_CONDUCT.md).
+
+## Where to start
+
+New here? A few good entry points:
+
+- **Good first issues:** browse issues labeled [`good first issue`](https://github.com/peacprotocol/peac/labels/good%20first%20issue) for small, well-scoped tasks.
+- **Run the examples first:** `pnpm demo:all` runs the start-here examples end to end; see [`examples/README.md`](../examples/README.md) for the curated set and [`docs/START_HERE.md`](../docs/START_HERE.md) for path-by-role guidance.
+- **Want an example that does not exist yet?** Open an [Example Request](https://github.com/peacprotocol/peac/issues/new?template=example_request.md).
+- **Questions or design discussion?** Use [Discussions](https://github.com/peacprotocol/peac/discussions) rather than an issue.
 
 ## Development Setup
 
@@ -104,7 +113,7 @@ perf(scope): optimize performance
 - Crawler operations: ≤ 35ms
 - API endpoints: documented SLOs
 
-## Enterprise CI/CD Pipeline
+## CI/CD validation pipeline
 
 Our 7-phase enterprise pipeline validates:
 
@@ -134,7 +143,7 @@ The project follows semantic versioning with development releases:
 - `0.9.12` for stable releases
 - Breaking changes documented
 
-### Branch Strategy
+### Branching workflow
 
 - Create release branches: `release/vX.X.X`
 - Feature branches: `feature/description`
