@@ -169,7 +169,8 @@
       "undici@<6.27.0": "6.27.0",
       "postcss@<8.5.10": ">=8.5.10",
       "form-data@<4.0.6": ">=4.0.6",
-      "vite@<6.4.2": ">=8.0.16"
+      "vite@<6.4.2": ">=8.0.16",
+      "ws@>=8.0.0 <8.21.0": "8.21.0"
     },
     "overridesComments": {
       "minimatch": "Cross-major pin to 10.2.4: typescript-estree requires ^9.0.4 but 9.x has no patch for GHSA-3ppc-4f35-3m26. minimatch 10.x is API-compatible (same globbing interface). 10.2.4 patches GHSA-7r86-cg39-jmmj and GHSA-23c5-xmqv-rm74 (ReDoS). Drops Node 18 (fine: repo baseline is >=22.0.0). Lint verified clean.",
@@ -189,6 +190,7 @@
       "postcss@<8.5.10": "Range-scoped to <8.5.10 only (forces patched 8.5.10+, fixes GHSA-qx2v-qp2m-jg93 XSS via unescaped </style> in CSS Stringify output). Dev-only via next 15.5.x (bundles postcss 8.4.31 internally) and vite. Workspace doesn't import postcss directly; affects build tooling only.",
       "form-data@<4.0.6": "Range-scoped to <4.0.6 only (forces patched 4.0.6+, fixes GHSA-hmw2-7cc7-3qxx CRLF injection via unescaped multipart field/filename). Dev-only via the supertest/superagent HTTP test client used by @peac/middleware-express tests; not in any published package.",
       "vite@<6.4.2": "Range-scoped to <6.4.2 only (forces patched, now floored at >=8.0.16, fixes GHSA-p9ff-h696-f583 arbitrary file read via dev server WebSocket, GHSA-4w7w-66w2-5vf9 path traversal in optimized deps .map handling, and GHSA-fx2h-pf6j-xcff server.fs.deny bypass on Windows alternate paths). Dev-only via vitest/@vitest/coverage-v8 and apps/verifier (internal app); pnpm resolves the override to vite 8.0.16; full test suite passes.",
+      "ws@>=8.0.0 <8.21.0": "Range-scoped to the v8 line below 8.21.0 only, pinned to exact 8.21.0 (the fixed v8 release). Fixes CVE-2026-48779 / GHSA-96hv-2xvq-fx4p (memory-exhaustion DoS from tiny fragments/data chunks) by resolving ws v8 to the patched 8.21.0 line. Dev/examples-only: resolves via dev wrangler -> miniflare -> ws and examples/erc8004-feedback -> isows; not in any published package. Exact pin (not a >= bound) keeps the lockfile diff narrow and stays on the v8 line.",
       "hono": "Bumped to >=4.12.25 to pull patches for CVE-2026-44455 (bodyLimit() bypass for chunked / unknown-length requests), CVE-2026-44456 (hono/jsx unvalidated JSX tag names), CVE-2026-44457 (CSS declaration injection via Style Object Values in JSX SSR), CVE-2026-44458 (Cache Middleware ignores Vary: Authorization / Vary: Cookie), CVE-2026-44459 (improper validation of NumericDate JWT claims), and GHSA-88fw-hqm2-52qc (CORS Middleware reflects any Origin, patched in 4.12.25). Prod dep via apps/api, apps/sandbox-issuer, packages/mcp-server, packages/server.",
       "fast-uri@<3.1.2": "Range-scoped to <3.1.2 only (forces patched 3.1.2+, fixes CVE-2026-6321 path traversal via percent-encoded dot segments and CVE-2026-6322 host confusion via percent-encoded authority delimiters). Transitive prod dep via ajv / ajv-formats (in @peac/protocol, @peac/receipts, apps/api) and @modelcontextprotocol/sdk (in @peac/mcp-server).",
       "ip-address@<=10.1.0": "Range-scoped to <=10.1.0 only (forces patched 10.1.1+, fixes CVE-2026-42338 XSS in Address6 HTML-emitting methods). Transitive prod dep via @modelcontextprotocol/sdk -> express-rate-limit."
