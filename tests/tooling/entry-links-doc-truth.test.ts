@@ -42,6 +42,8 @@ const REQUIRED_DOCS = [
   'docs/TRY.md',
   'docs/VERIFY.md',
   'docs/guides/integration-patterns.md',
+  'docs/guides/verification-options.md',
+  'docs/guides/offline-sample-index.md',
 ];
 
 // The seven "Choose your path" table targets in the README (one table row
