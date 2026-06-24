@@ -2,8 +2,8 @@
 
 > Open standard for verifiable interaction records across agent, tool, API, MCP, and cross-runtime systems.
 > Portable signed records anyone can verify offline.
-> Current release: v0.15.0
-> Last reviewed: 2026-06-01
+> Current release: v0.15.2
+> Last reviewed: 2026-06-24
 
 ## What is PEAC
 
@@ -16,7 +16,8 @@ PEAC does not orchestrate protocols, control systems, or enforce behavior. It re
 ## Quick Start
 
 - Install the MCP server: `npx -y @peac/mcp-server`
-- Verify a record: start the MCP server, then call `peac_verify` with a JWS and public key
+- Verify offline from the CLI: `pnpm dlx @peac/cli samples generate -o ./s` then `pnpm dlx @peac/cli verify ./s/valid/basic-record.jws --public-key ./s/bundles/sandbox-jwks.json` (prints `Signature valid (offline).`)
+- Verify a record over MCP: start the MCP server, then call `peac_verify` with a JWS and public key
 - Issue a record: use `@peac/protocol` with `issue()` and an Ed25519 signing key
 - GitHub: https://github.com/peacprotocol/peac
 - Website: https://www.peacprotocol.org
@@ -46,6 +47,9 @@ PEAC does not orchestrate protocols, control systems, or enforce behavior. It re
 ## Documentation
 
 - Start Here: https://www.peacprotocol.org/start-here
+- Integration patterns: https://github.com/peacprotocol/peac/blob/main/docs/guides/integration-patterns.md
+- Verification options: https://github.com/peacprotocol/peac/blob/main/docs/guides/verification-options.md
+- Offline sample index: https://github.com/peacprotocol/peac/blob/main/docs/guides/offline-sample-index.md
 - Wire Format: https://www.peacprotocol.org/docs/architecture/wire-format
 - Package Layering: https://www.peacprotocol.org/docs/architecture/package-layering
 - Error Codes: https://www.peacprotocol.org/docs/reference/error-codes

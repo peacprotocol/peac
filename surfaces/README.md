@@ -34,3 +34,7 @@ Surfaces provide turnkey solutions for specific platforms:
 - Production-ready templates
 
 See [docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md) for full architecture.
+
+---
+
+_Last reviewed: 2026-06-24._
