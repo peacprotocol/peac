@@ -13,6 +13,13 @@ PEAC records those actions, decisions, and events as portable signed interaction
 [![npm downloads](https://img.shields.io/npm/dm/@peac/protocol?style=flat&color=brightgreen)](https://www.npmjs.com/package/@peac/protocol)
 [![CI Status](https://img.shields.io/github/actions/workflow/status/peacprotocol/peac/ci.yml?branch=main&label=CI&color=brightgreen)](https://github.com/peacprotocol/peac/actions/workflows/ci.yml)
 
+## Start fast
+
+- **Verify a sample offline:** [`docs/guides/offline-sample-index.md`](docs/guides/offline-sample-index.md)
+- **Compare verification paths:** [`docs/guides/verification-options.md`](docs/guides/verification-options.md)
+- **Wire PEAC into MCP, OpenTelemetry, or a gateway:** [`docs/guides/integration-patterns.md`](docs/guides/integration-patterns.md)
+- **Choose by role:** [`docs/START_HERE.md`](docs/START_HERE.md)
+
 ## What PEAC records
 
 PEAC is useful when a system does work and another party later needs to
@@ -83,18 +90,33 @@ scope: [`docs/WHAT-PEAC-STANDARDIZES.md`](docs/WHAT-PEAC-STANDARDIZES.md).
 
 ## Choose your path
 
-| If you...                                       | PEAC helps you...                                                                                                                      | Start here                                                                                                                              |
-| ----------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| Run an API or metered service                   | issue signed records for requests, responses, usage, and policy-visible outcomes                                                       | [API Provider Quickstart](docs/guides/quickstart-api-provider.md)                                                                       |
-| Build MCP tools or agent workflows              | attach records to tool runs, command execution, handoffs, lifecycle events, and agent actions                                          | [MCP Integration Kit](integrator-kits/mcp/README.md) or `npx -y @peac/mcp-server`                                                       |
-| Build payment, gateway, or commerce flows       | preserve signed evidence around access, payment, settlement, mandate, gateway, and dispute events without operating the payment system | [MCP gateway records](docs/SOLUTIONS/mcp-gateway-receipts.md) or [Commerce evidence bundle](docs/SOLUTIONS/commerce-evidence-bundle.md) |
-| Track provisioning or resource lifecycle events | record catalog, provider-link, account, credential, budget, subscription, domain, deployment, and resource events                      | [Provisioning lifecycle records](docs/SOLUTIONS/verify-agent-provisioning.md)                                                           |
-| Need audit or review evidence                   | export portable records and bundles that can be referenced beside logs, traces, SIEMs, reports, and audit repositories                 | [Where PEAC fits](docs/WHERE-IT-FITS.md)                                                                                                |
-| Need to verify a record                         | verify a signed PEAC record with the issuer's public key or a self-hosted verifier                                                     | [Agent Operator Quickstart](docs/guides/quickstart-agent-operator.md)                                                                   |
+| If you...                                       | PEAC helps you...                                                                                                                      | Start here                                                                                                                                                                                         |
+| ----------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Run an API or metered service                   | issue signed records for requests, responses, usage, and policy-visible outcomes                                                       | [API Provider Quickstart](docs/guides/quickstart-api-provider.md)                                                                                                                                  |
+| Build MCP tools or agent workflows              | attach records to tool runs, command execution, handoffs, lifecycle events, and agent actions                                          | [MCP Integration Kit](integrator-kits/mcp/README.md), [Integration patterns guide](docs/guides/integration-patterns.md), or `npx -y @peac/mcp-server`                                              |
+| Build payment, gateway, or commerce flows       | preserve signed evidence around access, payment, settlement, mandate, gateway, and dispute events without operating the payment system | [MCP gateway records](docs/SOLUTIONS/mcp-gateway-receipts.md) or [Commerce evidence bundle](docs/SOLUTIONS/commerce-evidence-bundle.md)                                                            |
+| Track provisioning or resource lifecycle events | record catalog, provider-link, account, credential, budget, subscription, domain, deployment, and resource events                      | [Provisioning lifecycle records](docs/SOLUTIONS/verify-agent-provisioning.md)                                                                                                                      |
+| Need audit or review evidence                   | export portable records and bundles that can be referenced beside logs, traces, SIEMs, reports, and audit repositories                 | [Verification options](docs/guides/verification-options.md) or [Where PEAC fits](docs/WHERE-IT-FITS.md)                                                                                            |
+| Need to verify a record                         | verify a signed PEAC record with the issuer's public key or a self-hosted verifier                                                     | [Verification options](docs/guides/verification-options.md), [Offline sample index](docs/guides/offline-sample-index.md), or [Agent Operator Quickstart](docs/guides/quickstart-agent-operator.md) |
 
 Full path-by-role tree: [`docs/START_HERE.md`](docs/START_HERE.md).
 
-## Quickstart: verify one record
+## Quickstart: verify a sample offline
+
+```bash
+pnpm dlx @peac/cli samples generate -o ./s
+pnpm dlx @peac/cli verify ./s/valid/basic-record.jws --public-key ./s/bundles/sandbox-jwks.json
+```
+
+Expected:
+
+```text
+Signature valid (offline).
+```
+
+For browser and self-hosted verifier paths, see [`docs/guides/verification-options.md`](docs/guides/verification-options.md). For the full shipped sample set, see [`docs/guides/offline-sample-index.md`](docs/guides/offline-sample-index.md).
+
+## Quickstart: verify one record in code
 
 ```bash
 npm install @peac/protocol @peac/crypto
@@ -168,14 +190,16 @@ produced the log.
 PEAC is designed to be reviewed as protocol infrastructure, not as a
 hosted control plane.
 
-| Need                                      | Read                                                           |
-| ----------------------------------------- | -------------------------------------------------------------- |
-| Supported versions and disclosure process | [`SECURITY.md`](SECURITY.md)                                   |
-| Measured local verification baselines     | [`docs/SLO.md`](docs/SLO.md)                                   |
-| Stability classes and archived surfaces   | [`docs/STABILITY-CONTRACT.md`](docs/STABILITY-CONTRACT.md)     |
-| Compatibility and deprecation status      | [`docs/COMPATIBILITY_MATRIX.md`](docs/COMPATIBILITY_MATRIX.md) |
-| External standards references             | [`docs/STANDARDS_LEDGER.md`](docs/STANDARDS_LEDGER.md)         |
-| Release-line invariant snapshots          | [`docs/baselines/`](docs/baselines/)                           |
+| Need                                      | Read                                                                         |
+| ----------------------------------------- | ---------------------------------------------------------------------------- |
+| Supported versions and disclosure process | [`SECURITY.md`](SECURITY.md)                                                 |
+| Measured local verification baselines     | [`docs/SLO.md`](docs/SLO.md)                                                 |
+| Stability classes and archived surfaces   | [`docs/STABILITY-CONTRACT.md`](docs/STABILITY-CONTRACT.md)                   |
+| Compatibility and deprecation status      | [`docs/COMPATIBILITY_MATRIX.md`](docs/COMPATIBILITY_MATRIX.md)               |
+| External standards references             | [`docs/STANDARDS_LEDGER.md`](docs/STANDARDS_LEDGER.md)                       |
+| Release-line invariant snapshots          | [`docs/baselines/`](docs/baselines/)                                         |
+| Verification paths                        | [`docs/guides/verification-options.md`](docs/guides/verification-options.md) |
+| Offline sample records                    | [`docs/guides/offline-sample-index.md`](docs/guides/offline-sample-index.md) |
 
 The reference verifier is self-hostable. Verification can also be
 performed locally when the record and issuer public key are available.
@@ -309,6 +333,8 @@ Full doctrine: [`docs/specs/VERSIONING.md`](docs/specs/VERSIONING.md).
 ## Documentation
 
 - [Start Here](docs/START_HERE.md) — path by role.
+- [Integration patterns](docs/guides/integration-patterns.md) — MCP, OpenTelemetry, and gateway integration patterns using shipped surfaces.
+- [Verification options](docs/guides/verification-options.md), [Offline sample index](docs/guides/offline-sample-index.md) — verifier paths and sample records.
 - [How it works](docs/HOW-IT-WORKS.md), [Artifacts](docs/ARTIFACTS.md), [Where it fits](docs/WHERE-IT-FITS.md), [What PEAC standardizes](docs/WHAT-PEAC-STANDARDIZES.md).
 - [Use cases](docs/SOLUTIONS/) — practical recipes.
 - [Spec Index](docs/SPEC_INDEX.md) — normative specifications, including [Resource limits](docs/specs/RESOURCE-LIMITS.md).

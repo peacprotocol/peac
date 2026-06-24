@@ -1,6 +1,6 @@
 # Security Policy
 
-Last reviewed: 2026-06-01
+Last reviewed: 2026-06-24
 
 This is the canonical security policy for the PEAC Protocol. It describes
 how to report a vulnerability, which versions receive security fixes, what

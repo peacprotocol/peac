@@ -29,3 +29,7 @@ pnpm exec tsx scripts/conformance-harness.ts --adapter core --format pretty
 ```
 
 See the conformance harness documentation for full options.
+
+---
+
+_Last reviewed: 2026-06-24._
