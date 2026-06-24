@@ -13,14 +13,14 @@ pnpm start
 
 ## Endpoints
 
-### `POST /api/v1/verify`
+### `POST /v1/verify`
 
-Verify a PEAC receipt.
+Verify a PEAC receipt. This is the canonical verify operation; see `packages/schema/openapi/verify.yaml` and [`docs/HOSTED_VERIFY_CONTRACT.md`](../../docs/HOSTED_VERIFY_CONTRACT.md).
 
 **Request:**
 
 ```bash
-curl -X POST http://localhost:3000/api/v1/verify \
+curl -X POST http://localhost:3000/v1/verify \
   -H "Content-Type: application/json" \
   -d '{"receipt": "eyJhbGciOiJFZERTQSIs..."}'
 ```
@@ -36,16 +36,18 @@ curl -X POST http://localhost:3000/api/v1/verify \
 
 **Success response (200):**
 
+The response body indicates the verified/failed state. See `packages/schema/openapi/verify.yaml` and [`docs/HOSTED_VERIFY_CONTRACT.md`](../../docs/HOSTED_VERIFY_CONTRACT.md) for the canonical schema.
+
 ```json
 {
-  "valid": true,
-  "claims": {
-    "iss": "https://sandbox.peacprotocol.org",
-    "aud": "https://example.com",
-    "iat": 1738756800,
-    "exp": 1738760400,
-    "rid": "receipt-id"
-  }
+  "verified": true,
+  "receipt_ref": "sha256:<hex>",
+  "claims": {},
+  "warnings": [],
+  "policy_binding": "verified",
+  "issuer": "https://example.com",
+  "kid": "key-1",
+  "wire_version": "0.2"
 }
 ```
 
@@ -53,14 +55,14 @@ curl -X POST http://localhost:3000/api/v1/verify \
 
 ```json
 {
-  "type": "https://www.peacprotocol.org/problems/invalid-jws-format",
-  "title": "Invalid JWS Format",
-  "status": 422,
-  "detail": "Receipt is not valid JWS compact serialization"
+  "type": "https://www.peacprotocol.org/problems/invalid-format",
+  "title": "Invalid Format",
+  "status": 400,
+  "detail": "Input is not a valid compact JWS."
 }
 ```
 
-All error responses use `Content-Type: application/problem+json`.
+All error responses use `Content-Type: application/problem+json` with kernel-canonical error codes (see [`docs/HOSTED_VERIFY_CONTRACT.md`](../../docs/HOSTED_VERIFY_CONTRACT.md)).
 
 ### `GET /health`
 
@@ -70,15 +72,15 @@ Health check endpoint.
 { "ok": true }
 ```
 
-### `POST /verify` (deprecated)
+### Deprecated aliases
 
-Legacy verify endpoint. Use `/api/v1/verify` instead.
+`POST /api/v1/verify` and `POST /verify` are deprecated compatibility aliases. They delegate in-process to `POST /v1/verify` and return the same response shape and status codes. New integrations MUST target `POST /v1/verify`. See [`docs/HOSTED_VERIFY_CONTRACT.md`](../../docs/HOSTED_VERIFY_CONTRACT.md) for the alias behavior and Sunset schedule.
 
 ## Rate Limits
 
 | Tier      | Limit         | Window   | Header      |
 | --------- | ------------- | -------- | ----------- |
-| Anonymous | 100 requests  | 1 minute | :           |
+| Anonymous | 100 requests  | 1 minute | none        |
 | API Key   | 1000 requests | 1 minute | `X-API-Key` |
 
 All responses include RFC 9333 rate limit headers:
@@ -89,13 +91,14 @@ All responses include RFC 9333 rate limit headers:
 
 ## HTTP Status Codes
 
-| Status | Meaning                                              |
-| ------ | ---------------------------------------------------- |
-| 200    | Verification complete                                |
-| 413    | Receipt too large (> 256 KB)                         |
-| 422    | Invalid receipt, untrusted issuer, or missing claims |
-| 429    | Rate limit exceeded                                  |
-| 500    | Internal server error                                |
+| Status | Meaning                                                                                  |
+| ------ | ---------------------------------------------------------------------------------------- |
+| 200    | Verification completed; response body indicates the result.                              |
+| 400    | Invalid request format.                                                                  |
+| 413    | Request body too large (receipt exceeds 256 KiB).                                        |
+| 422    | Verification or validation failure (signature invalid, claims invalid, policy mismatch). |
+| 429    | Rate limit exceeded.                                                                     |
+| 502    | Upstream resolution failure (JWKS fetch, issuer config fetch).                           |
 
 ## Security Headers
 
