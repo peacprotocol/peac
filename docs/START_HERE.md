@@ -85,6 +85,10 @@ Key package: `@peac/cli`.
 
 ## Integration areas
 
+### Wire PEAC into your stack
+
+You already run MCP, an API or platform gateway, or OpenTelemetry, and you want to attach, carry, or export a portable signed record alongside it. See the [Integration patterns guide](guides/integration-patterns.md) for trace-context, OTel span-attribute, MCP `_meta`, and gateway-export patterns, each reusing surfaces that already ship.
+
 ### Commerce and payment evidence
 
 You want verifiable evidence from commerce and payment flows across x402, paymentauth / MPP (Machine Payments Protocol), ACP, Stripe SPT, or UCP. Prove what was offered, challenged, paid, or settled across organizational boundaries.

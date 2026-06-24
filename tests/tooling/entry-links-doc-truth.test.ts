@@ -41,6 +41,7 @@ const REQUIRED_DOCS = [
   'examples/README.md',
   'docs/TRY.md',
   'docs/VERIFY.md',
+  'docs/guides/integration-patterns.md',
 ];
 
 // The seven "Choose your path" table targets in the README (one table row
