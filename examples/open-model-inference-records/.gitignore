@@ -1,0 +1,6 @@
+node_modules/
+out/
+.env*
+*.log
+*private*key*
+*secret*

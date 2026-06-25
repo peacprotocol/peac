@@ -1,0 +1,22 @@
+{
+  "name": "@peac/example-open-model-inference-records",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Records for open-model inference calls: bind an inference observation manifest digest into a signed agent-action record and verify it offline.",
+  "type": "module",
+  "scripts": {
+    "demo": "tsx demo.ts",
+    "demo:write": "tsx demo.ts --write",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@peac/crypto": "workspace:*",
+    "@peac/protocol": "workspace:*",
+    "@peac/schema": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "^4.21.0",
+    "typescript": "^5.3.3"
+  }
+}

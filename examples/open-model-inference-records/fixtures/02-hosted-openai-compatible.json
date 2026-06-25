@@ -1,0 +1,8 @@
+{
+  "_comment": "Input descriptor (NOT a signed record). Describes a hosted OpenAI-compatible inference call. README-only; not exercised in CI (no network in tests).",
+  "mode": "hosted-openai-compatible",
+  "endpoint": "https://api.example/v1/chat/completions",
+  "model_ref": "urn:peac:model:open-model-sample",
+  "provider_ref": "urn:peac:provider:hosted-openai-compatible",
+  "policy_ref": "https://issuer.example/usage-policy"
+}
