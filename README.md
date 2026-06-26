@@ -292,7 +292,7 @@ Other commands: `peac observe command`, `peac record command`, `peac emit lifecy
 ## Protocol boundary
 
 PEAC is a records layer, not a runtime control plane. It records what
-another system attested and makes that record portable, signed, and
+another system reported and makes that record portable, signed, and
 verifiable across boundaries.
 
 PEAC does not authorize actions, validate credentials, process payments,

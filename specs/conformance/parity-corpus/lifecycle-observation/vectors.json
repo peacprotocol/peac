@@ -1,7 +1,7 @@
 {
   "family": "lifecycle-observation",
   "description": "Lifecycle observation parity vectors. Nine positive deterministic JSON observation payloads (one per event_kind) covering approval / evaluation / experiment / workflow_transition / mode_observed semantics. Per the parity-corpus convention established by runtime-governance vector rg-007 and reused by a2a-handoff and cli-execution, all vectors here assert envelope-level canonical agreement (LEFT/RIGHT verifier agreement on the wire envelope) and set expected.accepted=true; semantic rejection of extension content (forbidden top-level keys, opaque-ref grammar violations, approver_ref PII priority, missing/malformed observed_at, unknown event_kind) lives at the Layer 3 validator surface (validateLifecycleObservation exported from @peac/schema, exercised by packages/schema/__tests__/extensions/lifecycle-observation.test.ts).",
-  "version": "0.15.2",
+  "version": "0.15.3",
   "generator": "manual; lifecycle-observation v0.1 floor",
   "vectors": [
     {

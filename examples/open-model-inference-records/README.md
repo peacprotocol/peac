@@ -52,10 +52,10 @@ pnpm --filter @peac/example-open-model-inference-records demo:write
 
 This writes the public key, the manifest, and the records under `out/`:
 
-- `out/pubkey.json` — a public Ed25519 JWK (no private key is ever written to disk)
-- `out/manifest.json` — the inference observation manifest (refs and digests only)
-- `out/valid/inference-record.jws` — the signed record
-- `out/tampered/inference-record.jws` — a record whose payload was altered after signing
+- `out/pubkey.json` - a public Ed25519 JWK (no private key is ever written to disk)
+- `out/manifest.json` - the inference observation manifest (refs and digests only)
+- `out/valid/inference-record.jws` - the signed record
+- `out/tampered/inference-record.jws` - a record whose payload was altered after signing
 
 ## Verify offline
 

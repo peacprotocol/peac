@@ -1,13 +1,13 @@
 {
   "description": "Canonical source of truth for PEAC Protocol release metrics. Website, docs, and release notes consume this file. CI validates derived metrics (tests, build_targets, published_packages, conformance_*) against actual build output. Mutable release-state fields (release_date, dist_tag) are maintained by scripts/stamp-release-state.mjs per docs/RELEASING.md.",
   "schema_version": "1.0.0",
-  "version": "0.15.2",
+  "version": "0.15.3",
   "wire_format_version": "0.2",
   "dist_tag": "latest",
   "release_date": "2026-06-22",
   "metrics": {
-    "tests": 11813,
-    "test_files": 471,
+    "tests": 11863,
+    "test_files": 475,
     "published_packages": 36,
     "build_targets": 107,
     "conformance_requirement_ids": 290,

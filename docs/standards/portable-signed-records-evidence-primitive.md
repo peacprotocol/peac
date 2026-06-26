@@ -4,15 +4,15 @@
 **Last checked:** 2026-06-26.
 
 This document defines the portable signed interaction record as an evidence primitive: a single, self-contained
-artifact that records what happened in an interaction, signs it, and can be verified across organizational,
+artifact that records what was reported about an interaction, is signed by an issuer, and can be verified across organizational,
 vendor, and runtime boundaries. It is a neutral technical reference for the record format and its properties.
 For the mapping of this primitive to specific evaluation, audit, transparency, authorization, and security
 contexts, see [`docs/interop/PORTABLE-SIGNED-RECORDS-CROSSWALK.md`](../interop/PORTABLE-SIGNED-RECORDS-CROSSWALK.md).
 
 ## 1. Definition
 
-A portable signed interaction record is a compact JSON Web Signature (JWS) carrying a canonical, signed
-statement about an interaction. The following properties are fixed by the wire format and the signing and
+A portable signed interaction record is a compact JSON Web Signature (JWS) carrying a canonicalized, signed
+statement about a reported interaction. The following properties are fixed by the wire format and the signing and
 canonicalization rules used in this repository.
 
 - **Wire format.** The frozen receipt wire format is `peac-receipt/0.1` (frozen until v1.0); the
@@ -103,7 +103,7 @@ scoring that system. Each context below has a PEAC-owned worked example or recip
 
 Each example uses an existing registered record type; this document introduces no new type.
 
-## 6. Scale of the existing surface
+## 6. Repository facts at last check
 
 As facts from this repository at the last-checked date: released version `0.15.2`; wire format version `0.2`;
 `36` published packages; a conformance corpus of `290` requirement identifiers across `32` sections

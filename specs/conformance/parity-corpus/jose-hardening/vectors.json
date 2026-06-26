@@ -1,7 +1,7 @@
 {
   "family": "jose-hardening",
   "description": "Wire 0.2 JOSE rejection parity vectors. Each vector supplies a malformed JOSE protected header that the canonical hardening function (validateWire02Header in @peac/crypto) MUST reject. The bounded shadow-mode validator foundation must reach zero divergence with the existing JOSE hardening path on every vector. Error codes are the actual CryptoError codes thrown by the canonical path; they do NOT carry a structured path field.",
-  "version": "0.15.2",
+  "version": "0.15.3",
   "generator": "manual; v0.13.1 PR C floor",
   "vectors": [
     {
