@@ -5,4 +5,4 @@
  * NOT the OpenTelemetry API/SDK version. Kept in sync by
  * scripts/verify-doc-version-currency.mjs.
  */
-export const TELEMETRY_OTEL_VERSION = '0.15.2';
+export const TELEMETRY_OTEL_VERSION = '0.15.3';

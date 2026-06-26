@@ -25,7 +25,7 @@ startCommand:
         description: JWKS file for verifier key resolution (optional)
   commandFunction: |-
     (config) => {
-      const args = ['-y', '@peac/mcp-server@0.15.2'];
+      const args = ['-y', '@peac/mcp-server@0.15.3'];
       if (config.issuerKey) { args.push('--issuer-key', config.issuerKey); }
       if (config.issuerId) { args.push('--issuer-id', config.issuerId); }
       if (config.bundleDir) { args.push('--bundle-dir', config.bundleDir); }

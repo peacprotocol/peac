@@ -1,6 +1,6 @@
 {
   "name": "@peac/mappings-paymentauth",
-  "version": "0.15.2",
+  "version": "0.15.3",
   "description": "HTTP Payment authentication scheme (paymentauth/MPP) mapping for PEAC",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

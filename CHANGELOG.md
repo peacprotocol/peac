@@ -5,7 +5,28 @@ All notable changes to PEAC Protocol will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.15.2] - 2026-06-22
+## [0.15.3] - 2026-06-26
+
+Integration and verifier pack.
+
+Adds an example and two informative documents that make portable signed records
+easier to find and reason about, with no change to wire format, schema,
+registries, public API, or signing. A new example issues a signed record for an
+open-model inference call and verifies it offline, reusing the existing
+agent-action record and binding an inference observation manifest digest. A
+crosswalk maps existing examples to evaluation, audit, and transparency contexts,
+and a standards-facing note defines the portable signed interaction record as an
+evidence primitive.
+
+Public API: unchanged.
+Wire format: unchanged (0.2).
+Public schema: unchanged.
+Registered extension groups: unchanged (19).
+Registered receipt types: unchanged (61).
+Conformance sections: unchanged (32).
+Conformance requirement IDs: unchanged (290).
+
+## [0.15.2]
 
 Verification and signing hardening.
 
