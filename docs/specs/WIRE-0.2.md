@@ -1230,7 +1230,7 @@ Implementations MUST perform steps in the order specified. A step that produces 
 ### 19.2 Validation Steps
 
 **Step 1: Verify JWS signature.**
-Decode the compact JWS and verify the Ed25519 signature against the provided `publicKey`. The `alg` header parameter MUST be `EdDSA`. JOSE hardening checks are applied at this step: reject embedded keys (`jwk`, `x5c`, `x5u`, `jku`), reject `crit`, reject `b64: false`, reject `zip`, require `kid` (1 to 256 characters). Failure produces the corresponding `E_JWS_*` or `E_INVALID_SIGNATURE` error code.
+Decode the compact JWS and verify the Ed25519 signature against the provided `publicKey`. The `alg` header parameter MUST be `EdDSA`. Signature verification follows the PEAC Ed25519 verification profile (cofactorless; reject small-order public keys; reject a non-reduced scalar `S >= L`; 32-byte key, 64-byte signature), defined in `SECURITY-CONSIDERATIONS.md` Section 1 and cross-checked across the TypeScript and Go reference verifiers by the corpus at `specs/conformance/parity-corpus/ed25519-peac-profile/`. JOSE hardening checks are applied at this step: reject embedded keys (`jwk`, `x5c`, `x5u`, `jku`), reject `crit`, reject `b64: false`, reject `zip`, require `kid` (1 to 256 characters). Failure produces the corresponding `E_JWS_*` or `E_INVALID_SIGNATURE` error code.
 
 **Step 2: Apply strictness routing.**
 Examine the decoded `typ` header parameter:

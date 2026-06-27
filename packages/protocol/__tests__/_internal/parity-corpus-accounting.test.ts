@@ -168,13 +168,44 @@ describe('parity-corpus accounting (jcs-extended is excluded by design)', () => 
     const schemaPath = resolve(CORPUS_ROOT, 'jcs-extended', 'vectors.schema.json');
     expect(existsSync(schemaPath)).toBe(false);
   });
+
+  it('ed25519-peac-profile uses the hex-vector shape, not the parity-vector shape', () => {
+    // Like jcs-extended, this corpus is a documented exception: it is exercised
+    // by dedicated cross-language tests (ed25519.peac-profile-parity.test.ts
+    // and ed25519_peac_profile_parity_test.go), not by the schema-validated
+    // parity-vector loader. Assert the distinct shape so the exception stays
+    // specific rather than a blanket escape hatch.
+    const vectorsPath = resolve(CORPUS_ROOT, 'ed25519-peac-profile', 'vectors.json');
+    const vectorsJson = JSON.parse(readFileSync(vectorsPath, 'utf8')) as {
+      vectors: ReadonlyArray<Record<string, unknown>>;
+    };
+    expect(Array.isArray(vectorsJson.vectors)).toBe(true);
+    expect(vectorsJson.vectors.length).toBeGreaterThan(0);
+    for (const v of vectorsJson.vectors) {
+      expect(v).toHaveProperty('id');
+      expect(v).toHaveProperty('signature_hex');
+      expect(v).toHaveProperty('public_key_hex');
+      expect(v).toHaveProperty('peac_expected');
+      // It does NOT carry the parity-vector `input.payload` shape.
+      expect(v).not.toHaveProperty('input');
+    }
+  });
+
+  it('ed25519-peac-profile has no vectors.schema.json (not schema-validated as a parity family)', () => {
+    const schemaPath = resolve(CORPUS_ROOT, 'ed25519-peac-profile', 'vectors.schema.json');
+    expect(existsSync(schemaPath)).toBe(false);
+  });
 });
 
 describe('parity-corpus accounting (no silent extra families)', () => {
-  it('every directory under parity-corpus/ is either schema-validated and enrolled, or jcs-extended (the documented exception)', () => {
+  it('every directory under parity-corpus/ is either schema-validated and enrolled, or a documented hex-vector exception (jcs-extended, ed25519-peac-profile)', () => {
     const entries = readdirSync(CORPUS_ROOT, { withFileTypes: true });
     const dirs = entries.filter((e) => e.isDirectory()).map((e) => e.name);
-    const enrolled = new Set<string>([...(PARITY_FAMILIES as readonly string[]), 'jcs-extended']);
+    const enrolled = new Set<string>([
+      ...(PARITY_FAMILIES as readonly string[]),
+      'jcs-extended',
+      'ed25519-peac-profile',
+    ]);
     const unaccounted = dirs.filter((d) => !enrolled.has(d));
     expect(unaccounted, `unaccounted parity-corpus directories: ${unaccounted.join(', ')}`).toEqual(
       []

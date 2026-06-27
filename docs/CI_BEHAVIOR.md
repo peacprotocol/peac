@@ -11,7 +11,7 @@ This document describes the Continuous Integration pipeline behavior for the PEA
 
 CI runs on GitHub Actions for all pushes to `main` and for all pull requests. Release validation (tag builds, publication) is handled by separate workflows (`publish.yml`, `nightly.yml`), not the primary CI workflow. The primary workflow (`.github/workflows/ci.yml`) uses concurrency groups (`ci-${{ github.ref }}`) with cancel-in-progress to avoid redundant runs.
 
-**Node.js:** Version determined by `.node-version` file (currently 24.x Active LTS). Engine requirement: `>=22.0.0`. CI also tests Node 22 (Maintenance LTS) and Node 25 (forward-compat, non-blocking).
+**Node.js:** Version determined by `.node-version` file (currently 24.x Active LTS). Engine requirement: `>=22.13.0`. CI also tests Node 22 (Maintenance LTS) and Node 25 (forward-compat, non-blocking).
 
 **Package manager:** pnpm (version from `packageManager` field in root `package.json`). All CI jobs use `--frozen-lockfile`.
 

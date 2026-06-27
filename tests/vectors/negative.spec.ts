@@ -62,8 +62,10 @@ describe('Negative Test Vectors', () => {
       const parts = validJWS.split('.');
       const invalidJWS = `${parts[0]}.${parts[1]}.INVALID_SIGNATURE_DATA`;
 
-      // Should throw during verification
-      await expect(jwsVerify(invalidJWS, publicKey)).rejects.toThrow();
+      // Must fail verification. A malformed (wrong-length) signature is rejected
+      // as an inadmissible input: verification resolves with valid === false.
+      const verifyResult = await jwsVerify(invalidJWS, publicKey);
+      expect(verifyResult.valid).toBe(false);
 
       console.log('NEGATIVE VECTOR: Invalid signature correctly rejected');
     });

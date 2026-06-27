@@ -388,14 +388,24 @@ export async function verifyLocal(
     // 1. Verify signature and header via the internal codec boundary
     // (typ, alg validated by @peac/crypto). Default codec is a pure
     // pass-through to @peac/crypto.verify; the returned VerifyResult is
-    // byte-identical to the prior release for every fixture.
+    // byte-identical to the prior release for every fixture. Format errors
+    // (bad typ/header/JSON) are thrown as typed CryptoErrors and handled in
+    // the catch below (format-first), so the length discrimination here runs
+    // only on a well-formed JWS whose signature simply failed to verify.
     const result = await defaultCodec.decode<unknown>(jws, publicKey);
 
     if (!result.valid) {
+      // The Ed25519 verifier rejects a wrong-length signature by returning
+      // false (it no longer throws); distinguish that specifically from a
+      // genuine signature mismatch, matching verifyReceipt() in verify.ts.
+      const signatureBytes = ed25519SignatureByteLength(jws);
+      const invalidLength = signatureBytes !== null && signatureBytes !== ED25519_SIGNATURE_BYTES;
       return {
         valid: false,
         code: 'E_INVALID_SIGNATURE',
-        message: 'Ed25519 signature verification failed',
+        message: invalidLength
+          ? 'Ed25519 signature has invalid length'
+          : 'Ed25519 signature verification failed',
       };
     }
 
@@ -760,11 +770,13 @@ export async function verifyLocal(
       };
     }
 
-    // A wrong-length Ed25519 signature throws an untyped error inside the
-    // verifier (not a typed CryptoError, so it is not handled above). Classify
-    // it deterministically as an invalid signature rather than letting it fall
-    // through to E_INTERNAL. Typed format errors are handled earlier, so a
-    // malformed header/payload still maps to E_INVALID_FORMAT (format-first).
+    // Defense in depth: a wrong-length Ed25519 signature is rejected on the
+    // happy path (the verifier returns false and the !result.valid branch above
+    // classifies it). Should any verifier error nonetheless reach here, classify
+    // a wrong-length signature deterministically as an invalid signature rather
+    // than letting it fall through to E_INTERNAL. Typed format errors are
+    // handled earlier, so a malformed header/payload still maps to
+    // E_INVALID_FORMAT (format-first).
     const signatureBytes = ed25519SignatureByteLength(jws);
     if (signatureBytes !== null && signatureBytes !== ED25519_SIGNATURE_BYTES) {
       return {

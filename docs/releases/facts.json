@@ -15,7 +15,7 @@
   },
   "runtime": {
     "node_canonical": "24.14.1",
-    "node_minimum": ">=22.0.0",
+    "node_minimum": ">=22.13.0",
     "node_compat": "22",
     "node_forward_compat": "25+"
   },

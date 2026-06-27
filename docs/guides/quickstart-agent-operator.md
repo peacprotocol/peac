@@ -4,7 +4,7 @@ Verify a signed receipt in under 5 minutes. No server needed; verification is of
 
 ## Prerequisites
 
-- Node.js >= 22.0.0
+- Node.js >= 22.13.0
 
 ## 1. Install
 
