@@ -12,6 +12,7 @@ const STATUS_LABELS: Record<string, string> = {
   invalid: 'INVALID',
   error: 'ERROR',
   'no-key': 'NO KEY',
+  'unsupported-runtime': 'UNSUPPORTED RUNTIME',
 };
 
 export function renderResults(result: VerifyResult): void {

@@ -23,7 +23,7 @@ Current as of the repository state after the v0.14.3 profile additions.
 | Environment                  | Status            | Notes                                                                  |
 | ---------------------------- | ----------------- | ---------------------------------------------------------------------- |
 | Node.js 24 (Active LTS)      | **Required**      | Canonical development and CI lane                                      |
-| Node.js 22 (Maintenance LTS) | **Compatibility** | `engines.node >= 22.0.0` floor                                         |
+| Node.js 22 (Maintenance LTS) | **Compatibility** | `engines.node >= 22.13.0` floor                                        |
 | Node.js 25+                  | **Advisory**      | Forward-compat CI lane                                                 |
 | Go 1.26+                     | **Default**       | Interaction Record format (core issue/verify); middleware experimental |
 | Browser / Edge runtime       | **Partial**       | `@peac/schema` (no-network), verifier UI, worker surfaces              |

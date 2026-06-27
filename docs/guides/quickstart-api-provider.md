@@ -4,7 +4,7 @@ Add signed receipts to your Express.js API in under 5 minutes. Every response wi
 
 ## Prerequisites
 
-- Node.js >= 22.0.0
+- Node.js >= 22.13.0
 - An existing Express.js application (or create one below)
 
 ## 1. Install

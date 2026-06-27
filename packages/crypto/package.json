@@ -36,6 +36,9 @@
   "publishConfig": {
     "access": "public"
   },
+  "engines": {
+    "node": ">=22.13.0"
+  },
   "scripts": {
     "prebuild": "rm -rf dist",
     "build": "pnpm run build:js && pnpm run build:types",

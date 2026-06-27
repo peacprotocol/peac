@@ -19,8 +19,38 @@ MUST reject any other value.
 downgrade attacks, and key-type mismatches. Ed25519 provides 128-bit security
 with deterministic signatures (no per-signature randomness to leak).
 
-**Implementation:** `@peac/crypto` exports `sign()` and `verify()` using
-Ed25519 via the Node.js `node:crypto` module. No fallback algorithms exist.
+**Implementation:** `@peac/crypto` exports `sign()` and `verify()`. Signing uses
+`@noble/ed25519` (Web Crypto backed); verification uses the Web Crypto Subtle
+API. No fallback algorithms exist.
+
+**Verification profile.** "RFC 8032" is not a single accept/reject predicate:
+Ed25519 implementations differ on small-order public keys and on cofactored
+versus cofactorless verification. PEAC pins one predicate so independent
+verifiers reach the same decision on every input:
+
+- public key MUST be 32 bytes and signature MUST be 64 bytes;
+- small-order public keys (the 8-torsion subgroup) MUST be rejected;
+- a non-reduced signature scalar (`S >= L`, the Ed25519 group order) MUST be
+  rejected;
+- signature verification MUST be cofactorless.
+
+The TypeScript reference verifier implements this on the Web Crypto Subtle API
+(cofactorless) and fails closed if the runtime cannot provide the primitive: it
+throws rather than silently substituting a different predicate. The Go reference
+verifier (`crypto/ed25519`, cofactorless) applies the identical admissibility
+checks. The two implementations are cross-checked against a shared edge-vector
+corpus at `specs/conformance/parity-corpus/ed25519-peac-profile/` (the
+ed25519-speccheck cases plus canonical positives); both reach identical
+accept/reject decisions on every vector. Canonical signatures produced by
+`sign()` are unaffected; only malformed or non-canonical encodings are rejected.
+
+**Runtime requirement.** PEAC Ed25519 verification requires a runtime with
+stable WebCrypto Ed25519 support. Node.js users MUST use Node v22.13.0 or newer
+(WebCrypto Ed25519 is also stable on v20.19.3+ and v23.5.0+); the `@peac/crypto`
+package declares `engines.node >= 22.13.0` accordingly. Browsers MUST have
+WebCrypto Ed25519 support. Unsupported runtimes fail closed (the verifier throws
+`Ed25519RuntimeError`) and MUST NOT fall back to a different Ed25519
+verification predicate.
 
 ---
 

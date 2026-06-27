@@ -7,7 +7,7 @@
 | Version                      | Status            | Notes                                                           |
 | ---------------------------- | ----------------- | --------------------------------------------------------------- |
 | Node.js 24 (Active LTS)      | **Required**      | Canonical development and CI lane. `.node-version` pinned here. |
-| Node.js 22 (Maintenance LTS) | **Compatibility** | `engines.node >= 22.0.0` floor. CI compat lane.                 |
+| Node.js 22 (Maintenance LTS) | **Compatibility** | `engines.node >= 22.13.0` floor. CI compat lane.                |
 | Node.js 25+                  | **Advisory**      | Forward-compat CI lane. Not guaranteed.                         |
 
 ## Go

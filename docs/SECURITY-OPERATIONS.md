@@ -22,7 +22,7 @@ The current deprecation schedule is in [Deprecation Policy](DEPRECATION_POLICY.m
 | Runtime                      | Status        | Policy                                                          |
 | ---------------------------- | ------------- | --------------------------------------------------------------- |
 | Node.js 24 (Active LTS)      | Required      | Primary CI and development target                               |
-| Node.js 22 (Maintenance LTS) | Compatibility | `engines.node >= 22.0.0` floor; security fixes backported       |
+| Node.js 22 (Maintenance LTS) | Compatibility | `engines.node >= 22.13.0` floor; security fixes backported      |
 | Node.js 25+                  | Advisory      | Forward-compat CI lane; no support guarantee                    |
 | Go                           | Supported     | Wire 0.2 core (issue and local verify); middleware experimental |
 | Python                       | Not started   | API-first via the reference verifier HTTP API                   |

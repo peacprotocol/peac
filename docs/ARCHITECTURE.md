@@ -49,7 +49,7 @@ Layer 6: pillars         (depends on protocol, control)
 
 ### 4. Runtime Support Policy
 
-PEAC packages declare `engines.node: ">=22.0.0"` and follow this support policy:
+PEAC packages declare `engines.node: ">=22.13.0"` and follow this support policy:
 
 - **Canonical production target:** Node 24 (Active LTS). `.node-version` pins to the latest 24.x LTS patch.
 - **Compatibility floor:** Node 22 (Maintenance LTS). Supported because it is declared in `engines.node`. CI exercises Node 22 in a compatibility lane.
