@@ -99,6 +99,10 @@ export type VerifyLocalErrorCode =
   // Type-to-extension enforcement (Wire 0.2, v0.12.2)
   | 'E_EXTENSION_GROUP_REQUIRED'
   | 'E_EXTENSION_GROUP_MISMATCH'
+  // Raw-input I-JSON gate (RFC 7493): runs on raw header/payload bytes before parse
+  | 'E_IJSON_DUPLICATE_MEMBER_NAME'
+  | 'E_IJSON_NUMBER_OUT_OF_RANGE'
+  | 'E_IJSON_INVALID_STRING'
   | 'E_INTERNAL';
 
 /**
@@ -312,6 +316,13 @@ const JOSE_CODE_MAP: Record<string, VerifyLocalErrorCode> = {
   CRYPTO_JWS_MISSING_KID: 'E_JWS_MISSING_KID',
   CRYPTO_JWS_B64_REJECTED: 'E_JWS_B64_REJECTED',
   CRYPTO_JWS_ZIP_REJECTED: 'E_JWS_ZIP_REJECTED',
+  // Raw-input I-JSON gate (RFC 7493): specific E_IJSON_* codes so callers can
+  // distinguish duplicate member names, out-of-range numbers, and invalid
+  // strings from ordinary format errors. (Generic JSON syntax errors from the
+  // gate use CRYPTO_INVALID_JWS_FORMAT -> E_INVALID_FORMAT via FORMAT_ERROR_CODES.)
+  CRYPTO_IJSON_DUPLICATE_MEMBER_NAME: 'E_IJSON_DUPLICATE_MEMBER_NAME',
+  CRYPTO_IJSON_NUMBER_OUT_OF_RANGE: 'E_IJSON_NUMBER_OUT_OF_RANGE',
+  CRYPTO_IJSON_INVALID_STRING: 'E_IJSON_INVALID_STRING',
 };
 
 /** Max parse issues to include in details (prevents log bloat) */

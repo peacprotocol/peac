@@ -161,7 +161,12 @@ describe('verifyLocal(): failure hardening', () => {
     if (!result.valid) {
       expect(result.code).toBe('E_INVALID_FORMAT');
       expect(result.message).not.toBe('Unexpected verification error.');
-      expect(result.message).toContain('JWS');
+      // The I-JSON (RFC 7493) gate now runs on the raw payload bytes before
+      // JSON.parse, so a non-JSON payload is reported by the raw-input scanner
+      // (CRYPTO_INVALID_JWS_FORMAT -> E_INVALID_FORMAT) with a specific I-JSON
+      // message rather than the JSON.parse fallback "JWS payload" message. Both
+      // are valid typed passthroughs; the contract is that it is not genericized.
+      expect(result.message).toMatch(/JWS|I-JSON/);
     }
   });
 });

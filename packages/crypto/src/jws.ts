@@ -16,13 +16,9 @@ import {
   PEAC_ALG,
   VERIFIER_LIMITS,
 } from '@peac/kernel';
-import {
-  base64urlEncode,
-  base64urlDecode,
-  base64urlEncodeString,
-  base64urlDecodeString,
-} from './base64url';
+import { base64urlEncode, base64urlDecode, base64urlEncodeString } from './base64url';
 import { CryptoError } from './errors';
+import { assertIJson } from './ijson';
 
 // ---------------------------------------------------------------------------
 // JWS header types: 3-variant discriminated union (Correction 1)
@@ -340,9 +336,15 @@ export async function verify<T = unknown>(
   // Wrap in try/catch to translate SyntaxError / decode failures into stable
   // CryptoError codes; callers depend on CRYPTO_INVALID_JWS_FORMAT for error
   // classification and must never receive a raw SyntaxError at the boundary.
+  // Decode the header bytes once, enforce I-JSON (RFC 7493) on the raw bytes
+  // BEFORE JSON.parse (assertIJson throws stable CRYPTO_IJSON_* codes that must
+  // propagate; it runs OUTSIDE the JSON.parse try/catch so its specific code is
+  // not re-mapped to CRYPTO_INVALID_JWS_FORMAT), then parse the same bytes.
+  const headerBytes = base64urlDecode(headerB64);
+  assertIJson(headerBytes);
   let rawHeader: Record<string, unknown>;
   try {
-    rawHeader = JSON.parse(base64urlDecodeString(headerB64)) as Record<string, unknown>;
+    rawHeader = JSON.parse(new TextDecoder().decode(headerBytes)) as Record<string, unknown>;
   } catch {
     throw new CryptoError('CRYPTO_INVALID_JWS_FORMAT', 'JWS header: invalid base64url or JSON');
   }
@@ -357,10 +359,12 @@ export async function verify<T = unknown>(
     validateWire02Header(rawHeader);
   }
 
-  // Decode payload; same stable-error contract as header decode above.
+  // Decode payload once + I-JSON gate; same stable-error contract as header above.
+  const payloadBytes = base64urlDecode(payloadB64);
+  assertIJson(payloadBytes);
   let payload: T;
   try {
-    payload = JSON.parse(base64urlDecodeString(payloadB64)) as T;
+    payload = JSON.parse(new TextDecoder().decode(payloadBytes)) as T;
   } catch {
     throw new CryptoError('CRYPTO_INVALID_JWS_FORMAT', 'JWS payload: invalid base64url or JSON');
   }
@@ -422,17 +426,23 @@ export function decode<T = unknown>(jws: string): { header: JWSHeader; payload: 
 
   const [headerB64, payloadB64] = parts;
 
+  // I-JSON gate before parse (decode-once); CRYPTO_IJSON_* propagates outside
+  // the JSON.parse try/catch so the specific code is preserved.
+  const headerBytes = base64urlDecode(headerB64);
+  assertIJson(headerBytes);
   let rawHeader: Record<string, unknown>;
   try {
-    rawHeader = JSON.parse(base64urlDecodeString(headerB64)) as Record<string, unknown>;
+    rawHeader = JSON.parse(new TextDecoder().decode(headerBytes)) as Record<string, unknown>;
   } catch {
     throw new CryptoError('CRYPTO_INVALID_JWS_FORMAT', 'JWS header: invalid base64url or JSON');
   }
   const header = buildHeader(rawHeader);
 
+  const payloadBytes = base64urlDecode(payloadB64);
+  assertIJson(payloadBytes);
   let payload: T;
   try {
-    payload = JSON.parse(base64urlDecodeString(payloadB64)) as T;
+    payload = JSON.parse(new TextDecoder().decode(payloadBytes)) as T;
   } catch {
     throw new CryptoError('CRYPTO_INVALID_JWS_FORMAT', 'JWS payload: invalid base64url or JSON');
   }

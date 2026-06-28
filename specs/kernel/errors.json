@@ -1676,6 +1676,33 @@
       "category": "validation",
       "retryable": false,
       "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_IJSON_DUPLICATE_MEMBER_NAME",
+      "http_status": 400,
+      "title": "Duplicate JSON Member Name",
+      "description": "A JSON object contained duplicate member names, violating I-JSON (RFC 7493)",
+      "category": "validation",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_IJSON_NUMBER_OUT_OF_RANGE",
+      "http_status": 400,
+      "title": "Number Out Of I-JSON Range",
+      "description": "A JSON number was non-finite or its magnitude exceeded the I-JSON safe-integer range; encode large values as strings",
+      "category": "validation",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
+    },
+    {
+      "code": "E_IJSON_INVALID_STRING",
+      "http_status": 400,
+      "title": "Invalid JSON String",
+      "description": "A JSON string contained an invalid escape, lone surrogate, Unicode noncharacter, or invalid UTF-8, violating I-JSON (RFC 7493)",
+      "category": "validation",
+      "retryable": false,
+      "next_action": "retry_with_different_input"
     }
   ]
 }
