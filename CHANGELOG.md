@@ -5,7 +5,31 @@ All notable changes to PEAC Protocol will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.15.3] - 2026-06-26
+## [0.16.0] - 2026-06-28
+
+Deterministic Verification for Portable Records.
+
+Aligns record verification across the TypeScript and Go implementations and tightens
+raw input validation, with no change to the wire format or public schema. Defines the
+PEAC Ed25519 verification profile (cofactorless verification with a shared small-order
+denylist and a fixed-width scalar comparison), validates the JWS protected header and
+payload as I-JSON (RFC 7493) before parsing, and adds an optional bounded replay-guard
+profile for online consumers of already-verified records. Sets the supported Node floor
+to `>=22.13.0`.
+
+Public API: adds `createReplayGuard` (optional, composable; not wired into stateless
+verification).
+Wire format: unchanged (0.2).
+Public schema: unchanged.
+Node floor: `>=22.13.0`.
+New validation error codes: `E_IJSON_DUPLICATE_MEMBER_NAME`, `E_IJSON_NUMBER_OUT_OF_RANGE`,
+`E_IJSON_INVALID_STRING`.
+Registered extension groups: unchanged (19).
+Registered receipt types: unchanged (61).
+Conformance sections: unchanged (32).
+Conformance requirement IDs: unchanged (290).
+
+## [0.15.3]
 
 Integration and verifier pack.
 

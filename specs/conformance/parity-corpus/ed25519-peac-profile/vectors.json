@@ -1,7 +1,7 @@
 {
   "family": "ed25519-peac-profile",
   "description": "Ed25519 verification edge vectors proving TypeScript (Web Crypto) and Go (crypto/ed25519) agree under the PEAC cofactorless verification profile.",
-  "version": "1",
+  "version": "0.16.0",
   "status": "Informative",
   "vectors": [
     {

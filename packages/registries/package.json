@@ -1,6 +1,6 @@
 {
   "name": "@peac/registries",
-  "version": "0.15.3",
+  "version": "0.16.0",
   "private": true,
   "description": "PEAC Protocol - workspace-private internal facade re-grouping public @peac/kernel constants for internal-consumer ergonomics. Not published. Version tracks the workspace-wide value enforced by scripts/check-version-coherence.sh; the workspace-wide bump to 0.13.1 happens in the v0.13.1 release-prep PR.",
   "type": "module",
