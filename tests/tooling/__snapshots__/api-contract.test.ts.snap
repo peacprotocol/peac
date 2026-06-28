@@ -175,6 +175,7 @@ exports[`API contract: @peac/protocol > value exports match snapshot 1`] = `
   "createDefaultPolicy",
   "createDigest",
   "createEmptyReport",
+  "createReplayGuard",
   "createReportBuilder",
   "fetchDiscovery",
   "fetchIssuerConfig",

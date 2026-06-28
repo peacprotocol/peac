@@ -46,6 +46,10 @@ export * from './ssrf-safe-fetch';
 export * from './transport-profiles';
 export * from './pointer-fetch';
 
+// Optional bounded replay guard for already-verified records (composable; not wired
+// into stateless verifyLocal). See docs/specs/REPLAY-GUARD-PROFILE.md.
+export * from './replay-guard';
+
 // Re-export crypto utilities for single-package quickstart
 export {
   base64urlDecode,
