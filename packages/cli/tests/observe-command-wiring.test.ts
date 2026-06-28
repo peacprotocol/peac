@@ -19,6 +19,7 @@ import {
   parseIntegerFlag,
 } from '../src/commands/observe-command';
 import { CliExecutionSchema } from '@peac/schema';
+import { getVersion } from '../src/lib/version';
 
 const NODE = process.execPath;
 
@@ -130,6 +131,15 @@ describe('observe command wiring: end-to-end smoke', () => {
     const record = JSON.parse(result.stdout.trim()) as Record<string, unknown>;
     expect(record.shell_mode).toBe(true);
     expect((record.command as { program: string }).program).toBe('sh');
+  }, 20_000);
+
+  it('emits peac_cli_version from the canonical getVersion(), not a hardcoded fallback', async () => {
+    const result = await runWiredObserveCommand(['--', NODE, '-e', 'process.stdout.write("ok")']);
+    expect(result.exitCode).toBe(0);
+    const record = JSON.parse(result.stdout.trim()) as Record<string, unknown>;
+    const platform = record.platform as Record<string, unknown>;
+    expect(platform.peac_cli_version).toBe(getVersion());
+    expect(platform.peac_cli_version).not.toBe('0.14.1');
   }, 20_000);
 });
 

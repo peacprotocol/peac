@@ -29,6 +29,7 @@ import { CLI_COMMAND_EXECUTION_TYPE, CLI_EXECUTION_EXTENSION_KEY } from '@peac/s
 import { issue, IssueError } from '@peac/protocol';
 import { generateKeypair } from '@peac/crypto';
 import { CLI_LIMITS } from '../lib/cli-limits.js';
+import { getVersion } from '../lib/version.js';
 import { runObservationCore, preflightOutputWritable } from '../lib/observation-pipeline.js';
 import { parseIntegerFlag, type ObserveCommandOptions } from './observe-command.js';
 import {
@@ -201,7 +202,7 @@ export async function runRecordCommand(
   const captureEnv = io.captureEnv ?? process.env;
   const issuerKeyEnv = io.issuerKeyEnv ?? process.env;
   const cwd = io.cwd ?? process.cwd();
-  const peacCliVersion = io.peacCliVersion ?? '0.14.1';
+  const peacCliVersion = io.peacCliVersion ?? getVersion();
 
   const failures = validateRecordOptions(opts, childArgv);
   if (failures.length > 0) {

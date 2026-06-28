@@ -21,6 +21,7 @@
 import { Command, Option } from 'commander';
 import { writeFileSync } from 'node:fs';
 import { CLI_LIMITS } from '../lib/cli-limits.js';
+import { getVersion } from '../lib/version.js';
 import {
   preflightOutputWritable,
   resolveProgramPath,
@@ -193,7 +194,7 @@ export async function runObserveCommand(
   const childEnv = io.childEnv ?? process.env;
   const captureEnv = io.captureEnv ?? process.env;
   const cwd = io.cwd ?? process.cwd();
-  const peacCliVersion = io.peacCliVersion ?? '0.14.1';
+  const peacCliVersion = io.peacCliVersion ?? getVersion();
 
   const failures = validateObserveOptions(opts, childArgv);
   if (failures.length > 0) {
