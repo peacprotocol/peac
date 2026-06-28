@@ -1,0 +1,411 @@
+{
+  "family": "ijson-raw-input",
+  "description": "Raw-bytes I-JSON (RFC 7493) rejection/acceptance vectors proving the TypeScript and Go reference gates reach the same decision before JSON parsing. Inputs are base64url of the raw JSON document bytes.",
+  "version": "1",
+  "status": "Informative",
+  "vectors": [
+    {
+      "id": "duplicate-member-name-payload",
+      "description": "two members named \"a\" in the same object",
+      "input_b64": "eyJhIjoxLCJhIjoyfQ",
+      "expected": {
+        "accepted": false,
+        "code": "E_IJSON_DUPLICATE_MEMBER_NAME"
+      }
+    },
+    {
+      "id": "duplicate-member-name-nested",
+      "description": "duplicate member name inside a nested object",
+      "input_b64": "eyJ4Ijp7ImEiOjEsImEiOjJ9fQ",
+      "expected": {
+        "accepted": false,
+        "code": "E_IJSON_DUPLICATE_MEMBER_NAME"
+      }
+    },
+    {
+      "id": "duplicate-member-name-header",
+      "description": "duplicate \"alg\" in a JWS-header-shaped object",
+      "input_b64": "eyJhbGciOiJFZERTQSIsImFsZyI6Im5vbmUiLCJ0eXAiOiJpbnRlcmFjdGlvbi1yZWNvcmQrand0Iiwia2lkIjoiayJ9",
+      "expected": {
+        "accepted": false,
+        "code": "E_IJSON_DUPLICATE_MEMBER_NAME"
+      }
+    },
+    {
+      "id": "duplicate-member-name-escaped-equivalent",
+      "description": "member names equal only AFTER escape processing (\"a\\/b\" decodes to \"a/b\"); proves duplicate detection is post-unescape, not raw-substring",
+      "input_b64": "eyJhXC9iIjoxLCJhL2IiOjJ9",
+      "expected": {
+        "accepted": false,
+        "code": "E_IJSON_DUPLICATE_MEMBER_NAME"
+      }
+    },
+    {
+      "id": "integer-max-safe-plus-one",
+      "description": "2^53 (= MAX_SAFE_INTEGER + 1)",
+      "input_b64": "eyJuIjo5MDA3MTk5MjU0NzQwOTkyfQ",
+      "expected": {
+        "accepted": false,
+        "code": "E_IJSON_NUMBER_OUT_OF_RANGE"
+      }
+    },
+    {
+      "id": "integer-2pow53-plus-one",
+      "description": "2^53 + 1",
+      "input_b64": "eyJuIjo5MDA3MTk5MjU0NzQwOTkzfQ",
+      "expected": {
+        "accepted": false,
+        "code": "E_IJSON_NUMBER_OUT_OF_RANGE"
+      }
+    },
+    {
+      "id": "integer-min-safe-minus-one",
+      "description": "-(2^53)",
+      "input_b64": "eyJuIjotOTAwNzE5OTI1NDc0MDk5Mn0",
+      "expected": {
+        "accepted": false,
+        "code": "E_IJSON_NUMBER_OUT_OF_RANGE"
+      }
+    },
+    {
+      "id": "large-exponent",
+      "description": "1e400 (overflows binary64)",
+      "input_b64": "eyJuIjoxZTQwMH0",
+      "expected": {
+        "accepted": false,
+        "code": "E_IJSON_NUMBER_OUT_OF_RANGE"
+      }
+    },
+    {
+      "id": "large-integer-exponent",
+      "description": "9007199254740993e0 (integer-valued via exponent)",
+      "input_b64": "eyJuIjo5MDA3MTk5MjU0NzQwOTkzZTB9",
+      "expected": {
+        "accepted": false,
+        "code": "E_IJSON_NUMBER_OUT_OF_RANGE"
+      }
+    },
+    {
+      "id": "fraction-over-safe-range",
+      "description": "9007199254740991.5 (rounds to 2^53)",
+      "input_b64": "eyJuIjo5MDA3MTk5MjU0NzQwOTkxLjV9",
+      "expected": {
+        "accepted": false,
+        "code": "E_IJSON_NUMBER_OUT_OF_RANGE"
+      }
+    },
+    {
+      "id": "fraction-just-over-safe-range",
+      "description": "9007199254740991.1 (exact magnitude > bound; binary64 would round to bound)",
+      "input_b64": "eyJuIjo5MDA3MTk5MjU0NzQwOTkxLjF9",
+      "expected": {
+        "accepted": false,
+        "code": "E_IJSON_NUMBER_OUT_OF_RANGE"
+      }
+    },
+    {
+      "id": "negative-fraction-just-over-safe",
+      "description": "-9007199254740991.1 (exact magnitude > bound)",
+      "input_b64": "eyJuIjotOTAwNzE5OTI1NDc0MDk5MS4xfQ",
+      "expected": {
+        "accepted": false,
+        "code": "E_IJSON_NUMBER_OUT_OF_RANGE"
+      }
+    },
+    {
+      "id": "large-finite-float",
+      "description": "1e16 (finite float > 2^53-1)",
+      "input_b64": "eyJuIjoxZTE2fQ",
+      "expected": {
+        "accepted": false,
+        "code": "E_IJSON_NUMBER_OUT_OF_RANGE"
+      }
+    },
+    {
+      "id": "large-negative-finite-float",
+      "description": "-1e16 (finite float < -(2^53-1))",
+      "input_b64": "eyJuIjotMWUxNn0",
+      "expected": {
+        "accepted": false,
+        "code": "E_IJSON_NUMBER_OUT_OF_RANGE"
+      }
+    },
+    {
+      "id": "huge-positive-exponent-digits",
+      "description": "1e999999999999999999999999 (exponent overflows int; must reject)",
+      "input_b64": "eyJuIjoxZTk5OTk5OTk5OTk5OTk5OTk5OTk5OTk5OX0",
+      "expected": {
+        "accepted": false,
+        "code": "E_IJSON_NUMBER_OUT_OF_RANGE"
+      }
+    },
+    {
+      "id": "lone-high-surrogate",
+      "description": "lone high surrogate in a \\u escape (U+D800)",
+      "input_b64": "eyJzIjoiXHVEODAwIn0",
+      "expected": {
+        "accepted": false,
+        "code": "E_IJSON_INVALID_STRING"
+      }
+    },
+    {
+      "id": "lone-low-surrogate",
+      "description": "lone low surrogate in a \\u escape (U+DC00)",
+      "input_b64": "eyJzIjoiXHVEQzAwIn0",
+      "expected": {
+        "accepted": false,
+        "code": "E_IJSON_INVALID_STRING"
+      }
+    },
+    {
+      "id": "invalid-utf8-byte",
+      "description": "raw 0xFF byte inside a string (invalid UTF-8)",
+      "input_b64": "eyJzIjoi_yJ9",
+      "expected": {
+        "accepted": false,
+        "code": "E_IJSON_INVALID_STRING"
+      }
+    },
+    {
+      "id": "invalid-escape",
+      "description": "invalid escape sequence \\x",
+      "input_b64": "eyJzIjoiXHgifQ",
+      "expected": {
+        "accepted": false,
+        "code": "E_IJSON_INVALID_STRING"
+      }
+    },
+    {
+      "id": "bad-unicode-escape",
+      "description": "non-hex digits in a \\u escape (\\uZZZZ)",
+      "input_b64": "eyJzIjoiXHVaWlpaIn0",
+      "expected": {
+        "accepted": false,
+        "code": "E_IJSON_INVALID_STRING"
+      }
+    },
+    {
+      "id": "unterminated-string",
+      "description": "string with no closing quote",
+      "input_b64": "eyJzIjoiYWJjfQ",
+      "expected": {
+        "accepted": false,
+        "code": "E_IJSON_INVALID_STRING"
+      }
+    },
+    {
+      "id": "noncharacter-string-fdd0-escaped",
+      "description": "noncharacter U+FDD0 in a \\u escape",
+      "input_b64": "eyJzIjoiXHVGREQwIn0",
+      "expected": {
+        "accepted": false,
+        "code": "E_IJSON_INVALID_STRING"
+      }
+    },
+    {
+      "id": "noncharacter-string-fdef-escaped",
+      "description": "noncharacter U+FDEF in a \\u escape",
+      "input_b64": "eyJzIjoiXHVGREVGIn0",
+      "expected": {
+        "accepted": false,
+        "code": "E_IJSON_INVALID_STRING"
+      }
+    },
+    {
+      "id": "noncharacter-string-ffff-escaped",
+      "description": "noncharacter U+FFFF in a \\u escape",
+      "input_b64": "eyJzIjoiXHVGRkZGIn0",
+      "expected": {
+        "accepted": false,
+        "code": "E_IJSON_INVALID_STRING"
+      }
+    },
+    {
+      "id": "noncharacter-string-plane-fffe-escaped",
+      "description": "astral noncharacter U+1FFFE via surrogate pair \\uD83F\\uDFFE",
+      "input_b64": "eyJzIjoiXHVEODNGXHVERkZFIn0",
+      "expected": {
+        "accepted": false,
+        "code": "E_IJSON_INVALID_STRING"
+      }
+    },
+    {
+      "id": "noncharacter-member-name-escaped",
+      "description": "noncharacter U+FDD0 in a member name",
+      "input_b64": "eyJcdUZERDAiOjF9",
+      "expected": {
+        "accepted": false,
+        "code": "E_IJSON_INVALID_STRING"
+      }
+    },
+    {
+      "id": "noncharacter-string-fdd0-raw",
+      "description": "noncharacter U+FDD0 as raw UTF-8 bytes (ef b7 90) inside a string",
+      "input_b64": "eyJzIjoi77eQIn0",
+      "expected": {
+        "accepted": false,
+        "code": "E_IJSON_INVALID_STRING"
+      }
+    },
+    {
+      "id": "integer-max-safe-ACCEPTED",
+      "description": "9007199254740991 (= MAX_SAFE_INTEGER)",
+      "input_b64": "eyJuIjo5MDA3MTk5MjU0NzQwOTkxfQ",
+      "expected": {
+        "accepted": true
+      }
+    },
+    {
+      "id": "integer-min-safe-ACCEPTED",
+      "description": "-9007199254740991",
+      "input_b64": "eyJuIjotOTAwNzE5OTI1NDc0MDk5MX0",
+      "expected": {
+        "accepted": true
+      }
+    },
+    {
+      "id": "integer-via-exponent-ACCEPTED",
+      "description": "1e3 (= 1000)",
+      "input_b64": "eyJuIjoxZTN9",
+      "expected": {
+        "accepted": true
+      }
+    },
+    {
+      "id": "fraction-in-range-ACCEPTED",
+      "description": "1.5",
+      "input_b64": "eyJuIjoxLjV9",
+      "expected": {
+        "accepted": true
+      }
+    },
+    {
+      "id": "small-decimal-ACCEPTED",
+      "description": "0.0001",
+      "input_b64": "eyJuIjowLjAwMDF9",
+      "expected": {
+        "accepted": true
+      }
+    },
+    {
+      "id": "safe-fraction-near-bound-ACCEPTED",
+      "description": "9007199254740990.5 (< bound; has a fractional part)",
+      "input_b64": "eyJuIjo5MDA3MTk5MjU0NzQwOTkwLjV9",
+      "expected": {
+        "accepted": true
+      }
+    },
+    {
+      "id": "tiny-negative-exponent-ACCEPTED",
+      "description": "1e-999999 (magnitude far below 1; exponent must not overflow)",
+      "input_b64": "eyJuIjoxZS05OTk5OTl9",
+      "expected": {
+        "accepted": true
+      }
+    },
+    {
+      "id": "leading-zero-exponent-zero-ACCEPTED",
+      "description": "1e0000000000 (== 1e0 == 1; zero-padded exponent must not be treated as huge)",
+      "input_b64": "eyJuIjoxZTAwMDAwMDAwMDB9",
+      "expected": {
+        "accepted": true
+      }
+    },
+    {
+      "id": "leading-zero-exponent-positive-ACCEPTED",
+      "description": "1e0000000003 (== 1e3 == 1000; zero-padded exponent)",
+      "input_b64": "eyJuIjoxZTAwMDAwMDAwMDN9",
+      "expected": {
+        "accepted": true
+      }
+    },
+    {
+      "id": "escaped-quote-ACCEPTED",
+      "description": "escaped double quote \\\"",
+      "input_b64": "eyJ1IjoiYVwiYiJ9",
+      "expected": {
+        "accepted": true
+      }
+    },
+    {
+      "id": "escaped-backslash-ACCEPTED",
+      "description": "escaped backslash \\\\",
+      "input_b64": "eyJ1IjoiYVxcYiJ9",
+      "expected": {
+        "accepted": true
+      }
+    },
+    {
+      "id": "escaped-solidus-ACCEPTED",
+      "description": "escaped solidus \\/ (valid I-JSON, MUST accept)",
+      "input_b64": "eyJ1IjoiaHR0cDpcL1wveCJ9",
+      "expected": {
+        "accepted": true
+      }
+    },
+    {
+      "id": "escaped-newline-ACCEPTED",
+      "description": "escaped newline \\n",
+      "input_b64": "eyJ1IjoiYVxuYiJ9",
+      "expected": {
+        "accepted": true
+      }
+    },
+    {
+      "id": "escaped-carriage-return-ACCEPTED",
+      "description": "escaped carriage return \\r",
+      "input_b64": "eyJ1IjoiYVxyYiJ9",
+      "expected": {
+        "accepted": true
+      }
+    },
+    {
+      "id": "escaped-tab-ACCEPTED",
+      "description": "escaped tab \\t",
+      "input_b64": "eyJ1IjoiYVx0YiJ9",
+      "expected": {
+        "accepted": true
+      }
+    },
+    {
+      "id": "escaped-backspace-ACCEPTED",
+      "description": "escaped backspace \\b",
+      "input_b64": "eyJ1IjoiYVxiYiJ9",
+      "expected": {
+        "accepted": true
+      }
+    },
+    {
+      "id": "escaped-formfeed-ACCEPTED",
+      "description": "escaped form feed \\f",
+      "input_b64": "eyJ1IjoiYVxmYiJ9",
+      "expected": {
+        "accepted": true
+      }
+    },
+    {
+      "id": "valid-surrogate-pair-ACCEPTED",
+      "description": "valid surrogate pair \\uD83D\\uDE00 (U+1F600)",
+      "input_b64": "eyJzIjoiXHVEODNEXHVERTAwIn0",
+      "expected": {
+        "accepted": true
+      }
+    },
+    {
+      "id": "string-typed-large-number-ACCEPTED",
+      "description": "large integer encoded as a string",
+      "input_b64": "eyJhbW91bnRfbWlub3IiOiI5MDA3MTk5MjU0NzQwOTkzIn0",
+      "expected": {
+        "accepted": true
+      }
+    },
+    {
+      "id": "valid-peac-header-payload-ACCEPTED",
+      "description": "a normal PEAC protected header object",
+      "input_b64": "eyJhbGciOiJFZERTQSIsInR5cCI6ImludGVyYWN0aW9uLXJlY29yZCtqd3QiLCJraWQiOiIyMDI2LTAxLTAxVDAwOjAwOjAwWiJ9",
+      "expected": {
+        "accepted": true
+      }
+    }
+  ]
+}

@@ -27,7 +27,11 @@ export type CryptoErrorCode =
   | 'CRYPTO_JWS_CRIT_REJECTED'
   | 'CRYPTO_JWS_MISSING_KID'
   | 'CRYPTO_JWS_B64_REJECTED'
-  | 'CRYPTO_JWS_ZIP_REJECTED';
+  | 'CRYPTO_JWS_ZIP_REJECTED'
+  // I-JSON (RFC 7493) raw-bytes gate (see ijson.ts)
+  | 'CRYPTO_IJSON_DUPLICATE_MEMBER_NAME'
+  | 'CRYPTO_IJSON_NUMBER_OUT_OF_RANGE'
+  | 'CRYPTO_IJSON_INVALID_STRING';
 
 /**
  * Typed error for crypto operations
@@ -60,6 +64,9 @@ export function isFormatError(code: CryptoErrorCode): boolean {
     code === 'CRYPTO_INVALID_TYP' ||
     code === 'CRYPTO_INVALID_ALG' ||
     code === 'CRYPTO_INVALID_KEY_LENGTH' ||
-    code === 'CRYPTO_INVALID_SEED_LENGTH'
+    code === 'CRYPTO_INVALID_SEED_LENGTH' ||
+    code === 'CRYPTO_IJSON_DUPLICATE_MEMBER_NAME' ||
+    code === 'CRYPTO_IJSON_NUMBER_OUT_OF_RANGE' ||
+    code === 'CRYPTO_IJSON_INVALID_STRING'
   );
 }

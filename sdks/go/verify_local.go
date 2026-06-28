@@ -3,13 +3,34 @@ package peac
 import (
 	"crypto/ed25519"
 	"crypto/sha256"
+	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/peacprotocol/peac/sdks/go/jws"
 )
+
+// decodeCompactHeaderAndPayload splits a compact JWS and base64url-decodes the
+// protected header and payload segments, so the I-JSON gate can run on the raw
+// bytes BEFORE any JSON parsing (matching the TypeScript verify path).
+func decodeCompactHeaderAndPayload(receiptJWS string) ([]byte, []byte, error) {
+	parts := strings.Split(receiptJWS, ".")
+	if len(parts) != 3 {
+		return nil, nil, fmt.Errorf("JWS compact serialization must have three parts")
+	}
+	headerRaw, err := base64.RawURLEncoding.DecodeString(parts[0])
+	if err != nil {
+		return nil, nil, fmt.Errorf("JWS protected header: invalid base64url")
+	}
+	payloadRaw, err := base64.RawURLEncoding.DecodeString(parts[1])
+	if err != nil {
+		return nil, nil, fmt.Errorf("JWS payload: invalid base64url")
+	}
+	return headerRaw, payloadRaw, nil
+}
 
 // VerifyLocalOptions contains options for local interaction record verification.
 type VerifyLocalOptions struct {
@@ -83,6 +104,28 @@ func VerifyLocal(receiptJWS string, opts VerifyLocalOptions) *VerifyLocalResult 
 	// Compute receipt_ref
 	h := sha256.Sum256([]byte(receiptJWS))
 	result.ReceiptRef = "sha256:" + hex.EncodeToString(h[:])
+
+	// I-JSON (RFC 7493) gate on the raw protected-header and payload bytes BEFORE
+	// any JSON parsing (matching the TypeScript verify path, which gates before
+	// JSON.parse). A malformed-structure record is rejected deterministically here,
+	// before header parsing and before signature verification.
+	headerRaw, payloadRaw, err := decodeCompactHeaderAndPayload(receiptJWS)
+	if err != nil {
+		result.ErrorCode = "E_INVALID_FORMAT"
+		result.ErrorMessage = fmt.Sprintf("invalid JWS: %v", err)
+		return result
+	}
+	for _, raw := range [][]byte{headerRaw, payloadRaw} {
+		if err := assertIJSON(raw); err != nil {
+			if ie, ok := err.(*ijsonError); ok {
+				result.ErrorCode = ie.Code
+			} else {
+				result.ErrorCode = "E_INVALID_FORMAT"
+			}
+			result.ErrorMessage = err.Error()
+			return result
+		}
+	}
 
 	// Parse JWS
 	parsed, err := jws.Parse(receiptJWS)

@@ -195,16 +195,54 @@ describe('parity-corpus accounting (jcs-extended is excluded by design)', () => 
     const schemaPath = resolve(CORPUS_ROOT, 'ed25519-peac-profile', 'vectors.schema.json');
     expect(existsSync(schemaPath)).toBe(false);
   });
+
+  it('ijson-raw-input is NOT enrolled in PARITY_FAMILIES (intentionally excluded; raw-bytes shape)', () => {
+    const families = PARITY_FAMILIES as readonly string[];
+    expect(families).not.toContain('ijson-raw-input');
+  });
+
+  it('ijson-raw-input is NOT loaded by loadAllFamilies()', () => {
+    const names = loadAllFamilies().map((f) => f.family as string);
+    expect(names).not.toContain('ijson-raw-input');
+  });
+
+  it('ijson-raw-input uses the raw-bytes shape (input_b64 + expected), not the parity-vector shape', () => {
+    // Like jcs-extended and ed25519-peac-profile, this corpus is a documented
+    // exception exercised by dedicated cross-language tests
+    // (ijson.parity.test.ts and ijson_parity_test.go), not by the schema-validated
+    // parity-vector loader. A parsed-object corpus cannot represent the
+    // pathologies (duplicate member name, precision-losing number), so inputs are
+    // stored as base64url of the raw JSON document bytes.
+    const vectorsPath = resolve(CORPUS_ROOT, 'ijson-raw-input', 'vectors.json');
+    const vectorsJson = JSON.parse(readFileSync(vectorsPath, 'utf8')) as {
+      vectors: ReadonlyArray<Record<string, unknown>>;
+    };
+    expect(Array.isArray(vectorsJson.vectors)).toBe(true);
+    expect(vectorsJson.vectors.length).toBeGreaterThan(0);
+    for (const v of vectorsJson.vectors) {
+      expect(v).toHaveProperty('id');
+      expect(v).toHaveProperty('input_b64');
+      expect(v).toHaveProperty('expected');
+      // It does NOT carry the parity-vector `input.payload` shape.
+      expect(v).not.toHaveProperty('input');
+    }
+  });
+
+  it('ijson-raw-input has no vectors.schema.json (not schema-validated as a parity family)', () => {
+    const schemaPath = resolve(CORPUS_ROOT, 'ijson-raw-input', 'vectors.schema.json');
+    expect(existsSync(schemaPath)).toBe(false);
+  });
 });
 
 describe('parity-corpus accounting (no silent extra families)', () => {
-  it('every directory under parity-corpus/ is either schema-validated and enrolled, or a documented hex-vector exception (jcs-extended, ed25519-peac-profile)', () => {
+  it('every directory under parity-corpus/ is either schema-validated and enrolled, or a documented hex-vector exception (jcs-extended, ed25519-peac-profile, ijson-raw-input)', () => {
     const entries = readdirSync(CORPUS_ROOT, { withFileTypes: true });
     const dirs = entries.filter((e) => e.isDirectory()).map((e) => e.name);
     const enrolled = new Set<string>([
       ...(PARITY_FAMILIES as readonly string[]),
       'jcs-extended',
       'ed25519-peac-profile',
+      'ijson-raw-input',
     ]);
     const unaccounted = dirs.filter((d) => !enrolled.has(d));
     expect(unaccounted, `unaccounted parity-corpus directories: ${unaccounted.join(', ')}`).toEqual(
