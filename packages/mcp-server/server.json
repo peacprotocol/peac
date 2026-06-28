@@ -8,13 +8,13 @@
     "source": "github",
     "subfolder": "packages/mcp-server"
   },
-  "version": "0.16.0",
+  "version": "0.16.1",
   "websiteUrl": "https://www.peacprotocol.org",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "@peac/mcp-server",
-      "version": "0.16.0",
+      "version": "0.16.1",
       "transport": {
         "type": "stdio"
       }
@@ -22,7 +22,7 @@
     {
       "registryType": "npm",
       "identifier": "@peac/mcp-server",
-      "version": "0.16.0",
+      "version": "0.16.1",
       "transport": {
         "type": "streamable-http",
         "url": "http://localhost:3000/mcp"

@@ -1,7 +1,7 @@
 {
   "family": "ijson-raw-input",
   "description": "Raw-bytes I-JSON (RFC 7493) rejection/acceptance vectors proving the TypeScript and Go reference gates reach the same decision before JSON parsing. Inputs are base64url of the raw JSON document bytes.",
-  "version": "0.16.0",
+  "version": "0.16.1",
   "status": "Informative",
   "vectors": [
     {
