@@ -280,7 +280,7 @@ See [docs/specs/PEAC-ISSUER.md](specs/PEAC-ISSUER.md).
 - Two structural kinds: `evidence` and `challenge`
 - Open semantic `type` (reverse-DNS or absolute URI)
 - Multi-valued `pillars` from the closed pillar taxonomy
-- 15 extension groups, each typed with type-to-extension enforcement
+- Registered extension groups, each typed with type-to-extension validation
 - Policy binding: JCS (RFC 8785) + SHA-256 digest comparison
 - JOSE hardening: embedded keys rejected, `kid` required
 
@@ -364,13 +364,13 @@ peac policy generate peac-policy.yaml --out dist --well-known
 
 **Core:**
 
-| Package          | Description                                  |
-| ---------------- | -------------------------------------------- |
-| `@peac/kernel`   | Zero-dependency constants and registries     |
-| `@peac/schema`   | Types, Zod validators, JSON Schema           |
-| `@peac/crypto`   | EdDSA (Ed25519) JWS signing and verification |
-| `@peac/protocol` | High-level `issue()` and `verifyLocal()`     |
-| `@peac/control`  | Constraint types and enforcement (CAL)       |
+| Package          | Description                                   |
+| ---------------- | --------------------------------------------- |
+| `@peac/kernel`   | Zero-dependency constants and registries      |
+| `@peac/schema`   | Types, Zod validators, JSON Schema            |
+| `@peac/crypto`   | EdDSA (Ed25519) JWS signing and verification  |
+| `@peac/protocol` | High-level `issue()` and `verifyLocal()`      |
+| `@peac/control`  | Constraint types and validation helpers (CAL) |
 
 **Runtime:**
 
@@ -408,7 +408,7 @@ peac policy generate peac-policy.yaml --out dist --well-known
 | Package                          | Description                                         |
 | -------------------------------- | --------------------------------------------------- |
 | `@peac/mappings-a2a`             | A2A carrier, normalizer, discovery, OAuth PKCE auth |
-| `@peac/mappings-mcp`             | MCP metadata carrier and budget management          |
+| `@peac/mappings-mcp`             | MCP metadata carrier and budget evidence mapping    |
 | `@peac/mappings-intoto`          | in-toto v1.0 attestation provenance mapping         |
 | `@peac/mappings-slsa`            | SLSA v1.2 provenance predicate mapping              |
 | `@peac/mappings-paymentauth`     | paymentauth / MPP payment evidence mapping          |

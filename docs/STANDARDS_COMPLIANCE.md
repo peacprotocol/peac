@@ -1,8 +1,10 @@
 # Standards Compliance
 
-**Last verified:** v0.12.7 release cycle. Update this document and re-verify draft-tracked entries when standards advance or new releases ship.
+**Last reviewed:** 2026-06 documentation alignment pass. Update this document and re-verify draft-tracked entries when standards advance or new releases ship.
 
-This document maps each external standard referenced by PEAC to its compliance status.
+This document is a descriptive compatibility overview for PEAC-related standards, ecosystem protocols, and content signals. It is not a certification claim and not a per-row conformance ledger.
+
+For formal RFC, W3C, ISO/IEC, and FIPS status with code-level citation sites, see [`STANDARDS_LEDGER.md`](STANDARDS_LEDGER.md).
 
 ## Status definitions
 
@@ -16,13 +18,14 @@ This document maps each external standard referenced by PEAC to its compliance s
 
 ## Cryptographic and Wire Standards
 
-| Standard                       | Version | Status        | PEAC surface                                                              |
-| ------------------------------ | ------- | ------------- | ------------------------------------------------------------------------- |
-| JWS (RFC 7515)                 | Current | **Normative** | `@peac/crypto`: compact JWS serialization for all signed records          |
-| JWK (RFC 7517)                 | Current | **Normative** | `@peac/crypto`, JWKS resolver: key representation and discovery           |
-| EdDSA / Ed25519 (RFC 8032)     | Current | **Normative** | `@peac/crypto`: sole signing algorithm (`alg: EdDSA`)                     |
-| JCS (RFC 8785)                 | Current | **Normative** | Policy binding: deterministic JSON canonicalization for digest comparison |
-| Base64url (RFC 4648 Section 5) | Current | **Normative** | JWS encoding: all base64url without padding                               |
+| Standard                       | Version | Status        | PEAC surface                                                                          |
+| ------------------------------ | ------- | ------------- | ------------------------------------------------------------------------------------- |
+| JWS (RFC 7515)                 | Current | **Normative** | `@peac/crypto`: compact JWS serialization for all signed records                      |
+| JWK (RFC 7517)                 | Current | **Normative** | `@peac/crypto`, JWKS resolver: key representation and discovery                       |
+| EdDSA / Ed25519 (RFC 8032)     | Current | **Normative** | `@peac/crypto`: sole signing algorithm (`alg: EdDSA`)                                 |
+| JCS (RFC 8785)                 | Current | **Normative** | Policy binding: deterministic JSON canonicalization for digest comparison             |
+| Base64url (RFC 4648 Section 5) | Current | **Normative** | JWS encoding: all base64url without padding                                           |
+| I-JSON (RFC 7493)              | Current | **Normative** | Raw I-JSON gate on JWS header and payload bytes before parse (`@peac/crypto`, Go SDK) |
 
 ## HTTP and API Standards
 

@@ -131,7 +131,7 @@ peac/
 │   ├── schema/             # Layer 1: Zod validators, Wire 0.2 extension groups
 │   ├── crypto/             # Layer 2: Ed25519 JWS, JCS (RFC 8785), base64url
 │   ├── protocol/           # Layer 3: issue(), verifyLocal(), discovery
-│   ├── control/            # Layer 3: Constraint types and enforcement
+│   ├── control/            # Layer 3: Constraint types and validation helpers
 │   ├── middleware-core/    # Layer 3.5: Framework-agnostic receipt middleware
 │   ├── middleware-express/  # Layer 3.5: Express.js receipt middleware
 │   ├── server/             # Layer 5: HTTP verification server
@@ -192,13 +192,13 @@ doctrine, see
 
 ### Core (Normative, Layers 0-3)
 
-| Package          | Layer | Description                                                                                    |
-| ---------------- | ----- | ---------------------------------------------------------------------------------------------- |
-| `@peac/kernel`   | 0     | Zero-dependency constants, types, errors                                                       |
-| `@peac/schema`   | 1     | Zod validators, Wire 0.2 extension groups (15 extension groups), type-to-extension enforcement |
-| `@peac/crypto`   | 2     | Ed25519 JWS, JCS canonicalization (RFC 8785), JOSE hardening                                   |
-| `@peac/protocol` | 3     | `issue()`, `issueWire02()`, `verifyLocal()` with strict/interop profiles                       |
-| `@peac/control`  | 3     | Constraint types and kernel constraint enforcement                                             |
+| Package          | Layer | Description                                                                        |
+| ---------------- | ----- | ---------------------------------------------------------------------------------- |
+| `@peac/kernel`   | 0     | Zero-dependency constants, types, errors                                           |
+| `@peac/schema`   | 1     | Zod validators, registered Wire 0.2 extension groups, type-to-extension validation |
+| `@peac/crypto`   | 2     | Ed25519 JWS, JCS canonicalization (RFC 8785), JOSE hardening                       |
+| `@peac/protocol` | 3     | `issue()`, `issueWire02()`, `verifyLocal()` with strict/interop profiles           |
+| `@peac/control`  | 3     | Constraint types and kernel constraint validation helpers                          |
 
 ### Middleware (Layer 3.5)
 
@@ -269,7 +269,6 @@ interface Wire02Header {
 interface Wire02Claims {
   iss: string; // Issuer URL (https:// or did:)
   iat: number; // Issued at (Unix timestamp)
-  exp?: number; // Expiration (Unix timestamp)
   jti: string; // Unique receipt ID
   peac_version: '0.2'; // Wire version
   kind: 'evidence' | 'challenge';
@@ -332,13 +331,15 @@ Full threat catalog, mitigations, and per-threat test links live in [Threat mode
 
 ## Conformance Levels
 
-| Level | Capability                                       |
-| ----- | ------------------------------------------------ |
-| L0    | Parse peac.txt discovery manifests               |
-| L1    | HTTP semantics and Problem Details               |
-| L2    | Policy enforcement (purposes, quotas, retention) |
-| L3    | Negotiation, payment, and receipts               |
-| L4    | Provenance, attestation, and audit trails        |
+| Level | Capability                                                  |
+| ----- | ----------------------------------------------------------- |
+| L0    | Parse peac.txt discovery manifests                          |
+| L1    | HTTP semantics and Problem Details                          |
+| L2    | Policy binding and validation (purposes, quotas, retention) |
+| L3    | Negotiation, payment, and receipt record types              |
+| L4    | Provenance, attestation, and audit-trail record types       |
+
+These describe the record and validation capabilities an implementation covers. PEAC records and verifies these interactions; it does not enforce policy, negotiate, or settle payments.
 
 ---
 
