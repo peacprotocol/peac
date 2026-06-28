@@ -47,6 +47,7 @@ const PROTOCOL_PUBLIC_EXPORT_BASELINE_PR_A = [
   'checkPolicyBinding',
   'clearJWKSCache',
   'clearKidThumbprints',
+  'createReplayGuard',
   'computeDocumentDigest',
   'computeJsonDocumentDigestJcs',
   'computeJwkThumbprint',
