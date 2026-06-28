@@ -12,6 +12,7 @@ import { Command } from 'commander';
 import { recordCommand } from '../src/commands/record-command';
 import { decode } from '@peac/crypto';
 import { CLI_EXECUTION_EXTENSION_KEY } from '@peac/schema';
+import { getVersion } from '../src/lib/version';
 
 const NODE = process.execPath;
 
@@ -94,6 +95,11 @@ describe('record command wiring: end-to-end smoke', () => {
     const extensions = (payload as Record<string, unknown>).extensions as Record<string, unknown>;
     const ext = extensions[CLI_EXECUTION_EXTENSION_KEY] as Record<string, unknown>;
     expect(ext.type).toBe('org.peacprotocol/cli-command-execution');
+    // peac_cli_version comes from the canonical getVersion(), not a hardcoded fallback,
+    // and matches the observe command path (same version source).
+    const platform = ext.platform as Record<string, unknown>;
+    expect(platform.peac_cli_version).toBe(getVersion());
+    expect(platform.peac_cli_version).not.toBe('0.14.1');
   }, 20_000);
 
   it('keeps options before `--` as PEAC options and post-`--` tokens as child args', async () => {
