@@ -21,7 +21,7 @@ function hash(fragment) {
   return 'sha256:' + createHash('sha256').update(fragment, 'utf-8').digest('hex');
 }
 
-const VERSION = '0.15.3';
+const VERSION = '0.16.0';
 
 // Preserve introduced_in across regenerations (fail-closed).
 //

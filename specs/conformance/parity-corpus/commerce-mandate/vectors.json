@@ -1,7 +1,7 @@
 {
   "family": "commerce-mandate",
   "description": "Commerce mandate parity vectors. Seven positive deterministic JSON observation payloads (one per event_kind) covering mandate / authorization / capture / void / refund / settlement / budget semantics. Per the parity-corpus convention, all vectors assert envelope-level canonical agreement and set expected.accepted=true; semantic rejection of extension content (forbidden payment-data keys, opaque-ref grammar violations, finality-synthesis blocks, missing required fields, invalid event_kind, scheme conflicts) lives at the Layer 3 validator surface (validateCommerceMandate exported from @peac/schema, exercised by packages/schema/__tests__/extensions/commerce-mandate.test.ts).",
-  "version": "0.15.3",
+  "version": "0.16.0",
   "generator": "manual; commerce-mandate v0.1 floor",
   "vectors": [
     {

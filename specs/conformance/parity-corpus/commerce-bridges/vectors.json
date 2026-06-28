@@ -1,7 +1,7 @@
 {
   "family": "commerce-bridges",
   "description": "Commerce evidence parity vectors covering one envelope shape per upstream family (x402, ACP, paymentauth, Stripe SPT). Each vector uses the canonical commerce extension schema (payment_rail / amount_minor / currency / event), where event values are restricted to the canonical lifecycle enum (authorization|capture|settlement|refund|void|chargeback). Bridge-specific upstream artifact preservation lives in adapter packages, not the canonical envelope; this corpus tests envelope validation only.",
-  "version": "0.15.3",
+  "version": "0.16.0",
   "generator": "manual; v0.13.1 PR C floor",
   "vectors": [
     {
