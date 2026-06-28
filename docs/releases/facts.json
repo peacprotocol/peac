@@ -4,7 +4,7 @@
   "version": "0.16.0",
   "wire_format_version": "0.2",
   "dist_tag": "latest",
-  "release_date": "2026-06-26",
+  "release_date": "2026-06-28",
   "metrics": {
     "tests": 11974,
     "test_files": 478,
