@@ -477,9 +477,15 @@ JOSE hardening (embedded key rejection, crit, b64, zip checks) applies to:
 
 Wire 0.1 tokens (`typ` is `peac-receipt/0.1`) are excluded because the legacy format predates these constraints.
 
-### 10.6 JSON Parse Safety
+### 10.6 Raw I-JSON Input Gate
 
-All `JSON.parse` calls on JWS header and payload segments are wrapped in try/catch. Parse failures produce `CRYPTO_INVALID_JWS_FORMAT` errors with stable error codes.
+Before parsing the JWS protected header or payload as JSON, implementations MUST validate the raw decoded bytes as I-JSON (RFC 7493). The gate rejects duplicate object member names after escape decoding, numeric values outside the interoperable safe integer range, invalid UTF-8 string bytes, invalid string escapes, lone surrogates, and Unicode noncharacters. Failures map to the `E_IJSON_DUPLICATE_MEMBER_NAME`, `E_IJSON_NUMBER_OUT_OF_RANGE`, and `E_IJSON_INVALID_STRING` validation errors.
+
+The standalone `ijson-raw-input` conformance corpus under `specs/conformance/parity-corpus/ijson-raw-input/` exercises this gate; the TypeScript and Go verifiers agree on every vector.
+
+### 10.7 JSON Parse Safety
+
+After the raw I-JSON gate passes, all `JSON.parse` calls on JWS header and payload segments are wrapped in try/catch. Parse failures produce `CRYPTO_INVALID_JWS_FORMAT` errors with stable error codes.
 
 ---
 
@@ -623,7 +629,7 @@ Output: boolean (true if valid extension key grammar)
 
 ### 12.3 Core Extension Groups
 
-Twelve core extension groups have typed schemas in `@peac/schema`. All use `.strict()` mode (unknown keys within a group are rejected). Registered first-party receipt types with a mapped extension group are enforced in `verifyLocal()`: strict mode requires the mapped group; interop mode downgrades absence or mismatch to warnings (see section 12.17).
+Core extension groups have typed schemas in `@peac/schema`. All use `.strict()` mode (unknown keys within a group are rejected). Registered first-party receipt types with a mapped extension group are enforced in `verifyLocal()`: strict mode requires the mapped group; interop mode downgrades absence or mismatch to warnings (see section 12.17).
 
 | Key                            | Group       | Section |
 | ------------------------------ | ----------- | ------- |
@@ -704,7 +710,7 @@ This ensures forward compatibility: new extension groups can be defined without 
 
 ### 12.9 Typed Accessor Helpers
 
-Twelve typed accessor functions are provided by `@peac/schema`:
+Typed accessor functions are provided by `@peac/schema`:
 
 - `getCommerceExtension(extensions)`
 - `getAccessExtension(extensions)`
@@ -1032,7 +1038,7 @@ Wire 0.1 and Wire 0.2 coexist in the same implementation. The verification pipel
 <!-- peac:validate -->
 
 ```text
-1. Decode the JWS header (base64url decode + JSON parse).
+1. Decode the JWS header (base64url decode, raw I-JSON validation per Section 10.6, then JSON parse).
 2. Read the typ header parameter.
 3. Route based on typ:
    - 'peac-receipt/0.1': Wire 0.1 path
@@ -1348,6 +1354,8 @@ When implemented, replay caches SHOULD observe the following:
 2. **Per-issuer scoping**: Caches SHOULD be scoped per `iss` to prevent cross-issuer `jti` collisions from causing false positives.
 3. **Probabilistic structures**: Implementations MAY use bloom filters or probabilistic data structures for high-throughput scenarios. False positives (rejecting a legitimate receipt) are preferable to false negatives (accepting a replay) in replay detection.
 4. **Distributed caches**: In multi-node deployments, replay caches MAY be shared (e.g., Redis, DynamoDB) or node-local. Node-local caches provide weaker replay protection but are acceptable for stateless-first architectures.
+
+The optional `createReplayGuard` helper in `@peac/protocol` is a composable reference implementation of bounded replay detection for already-verified records (a `maxEntries` cap plus an `iat` window and TTL purge). It is not wired into stateless verification. See the informative [Bounded Replay Guard Profile](REPLAY-GUARD-PROFILE.md).
 
 ### 20.4 Audience Binding (`aud`)
 

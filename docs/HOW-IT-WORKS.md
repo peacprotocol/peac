@@ -100,7 +100,7 @@ Under the hood, `verifyLocal()` checks:
 3. Kernel constraints (size caps, pointer depth, canonical form).
 4. Schema validity (Wire claims shape, extension groups, pillar taxonomy).
 5. Policy binding (if `peac.policy` is present, three-state: `verified` / `failed` / `unavailable`).
-6. Timing bounds (`iat` / `nbf` / `exp` within configured clock skew).
+6. Timing checks for issued-at (`iat`) freshness and clock skew where configured; core record validity does not expire by default.
 
 For the hosted path, `POST /v1/verify` on the reference verifier returns the same deterministic verification report. See [`packages/schema/openapi/verify.yaml`](../packages/schema/openapi/verify.yaml).
 

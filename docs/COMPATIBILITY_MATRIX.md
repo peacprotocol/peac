@@ -1,6 +1,6 @@
 # Compatibility Matrix
 
-Current as of the repository state after the v0.14.3 profile additions.
+Current as of the 2026-06 documentation review. Runtime claims track the `.node-version` (Node 24 canonical), the `>=22.13.0` Node floor, and `sdks/go/go.mod` (Go 1.26).
 
 ## Wire Format Support
 
@@ -84,7 +84,7 @@ One classification per Layer 4 surface. Under ambiguity between two defensible c
 | `experimental`             | Public but explicitly subject to change; `@experimental` JSDoc; breaking changes allowed with CHANGELOG note.                                                                | JSDoc tag.                                                                            |
 | `paused`                   | Intentionally not maintained in this release cycle; `paused_reason` and `resumption_target` recorded in the row.                                                             | Row-level rationale documented in the matrix.                                         |
 
-As of v0.14.4, no Layer 4 surface is `live-upstream-tested`: no CI step exercises a live upstream endpoint today. Promotion from `conformance-fixture-only` to `live-upstream-tested` requires committing a recorded round-trip fixture stamped with the upstream release and wiring it into CI.
+No Layer 4 surface is `live-upstream-tested`: no CI step exercises a live upstream endpoint today. Promotion from `conformance-fixture-only` to `live-upstream-tested` requires committing a recorded round-trip fixture stamped with the upstream release and wiring it into CI.
 
 ### Evidence
 
