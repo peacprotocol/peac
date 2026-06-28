@@ -1357,9 +1357,13 @@ When implemented, replay caches SHOULD observe the following:
 
 The optional `createReplayGuard` helper in `@peac/protocol` is a composable reference implementation of bounded replay detection for already-verified records (a `maxEntries` cap plus an `iat` window and TTL purge). It is not wired into stateless verification. See the informative [Bounded Replay Guard Profile](REPLAY-GUARD-PROFILE.md).
 
-### 20.4 Audience Binding (`aud`)
+### 20.4 Audience Scoping
 
-The `aud` claim is OPTIONAL in Wire 0.2. When present, it binds the receipt to a specific audience (resource server, API endpoint). Verifiers that check `aud` SHOULD reject receipts not addressed to them. Audience binding is orthogonal to replay prevention: a receipt replayed to the correct audience is still a replay.
+Wire 0.2 does not define a top-level `aud` claim. Core record validity is independent of audience.
+
+Deployments that need audience scoping SHOULD apply local verification policy, policy-binding material, or a registered extension or profile outside the core Wire 0.2 claim set. Verifiers MUST NOT treat an unregistered top-level `aud` member as valid Wire 0.2 payload; unknown top-level fields are rejected by the strict envelope schema.
+
+Audience scoping is orthogonal to replay detection: a record presented to the intended audience can still be a replay.
 
 ### 20.5 Evidence Bundles
 
