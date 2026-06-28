@@ -2136,10 +2136,10 @@
         },
         {
           "id": "WIRE02-REPLAY-011",
-          "keyword": "OPTIONAL",
-          "summary": "aud claim is OPTIONAL in Wire 0.2",
-          "source_fragment": "The `aud` claim is OPTIONAL in Wire 0.2.",
-          "source_fragment_hash": "sha256:f4954bc439f94c9203e5eb67291f9e4a55b87ae3e3d924c4d78e311668ff5249",
+          "keyword": "MUST NOT",
+          "summary": "Verifiers MUST NOT treat an unregistered top-level aud as valid Wire 0.2 payload",
+          "source_fragment": "Verifiers MUST NOT treat an unregistered top-level `aud` member as valid Wire 0.2 payload",
+          "source_fragment_hash": "sha256:47d4739935df446feaaf92cb79de154ed499cca1ef664bf9bc6a45c03cf1dae0",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
           "last_reviewed_in": "0.15.3"
@@ -2147,9 +2147,9 @@
         {
           "id": "WIRE02-REPLAY-012",
           "keyword": "SHOULD",
-          "summary": "Verifiers checking aud SHOULD reject unaddressed receipts",
-          "source_fragment": "Verifiers that check `aud` SHOULD reject receipts not addressed to them.",
-          "source_fragment_hash": "sha256:21689600c2bb21482e756b96ebb569b450e355b25156c70847e0a48bd55119be",
+          "summary": "Audience scoping SHOULD use mechanisms outside the Wire 0.2 core claim set",
+          "source_fragment": "Deployments that need audience scoping SHOULD apply local verification policy, policy-binding material, or a registered extension or profile outside the core Wire 0.2 claim set",
+          "source_fragment_hash": "sha256:cb40888ccba5642a27ecf7b0d73dbf0c128a27a04cbeae51b82c7d336d7f3c39",
           "enforcement_class": "advisory",
           "introduced_in": "0.14.4",
           "last_reviewed_in": "0.15.3"

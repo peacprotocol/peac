@@ -360,8 +360,8 @@ const REQUIREMENTS = [
   { section: 20, keyword: 'RECOMMENDED', summary: 'RECOMMENDED cache window is 2x tolerance (600s)', source_fragment: 'A RECOMMENDED window is 2x `OCCURRED_AT_TOLERANCE_SECONDS` (600 seconds).', enforcement_class: 'advisory' },
   { section: 20, keyword: 'SHOULD', summary: 'Caches SHOULD be scoped per iss', source_fragment: 'Caches SHOULD be scoped per `iss`', enforcement_class: 'advisory' },
   { section: 20, keyword: 'MAY', summary: 'Implementations MAY use probabilistic structures', source_fragment: 'Implementations MAY use bloom filters or probabilistic data structures', enforcement_class: 'advisory' },
-  { section: 20, keyword: 'OPTIONAL', summary: 'aud claim is OPTIONAL in Wire 0.2', source_fragment: 'The `aud` claim is OPTIONAL in Wire 0.2.', enforcement_class: 'advisory' },
-  { section: 20, keyword: 'SHOULD', summary: 'Verifiers checking aud SHOULD reject unaddressed receipts', source_fragment: 'Verifiers that check `aud` SHOULD reject receipts not addressed to them.', enforcement_class: 'advisory' },
+  { section: 20, keyword: 'MUST NOT', summary: 'Verifiers MUST NOT treat an unregistered top-level aud as valid Wire 0.2 payload', source_fragment: 'Verifiers MUST NOT treat an unregistered top-level `aud` member as valid Wire 0.2 payload', enforcement_class: 'advisory' },
+  { section: 20, keyword: 'SHOULD', summary: 'Audience scoping SHOULD use mechanisms outside the Wire 0.2 core claim set', source_fragment: 'Deployments that need audience scoping SHOULD apply local verification policy, policy-binding material, or a registered extension or profile outside the core Wire 0.2 claim set', enforcement_class: 'advisory' },
   { section: 20, keyword: 'MUST', summary: 'Each receipt in bundle MUST have unique jti', source_fragment: 'Each receipt in an evidence bundle MUST have a unique `jti`.', enforcement_class: 'hard_fail', error_code: 'E_MISSING_REQUIRED_CLAIM' },
 ];
 
