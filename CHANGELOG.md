@@ -5,7 +5,23 @@ All notable changes to PEAC Protocol will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.16.0] - 2026-06-28
+## [0.16.1] - 2026-06-28
+
+CLI Metadata Alignment.
+
+Updates CLI observation and record metadata so `platform.peac_cli_version` is sourced
+from package metadata. No wire-format, schema, signing, registry, or verification
+behavior change.
+
+Public API: unchanged.
+Wire format: unchanged (0.2).
+Public schema: unchanged.
+Registered extension groups: unchanged (19).
+Registered receipt types: unchanged (61).
+Conformance sections: unchanged (32).
+Conformance requirement IDs: unchanged (290).
+
+## [0.16.0]
 
 Deterministic Verification for Portable Records.
 
