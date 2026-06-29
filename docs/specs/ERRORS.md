@@ -1,4 +1,4 @@
-# PEAC Error Registry
+# PEAC Error Registry Companion
 
 The complete, authoritative, machine-readable error registry is
 [`specs/kernel/errors.json`](../../specs/kernel/errors.json). Its top-level `version`
