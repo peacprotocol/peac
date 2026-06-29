@@ -1,6 +1,15 @@
 # PEAC Error Registry
 
-Normative error codes for PEAC Protocol v0.11.3+.
+The complete, authoritative, machine-readable error registry is
+[`specs/kernel/errors.json`](../../specs/kernel/errors.json). Its top-level `version`
+field tracks the error-registry version for the release. Its generated TypeScript bindings are
+`packages/kernel/src/errors.generated.ts`. This document is a human-readable companion:
+it groups common codes by category with remediation guidance, but `errors.json` is the
+normative source and may contain codes not listed here.
+
+For raw I-JSON (RFC 7493) input validation behavior and the `E_IJSON_*` codes, see
+[WIRE-0.2.md](WIRE-0.2.md) Section 10.6. For the RFC 9457 Problem Details response shape,
+see [errors.md](../errors.md).
 
 ## Format
 
@@ -9,14 +18,17 @@ Normative error codes for PEAC Protocol v0.11.3+.
 
 ## Validation Errors (400)
 
-| Code                      | Category   | Severity | Retryable | Next Action                  | HTTP | Description                                                                 | Remediation                                                                          |
-| ------------------------- | ---------- | -------- | --------- | ---------------------------- | ---- | --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
-| `E_CONTROL_REQUIRED`      | validation | error    | false     | `retry_with_different_input` | 400  | Control block required when payment present or enforcement.method==http-402 | Add control{} block to auth context                                                  |
-| `E_INVALID_ENVELOPE`      | validation | error    | false     | `retry_with_different_input` | 400  | Receipt envelope structure is invalid                                       | Ensure envelope has auth, evidence, and meta blocks                                  |
-| `E_INVALID_CONTROL_CHAIN` | validation | error    | false     | `retry_with_different_input` | 400  | Control chain is invalid or inconsistent                                    | Ensure chain is non-empty and decision matches chain results                         |
-| `E_INVALID_PAYMENT`       | validation | error    | false     | `retry_with_different_input` | 400  | Payment evidence is malformed or incomplete                                 | Verify payment has required fields (scheme, reference, amount, currency, asset, env) |
-| `E_INVALID_POLICY_HASH`   | validation | error    | false     | `retry_with_different_input` | 400  | Policy hash does not match policy content                                   | Recompute policy_hash as base64url(sha256(JCS(policy)))                              |
-| `E_EXPIRED_RECEIPT`       | validation | error    | false     | `retry_with_different_input` | 401  | Receipt exp claim is in the past                                            | Use a current receipt                                                                |
+| Code                            | Category   | Severity | Retryable | Next Action                  | HTTP | Description                                                                                                                    | Remediation                                                                          |
+| ------------------------------- | ---------- | -------- | --------- | ---------------------------- | ---- | ------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------ |
+| `E_CONTROL_REQUIRED`            | validation | error    | false     | `retry_with_different_input` | 400  | Control block required when payment present or enforcement.method==http-402                                                    | Add control{} block to auth context                                                  |
+| `E_INVALID_ENVELOPE`            | validation | error    | false     | `retry_with_different_input` | 400  | Receipt envelope structure is invalid                                                                                          | Ensure envelope has auth, evidence, and meta blocks                                  |
+| `E_INVALID_CONTROL_CHAIN`       | validation | error    | false     | `retry_with_different_input` | 400  | Control chain is invalid or inconsistent                                                                                       | Ensure chain is non-empty and decision matches chain results                         |
+| `E_INVALID_PAYMENT`             | validation | error    | false     | `retry_with_different_input` | 400  | Payment evidence is malformed or incomplete                                                                                    | Verify payment has required fields (scheme, reference, amount, currency, asset, env) |
+| `E_INVALID_POLICY_HASH`         | validation | error    | false     | `retry_with_different_input` | 400  | Policy hash does not match policy content                                                                                      | Recompute policy_hash as base64url(sha256(JCS(policy)))                              |
+| `E_IJSON_DUPLICATE_MEMBER_NAME` | validation | error    | false     | `retry_with_different_input` | 400  | A JSON object contained duplicate member names, violating I-JSON (RFC 7493)                                                    | Ensure JSON objects have unique member names                                         |
+| `E_IJSON_NUMBER_OUT_OF_RANGE`   | validation | error    | false     | `retry_with_different_input` | 400  | A JSON number was non-finite or its magnitude exceeded the I-JSON safe-integer range                                           | Encode large or non-integer values as strings                                        |
+| `E_IJSON_INVALID_STRING`        | validation | error    | false     | `retry_with_different_input` | 400  | A JSON string contained an invalid escape, lone surrogate, Unicode noncharacter, or invalid UTF-8, violating I-JSON (RFC 7493) | Emit valid UTF-8 I-JSON strings                                                      |
+| `E_EXPIRED_RECEIPT`             | validation | error    | false     | `retry_with_different_input` | 401  | Receipt exp claim is in the past                                                                                               | Use a current receipt                                                                |
 
 ## Verification Errors (401)
 
@@ -301,6 +313,8 @@ In MCP tool responses, error structured content includes both fields:
 
 ## Version History
 
+- **v0.16.0**: Added raw-input I-JSON (RFC 7493) validation codes `E_IJSON_DUPLICATE_MEMBER_NAME`, `E_IJSON_NUMBER_OUT_OF_RANGE`, `E_IJSON_INVALID_STRING` to the machine-readable registry.
+- **Documentation note**: `specs/kernel/errors.json` is the authoritative error registry; this document is a human-readable companion.
 - **v0.11.2**: Added `next_action` agent recovery hints (DD-132, DD-133); renamed `retriable` to `retryable` (DD-134)
 - **v0.10.7**: Added Interaction Evidence error codes and validation semantics
 - **v0.9.15**: Initial error registry with structured error model
