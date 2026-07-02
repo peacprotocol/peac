@@ -1,40 +1,46 @@
 # PEAC Surfaces
 
-Platform-specific integrations and deployment templates.
+Platform-specific integrations and deployment templates for PEAC.
 
 ## Structure
 
-### Plugins
+### Edge workers
 
-- **[wordpress/](plugins/wordpress/)** - WordPress plugin (v0.9.19+)
-- **[vercel/](plugins/vercel/)** - Vercel integration (v0.9.19+)
-
-### Workers
-
-- **[cloudflare/](workers/cloudflare/)** - Cloudflare Workers (v0.9.18+)
-- **[deno/](workers/deno/)** - Deno Deploy (v0.9.19+)
+- **[workers/cloudflare/](workers/cloudflare/)** - Cloudflare Workers handler
+- **[workers/fastly/](workers/fastly/)** - Fastly Compute handler
+- **[workers/akamai/](workers/akamai/)** - Akamai EdgeWorkers handler
 
 ### Frameworks
 
-- **[langchain/](langchain/)** - LangChain integration (v0.9.20+)
-- **[nextjs/](nextjs/)** - Next.js template (v0.9.19+)
-- **[dashboard/](dashboard/)** - Admin dashboard (v0.9.21+)
+- **[nextjs/](nextjs/)** - Next.js middleware
+
+### Verifier
+
+- **[reference-verifier/](reference-verifier/)** - Self-hostable reference verifier (Docker + Cloudflare)
+
+### Editor and agent plugins
+
+- **[plugin-pack/](plugin-pack/)** - Editor and agent plugin templates
+
+### Distribution
+
+- **[distribution/](distribution/)** - Listing and distribution assets
 
 ## Status
 
-All surfaces are placeholders in v0.9.15. Implementation begins in v0.9.18+.
+Per-surface status is generated in [../docs/SURFACE_STATUS.md](../docs/SURFACE_STATUS.md). Do not hand-restate surface state here; that document is the source of truth.
 
 ## Purpose
 
-Surfaces provide turnkey solutions for specific platforms:
+Surfaces provide turnkey integration points for specific platforms:
 
 - Pre-configured deployments
-- Platform-optimized performance
+- Platform-optimized handlers
 - Best-practice examples
-- Production-ready templates
+- Reusable templates
 
-See [docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md) for full architecture.
+See [../docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md) for the full architecture.
 
 ---
 
-_Last reviewed: 2026-06-24._
+_Last reviewed: 2026-07-02._

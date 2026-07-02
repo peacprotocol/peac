@@ -6,9 +6,9 @@
 
 Start with our documentation:
 
-- [Specification Index](docs/SPEC_INDEX.md) - Entry point for implementers
-- [Architecture](docs/ARCHITECTURE.md) - Protocol design and layering
-- [CI Behavior](docs/CI_BEHAVIOR.md) - Build and test guidelines
+- [Specification Index](../docs/SPEC_INDEX.md) - Entry point for implementers
+- [Architecture](../docs/ARCHITECTURE.md) - Protocol design and layering
+- [CI Behavior](../docs/CI_BEHAVIOR.md) - Build and test guidelines
 
 ### Community Support
 

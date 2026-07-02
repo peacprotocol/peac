@@ -10,7 +10,7 @@ Maps RSL 1.0 usage tokens (`all`, `ai-all`, `ai-train`, `ai-input`, `ai-index`, 
 
 **Media Type**: `application/rsl+xml` (for RSL files)
 
-## Non-goals (v0.9.18)
+## Non-goals
 
 - No OLP/CAP/EMS support
 - No RSL-specific envelope fields

@@ -154,9 +154,9 @@ self-contained development environments only.
 
 | Invariant                               | Test                                                                                                     |
 | --------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| Reject literal private IPv4             | [`packages/net/node/tests/ssrf.test.ts`](../../packages/net/node/tests/ssrf.test.ts)                     |
+| Reject literal private IPv4             | [`packages/net/node/tests/ssrf-expansion.test.ts`](../../packages/net/node/tests/ssrf-expansion.test.ts) |
 | Reject literal IPv6 loopback / ULA / LL | [`packages/net/node/tests/ssrf-expansion.test.ts`](../../packages/net/node/tests/ssrf-expansion.test.ts) |
-| Reject DNS-resolved private addresses   | [`packages/net/node/tests/ssrf.test.ts`](../../packages/net/node/tests/ssrf.test.ts)                     |
+| Reject DNS-resolved private addresses   | [`packages/net/node/tests/ssrf-expansion.test.ts`](../../packages/net/node/tests/ssrf-expansion.test.ts) |
 | Reject IDNA-encoded localhost           | same                                                                                                     |
 | Cloud-metadata IP detection             | [`packages/jwks-cache/tests/security.test.ts`](../../packages/jwks-cache/tests/security.test.ts)         |
 

@@ -57,7 +57,7 @@ Runtime removal is scheduled no earlier than the advertised Sunset date (2026-11
 
 ### POST /v1/issue (provisional)
 
-Issue a signed interaction record. This endpoint is provisional and uses a BYO-key model (caller provides an Ed25519 private key seed). The contract is defined in [`HOSTED_ISSUE_CONTRACT.md`](HOSTED_ISSUE_CONTRACT.md). The legacy request model shown below is retained for archival purposes only.
+Issue a signed interaction record. This endpoint is provisional and uses a BYO-key model (caller provides an Ed25519 private key seed). It is gated behind `PEAC_HOSTED_ISSUE=true` and its request/response contract is not yet published as a standalone document. The legacy request model shown below is retained for archival purposes only.
 
 **Request (superseded):**
 

@@ -46,6 +46,6 @@ A case study counts as external proof in a release note only when all four of th
 
 ## Related documents
 
-- [External audit scope](../external-audit-scope.md) (scheduled for v0.12.13 P2 landing).
+- External audit scope: not yet published as a standalone document.
 - [Trust artifacts](../TRUST-ARTIFACTS.md)
 - [Compliance mappings](../compliance/README.md)

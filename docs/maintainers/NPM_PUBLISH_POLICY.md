@@ -1,5 +1,7 @@
 # NPM Publishing Policy and Procedures
 
+> **Historical (superseded):** This document predates first publish. All 36 packages have published to npm since well before the versions referenced below; for current procedures see [`PUBLISHING.md`](./PUBLISHING.md) and [`RELEASING.md`](./RELEASING.md). Retained for historical context.
+
 **Policy:** We publish only the latest version to npm.
 **Schedule:** First npm publish deferred until **v0.9.31** (three releases after v0.9.28).
 **Last Updated:** 2026-01-09
