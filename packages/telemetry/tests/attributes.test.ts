@@ -24,6 +24,18 @@ describe('PEAC_ATTRS', () => {
     expect(PEAC_ATTRS.VALID).toBe('peac.valid');
   });
 
+  it('defines the record reference attribute and keeps the legacy receipt one for compatibility', () => {
+    // LIFECYCLE-OBSERVATION-PROFILE section 7.1: new emitters use peac.record.ref
+    expect(PEAC_ATTRS.RECORD_REF).toBe('peac.record.ref');
+    expect(PEAC_ATTRS.RECEIPT_REF).toBe('peac.receipt.ref');
+
+    const values = Object.values(PEAC_ATTRS);
+    expect(values).toContain('peac.record.ref');
+    expect(values).toContain('peac.receipt.ref'); // dual-emitted for compatibility
+    // the underscore legacy form is grandfathered elsewhere and must not be a telemetry attribute here
+    expect(values).not.toContain('peac.receipt_ref');
+  });
+
   it('should use stable OTel semconv for HTTP', () => {
     // These are stable OTel semantic conventions
     expect(PEAC_ATTRS.HTTP_METHOD).toBe('http.request.method');
