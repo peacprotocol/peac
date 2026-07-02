@@ -1,6 +1,6 @@
 # Integrator Kits
 
-Pre-packaged integration guides and conformance fixtures for ecosystem partners.
+Pre-packaged integration guides and conformance fixtures for ecosystem integrations.
 
 ## Structure
 
@@ -9,8 +9,11 @@ integrator-kits/
   template/        Base template for new kits
   mcp/             Model Context Protocol integration
   a2a/             Agent-to-Agent protocol integration
-  acp/             Agent Communication Protocol integration
+  acp/             Agentic Commerce Protocol integration
   x402/            HTTP 402 payment protocol integration
+  ucp/             Universal Commerce Protocol integration
+  paymentauth/     HTTP Payment Authentication (paymentauth / MPP) integration
+  stripe-projects/ Stripe Projects provisioning integration
   content-signals/ Content Signals integration
 ```
 

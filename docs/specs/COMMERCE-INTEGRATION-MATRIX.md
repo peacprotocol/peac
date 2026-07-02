@@ -41,13 +41,13 @@ paymentauth introduces a second receipt header (`Payment-Receipt`) that can coex
 
 ## Upstream Compatibility
 
-| Rail / Protocol | Current Upstream Version                                 | Notes                                                 |
-| --------------- | -------------------------------------------------------- | ----------------------------------------------------- |
-| paymentauth     | `draft-ryan-httpauth-payment-01` (active Internet-Draft) | Not a settled standard; aligned with the active draft |
-| ACP             | `API-Version: 2026-01-30`                                | Previous `2026-01-22` deprecated; see note below      |
-| A2A             | `v1.0.0` (released March 12, 2026)                       | PEAC adapter shipped in v0.12.3                       |
-| UCP             | `v2026-01-23`                                            | Date-based versioning; active development             |
-| x402            | v2 (recommended per Coinbase migration guide)            | PEAC reads both v1 and v2 headers                     |
+| Rail / Protocol | Current Upstream Version                                 | Notes                                                                                                          |
+| --------------- | -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| paymentauth     | `draft-ryan-httpauth-payment-01` (active Internet-Draft) | Not a settled standard; aligned with the active draft                                                          |
+| ACP             | `API-Version: 2026-01-30`                                | Previous `2026-01-22` deprecated; see note below                                                               |
+| A2A             | `v1.0.0` (released March 12, 2026)                       | PEAC adapter shipped in v0.12.3                                                                                |
+| UCP             | `v2026-04-08`                                            | Date-based versioning; active development. Pinned tag tracked in `specs/upstream/ucp/signatures-snapshot.json` |
+| x402            | v2 (recommended per Coinbase migration guide)            | PEAC reads both v1 and v2 headers                                                                              |
 
 ACP compatibility versioning is sourced from the [ACP repository changelog](https://github.com/agentic-commerce-protocol/agentic-commerce-protocol/tree/main/changelog). The public documentation website may lag behind the repository; when versions differ, the repository changelog is authoritative.
 
