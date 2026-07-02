@@ -150,6 +150,8 @@ function buildReceiptIssuedAttributes(
   };
 
   if (input.receiptRef) {
+    // Dual-emit for one minor release window: peac.record.ref is preferred; peac.receipt.ref is compatibility-only.
+    attrs[PEAC_ATTRS.RECORD_REF] = input.receiptRef;
     attrs[PEAC_ATTRS.RECEIPT_REF] = input.receiptRef;
   }
 
@@ -208,6 +210,8 @@ function buildReceiptVerifiedAttributes(
   };
 
   if (input.receiptRef) {
+    // Dual-emit for one minor release window: peac.record.ref is preferred; peac.receipt.ref is compatibility-only.
+    attrs[PEAC_ATTRS.RECORD_REF] = input.receiptRef;
     attrs[PEAC_ATTRS.RECEIPT_REF] = input.receiptRef;
   }
 

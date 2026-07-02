@@ -1,19 +1,25 @@
 /**
  * @peac/telemetry-otel - OTel provider tests
  *
- * These tests verify the provider creates correctly and doesn't throw.
- * Span event integration is complex to test in isolation and is better
- * verified through integration tests with a full OTel SDK setup.
+ * These tests verify provider construction, privacy behavior, span-event
+ * attributes, and metric-label boundaries using in-memory OTel SDK components.
  */
 
+import { AsyncLocalStorage } from 'node:async_hooks';
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { trace, metrics } from '@opentelemetry/api';
+import { trace, metrics, context, ROOT_CONTEXT } from '@opentelemetry/api';
+import type { Context, ContextManager } from '@opentelemetry/api';
 import {
   BasicTracerProvider,
   InMemorySpanExporter,
   SimpleSpanProcessor,
 } from '@opentelemetry/sdk-trace-base';
-import { MeterProvider } from '@opentelemetry/sdk-metrics';
+import {
+  MeterProvider,
+  PeriodicExportingMetricReader,
+  InMemoryMetricExporter,
+  AggregationTemporality,
+} from '@opentelemetry/sdk-metrics';
 import { createOtelProvider } from '../src/provider.js';
 
 describe('createOtelProvider', () => {
@@ -285,5 +291,139 @@ describe('provider hash behavior', () => {
         payment: { rail: 'stripe', amount: 500, currency: 'USD' },
       })
     ).not.toThrow();
+  });
+
+  describe('record.ref / receipt.ref dual-emit (span events)', () => {
+    const REF = 'sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
+
+    // Minimal AsyncLocalStorage-based context manager (Node built-in; test-only,
+    // no extra dependency) so trace.getActiveSpan() resolves inside startActiveSpan.
+    class TestContextManager implements ContextManager {
+      private readonly als = new AsyncLocalStorage<Context>();
+      active(): Context {
+        return this.als.getStore() ?? ROOT_CONTEXT;
+      }
+      with<A extends unknown[], F extends (...args: A) => ReturnType<F>>(
+        ctx: Context,
+        fn: F,
+        thisArg?: ThisParameterType<F>,
+        ...args: A
+      ): ReturnType<F> {
+        return this.als.run(ctx, () => fn.call(thisArg as ThisParameterType<F>, ...args));
+      }
+      bind<T>(_ctx: Context, target: T): T {
+        return target;
+      }
+      enable(): this {
+        return this;
+      }
+      disable(): this {
+        this.als.disable();
+        return this;
+      }
+    }
+
+    let localSpanExporter: InMemorySpanExporter;
+    let localTracerProvider: BasicTracerProvider;
+
+    beforeEach(() => {
+      context.disable();
+      trace.disable();
+      metrics.disable();
+      context.setGlobalContextManager(new TestContextManager().enable());
+      localSpanExporter = new InMemorySpanExporter();
+      localTracerProvider = new BasicTracerProvider({
+        spanProcessors: [new SimpleSpanProcessor(localSpanExporter)],
+      });
+      trace.setGlobalTracerProvider(localTracerProvider);
+    });
+
+    afterEach(async () => {
+      await localTracerProvider.shutdown();
+      localSpanExporter.reset();
+      context.disable();
+      trace.disable();
+      metrics.disable();
+    });
+
+    // Capture the first span-event attributes produced while an active span exists.
+    function eventAttrs(
+      run: (p: ReturnType<typeof createOtelProvider>) => void
+    ): Record<string, unknown> {
+      const provider = createOtelProvider({ serviceName: 'test' });
+      trace.getTracer('test').startActiveSpan('op', (span) => {
+        run(provider);
+        span.end();
+      });
+      const spans = localSpanExporter.getFinishedSpans();
+      const events = spans[spans.length - 1]?.events ?? [];
+      return (events[0]?.attributes ?? {}) as Record<string, unknown>;
+    }
+
+    it('onReceiptIssued emits peac.record.ref and compatibility peac.receipt.ref with the same value', () => {
+      const attrs = eventAttrs((p) =>
+        p.onReceiptIssued({ receiptHash: 'sha256:abc', receiptRef: REF })
+      );
+      expect(attrs['peac.record.ref']).toBe(REF);
+      expect(attrs['peac.receipt.ref']).toBe(REF);
+      expect(attrs['peac.receipt_ref']).toBeUndefined();
+    });
+
+    it('onReceiptVerified emits peac.record.ref and compatibility peac.receipt.ref with the same value', () => {
+      const attrs = eventAttrs((p) =>
+        p.onReceiptVerified({ receiptHash: 'sha256:abc', receiptRef: REF, valid: true })
+      );
+      expect(attrs['peac.record.ref']).toBe(REF);
+      expect(attrs['peac.receipt.ref']).toBe(REF);
+      expect(attrs['peac.receipt_ref']).toBeUndefined();
+    });
+
+    it('emits neither ref attribute when receiptRef is absent', () => {
+      const attrs = eventAttrs((p) => p.onReceiptIssued({ receiptHash: 'sha256:abc' }));
+      expect(attrs['peac.record.ref']).toBeUndefined();
+      expect(attrs['peac.receipt.ref']).toBeUndefined();
+    });
+
+    it('does not add the record/receipt ref as a metric label (span-event only)', async () => {
+      metrics.disable();
+      const exporter = new InMemoryMetricExporter(AggregationTemporality.CUMULATIVE);
+      const reader = new PeriodicExportingMetricReader({ exporter, exportIntervalMillis: 60_000 });
+      const mp = new MeterProvider({ readers: [reader] });
+      metrics.setGlobalMeterProvider(mp);
+      try {
+        const provider = createOtelProvider({ serviceName: 'test' });
+        provider.onReceiptIssued({
+          receiptHash: 'sha256:abc',
+          receiptRef: REF,
+          issuer: 'https://issuer.example',
+          durationMs: 10,
+        });
+        await reader.forceFlush();
+
+        const collected = exporter.getMetrics();
+        let dataPointCount = 0;
+        const labelKeys = new Set<string>();
+        for (const rm of collected) {
+          for (const sm of rm.scopeMetrics) {
+            for (const metric of sm.metrics) {
+              for (const dp of metric.dataPoints) {
+                dataPointCount += 1;
+                for (const k of Object.keys(dp.attributes ?? {})) labelKeys.add(k);
+              }
+            }
+          }
+        }
+
+        // Datapoints were actually recorded and inspected, so the assertions are meaningful.
+        expect(dataPointCount).toBeGreaterThan(0);
+        expect(labelKeys.has('peac.issuer_hash')).toBe(true);
+        // Record references are high-cardinality; they must never become metric labels.
+        expect(labelKeys.has('peac.record.ref')).toBe(false);
+        expect(labelKeys.has('peac.receipt.ref')).toBe(false);
+        expect(labelKeys.has('peac.receipt_ref')).toBe(false);
+      } finally {
+        await mp.shutdown();
+      }
+    });
   });
 });
