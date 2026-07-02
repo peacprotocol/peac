@@ -328,7 +328,7 @@ Risk signal receipts follow the observation model (DD-136): signals record obser
 
 ### 6.4 Risk Signal Extension (Reserved)
 
-The `org.peacprotocol/risk_signal` extension key is reserved in `registries.json`. Schema implementation is planned for v0.11.4. Implementations MAY use this key with custom payloads in `ext[]`; verifiers MUST pass unknown extension payloads through without error.
+The `org.peacprotocol/risk_signal` extension key is reserved in `registries.json`. Schema implementation is not yet defined. Implementations MAY use this key with custom payloads in `ext[]`; verifiers MUST pass unknown extension payloads through without error.
 
 Anticipated fields (non-normative, subject to change):
 
@@ -390,7 +390,7 @@ Records evidence of a state synchronization checkpoint between agents. Applicabl
 
 ### 7.3 Sync Checkpoint Extension (Reserved)
 
-The `org.peacprotocol/sync_checkpoint` extension key is reserved in `registries.json`. Schema implementation is planned for v0.11.4.
+The `org.peacprotocol/sync_checkpoint` extension key is reserved in `registries.json`. Schema implementation is not yet defined.
 
 Anticipated fields (non-normative, subject to change):
 
@@ -448,7 +448,7 @@ Records trace context for distributed tracing correlation. Applicable to systems
 
 ### 8.3 Trace Context Extension (Reserved)
 
-The `org.peacprotocol/trace_context` extension key is reserved in `registries.json`. Schema implementation is planned for v0.11.4.
+The `org.peacprotocol/trace_context` extension key is reserved in `registries.json`. Schema implementation is not yet defined.
 
 Anticipated fields (non-normative, subject to change):
 

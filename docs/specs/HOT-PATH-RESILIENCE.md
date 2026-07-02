@@ -672,8 +672,8 @@ class RateLimiter {
 
 ## References
 
-- [JSON Evidence Validation](../../packages/schema/src/json-evidence.ts)
-- [Worker Core Handler](../../surfaces/workers/_shared/core/handle-tap.ts)
-- [Contracts MODE_BEHAVIOR](../../packages/contracts/src/contracts/mode.ts)
+- [Evidence Validation](../../packages/schema/src/evidence.ts)
+- [Cloudflare Worker Handler](../../surfaces/workers/cloudflare/src/index.ts)
+- [Contracts MODE_BEHAVIOR](../../packages/contracts/src/index.ts)
 - [JWKS Cache](../../packages/jwks-cache/src/cache.ts)
 - [Telemetry OTel](../../packages/telemetry-otel/src/metrics.ts)

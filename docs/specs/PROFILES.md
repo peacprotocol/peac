@@ -50,7 +50,7 @@ These categories are planned but not yet specified:
   to receipts (see DD-49, planned for Wire 0.2)
 - **Core Evidence Profiles**: standardized evidence patterns for
   privacy, access control, toolcall coordination, and delegation
-  (planned for v0.12.1)
+  (reserved; not currently defined)
 
 ## Design Principles
 

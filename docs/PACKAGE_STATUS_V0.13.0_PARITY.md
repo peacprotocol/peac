@@ -1,5 +1,7 @@
 # v0.13.0 Package-Status Parity Audit
 
+> **Historical snapshot (v0.13.0):** point-in-time parity audit; not maintained past v0.13.0. See [`docs/PACKAGE_STATUS.md`](./PACKAGE_STATUS.md) for current package status.
+
 Companion to [`docs/PACKAGE_STATUS.md`](./PACKAGE_STATUS.md). This document
 records the per-export parity audit used to decide posture for deprecated
 and archived packages at v0.13.0. It is hand-maintained; the generator at

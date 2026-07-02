@@ -120,7 +120,7 @@ pnpm --filter @peac/adapter-runtime-governance test
 pnpm --filter @peac/adapter-managed-agents test
 ```
 
-The conformance vectors used in the step-by-step are under [`specs/conformance/runtime-governance/`](../../specs/conformance/runtime-governance/) (Section 27: RTGOV-001..RTGOV-007); the per-mapper test suites exercise each vector end-to-end.
+The runtime-governance conformance requirements exercised in the step-by-step are registered as RTGOV-001..RTGOV-007 in [`specs/conformance/extension-requirement-ids.json`](../../specs/conformance/extension-requirement-ids.json) (Section 27); the per-mapper test suites exercise each requirement end-to-end.
 
 ## Where to go from here
 

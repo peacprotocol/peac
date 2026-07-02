@@ -26,9 +26,10 @@ Payment proof adapters verify payment handshake artifacts (offers, receipts, set
 
 | Adapter   | Protocol       | Status  |
 | --------- | -------------- | ------- |
-| Stripe    | Card payments  | Planned |
 | UPI       | India payments | Planned |
 | Lightning | Bitcoin L2     | Planned |
+
+Stripe and card-network integrations currently ship as rail packages (`@peac/rails-stripe`, `@peac/rails-card`, `@peac/rails-x402`) rather than adapters; see `packages/rails/`.
 
 ## Attestation Adapters
 
@@ -36,9 +37,21 @@ Attestation adapters verify cryptographic claims about identity, attribution, or
 
 ### Available Adapters
 
-| Adapter | Protocol | Status      | Package             |
-| ------- | -------- | ----------- | ------------------- |
-| EAS     | EAS      | Implemented | `@peac/adapter-eas` |
+| Adapter | Protocol     | Status      | Package             |
+| ------- | ------------ | ----------- | ------------------- |
+| DID     | W3C DID      | Implemented | `@peac/adapter-did` |
+| EAT     | RFC 9711 EAT | Implemented | `@peac/adapter-eat` |
+
+## Runtime and Observation Adapters
+
+These adapters map runtime governance, agent-runtime, and tool-call observations to canonical PEAC records.
+
+| Adapter            | Source                       | Status      | Package                            |
+| ------------------ | ---------------------------- | ----------- | ---------------------------------- |
+| Runtime governance | Runtime governance decisions | Implemented | `@peac/adapter-runtime-governance` |
+| Managed agents     | Managed agent-runtime events | Implemented | `@peac/adapter-managed-agents`     |
+| OpenAI-compatible  | OpenAI-compatible chat runs  | Implemented | `@peac/adapter-openai-compatible`  |
+| OpenClaw           | Tool-call capture            | Implemented | `@peac/adapter-openclaw`           |
 
 ## Architecture
 
@@ -88,7 +101,6 @@ Examples:
 
 - `peac-x402-offer-receipt/0.2` - x402 signed offer/receipt extension records
 - `peac-x402/0.1` - Reserved for baseline x402 header-only mapping
-- `peac-eas/0.1` - EAS attestation records
 
 Profile identifiers are distinct from the core PEAC wire format (`peac-receipt/0.1`). Profiles define how specific proof sources map to canonical records.
 
