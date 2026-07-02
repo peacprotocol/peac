@@ -1,6 +1,6 @@
 # Commerce Protocol Coverage in PEAC
 
-**Snapshot date:** April 14, 2026. For current upstream status, see the
+**Snapshot date:** July 2, 2026. For current upstream status, see the
 linked specifications and per-protocol docs below.
 
 This document distinguishes three truth surfaces so readers can reason about
@@ -107,9 +107,10 @@ commerce events.
 PEAC Protocol owns the neutral evidence layer: mappings, conformance
 fixtures, open-source adapters, the reference verifier
 (self-hostable, tenantless), and distribution surface listings.
-Operator-grade and product-grade surfaces (managed verification, integrator
-workflows, enterprise trust center, billing, pilot facilitation) live
-outside this repo and outside this matrix.
+Deployment and product surfaces such as managed verification, integration
+workflows, and billing wrappers live outside this repo and outside this
+matrix. They can compose with PEAC records, but they do not change PEAC wire
+format, schemas, signing, or verification behavior.
 
 ## See also
 

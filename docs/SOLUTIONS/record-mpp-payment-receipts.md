@@ -1,10 +1,10 @@
 # Record MPP payment receipts as portable signed records
 
-MPP handles the payment flow. PEAC records the resulting payment event as a portable signed `org.peacprotocol/payment` record verifiable without MPP server logs.
+MPP/paymentauth handles the payment flow. PEAC records the observed payment result as a portable signed `org.peacprotocol/payment` record that can be verified without MPP server logs.
 
 ## Problem
 
-The "Payment" HTTP authentication scheme (`draft-ryan-httpauth-payment-01`, an active individual Internet-Draft and work in progress, not a finalized standard, used by Machine Payments Protocol implementations) returns a `Payment-Receipt` header on a successful `200` after an HTTP `402` challenge. That receipt proves to the server that payment happened, but the core header is base64url JSON, not a portable PEAC-verifiable signed record: it cannot travel and be independently verified outside the server that issued it.
+The "Payment" HTTP authentication scheme (`draft-ryan-httpauth-payment-01`, an active individual Internet-Draft and work in progress, not a finalized standard, used by Machine Payments Protocol implementations) returns a `Payment-Receipt` header on a successful `200` after an HTTP `402` challenge. That receipt represents the upstream payment result in the issuing server context, but the core header is base64url JSON, not a portable PEAC-verifiable signed record: it cannot travel and be independently verified outside the context that issued or received it.
 
 ## What PEAC adds
 
@@ -35,3 +35,7 @@ When the paid call is an MCP tool call, the PEAC receipt reference rides alongsi
 ## Runnable example
 
 See [`examples/mpp-payment-record/`](../../examples/mpp-payment-record/): a local, no-network demo that records a `Payment-Receipt`, verifies the record offline, demonstrates the `_meta` coexistence, and shows that tampering with the record fails verification (`E_INVALID_SIGNATURE`). It is the signed-record capstone on top of [`examples/paymentauth-evidence/`](../../examples/paymentauth-evidence/) (which is the parse + map example): it reuses the same `@peac/mappings-paymentauth` parser and `toCommerceExtensionFields()` mapper and introduces no new protocol surface.
+
+## MPP client SDKs
+
+MPP client implementations such as `mppx` (`https://github.com/wevm/mppx`) can produce or carry `Payment-Receipt` material that maps through the existing `@peac/mappings-paymentauth` path (`parsePaymentauthReceipt` -> `normalizeReceipt` -> `fromPaymentauthReceipt`). PEAC does not depend on `mppx`; it records the observed paymentauth / MPP artifact as portable evidence. `paymentauth` is the code and registry term; `MPP` and `mppx` are used only in prose. Inclusion does not imply endorsement, dependency, or support.
