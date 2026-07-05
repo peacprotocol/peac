@@ -6,17 +6,17 @@ This guide explains how to integrate PEAC receipts with x402 HTTP 402 payment fl
 
 ## Overview
 
-[x402](https://x402.org) is an open standard for HTTP 402 payments. PEAC adds a cryptographic receipts layer on top:
+[x402](https://x402.org) is an open standard for HTTP 402 payments; its Signed Offers and Receipts extension defines payment-native signed artifacts. PEAC preserves those artifacts inside portable, offline-verifiable interaction records:
 
-| Layer    | What It Does                              |
-| -------- | ----------------------------------------- |
-| **x402** | Handles payment (Base/USDC, Solana, etc.) |
-| **PEAC** | Proves payment happened (signed receipt)  |
+| Layer    | What It Does                                                           |
+| -------- | ---------------------------------------------------------------------- |
+| **x402** | Defines the payment flow and payment-native signed offers/receipts     |
+| **PEAC** | Preserves those artifacts inside a portable, offline-verifiable record |
 
 Together they enable:
 
 - Instant payments via crypto rails
-- Offline-verifiable proof of payment
+- Offline-verifiable payment and delivery artifacts
 - Audit trail with payment evidence
 
 ## Quick Start

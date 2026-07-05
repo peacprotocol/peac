@@ -11,7 +11,7 @@
 The Cloudflare ecosystem operationalises three adjacent surfaces:
 
 - **Markdown for Agents** delivers content with `Accept: text/markdown` content negotiation, `vary: accept`, and `content-signal` response headers.
-- **AI Crawl Control** controls who reaches what; pay-per-crawl is in private beta.
+- **AI Crawl Control** controls who reaches what; Cloudflare has also announced (waitlist, 2026-07-01) letting operators charge for Cloudflare-protected web pages, datasets, APIs, or MCP tools, with settlement over x402 in stablecoins.
 - **x402 SDKs** wire payment rails into agent flows.
 
 None of these produce a verifiable record of what was surfaced and bound. PEAC fills that gap as the records layer: it binds the policy and terms a publisher exposes and emits portable signed records that survive organizational boundaries.
@@ -72,7 +72,7 @@ When Cloudflare serves the markdown representation via `Accept: text/markdown`, 
 
 ### 5. Compose with x402 PR-1986
 
-x402 PR-1986 advertises the `terms` field but does not define consent or binding. PEAC adds the binding/proof layer: the same publisher who advertises the terms also issues PEAC records that bind the digest and prove what was surfaced. See the upstream comment trail on [x402 PR #1986](https://github.com/x402-foundation/x402/pull/1986) for the alignment.
+x402 PR-1986 advertises the `terms` field but does not define consent or binding. PEAC adds a portable binding record: the same publisher who advertises the terms can issue PEAC records that bind the digest and record what was surfaced. See the upstream comment trail on [x402 PR #1986](https://github.com/x402-foundation/x402/pull/1986) for the alignment.
 
 ### 6. Verify offline
 
