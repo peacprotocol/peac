@@ -1,6 +1,6 @@
 # x402 Scheme Coverage in PEAC
 
-**Snapshot date:** upstream x402 state as of April 10, 2026. For current
+**Snapshot date:** upstream x402 scheme state as of April 10, 2026; the Signed Offers and Receipts extension re-checked at spec_version 0.6 on 2026-07-05. For current
 upstream status, see
 [x402-foundation/x402](https://github.com/x402-foundation/x402) and the
 per-facilitator docs linked below.
@@ -102,19 +102,19 @@ on-chain or by the facilitator, not by PEAC.
 ## Deferred to future PEAC releases
 
 This document records the current PEAC position on upstream features that are
-not in scope for v0.12.9. Each row is an explicit gap, not a silent omission.
+not in scope for the current mapping. Each row is an explicit gap, not a silent omission.
 
-| Feature                                        | Upstream status                  | PEAC position                        |
-| ---------------------------------------------- | -------------------------------- | ------------------------------------ |
-| `upto` on Solana                               | [RFC #1642][rfc-1642] unresolved | Not claimed; watch upstream          |
-| Payment Identifier extension                   | Stable                           | Not mapped yet; tracked for v0.12.10 |
-| Gas sponsoring (EIP-2612, ERC-20)              | Stable                           | Out of scope for v0.12.9             |
-| Bazaar discovery                               | Stable                           | Out of scope for v0.12.9             |
-| Sign-in-with-X                                 | Stable                           | Out of scope for v0.12.9             |
-| Facilitator attestation                        | [#1921][rfc-1921] open           | Watch upstream                       |
-| Negotiated BCP                                 | [#1960][rfc-1960] open           | Watch upstream                       |
-| State channels                                 | [#1909][rfc-1909] open           | Watch upstream                       |
-| Commerce lifecycle (authorize / settle phases) | Scheme layer                     | Tracked for a future PEAC release    |
+| Feature                                        | Upstream status                  | PEAC position                                |
+| ---------------------------------------------- | -------------------------------- | -------------------------------------------- |
+| `upto` on Solana                               | [RFC #1642][rfc-1642] unresolved | Not claimed; watch upstream                  |
+| Payment Identifier extension                   | Stable                           | Not mapped yet; tracked for a future release |
+| Gas sponsoring (EIP-2612, ERC-20)              | Stable                           | Out of scope for the current mapping         |
+| Bazaar discovery                               | Stable                           | Out of scope for the current mapping         |
+| Sign-in-with-X                                 | Stable                           | Out of scope for the current mapping         |
+| Facilitator attestation                        | [#1921][rfc-1921] open           | Watch upstream                               |
+| Negotiated BCP                                 | [#1960][rfc-1960] open           | Watch upstream                               |
+| State channels                                 | [#1909][rfc-1909] open           | Watch upstream                               |
+| Commerce lifecycle (authorize / settle phases) | Scheme layer                     | Tracked for a future PEAC release            |
 
 [rfc-1921]: https://github.com/x402-foundation/x402/issues/1921
 [rfc-1960]: https://github.com/x402-foundation/x402/issues/1960
