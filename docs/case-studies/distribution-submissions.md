@@ -25,7 +25,7 @@ Status tracking for every external listing or marketplace submission PEAC mainta
 
 ## Tag-time discipline
 
-At v0.12.13 tag time, every row above requires:
+At release tag time, every row above requires:
 
 - `prepared` at minimum, with a committed artifact under `surfaces/plugin-pack/`, `packages/mcp-server/smithery.yaml`, or equivalent local source.
 - Or `submitted`, with a submission URL, PR number, or review thread captured in the `Artifact reference` cell.
