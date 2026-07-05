@@ -19,7 +19,7 @@ truth.
 
 1. Provision your host to run:
    ```text
-   npx -y @peac/mcp-server@0.12.11 --issuer-key env:PEAC_ISSUER_KEY \
+   npx -y @peac/mcp-server@0.16.1 --issuer-key env:PEAC_ISSUER_KEY \
      --issuer-id https://your-service.example.com
    ```
    The pinned version tracks the canonical `smithery.yaml`; update
