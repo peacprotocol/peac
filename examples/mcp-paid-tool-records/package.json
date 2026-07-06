@@ -1,0 +1,25 @@
+{
+  "name": "@peac/example-mcp-paid-tool-records",
+  "version": "0.0.0",
+  "private": true,
+  "description": "PEAC example: bind a priced MCP tool call to a settled x402 payment as a portable signed payment record (org.peacprotocol/payment), carried in the tool result's _meta and verified offline",
+  "type": "module",
+  "scripts": {
+    "demo": "tsx demo.ts",
+    "demo:tamper": "tsx demo.ts --tamper",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@peac/adapter-x402": "workspace:*",
+    "@peac/crypto": "workspace:*",
+    "@peac/kernel": "workspace:*",
+    "@peac/mappings-mcp": "workspace:*",
+    "@peac/protocol": "workspace:*",
+    "@peac/schema": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "^4.21.0",
+    "typescript": "^5.3.3"
+  }
+}
