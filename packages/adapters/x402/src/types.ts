@@ -368,8 +368,10 @@ export interface X402PeacRecord {
        */
       settlementExtensionsDigest?: string;
       /**
-       * Raw settlement `extensions` bag, preserved verbatim ONLY when
-       * mapping was performed with `preserveRawSettlementExtensions:
+       * Raw settlement `extensions` bag, preserved as a canonical JSON
+       * clone (derived from the bounded RFC 8785 JCS bytes, not the
+       * caller's original object reference or byte serialization) ONLY
+       * when mapping was performed with `preserveRawSettlementExtensions:
        * true` (default: omitted). May carry upstream protocol-extension
        * data (e.g. payer- or resource-correlating material); never
        * copied into signed `evidence`.

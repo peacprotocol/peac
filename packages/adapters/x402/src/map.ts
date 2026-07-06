@@ -41,6 +41,29 @@ import { X402_OFFER_RECEIPT_PROFILE } from './types.js';
 // ---------------------------------------------------------------------------
 
 /**
+ * Canonicalize a settlement `extensions` object for bounding + digesting,
+ * converting any canonicalization failure into the stable adapter-local
+ * `settlement_extensions_invalid` error. A public JS caller could pass a
+ * value that is not JSON-canonicalizable (cyclic references, `BigInt`, or
+ * other non-JSON types); those must fail closed with a stable protocol
+ * code rather than leaking a raw `TypeError`/`RangeError`. The raw
+ * extension value is never included in the error message.
+ *
+ * Note: `undefined` object-member values are omitted by `canonicalize`
+ * (RFC 8785 / `JSON.stringify` semantics), not treated as an error.
+ */
+function canonicalizeSettlementExtensions(extensions: Record<string, unknown>): string {
+  try {
+    return canonicalize(extensions);
+  } catch {
+    throw new X402Error(
+      'settlement_extensions_invalid',
+      'Settlement extensions must be JSON-canonicalizable'
+    );
+  }
+}
+
+/**
  * Applies settlement `extensions` (x402 protocol-extension passthrough
  * data) to a PEAC record's `proofs.x402` bundle, in place.
  *
@@ -70,8 +93,9 @@ import { X402_OFFER_RECEIPT_PROFILE } from './types.js';
  * @throws X402Error `settlement_extensions_too_large` if the canonical
  *   serialization exceeds `MAX_SETTLEMENT_EXTENSIONS_BYTES`.
  * @throws X402Error `settlement_extensions_invalid` if `extensions`
- *   embeds a receipt that conflicts with `proofsX402.receipt`, or if the
- *   embedded offer-receipt extension is structurally malformed.
+ *   embeds a receipt that conflicts with `proofsX402.receipt`, if the
+ *   embedded offer-receipt extension is structurally malformed, or if
+ *   `extensions` is not JSON-canonicalizable.
  */
 function applySettlementExtensions(
   proofsX402: X402PeacRecord['proofs']['x402'],
@@ -82,7 +106,7 @@ function applySettlementExtensions(
     return;
   }
 
-  const canonical = canonicalize(extensions);
+  const canonical = canonicalizeSettlementExtensions(extensions);
   const byteLength = Buffer.byteLength(canonical, 'utf8');
   if (byteLength > MAX_SETTLEMENT_EXTENSIONS_BYTES) {
     throw new X402Error(
@@ -150,8 +174,8 @@ export interface ToPeacRecordOptions {
    */
   maxCompactJwsBytes?: number;
   /**
-   * Preserve the raw settlement `extensions` bag verbatim under
-   * `proofs.x402.settlementExtensions`, in addition to the always-on
+   * Preserve the raw settlement `extensions` bag as a canonical JSON
+   * clone under `proofs.x402.settlementExtensions`, in addition to the always-on
    * `settlementExtensionsDigest`. Default: false.
    *
    * Privacy note: the settlement `extensions` bag is upstream
@@ -336,8 +360,8 @@ export interface ToPeacRecordV2Options {
   /** Signer authorization result */
   authorizationResult?: AuthorizationResult;
   /**
-   * Preserve the raw settlement `extensions` bag verbatim under
-   * `proofs.x402.settlementExtensions`, in addition to the always-on
+   * Preserve the raw settlement `extensions` bag as a canonical JSON
+   * clone under `proofs.x402.settlementExtensions`, in addition to the always-on
    * `settlementExtensionsDigest`. Default: false. See
    * `ToPeacRecordOptions.preserveRawSettlementExtensions` for the
    * privacy rationale (identical semantics for V2).

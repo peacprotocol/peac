@@ -52,9 +52,10 @@ preserved under `proofs.x402` using a privacy-hardened default:
   (`sha256:<64 lowercase hex>`, computed over the RFC 8785 JCS
   canonicalization of the `extensions` object), is added whenever a
   settlement `extensions` object is present.
-- The raw `extensions` bag itself is preserved verbatim under
-  `settlementExtensions` only when the caller opts in; it is omitted by
-  default.
+- The raw `extensions` bag is preserved under `settlementExtensions` only
+  when the caller opts in, as a canonical JSON clone (derived from the
+  bounded RFC 8785 JCS bytes, not the caller's original object reference or
+  byte serialization); it is omitted by default.
 
 `settlementExtensionsDigest` is an **integrity/correlation** handle, not
 anonymization: two records that preserve the same upstream settlement

@@ -345,4 +345,57 @@ describe('toPeacRecord: settlement extensions', () => {
       );
     });
   });
+
+  describe('canonicalization failures (JSON-canonicalizable guard)', () => {
+    it('throws settlement_extensions_invalid for a cyclic extensions object', () => {
+      const cyclic: Record<string, unknown> = {};
+      cyclic.self = cyclic;
+      expect(() => toPeacRecord(PAYMENT_REQUIRED_VALID, withExtensions(cyclic))).toThrow(X402Error);
+      try {
+        toPeacRecord(PAYMENT_REQUIRED_VALID, withExtensions(cyclic));
+        throw new Error('expected throw');
+      } catch (err) {
+        expect((err as X402Error).code).toBe('settlement_extensions_invalid');
+        // The raw extension value must not leak into the error message.
+        expect((err as X402Error).message).toBe(
+          'Settlement extensions must be JSON-canonicalizable'
+        );
+      }
+    });
+
+    it('throws settlement_extensions_invalid for a BigInt value inside extensions', () => {
+      const withBigInt = { amount: BigInt(1) } as unknown as Record<string, unknown>;
+      expect(() => toPeacRecord(PAYMENT_REQUIRED_VALID, withExtensions(withBigInt))).toThrow(
+        X402Error
+      );
+      try {
+        toPeacRecord(PAYMENT_REQUIRED_VALID, withExtensions(withBigInt));
+        throw new Error('expected throw');
+      } catch (err) {
+        expect((err as X402Error).code).toBe('settlement_extensions_invalid');
+      }
+    });
+
+    it('does not emit or partially populate a record when canonicalization fails', () => {
+      // toPeacRecord throws before returning; there is no partial record.
+      const cyclic: Record<string, unknown> = {};
+      cyclic.self = cyclic;
+      let record: unknown;
+      expect(() => {
+        record = toPeacRecord(PAYMENT_REQUIRED_VALID, withExtensions(cyclic));
+      }).toThrow(X402Error);
+      expect(record).toBeUndefined();
+    });
+
+    it('omits undefined object-member values per RFC 8785 / JSON.stringify (locked behavior, not an error)', () => {
+      // canonicalize drops undefined members (documented PROTOCOL DECISION),
+      // so { a: 1, b: undefined } digests identically to { a: 1 }.
+      const withUndefined = { a: 1, b: undefined } as Record<string, unknown>;
+      const recordU = toPeacRecord(PAYMENT_REQUIRED_VALID, withExtensions(withUndefined));
+      const recordPlain = toPeacRecord(PAYMENT_REQUIRED_VALID, withExtensions({ a: 1 }));
+      expect(recordU.proofs.x402.settlementExtensionsDigest).toBe(
+        recordPlain.proofs.x402.settlementExtensionsDigest
+      );
+    });
+  });
 });
