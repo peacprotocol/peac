@@ -99,7 +99,7 @@ function asSignedReceiptEnvelope(value: Record<string, unknown>): RawSignedRecei
 
   throw new X402Error(
     'settlement_extensions_invalid',
-    `Settlement offer-receipt receipt has an unrecognized format: ${JSON.stringify(format)}`
+    'Settlement offer-receipt receipt has an unrecognized format'
   );
 }
 

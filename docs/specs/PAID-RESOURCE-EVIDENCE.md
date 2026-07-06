@@ -13,8 +13,9 @@ pattern is protocol-neutral, not x402-specific.
 
 A paid-resource interaction (an agent or client paying to access a resource
 behind a 402 challenge) produces several distinct artifacts: the offer terms
-the resource advertised, the signed receipt a facilitator or payer returned,
-and, optionally, upstream protocol-extension data attached to the settlement
+the resource advertised, the signed receipt or settlement artifact returned
+by the upstream payment flow, and, optionally, upstream protocol-extension
+data attached to the settlement
 response. PEAC records what happened without settling the payment, pricing
 the resource, or verifying the payment scheme's own invariants. This document
 describes the record composition and the privacy posture for the artifacts

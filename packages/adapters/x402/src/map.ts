@@ -115,9 +115,8 @@ function applySettlementExtensions(
     );
   }
 
-  // Reviewer addition: receipt-consistency guard. Reuses the same
-  // extraction path callers use standalone, so there is a single source
-  // of truth for the offer-receipt nesting walk.
+  // Enforce receipt consistency using the same extraction path exposed
+  // to callers, so the offer-receipt nesting walk has one source of truth.
   const embeddedReceipt = extractSignedReceiptFromSettlement({ extensions });
   if (
     embeddedReceipt !== null &&
@@ -133,8 +132,8 @@ function applySettlementExtensions(
   proofsX402.settlementExtensionsDigest = `${HASH.prefix}${digestHex}`;
 
   if (preserveRaw) {
-    // Reviewer addition: derive the preserved object from the bounded
-    // canonical bytes (never the caller's object reference).
+    // Derive the preserved object from the bounded canonical bytes,
+    // never the caller's live object reference.
     proofsX402.settlementExtensions = JSON.parse(canonical) as Record<string, unknown>;
   }
 }
