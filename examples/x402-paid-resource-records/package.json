@@ -1,0 +1,24 @@
+{
+  "name": "@peac/example-x402-paid-resource-records",
+  "version": "0.0.0",
+  "private": true,
+  "description": "PEAC example: record an x402 offer/receipt settlement (offer-receipt extension) as a portable signed payment record (org.peacprotocol/payment) with offline verification, dual-channel settlement observation, and digest-mismatch detection",
+  "type": "module",
+  "scripts": {
+    "demo": "tsx demo.ts",
+    "demo:tamper": "tsx demo.ts --tamper",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@peac/adapter-x402": "workspace:*",
+    "@peac/crypto": "workspace:*",
+    "@peac/kernel": "workspace:*",
+    "@peac/protocol": "workspace:*",
+    "@peac/schema": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "^4.21.0",
+    "typescript": "^5.3.3"
+  }
+}
