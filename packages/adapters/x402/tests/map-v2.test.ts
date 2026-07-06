@@ -39,12 +39,12 @@ const V2_RECEIPT: NormalizedV2Receipt = {
 
 const RAW_OFFER: RawSignedOffer = {
   format: 'jws',
-  compactJws: 'eyJ0eXAiOiJKV1QifQ.eyJ0ZXN0Ijp0cnVlfQ.c2lnbmF0dXJl',
+  signature: 'eyJ0eXAiOiJKV1QifQ.eyJ0ZXN0Ijp0cnVlfQ.c2lnbmF0dXJl',
 };
 
 const RAW_RECEIPT: RawSignedReceipt = {
   format: 'jws',
-  compactJws: 'eyJ0eXAiOiJKV1QifQ.eyJyZWNlaXB0Ijp0cnVlfQ.c2lnbmF0dXJl',
+  signature: 'eyJ0eXAiOiJKV1QifQ.eyJyZWNlaXB0Ijp0cnVlfQ.c2lnbmF0dXJl',
 };
 
 describe('toPeacRecordV2()', () => {
@@ -135,14 +135,6 @@ describe('toPeacRecordV2()', () => {
 // ---------------------------------------------------------------------------
 
 describe('toPeacRecordV2(): settlement extensions', () => {
-  // Properly-shaped RawJWSSignedReceipt (this file's top-level RAW_RECEIPT
-  // fixture uses a non-standard `compactJws` field name and is left as-is;
-  // these tests use a correctly-shaped fixture instead).
-  const VALID_RAW_RECEIPT: RawSignedReceipt = {
-    format: 'jws',
-    signature: 'eyJhbGciOiJFZERTQSJ9.eyJpc3MiOiJodHRwczovL2FwaS5leGFtcGxlLmNvbSJ9.c2lnbmF0dXJl',
-  };
-
   const EXTENSIONS_SIMPLE = { foo: 'bar' };
 
   function withExtensions(extensions: Record<string, unknown> | undefined): NormalizedV2Receipt {
@@ -154,19 +146,14 @@ describe('toPeacRecordV2(): settlement extensions', () => {
       V2_OFFER,
       withExtensions(EXTENSIONS_SIMPLE),
       RAW_OFFER,
-      VALID_RAW_RECEIPT
+      RAW_RECEIPT
     );
     expect(record.proofs.x402.settlementExtensionsDigest).toMatch(/^sha256:[0-9a-f]{64}$/);
     expect(record.proofs.x402.settlementExtensions).toBeUndefined();
   });
 
   it('omits settlement extension keys entirely when extensions is absent', () => {
-    const record = toPeacRecordV2(
-      V2_OFFER,
-      withExtensions(undefined),
-      RAW_OFFER,
-      VALID_RAW_RECEIPT
-    );
+    const record = toPeacRecordV2(V2_OFFER, withExtensions(undefined), RAW_OFFER, RAW_RECEIPT);
     expect(record.proofs.x402.settlementExtensionsDigest).toBeUndefined();
     expect(record.proofs.x402.settlementExtensions).toBeUndefined();
   });
@@ -176,7 +163,7 @@ describe('toPeacRecordV2(): settlement extensions', () => {
       V2_OFFER,
       withExtensions(EXTENSIONS_SIMPLE),
       RAW_OFFER,
-      VALID_RAW_RECEIPT
+      RAW_RECEIPT
     );
     expect(record.evidence).not.toHaveProperty('settlementExtensions');
     expect(record.evidence).not.toHaveProperty('settlementExtensionsDigest');
@@ -184,15 +171,9 @@ describe('toPeacRecordV2(): settlement extensions', () => {
 
   it('adds raw only when preserveRawSettlementExtensions is true, as a clone of the caller input', () => {
     const extensions = { mutable: 'original' };
-    const record = toPeacRecordV2(
-      V2_OFFER,
-      withExtensions(extensions),
-      RAW_OFFER,
-      VALID_RAW_RECEIPT,
-      {
-        preserveRawSettlementExtensions: true,
-      }
-    );
+    const record = toPeacRecordV2(V2_OFFER, withExtensions(extensions), RAW_OFFER, RAW_RECEIPT, {
+      preserveRawSettlementExtensions: true,
+    });
     expect(record.proofs.x402.settlementExtensions).toEqual({ mutable: 'original' });
     expect(record.proofs.x402.settlementExtensions).not.toBe(extensions);
 
@@ -204,9 +185,9 @@ describe('toPeacRecordV2(): settlement extensions', () => {
 
   describe('receipt consistency guard', () => {
     it('allows a matching embedded receipt', () => {
-      const extensions = { 'offer-receipt': { info: { receipt: VALID_RAW_RECEIPT } } };
+      const extensions = { 'offer-receipt': { info: { receipt: RAW_RECEIPT } } };
       expect(() =>
-        toPeacRecordV2(V2_OFFER, withExtensions(extensions), RAW_OFFER, VALID_RAW_RECEIPT)
+        toPeacRecordV2(V2_OFFER, withExtensions(extensions), RAW_OFFER, RAW_RECEIPT)
       ).not.toThrow();
     });
 
@@ -217,7 +198,7 @@ describe('toPeacRecordV2(): settlement extensions', () => {
       };
       const extensions = { 'offer-receipt': { info: { receipt: conflicting } } };
       expect(() =>
-        toPeacRecordV2(V2_OFFER, withExtensions(extensions), RAW_OFFER, VALID_RAW_RECEIPT)
+        toPeacRecordV2(V2_OFFER, withExtensions(extensions), RAW_OFFER, RAW_RECEIPT)
       ).toThrow(X402Error);
     });
   });
@@ -228,7 +209,7 @@ describe('toPeacRecordV2(): settlement extensions', () => {
         V2_OFFER,
         withExtensions(EXTENSIONS_SIMPLE),
         RAW_OFFER,
-        VALID_RAW_RECEIPT
+        RAW_RECEIPT
       );
       expect(Object.keys(record.proofs.x402).sort()).toEqual(
         ['offer', 'receipt', 'settlementExtensionsDigest'].sort()
