@@ -145,6 +145,21 @@ export interface RawV2SettlementResponseSuccess {
   network: string;
   /** Payer address */
   payer: string;
+  /**
+   * Upstream protocol-extensions data (optional).
+   *
+   * Mirrors `SettleResponse.extensions?: Record<string, unknown>` from
+   * upstream x402-foundation/x402
+   * (`typescript/packages/core/src/types/facilitator.ts`), a generic
+   * protocol-extension passthrough field that pre-dates the offer-receipt
+   * extension (PR #1003). The "Signed Offers & Receipts" extension places
+   * a signed receipt at `extensions["offer-receipt"].info.receipt`
+   * (specs/extensions/extension-offer-and-receipt.md Section 5.1, pinned
+   * commit f2bbb5c); sibling extensions (e.g. batch-settlement) may use
+   * other keys under this same bag. Raw pass-through only: no PEAC
+   * semantics are added at this layer (see normalize-v2.ts / map.ts).
+   */
+  extensions?: Record<string, unknown>;
 }
 
 /**
@@ -162,6 +177,16 @@ export interface RawV2SettlementResponseFailure {
   network: string;
   /** Payer address */
   payer: string;
+  /**
+   * Upstream protocol-extensions data (optional).
+   *
+   * See `RawV2SettlementResponseSuccess.extensions` for the field's
+   * provenance and semantics. Present on the unified upstream
+   * `SettleResponse` shape regardless of `success`; PEAC's V2
+   * normalization (`normalizeV2Receipt`) only carries it forward on the
+   * success path, since failed settlements do not produce a receipt.
+   */
+  extensions?: Record<string, unknown>;
 }
 
 /** Discriminated union of V2 settlement response outcomes */

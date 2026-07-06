@@ -77,6 +77,16 @@ export interface NormalizedV2Receipt {
   resourceUrl: string;
   /** Receipt issuance timestamp in epoch seconds (caller-supplied from response timing) */
   issuedAt: number;
+  /**
+   * Upstream protocol-extensions data (optional), preserved verbatim from
+   * `RawV2SettlementResponseSuccess.extensions` when present.
+   *
+   * This is a raw/normalized pass-through only: no PEAC semantics are
+   * added here. The mapper (`map.ts` `toPeacRecordV2`) applies the
+   * privacy-hardened default (digest under `proofs.x402`, raw preservation
+   * opt-in) when building the emitted record.
+   */
+  extensions?: Record<string, unknown>;
 }
 
 // ---------------------------------------------------------------------------
@@ -154,5 +164,6 @@ export function normalizeV2Receipt(
     resourceUrl,
     issuedAt,
     ...(settlement.transaction && { transaction: settlement.transaction }),
+    ...(settlement.extensions !== undefined && { extensions: settlement.extensions }),
   };
 }

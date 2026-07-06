@@ -8,14 +8,22 @@
  * Raw upstream artifacts are preserved as-is in proofs.
  */
 
+import { createHash } from 'node:crypto';
+
 import type { PeacEvidenceCarrier } from '@peac/kernel';
+import { HASH } from '@peac/kernel';
 import { computeReceiptRef } from '@peac/schema';
+import { canonicalize } from '@peac/crypto';
 
 import { X402Error } from './errors.js';
 import type { RawSignedOffer, RawSignedReceipt } from './raw.js';
 import { extractOfferPayload, extractReceiptPayload } from './raw.js';
 import { normalizeOfferPayload, normalizeReceiptPayload } from './normalize.js';
 import type { NormalizedV2Offer, NormalizedV2Receipt } from './normalize-v2.js';
+import {
+  extractSignedReceiptFromSettlement,
+  MAX_SETTLEMENT_EXTENSIONS_BYTES,
+} from './settlement-extensions.js';
 import type {
   X402OfferReceiptChallenge,
   X402SettlementResponse,
@@ -27,6 +35,85 @@ import type {
   AuthorizationResult,
 } from './types.js';
 import { X402_OFFER_RECEIPT_PROFILE } from './types.js';
+
+// ---------------------------------------------------------------------------
+// Settlement extensions (proofs.x402), shared by V1 and V2 mapping
+// ---------------------------------------------------------------------------
+
+/**
+ * Applies settlement `extensions` (x402 protocol-extension passthrough
+ * data) to a PEAC record's `proofs.x402` bundle, in place.
+ *
+ * Privacy-hardened default: only a stable content digest
+ * (`settlementExtensionsDigest`) is added, computed over the RFC 8785 JCS
+ * canonicalization of `extensions`. The SAME canonical bytes are used for
+ * both the DoS bound and the digest (computed once), avoiding a
+ * bound/digest mismatch. The digest is byte-identical to
+ * `computeJsonDocumentDigestJcs(extensions)` from `@peac/protocol`; it is
+ * computed here via Node's synchronous `createHash` instead so that
+ * `toPeacRecord`/`toPeacRecordV2` remain synchronous public APIs.
+ *
+ * Raw `extensions` are preserved under `proofs.x402.settlementExtensions`
+ * ONLY when `preserveRaw` is true, and the preserved object is derived
+ * from the already-bounded canonical string (`JSON.parse(canonical)`),
+ * never the caller's live object reference, so later caller-side
+ * mutation of the input cannot alter the emitted record.
+ *
+ * Also enforces a receipt-consistency guard: if `extensions` embeds a
+ * signed receipt via the offer-receipt extension
+ * (`extensions["offer-receipt"].info.receipt`) that structurally differs
+ * from the receipt already present at `proofsX402.receipt`, the record
+ * would carry two conflicting receipts, so mapping fails closed instead.
+ *
+ * No-op (byte-identical output) when `extensions` is `undefined`.
+ *
+ * @throws X402Error `settlement_extensions_too_large` if the canonical
+ *   serialization exceeds `MAX_SETTLEMENT_EXTENSIONS_BYTES`.
+ * @throws X402Error `settlement_extensions_invalid` if `extensions`
+ *   embeds a receipt that conflicts with `proofsX402.receipt`, or if the
+ *   embedded offer-receipt extension is structurally malformed.
+ */
+function applySettlementExtensions(
+  proofsX402: X402PeacRecord['proofs']['x402'],
+  extensions: Record<string, unknown> | undefined,
+  preserveRaw: boolean
+): void {
+  if (extensions === undefined) {
+    return;
+  }
+
+  const canonical = canonicalize(extensions);
+  const byteLength = Buffer.byteLength(canonical, 'utf8');
+  if (byteLength > MAX_SETTLEMENT_EXTENSIONS_BYTES) {
+    throw new X402Error(
+      'settlement_extensions_too_large',
+      `Settlement extensions canonical serialization (${byteLength} bytes) exceeds the ${MAX_SETTLEMENT_EXTENSIONS_BYTES} byte limit`
+    );
+  }
+
+  // Reviewer addition: receipt-consistency guard. Reuses the same
+  // extraction path callers use standalone, so there is a single source
+  // of truth for the offer-receipt nesting walk.
+  const embeddedReceipt = extractSignedReceiptFromSettlement({ extensions });
+  if (
+    embeddedReceipt !== null &&
+    canonicalize(embeddedReceipt) !== canonicalize(proofsX402.receipt)
+  ) {
+    throw new X402Error(
+      'settlement_extensions_invalid',
+      'Settlement extensions embed a receipt that conflicts with proofs.x402.receipt'
+    );
+  }
+
+  const digestHex = createHash('sha256').update(canonical, 'utf8').digest('hex');
+  proofsX402.settlementExtensionsDigest = `${HASH.prefix}${digestHex}`;
+
+  if (preserveRaw) {
+    // Reviewer addition: derive the preserved object from the bounded
+    // canonical bytes (never the caller's object reference).
+    proofsX402.settlementExtensions = JSON.parse(canonical) as Record<string, unknown>;
+  }
+}
 
 /**
  * Options for record mapping
@@ -62,6 +149,21 @@ export interface ToPeacRecordOptions {
    * Maximum compact JWS byte length for payload extraction
    */
   maxCompactJwsBytes?: number;
+  /**
+   * Preserve the raw settlement `extensions` bag verbatim under
+   * `proofs.x402.settlementExtensions`, in addition to the always-on
+   * `settlementExtensionsDigest`. Default: false.
+   *
+   * Privacy note: the settlement `extensions` bag is upstream
+   * protocol-extension data (e.g. batch-settlement, or sibling
+   * extensions this adapter does not interpret) and MAY carry payer- or
+   * resource-correlating material. The digest-by-default posture avoids
+   * storing that raw material in the emitted PEAC record unless
+   * explicitly opted in. The preserved value is a clone derived from the
+   * bounded canonical (RFC 8785 JCS) bytes, never the caller's live
+   * object reference.
+   */
+  preserveRawSettlementExtensions?: boolean;
 }
 
 /**
@@ -182,13 +284,20 @@ export function toPeacRecord(
 
   hints.verification = verification;
 
+  const proofsX402: X402PeacRecord['proofs']['x402'] = {
+    offer, // exact raw artifact, never mutated
+    receipt, // exact raw artifact, never mutated
+  };
+  applySettlementExtensions(
+    proofsX402,
+    settlementResponse.extensions,
+    options?.preserveRawSettlementExtensions ?? false
+  );
+
   return {
     version: X402_OFFER_RECEIPT_PROFILE,
     proofs: {
-      x402: {
-        offer, // exact raw artifact, never mutated
-        receipt, // exact raw artifact, never mutated
-      },
+      x402: proofsX402,
     },
     evidence: {
       resourceUrl: offerPayload.resourceUrl,
@@ -226,6 +335,14 @@ export interface ToPeacRecordV2Options {
   cryptoResult?: CryptoResult;
   /** Signer authorization result */
   authorizationResult?: AuthorizationResult;
+  /**
+   * Preserve the raw settlement `extensions` bag verbatim under
+   * `proofs.x402.settlementExtensions`, in addition to the always-on
+   * `settlementExtensionsDigest`. Default: false. See
+   * `ToPeacRecordOptions.preserveRawSettlementExtensions` for the
+   * privacy rationale (identical semantics for V2).
+   */
+  preserveRawSettlementExtensions?: boolean;
 }
 
 /**
@@ -293,13 +410,20 @@ export function toPeacRecordV2(
 
   hints.verification = verification;
 
+  const proofsX402: X402PeacRecord['proofs']['x402'] = {
+    offer: rawOffer,
+    receipt: rawReceipt,
+  };
+  applySettlementExtensions(
+    proofsX402,
+    receipt.extensions,
+    options?.preserveRawSettlementExtensions ?? false
+  );
+
   return {
     version: X402_OFFER_RECEIPT_PROFILE,
     proofs: {
-      x402: {
-        offer: rawOffer,
-        receipt: rawReceipt,
-      },
+      x402: proofsX402,
     },
     evidence: {
       resourceUrl: offer.resource.url,

@@ -7,6 +7,7 @@
 
 import { describe, it, expect } from 'vitest';
 import { toPeacRecordV2 } from '../src/map.js';
+import { X402Error } from '../src/errors.js';
 import type { NormalizedV2Offer, NormalizedV2Receipt } from '../src/normalize-v2.js';
 import type { RawSignedOffer, RawSignedReceipt } from '../src/raw.js';
 import { X402_OFFER_RECEIPT_PROFILE } from '../src/types.js';
@@ -126,5 +127,112 @@ describe('toPeacRecordV2()', () => {
 
     expect(record.createdAt).toBeTruthy();
     expect(new Date(record.createdAt).getTime()).not.toBeNaN();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// settlement extensions (proofs.x402), V2
+// ---------------------------------------------------------------------------
+
+describe('toPeacRecordV2(): settlement extensions', () => {
+  // Properly-shaped RawJWSSignedReceipt (this file's top-level RAW_RECEIPT
+  // fixture uses a non-standard `compactJws` field name and is left as-is;
+  // these tests use a correctly-shaped fixture instead).
+  const VALID_RAW_RECEIPT: RawSignedReceipt = {
+    format: 'jws',
+    signature: 'eyJhbGciOiJFZERTQSJ9.eyJpc3MiOiJodHRwczovL2FwaS5leGFtcGxlLmNvbSJ9.c2lnbmF0dXJl',
+  };
+
+  const EXTENSIONS_SIMPLE = { foo: 'bar' };
+
+  function withExtensions(extensions: Record<string, unknown> | undefined): NormalizedV2Receipt {
+    return { ...V2_RECEIPT, extensions };
+  }
+
+  it('adds settlementExtensionsDigest by default, raw absent', () => {
+    const record = toPeacRecordV2(
+      V2_OFFER,
+      withExtensions(EXTENSIONS_SIMPLE),
+      RAW_OFFER,
+      VALID_RAW_RECEIPT
+    );
+    expect(record.proofs.x402.settlementExtensionsDigest).toMatch(/^sha256:[0-9a-f]{64}$/);
+    expect(record.proofs.x402.settlementExtensions).toBeUndefined();
+  });
+
+  it('omits settlement extension keys entirely when extensions is absent', () => {
+    const record = toPeacRecordV2(
+      V2_OFFER,
+      withExtensions(undefined),
+      RAW_OFFER,
+      VALID_RAW_RECEIPT
+    );
+    expect(record.proofs.x402.settlementExtensionsDigest).toBeUndefined();
+    expect(record.proofs.x402.settlementExtensions).toBeUndefined();
+  });
+
+  it('never places settlement extension data under evidence', () => {
+    const record = toPeacRecordV2(
+      V2_OFFER,
+      withExtensions(EXTENSIONS_SIMPLE),
+      RAW_OFFER,
+      VALID_RAW_RECEIPT
+    );
+    expect(record.evidence).not.toHaveProperty('settlementExtensions');
+    expect(record.evidence).not.toHaveProperty('settlementExtensionsDigest');
+  });
+
+  it('adds raw only when preserveRawSettlementExtensions is true, as a clone of the caller input', () => {
+    const extensions = { mutable: 'original' };
+    const record = toPeacRecordV2(
+      V2_OFFER,
+      withExtensions(extensions),
+      RAW_OFFER,
+      VALID_RAW_RECEIPT,
+      {
+        preserveRawSettlementExtensions: true,
+      }
+    );
+    expect(record.proofs.x402.settlementExtensions).toEqual({ mutable: 'original' });
+    expect(record.proofs.x402.settlementExtensions).not.toBe(extensions);
+
+    extensions.mutable = 'changed-after-mapping';
+    expect((record.proofs.x402.settlementExtensions as Record<string, unknown>).mutable).toBe(
+      'original'
+    );
+  });
+
+  describe('receipt consistency guard', () => {
+    it('allows a matching embedded receipt', () => {
+      const extensions = { 'offer-receipt': { info: { receipt: VALID_RAW_RECEIPT } } };
+      expect(() =>
+        toPeacRecordV2(V2_OFFER, withExtensions(extensions), RAW_OFFER, VALID_RAW_RECEIPT)
+      ).not.toThrow();
+    });
+
+    it('throws settlement_extensions_invalid when the embedded receipt conflicts with proofs.x402.receipt', () => {
+      const conflicting: RawSignedReceipt = {
+        format: 'jws',
+        signature: 'eyJhbGciOiJFZERTQSJ9.eyJpc3MiOiJodHRwczovL2FwaS5leGFtcGxlLmNvbSJ9.ZGlmZmVyZW50',
+      };
+      const extensions = { 'offer-receipt': { info: { receipt: conflicting } } };
+      expect(() =>
+        toPeacRecordV2(V2_OFFER, withExtensions(extensions), RAW_OFFER, VALID_RAW_RECEIPT)
+      ).toThrow(X402Error);
+    });
+  });
+
+  describe('serialization lock', () => {
+    it('proofs.x402 keys are exactly offer/receipt/settlementExtensionsDigest by default (camelCase)', () => {
+      const record = toPeacRecordV2(
+        V2_OFFER,
+        withExtensions(EXTENSIONS_SIMPLE),
+        RAW_OFFER,
+        VALID_RAW_RECEIPT
+      );
+      expect(Object.keys(record.proofs.x402).sort()).toEqual(
+        ['offer', 'receipt', 'settlementExtensionsDigest'].sort()
+      );
+    });
   });
 });

@@ -166,6 +166,21 @@ describe('fromX402SettlementObservation: rejection paths', () => {
   });
 });
 
+describe('fromX402SettlementObservation: settlement-extensions regression (finality guard untouched)', () => {
+  it('produces identical output whether or not an extensions-shaped field is present on the input', () => {
+    const base = input();
+    const withExtras = {
+      ...base,
+      extensions: { 'offer-receipt': { info: { offers: [] } } },
+    } as X402SettlementObservationInput;
+
+    const outBase = fromX402SettlementObservation(base);
+    const outWithExtras = fromX402SettlementObservation(withExtras);
+
+    expect(outWithExtras).toEqual(outBase);
+  });
+});
+
 describe('fromX402SettlementObservation: amount semantics (minor units)', () => {
   it('payment.amount is integer minor-unit value', () => {
     const out = fromX402SettlementObservation(input({ amount_minor: '99999' }));
