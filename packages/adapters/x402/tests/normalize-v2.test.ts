@@ -170,4 +170,40 @@ describe('normalizeV2Receipt', () => {
       '0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890'
     );
   });
+
+  // -------------------------------------------------------------------------
+  // extensions passthrough (settlement-extensions preservation)
+  // -------------------------------------------------------------------------
+
+  describe('extensions passthrough', () => {
+    it('preserves extensions verbatim on a successful settlement', () => {
+      const settlement: RawV2SettlementResponse = {
+        ...SUCCESS_SETTLEMENT,
+        extensions: { 'offer-receipt': { info: { offers: [] } } },
+      };
+      const result = normalizeV2Receipt(settlement, 'https://api.example.com/premium', 1711900000);
+      expect(result).not.toBeNull();
+      expect(result!.extensions).toEqual({ 'offer-receipt': { info: { offers: [] } } });
+    });
+
+    it('omits the extensions key entirely when absent (never synthesizes {})', () => {
+      const result = normalizeV2Receipt(
+        SUCCESS_SETTLEMENT,
+        'https://api.example.com/premium',
+        1711900000
+      );
+      expect(result).not.toBeNull();
+      expect(result!.extensions).toBeUndefined();
+      expect('extensions' in result!).toBe(false);
+    });
+
+    it('still returns null for a failed settlement even when extensions is present', () => {
+      const settlement: RawV2SettlementResponse = {
+        ...FAILED_SETTLEMENT,
+        extensions: { 'offer-receipt': { info: {} } },
+      };
+      const result = normalizeV2Receipt(settlement, 'https://api.example.com/premium', 1711900000);
+      expect(result).toBeNull();
+    });
+  });
 });

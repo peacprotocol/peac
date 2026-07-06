@@ -358,6 +358,25 @@ export interface X402PeacRecord {
     x402: {
       offer: RawSignedOffer;
       receipt: RawSignedReceipt;
+      /**
+       * Integrity/correlation digest over the settlement `extensions`
+       * bag (RFC 8785 JCS canonicalization + SHA-256,
+       * `sha256:<64 lowercase hex>`), present whenever the settlement
+       * response carried an `extensions` object. This is a stable
+       * equality handle, NOT anonymization: two records preserving the
+       * same upstream settlement extensions share this digest.
+       */
+      settlementExtensionsDigest?: string;
+      /**
+       * Raw settlement `extensions` bag, preserved as a canonical JSON
+       * clone (derived from the bounded RFC 8785 JCS bytes, not the
+       * caller's original object reference or byte serialization) ONLY
+       * when mapping was performed with `preserveRawSettlementExtensions:
+       * true` (default: omitted). May carry upstream protocol-extension
+       * data (e.g. payer- or resource-correlating material); never
+       * copied into signed `evidence`.
+       */
+      settlementExtensions?: Record<string, unknown>;
     };
   };
   /** Normalized evidence fields (extracted from signed payloads via Layer B) */

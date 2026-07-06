@@ -15,6 +15,7 @@
  * - payload_*: Generic payload errors
  * - amount_*: Amount validation errors
  * - network_*: Network validation errors
+ * - settlement_extensions_*: Settlement `extensions` bag errors
  */
 export type X402ErrorCode =
   | 'offer_invalid_format'
@@ -42,7 +43,9 @@ export type X402ErrorCode =
   | 'jws_too_large'
   | 'jws_malformed'
   | 'jws_padded_base64url'
-  | 'jws_payload_not_object';
+  | 'jws_payload_not_object'
+  | 'settlement_extensions_invalid'
+  | 'settlement_extensions_too_large';
 
 /**
  * HTTP status mapping for error codes
@@ -74,6 +77,8 @@ const ERROR_HTTP_STATUS: Record<X402ErrorCode, number> = {
   jws_malformed: 400,
   jws_padded_base64url: 400,
   jws_payload_not_object: 400,
+  settlement_extensions_invalid: 400,
+  settlement_extensions_too_large: 400,
 };
 
 /**

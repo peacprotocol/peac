@@ -19,7 +19,7 @@
       "asset": { "type": "string", "required": true },
       "payTo": { "type": "string", "required": true },
       "amount": { "type": "string", "required": true },
-      "validUntil": { "type": "number", "required": true }
+      "validUntil": { "type": "number", "required": false }
     }
   },
   "receipt_payload": {

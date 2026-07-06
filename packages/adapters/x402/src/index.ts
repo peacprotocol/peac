@@ -168,6 +168,15 @@ export type {
   X402SettlementOptions,
 } from './settlement.js';
 
+// Settlement extensions: signed-receipt extraction from the settlement
+// `extensions` bag (offer-receipt extension, upstream commit f2bbb5c).
+// Extraction only; does not verify signatures. See map.ts for how the
+// mapper preserves settlement extensions into proofs.x402.
+export {
+  extractSignedReceiptFromSettlement,
+  MAX_SETTLEMENT_EXTENSIONS_BYTES,
+} from './settlement-extensions.js';
+
 // x402 PR #1986 terms digest helpers (v0.12.14). Mapper-local convenience
 // over @peac/protocol/document-binding; digest is NEVER stamped into the
 // emitted record / envelope shape (verifier-report-only).
