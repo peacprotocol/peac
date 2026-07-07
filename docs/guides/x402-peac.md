@@ -44,11 +44,8 @@ const { jws } = await issue({
       currency: 'USD',
       asset: 'USDC',
       env: 'live',
-      network: 'eip155:8453', // Base mainnet
-      tx_hash: txHash,
-      recipient: recipientAddress,
-      x402_version: 'v2',
-      reference: `x402_${paymentId}`,
+      event: 'settlement',
+      reference: `x402_${txHash}`, // caller-assigned reference; e.g. bind the x402 transaction hash
     },
   },
   privateKey,
@@ -58,6 +55,12 @@ const { jws } = await issue({
 // Set the PEAC-Receipt header in your response
 response.setHeader('PEAC-Receipt', jws);
 ```
+
+> The `org.peacprotocol/commerce` extension is strict: it carries only `payment_rail`, `amount_minor`,
+> `currency`, `asset`, `reference`, `env`, and `event`. x402-specific transaction details such as `network`,
+> transaction hash, and recipient are not commerce fields. Preserve them through the x402 mapping path, for
+> example `@peac/adapter-x402`'s record-mapping helpers (`toPeacRecord`), which normalize x402-specific fields
+> into the record evidence instead of adding them to the commerce extension.
 
 ### 3. Verify a Receipt
 
@@ -329,7 +332,7 @@ app.get('/premium', async (req, res) => {
 
 // Endpoint called after x402 payment succeeds
 app.post('/issue-receipt', async (req, res) => {
-  const { resource, txHash, network } = req.body;
+  const { txHash } = req.body;
 
   const { jws } = await issue({
     iss: 'https://your-api.com',
@@ -343,9 +346,7 @@ app.post('/issue-receipt', async (req, res) => {
         currency: 'USD',
         asset: 'USDC',
         env: 'live',
-        network,
-        tx_hash: txHash,
-        x402_version: 'v2',
+        event: 'settlement',
         reference: `x402_${txHash}`,
       },
     },
