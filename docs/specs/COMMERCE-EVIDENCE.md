@@ -152,3 +152,39 @@ The closed set of commerce events that imply finality and therefore require an e
 - `chargeback`
 
 Non-finality observations (for example, discovery responses, capability snapshots, session-lifecycle access events) MUST NOT set `commerce.event` and are exempt from the guard.
+
+## Linked Counterparty Acknowledgment Records (Informative)
+
+Status: Informative. This section adds no normative requirement and no new field. It describes a composition pattern over the existing `org.peacprotocol/payment` type, the registered `org.peacprotocol/correlation` extension, and the DD-129 record reference rule.
+
+More than one party can issue its own signed observation about the same payment as two independently signed, single-issuer records that a verifier binds together offline:
+
+- **Record P** is the payer's `org.peacprotocol/payment` record (commerce fields plus a `org.peacprotocol/correlation` `workflow_id`).
+- **Record Q** is the provider's own `org.peacprotocol/payment` record that references P by the full identity triple `(acknowledged_iss, acknowledged_jti, acknowledged_record_ref)`, where `acknowledged_record_ref = sha256(P's compact JWS)` per DD-129. Q also carries `correlation.parent_jti = P.jti` and `depends_on = [P.jti]`.
+
+This is not a countersignature envelope and not two signatures over one payload; each record has exactly one issuer signature. PEAC does not countersign, arbitrate, or establish contractual agreement; an acknowledgment record reports only what the acknowledging party asserts.
+
+Q is a provider-side observation of P's payment record, not a second payment. It carries `acknowledging_role: "provider"` and `acknowledgment_scope: "payment-record-observed"`, and it omits any settlement or finality event. Because `org.peacprotocol/payment` is bound to the `org.peacprotocol/commerce` extension group, Q mirrors P's minimum commerce identity fields (`payment_rail` / `amount_minor` / `currency` / `reference` / `env`), describing the same acknowledged payment, and the linked verifier requires those mirrored fields to match P.
+
+The link is carried in an example-local, unregistered extension key (reverse-DNS form; preserved verbatim by verifiers, not part of the registry):
+
+```json
+"com.example/counterparty_acknowledgment": {
+  "acknowledged_iss": "https://payer.example",
+  "acknowledged_jti": "01H...",
+  "acknowledged_record_ref": "sha256:<hex64 over P's compact JWS bytes>",
+  "acknowledging_role": "provider",
+  "acknowledgment_scope": "payment-record-observed"
+}
+```
+
+A verifier confirms the link offline, using only the two issuer public keys:
+
+1. P verifies offline.
+2. Q verifies offline.
+3. `sha256(P's compact JWS)` is recomputed and byte-compared to `acknowledged_record_ref`.
+4. `acknowledged_iss` and `acknowledged_jti` match P's real `iss` and `jti` claims (a well-formed record must not bind a real digest while misrepresenting who or what it acknowledges).
+5. `correlation.workflow_id` matches, `Q.parent_jti` equals `P.jti`, and `Q.depends_on` includes `P.jti`.
+6. Q's mirrored `payment_rail` / `amount_minor` / `currency` / `reference` / `env` match P.
+
+The check fails closed on any mismatch, and an absent acknowledgment extension is reported as "not linked" rather than a false "acknowledged". A runnable example is at `examples/counterparty-acknowledgment-records`.
