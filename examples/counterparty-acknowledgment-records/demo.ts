@@ -47,13 +47,28 @@ export interface CommerceFields {
   readonly payment_rail: string;
   readonly amount_minor: string;
   readonly currency: string;
-  readonly reference?: string;
-  readonly env?: 'live' | 'test';
+  readonly reference: string;
+  readonly env: 'live' | 'test';
 }
 
 function log(msg: string): void {
   // eslint-disable-next-line no-console
   console.log(msg);
+}
+
+/** Fail before signing if a required example commerce field is missing. */
+function assertCommerceFields(commerce: CommerceFields): void {
+  for (const key of ['payment_rail', 'amount_minor', 'currency', 'reference', 'env'] as const) {
+    if (!commerce[key]) {
+      throw new Error(`commerce.${key} is required for this example`);
+    }
+  }
+}
+
+function assertWorkflowId(workflowId: string): void {
+  if (!workflowId) {
+    throw new Error('workflowId is required for this example');
+  }
 }
 
 // --- Record P (payer's payment record) --------------------------------------
@@ -78,6 +93,8 @@ export async function issuePaymentRecordP(params: {
   commerce: CommerceFields;
   workflowId: string;
 }): Promise<PaymentRecord> {
+  assertCommerceFields(params.commerce);
+  assertWorkflowId(params.workflowId);
   const { jws } = await issue({
     iss: PAYER_ISS,
     kind: 'evidence',
@@ -130,6 +147,7 @@ export async function issueAcknowledgmentRecordQ(params: {
   commerce?: CommerceFields;
 }): Promise<{ jws: string }> {
   const commerce = params.commerce ?? params.p.commerce;
+  assertCommerceFields(commerce);
   return issue({
     iss: PROVIDER_ISS,
     kind: 'evidence',
@@ -298,7 +316,7 @@ export async function runDemo(opts: { tamper?: boolean } = {}): Promise<DemoResu
     workflowId,
   });
   log(`   P: iss=${p.iss} jti=${p.jti}`);
-  log(`   P receipt_ref (sha256 of P's JWS) = ${p.receiptRef}`);
+  log(`   P receipt_ref (over P's compact JWS bytes) = ${p.receiptRef}`);
 
   log('2. Provider issues its own signed record Q that references P by (iss, jti, receipt_ref).');
   const q = await issueAcknowledgmentRecordQ({ privateKey: provider.privateKey, p });
@@ -329,15 +347,9 @@ export async function runDemo(opts: { tamper?: boolean } = {}): Promise<DemoResu
   return { ok, pReceiptRef: p.receiptRef, link, tamper };
 }
 
-const isMain = (() => {
-  try {
-    return import.meta.url === `file://${process.argv[1]}`;
-  } catch {
-    return false;
-  }
-})();
-
-if (isMain) {
+// Run only when executed directly (pnpm demo), not when imported by a test.
+const invokedDirectly = process.argv[1] !== undefined && /demo\.ts$/.test(process.argv[1]);
+if (invokedDirectly) {
   runDemo({ tamper: process.argv.includes('--tamper') })
     .then((r) => process.exit(r.ok ? 0 : 1))
     .catch((err) => {

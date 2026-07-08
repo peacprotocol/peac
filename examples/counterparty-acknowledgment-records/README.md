@@ -9,7 +9,7 @@
 ## What this shows
 
 - **Record P** - the payer issues a signed `org.peacprotocol/payment` record (commerce fields + a `org.peacprotocol/correlation` workflow id).
-- **Record Q** - the provider issues its **own** signed `org.peacprotocol/payment` record that references P by the full identity triple `(acknowledged_iss, acknowledged_jti, acknowledged_record_ref)`, where `acknowledged_record_ref = sha256(P's compact JWS)` (DD-129). Q carries `correlation.parent_jti = P.jti` and `depends_on = [P.jti]`, plus an example-local `com.example/counterparty_acknowledgment` extension.
+- **Record Q** - the provider issues its **own** signed `org.peacprotocol/payment` record that references P by the full identity triple `(acknowledged_iss, acknowledged_jti, acknowledged_record_ref)`, where `acknowledged_record_ref` is the PEAC `receipt_ref` over P's compact JWS bytes. Q carries `correlation.parent_jti = P.jti` and `depends_on = [P.jti]`, plus an example-local `com.example/counterparty_acknowledgment` extension.
 
 This is **not** a countersignature envelope and **not** two signatures over one payload; each record has exactly one issuer signature. PEAC does not countersign, arbitrate, or establish contractual agreement; an acknowledgment record reports only what the acknowledging party asserts.
 
