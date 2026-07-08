@@ -1,0 +1,22 @@
+{
+  "name": "@peac/example-counterparty-acknowledgment-records",
+  "version": "0.0.0",
+  "private": true,
+  "description": "PEAC example: two independently signed single-issuer records where a provider record acknowledges a payer payment record by (iss, jti, receipt_ref), verified offline",
+  "type": "module",
+  "scripts": {
+    "demo": "tsx demo.ts",
+    "demo:tamper": "tsx demo.ts --tamper",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@peac/crypto": "workspace:*",
+    "@peac/protocol": "workspace:*",
+    "@peac/schema": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "^4.21.0",
+    "typescript": "^5.3.3"
+  }
+}
