@@ -409,23 +409,23 @@ Implementations MAY additionally check:
 
 ## 7. Merkle Commitment
 
-> **Implementation Status:** Merkle commitment is specified for large workflows but implementation is deferred. The schema supports `receipt_merkle_root` field; helper functions for Merkle tree construction and verification will be added to `@peac/audit` in a future release.
+> **Implementation Status:** Implemented in `@peac/audit` as `buildReceiptMerkleCommitment`, `generateReceiptMerkleInclusionProof`, and `verifyReceiptMerkleInclusion` (tree algorithm id `peac.merkle.ct-sorted-set-sha256-v1`). The schema `receipt_merkle_root` / `receipt_count` fields carry the commitment's `root` / `tree_size`. This is a CT-style Merkle Tree Hash following the RFC 9162 Section 2.1.1 formulas (RFC 9162 obsoletes RFC 6962), adapted as a **sorted-set commitment over PEAC `receipt_ref` digests**. It is NOT a Certificate Transparency append-only log; PEAC does not operate a log or anchor these roots. A commitment proves inclusion in the committed set; by itself it proves neither completeness nor the validity of any record. Operators additionally check that the workflow summary's `receipt_merkle_root` / `receipt_count` match the commitment's `root` / `tree_size`, and each PEAC record is still verified independently.
 
-For large workflows (100+ receipts), use Merkle root instead of listing all receipt IDs.
+For large workflows, a summary can carry `receipt_merkle_root` and `receipt_count` instead of listing every `receipt_ref`.
 
-### 7.1 Construction (RFC 6962 Style)
+### 7.1 Construction (CT-style, RFC 9162 Section 2.1.1)
 
 ```
 MTH({d(0)}) = SHA-256(0x00 || d(0))  // Leaf
-MTH(D[n]) = SHA-256(0x01 || MTH(D[0:k]) || MTH(D[k:n]))  // Internal node
+MTH(D[n]) = SHA-256(0x01 || MTH(D[0:k]) || MTH(D[k:n]))  // Internal node, k = largest power of two < n
 ```
 
 Where:
 
-- `d(i)` is the receipt digest (SHA-256 of JWS bytes)
-- Leaves are prefixed with `0x00`
-- Internal nodes are prefixed with `0x01`
-- Tree is computed over lexicographically sorted receipt digests
+- `d(i)` is the receipt digest (the raw 32 bytes decoded from the `receipt_ref` = `sha256:{hex64}`)
+- Leaves are prefixed with `0x00`, internal nodes with `0x01` (domain separation for second-preimage resistance)
+- The tree is computed over **bytewise lexicographically sorted** receipt digests (shuffled input yields the same root)
+- Duplicate refs are rejected; **empty input is rejected as a PEAC policy** (the RFC 9162 empty-list hash `MTH({}) = HASH()` is intentionally not emitted, since an empty commitment is never meaningful for a workflow)
 
 ### 7.2 Digest Computation
 
@@ -442,20 +442,24 @@ Format in workflow summary: `sha256:{hex64}`
 To prove a receipt is part of a workflow:
 
 ```typescript
-interface MerkleInclusionProof {
-  leaf_index: number;
+interface ReceiptMerkleInclusionProof {
+  tree_alg: 'peac.merkle.ct-sorted-set-sha256-v1';
+  hash_alg: 'sha256';
+  leaf_index: number; // index within the sorted leaf order
   tree_size: number;
-  hashes: string[]; // sha256:{hex64}
+  hashes: string[]; // sibling path, leaf -> root, each sha256:{hex64}
 }
 ```
 
 ### 7.4 Verification
 
+Verification takes the full commitment (so the proof is bound to the commitment's `tree_size` as well as its `root`) and uses the RFC 9162 Section 2.1.3.2 inclusion-proof fold (`fn = leaf_index`, `sn = tree_size - 1`), not a simplified perfect-tree bit-walk. It returns `false` for a well-formed but cryptographically wrong proof (including one whose `tree_size` disagrees with the commitment) and throws a package-local `MerkleInputError` only on malformed input.
+
 ```typescript
-function verifyMerkleInclusion(
-  root: string, // Expected Merkle root
-  receiptDigest: string, // SHA-256 of receipt JWS
-  proof: MerkleInclusionProof
+function verifyReceiptMerkleInclusion(
+  commitment: ReceiptMerkleCommitment, // { tree_alg, hash_alg, root, tree_size }
+  targetRef: string, // The receipt_ref being proven (sha256:{hex64})
+  proof: ReceiptMerkleInclusionProof
 ): boolean;
 ```
 
