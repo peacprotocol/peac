@@ -47,7 +47,7 @@ jobs:
     environment: npm-production
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           persist-credentials: false
 
@@ -184,7 +184,7 @@ jobs:
       # ----------------------------------------------------------------------
       - name: Checkout for Stage 2 finalize
         if: ${{ !inputs.dry_run && !inputs.skip_release_finalize }}
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           persist-credentials: false
 
