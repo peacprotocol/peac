@@ -112,6 +112,7 @@ You need signed records for audit, dispute review, or regulatory alignment — r
 2. See [Evidence Bundles](specs/EVIDENCE-CARRIER-CONTRACT.md) for offline verification bundles
 3. Review [regulatory and assurance mappings](governance/) for NIST AI RMF, EU AI Act, and OWASP ASI alignment
 4. Outcome-led recipe: [`docs/SOLUTIONS/regulatory-audit-trail.md`](SOLUTIONS/regulatory-audit-trail.md)
+5. Review observed agent spend for finance and audit workflows: [`docs/SOLUTIONS/agent-spend-attribution.md`](SOLUTIONS/agent-spend-attribution.md)
 
 Key packages: `@peac/protocol`, `@peac/audit`.
 
