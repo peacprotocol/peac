@@ -117,11 +117,11 @@ The current wire format is JWS Compact Serialization with Ed25519.
 There is no algorithm negotiation surface and no plan to introduce
 COSE/CBOR as a default in the v0.13.x line.
 
-## H. Trust-chain transparency
+## H. SCITT transparency composition
 
-| Standard / draft                                          | Status            | PEAC stance                                                                                                                                      |
-| --------------------------------------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------- |
-| IETF SCITT Architecture (`draft-ietf-scitt-architecture`) | Draft / RFC-to-be | Informative composition target. No wire change is planned until the document publishes and a reference-implementation maturity bar is satisfied. | See [`docs/specs/SCITT-COMPOSITION.md`](specs/SCITT-COMPOSITION.md) for the composition note. |
+| Standard                                                                                                                                                 | Status          | PEAC stance                                                                      | Composition note                                              |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| [RFC 9943](https://www.rfc-editor.org/rfc/rfc9943.html) (SCITT Architecture) and [RFC 9942](https://www.rfc-editor.org/rfc/rfc9942.html) (COSE Receipts) | Standards Track | Informative external composition only; no PEAC wire change. Published June 2026. | See [PEAC and SCITT Composition](specs/SCITT-COMPOSITION.md). |
 
 ## J. Provisioning lifecycle composition (advisory references)
 
