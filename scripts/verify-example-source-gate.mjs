@@ -65,6 +65,7 @@ export const SCAN_TARGETS = [
   { path: 'examples/x402-paid-resource-records', kind: 'dir', required: true },
   { path: 'examples/mcp-paid-tool-records', kind: 'dir', required: true },
   { path: 'examples/counterparty-acknowledgment-records', kind: 'dir', required: true },
+  { path: 'examples/action-approval-records', kind: 'dir', required: true },
 ];
 
 /** Directory names that are never scanned (vendored or generated). */
