@@ -168,3 +168,22 @@ export {
   serializeCommerceBundle,
   groupByLifecycle,
 } from './commerce-bundle.js';
+
+// Merkle commitment helpers for workflow receipt sets.
+export type {
+  Sha256DigestRef,
+  ReceiptMerkleRoot,
+  MerkleNodeHash,
+  ReceiptMerkleCommitment,
+  ReceiptMerkleInclusionProof,
+  MerkleInputErrorCode,
+} from './merkle.js';
+
+export {
+  MERKLE_TREE_ALG,
+  MERKLE_HASH_ALG,
+  MerkleInputError,
+  buildReceiptMerkleCommitment,
+  generateReceiptMerkleInclusionProof,
+  verifyReceiptMerkleInclusion,
+} from './merkle.js';
