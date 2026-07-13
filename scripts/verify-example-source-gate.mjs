@@ -2,9 +2,9 @@
 /**
  * verify-example-source-gate
  *
- * Repository check for the provisioning-lifecycle and commerce example
- * public surface. Detects committed live-shaped secrets, base64url-encoded
- * payment credentials, and retired public vocabulary in the example,
+ * Repository check for configured example and documentation surfaces.
+ * Detects committed live-shaped secrets, base64url-encoded payment
+ * credentials, and retired public vocabulary in the configured example,
  * recipe, parity-corpus, and smoke/doc-truth test files.
  *
  * This is NOT a substitute for the recursive credential-material walker
@@ -14,10 +14,7 @@
  * corpora, and smoke tests must not carry live token shapes, decoded
  * payment credentials, or vendor-named identifiers.
  *
- * Scanned surface:
- *   - provisioning-lifecycle PR 3 surface (examples/recipe/parity/tests)
- *   - the commerce example directories (x402 / paymentauth / ACP / Stripe /
- *     commerce-evidence-bundle / commerce-mandate-records)
+ * The scanned surface is the `SCAN_TARGETS` list below.
  *
  * Import-safe: `scanContent(text, options?)` is a pure function (no
  * filesystem, console, or process access) so it can be unit-tested
@@ -66,6 +63,7 @@ export const SCAN_TARGETS = [
   { path: 'examples/mcp-paid-tool-records', kind: 'dir', required: true },
   { path: 'examples/counterparty-acknowledgment-records', kind: 'dir', required: true },
   { path: 'examples/action-approval-records', kind: 'dir', required: true },
+  { path: 'examples/agent-run-lineage-records', kind: 'dir', required: true },
 ];
 
 /** Directory names that are never scanned (vendored or generated). */
@@ -380,7 +378,7 @@ export function main() {
 
   if (findings.length === 0) {
     console.log(
-      'verify-example-source-gate: clean (0 findings across provisioning + commerce surface)'
+      'verify-example-source-gate: clean (0 findings across all configured scan targets)'
     );
     process.exit(0);
   }
