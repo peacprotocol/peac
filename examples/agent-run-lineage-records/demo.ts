@@ -11,15 +11,17 @@
  * outputs, tool inputs/outputs, headers, and credentials never appear in the
  * manifest, the records, or the logs.
  *
- * Issuance runs the same strict validators as verification: the manifest is
- * validated and its sanitized snapshot is used, and every agent-action,
- * correlation, and example-local extension is validated before `issue()`.
+ * Issuance validates the manifest, agent-action payload, correlation metadata,
+ * and example-local extension shapes before signing. Offline verification
+ * additionally checks cross-record, coverage, chronology, descriptor-binding,
+ * and parent-fork invariants.
  */
 
 import { computeJsonDocumentDigestJcs, issue, verifyLocal } from '@peac/protocol';
 import {
   type ReceiptRef,
   CorrelationExtensionSchema,
+  Rfc3339DateTimeSchema,
   computeReceiptRef,
   validateAgentActionForType,
 } from '@peac/schema';
@@ -197,10 +199,14 @@ export interface IssuedRun {
   readonly coveredRecordRefs: readonly ReceiptRef[];
 }
 
-/** Reject an agent-action payload that would not pass verification. */
+/** Reject an agent-action payload that does not satisfy the example's issuance-time schema profile. */
 function assertAgentActionValid(type: string, action: Record<string, unknown>): void {
   const result = validateAgentActionForType(type, action);
   if (!result.ok) throw new Error(`agent-action payload invalid for issuance: ${type}`);
+  const observedAt = (result.value as Record<string, unknown>).observed_at;
+  if (typeof observedAt !== 'string' || !Rfc3339DateTimeSchema.safeParse(observedAt).success) {
+    throw new Error('agent-action observed_at is outside the strict RFC 3339 profile');
+  }
 }
 
 /** Reject a correlation payload that would not pass the canonical strict schema. */

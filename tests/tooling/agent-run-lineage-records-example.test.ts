@@ -2347,4 +2347,34 @@ describe('agent-run-lineage-records: introspection totality and fork corresponde
     });
     expect(r).toEqual(bad('record-invalid'));
   });
+  it('issueRun rejects minute-precision finalization timestamps before signing', async () => {
+    const { publicKey, privateKey } = await generateKeypair();
+    const manifest = await buildAgentRunManifest();
+    await expect(
+      issueRun({
+        privateKey,
+        publicKey,
+        manifest,
+        finalizationObservedAt: '2026-01-15T10:03Z',
+      })
+    ).rejects.toThrow('agent-action observed_at is outside the strict RFC 3339 profile');
+  });
+
+  it('issueRun accepts strict fractional and offset finalization timestamps', async () => {
+    const { publicKey, privateKey } = await generateKeypair();
+    const manifest = await buildAgentRunManifest();
+    const run = await issueRun({
+      privateKey,
+      publicKey,
+      manifest,
+      finalizationObservedAt: '2026-01-15T15:33:00.500+05:30',
+    });
+    const r = await verifyAgentRunLineageEvidence({
+      expectedManifest: manifest,
+      publicKey,
+      expectedIssuer: ISSUER,
+      records: [...run.eventJws, run.finalizationJws],
+    });
+    expect(r.kind).toBe('run-lineage-evidence-consistent');
+  });
 });
