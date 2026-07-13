@@ -9,7 +9,7 @@ truth.
 
 ## Prerequisites
 
-- Node.js 22 or newer.
+- Node.js 22.13.0 or newer.
 - A hosting platform that can front HTTPS to a Node.js process
   (Cloudflare Workers, Fly.io, self-managed container, etc.).
 - An Ed25519 JWK for issuance (optional if read-only tools are the
@@ -19,7 +19,7 @@ truth.
 
 1. Provision your host to run:
    ```text
-   npx -y @peac/mcp-server@0.16.1 --issuer-key env:PEAC_ISSUER_KEY \
+   npx -y @peac/mcp-server@0.16.2 --issuer-key env:PEAC_ISSUER_KEY \
      --issuer-id https://your-service.example.com
    ```
    The pinned version tracks the canonical `smithery.yaml`; update
