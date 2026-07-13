@@ -182,7 +182,6 @@ Path: [`surfaces/plugin-pack/`](../surfaces/plugin-pack/).
 | ------------------------- | ------------------------------------------------------------------------------------------- | --------------- |
 | Historical bridge app     | `apps/bridge` (removed from HEAD; recoverable from git history and tags)                    | `internal-only` |
 | Sandbox issuer            | [`apps/sandbox-issuer`](../apps/sandbox-issuer)                                             | `internal-only` |
-| Experimental EAS adapter  | [`packages/adapters/eas`](../packages/adapters/eas)                                         | `experimental`  |
 | Archived transports       | `transport/http`, `transport/ws` (removed from HEAD; recoverable from git history and tags) | `archived`      |
 | Nextjs middleware preview | [`surfaces/nextjs/middleware`](../surfaces/nextjs/middleware)                               | `experimental`  |
 
