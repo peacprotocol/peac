@@ -71,9 +71,10 @@ The finalization record's `agent_ref` equals the root event's `agent_ref` in the
 supplied manifest; it is an issuer-reported record, not an independently trusted
 runtime identity.
 
-A verifier given the manifest, the run records, one issuer key, and one issuer
-checks that the supplied records exactly match the coverage set asserted by the
-signed finalization record. This establishes internal consistency between the
+Given the manifest, run records, issuer public key, and expected issuer
+identifier, the verifier checks that the supplied records exactly match the
+coverage set asserted by the signed finalization record. This establishes
+internal consistency between the
 issuer-supplied manifest, the run records, and the signed summary. It does not
 prove that the issuer recorded or disclosed every real-world runtime event, and
 the Merkle commitment proves inclusion in the committed set, not chronology or

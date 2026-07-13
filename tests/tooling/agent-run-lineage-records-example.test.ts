@@ -2310,4 +2310,41 @@ describe('agent-run-lineage-records: introspection totality and fork corresponde
     });
     expect(r).toEqual(bad('input-limit-exceeded'));
   });
+  it('finalization with minute-precision observed_at -> record-invalid (strict RFC 3339 profile)', async () => {
+    // The canonical agent-action validator accepts minute precision, so this
+    // record signs; the example's strict profile rejects it at normalization.
+    // Under an epoch-zero parser fallback this would instead have surfaced as a
+    // temporal-order result, so record-invalid confirms the fail-closed path.
+    const r = await runWithTimes('2026-01-15T10:00:00Z', '2026-01-15T10:03Z');
+    expect(r).toEqual(bad('record-invalid'));
+  });
+
+  it('event record with minute-precision observed_at -> record-invalid', async () => {
+    const { publicKey, privateKey } = await generateKeypair();
+    const manifest = await oneEventManifest();
+    const md = await computeManifestDigest(manifest);
+    const desc = manifest.events[0];
+    const dd = await computeEventDescriptorDigest(desc);
+    const eventJws = await issueRawRecord({
+      privateKey,
+      type: INVOKED_TYPE,
+      action: {
+        event_kind: 'agent-action-invoked-observed',
+        agent_ref: desc.agent_ref,
+        action_ref: desc.action_ref,
+        observed_at: '2026-01-15T10:00Z',
+        upstream_artifact_ref: desc.event_ref,
+        upstream_artifact_digest: dd,
+      },
+      correlation: { workflow_id: WORKFLOW_ID },
+      lineage: { run_ref: RUN_REF, run_manifest_digest: md, sequence_index: 0 },
+    });
+    const r = await verifyAgentRunLineageEvidence({
+      expectedManifest: manifest,
+      publicKey,
+      expectedIssuer: ISSUER,
+      records: [eventJws],
+    });
+    expect(r).toEqual(bad('record-invalid'));
+  });
 });

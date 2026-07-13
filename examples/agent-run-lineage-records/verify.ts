@@ -29,6 +29,7 @@ import {
   CorrelationExtensionSchema,
   OpaqueRefSchema,
   ReceiptRefSchema,
+  Rfc3339DateTimeSchema,
   Sha256DigestSchema,
   computeReceiptRef,
   validateAgentActionForType,
@@ -162,13 +163,18 @@ function isSortedUnique(refs: readonly string[]): boolean {
 
 const RFC3339_PARTS = /^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})(?:\.(\d+))?(Z|[+-]\d{2}:\d{2})$/i;
 
-/** Whole UTC epoch second (offset-normalized) and the fractional digit string. */
-function splitRfc3339(value: string): { epochSeconds: bigint; frac: string } {
+/**
+ * Whole UTC epoch second (offset-normalized) and the fractional digit string.
+ * Fail-closed: returns `undefined` on a grammar mismatch or an unparseable
+ * instant rather than substituting the Unix epoch.
+ */
+function splitRfc3339(value: string): { epochSeconds: bigint; frac: string } | undefined {
   const m = RFC3339_PARTS.exec(value);
-  if (!m) return { epochSeconds: 0n, frac: '' };
+  if (!m) return undefined;
   const [, base, frac = '', offset] = m;
   const ms = Date.parse(`${base}${offset.toUpperCase() === 'Z' ? 'Z' : offset}`);
-  return { epochSeconds: BigInt(Number.isNaN(ms) ? 0 : Math.floor(ms / 1000)), frac };
+  if (Number.isNaN(ms)) return undefined;
+  return { epochSeconds: BigInt(Math.floor(ms / 1000)), frac };
 }
 
 /**
@@ -176,11 +182,12 @@ function splitRfc3339(value: string): { epochSeconds: bigint; frac: string } {
  * precision that millisecond parsing would collapse. Whole seconds compare as
  * the offset-normalized UTC epoch second; on a tie the fractional digit strings
  * are right-padded and compared decimally. A numeric offset (including `-00:00`)
- * is normalized to UTC.
+ * is normalized to UTC. Returns `undefined` if either input is unparseable.
  */
-function compareRfc3339Instants(a: string, b: string): -1 | 0 | 1 {
+function compareRfc3339Instants(a: string, b: string): -1 | 0 | 1 | undefined {
   const pa = splitRfc3339(a);
   const pb = splitRfc3339(b);
+  if (!pa || !pb) return undefined;
   if (pa.epochSeconds < pb.epochSeconds) return -1;
   if (pa.epochSeconds > pb.epochSeconds) return 1;
   const len = Math.max(pa.frac.length, pb.frac.length);
@@ -445,6 +452,12 @@ function normalize(
     typeof actionRef !== 'string' ||
     typeof observedAt !== 'string'
   ) {
+    return 'record-invalid';
+  }
+  // Enforce the example's strict seconds-precision RFC 3339 profile on every
+  // record's observed_at (the canonical agent-action validator permits
+  // minute precision, which this example does not).
+  if (!Rfc3339DateTimeSchema.safeParse(observedAt).success) {
     return 'record-invalid';
   }
 
@@ -768,9 +781,9 @@ export async function verifyAgentRunLineageEvidence(
   ) {
     return invalid('lineage-link-mismatch');
   }
-  if (compareRfc3339Instants(finalization.observedAt, lastEvent.observedAt) < 0) {
-    return invalid('temporal-order-invalid');
-  }
+  const order = compareRfc3339Instants(finalization.observedAt, lastEvent.observedAt);
+  if (order === undefined) return invalid('record-invalid');
+  if (order < 0) return invalid('temporal-order-invalid');
 
   // 8. Summary: coverage set == event records; mandatory Merkle commitment.
   const summary = finalization.summary;
