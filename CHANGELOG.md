@@ -5,7 +5,33 @@ All notable changes to PEAC Protocol will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.16.1] - 2026-06-28
+## [0.16.2] - 2026-07-14
+
+Portable Evidence Pack.
+
+Expands PEAC's portable evidence capabilities for paid-resource, agent-run,
+action-approval, and counterparty interactions, without changing the wire format,
+public schema, or structural sentinels.
+
+Public API: adds `extractSignedReceiptFromSettlement` (`@peac/adapter-x402`, additive).
+Audit: adds Merkle commitment helpers for workflow receipts (`@peac/audit`; CT-style
+(RFC 9162) sorted-set commitment; offline inclusion proofs).
+Telemetry: aligns the custom telemetry record reference attribute by dual-emitting
+`peac.record.ref` while preserving `peac.receipt.ref` compatibility. `peac.receipt.ref`
+remains dual-emitted for one minor release window for compatibility. New consumers
+should read `peac.record.ref`.
+Examples: adds paid-resource, paid-MCP-tool, linked counterparty acknowledgment,
+agent-run lineage, and action-approval offline examples (build_targets 107 to 112).
+Docs: adds an external-anchoring guide, an agent-spend-attribution solution, and a
+runtime-lineage export guide.
+Wire format: unchanged (0.2).
+Public schema: unchanged.
+Registered extension groups: unchanged (19).
+Registered receipt types: unchanged (61).
+Conformance sections: unchanged (32).
+Conformance requirement IDs: unchanged (290).
+
+## [0.16.1]
 
 CLI Metadata Alignment.
 

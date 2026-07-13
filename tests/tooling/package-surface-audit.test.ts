@@ -110,11 +110,11 @@ describe('publish-manifest surface audit', () => {
     expect(manifest.totalPackages).toBe(V0_13_1_TARGET_COUNT);
   });
 
-  it('manifest version is either current release (0.16.0) or target (0.16.1)', () => {
+  it('manifest version is either current release (0.16.1) or target (0.16.2)', () => {
     // Version stamping belongs to release prep. Accept either the current
     // released value or the next-release target to keep the gate robust
     // across the release lifecycle.
-    expect(['0.16.0', '0.16.1']).toContain(manifest.version);
+    expect(['0.16.1', '0.16.2']).toContain(manifest.version);
   });
 
   it('totalPackages field matches packages[] length', () => {
@@ -260,5 +260,36 @@ describe('publish-closure invariant', () => {
       if (declaresDisc) offenders.push(npmName);
     }
     expect(offenders, offenders.join(', ')).toEqual([]);
+  });
+});
+
+describe('mcp-server node floor parity', () => {
+  // The published Node minimum must not diverge across distribution surfaces.
+  const NODE_MINIMUM = '>=22.13.0';
+
+  const mcpPackageJson = readJson(join(ROOT, 'packages', 'mcp-server', 'package.json'));
+  const mcpManifest = readJson(join(ROOT, 'packages', 'mcp-server', 'manifest.json'));
+  const facts = readJson(join(ROOT, 'docs', 'releases', 'facts.json'));
+
+  it('mcp-server package.json engines.node is the canonical minimum', () => {
+    expect(mcpPackageJson.engines?.node).toBe(NODE_MINIMUM);
+  });
+
+  it('mcp-server manifest.json runtimes.node matches the canonical minimum', () => {
+    expect(mcpManifest.compatibility?.runtimes?.node).toBe(NODE_MINIMUM);
+  });
+
+  it('facts.json runtime.node_minimum matches the canonical minimum', () => {
+    expect(facts.runtime?.node_minimum).toBe(NODE_MINIMUM);
+  });
+
+  it('all three distribution surfaces agree on the Node minimum', () => {
+    const values = [
+      mcpPackageJson.engines?.node,
+      mcpManifest.compatibility?.runtimes?.node,
+      facts.runtime?.node_minimum,
+    ];
+    expect(new Set(values).size).toBe(1);
+    expect(values[0]).toBe(NODE_MINIMUM);
   });
 });
