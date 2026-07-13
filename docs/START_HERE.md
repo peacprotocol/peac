@@ -51,6 +51,7 @@ You run a managed agent runtime, policy system, or adjacent control surface and 
 1. Review the [runtime-governance adapter](../packages/adapters/runtime-governance/) and its conformance fixtures.
 2. Outcome-led recipe: [`docs/SOLUTIONS/runtime-evidence-export.md`](SOLUTIONS/runtime-evidence-export.md)
 3. See [examples/managed-agents-export](../examples/managed-agents-export/) for the Claude Managed Agents mapping.
+4. Export run lineage: [Agent runtime lineage export guide](guides/agent-runtime-lineage-export.md) and [examples/agent-run-lineage-records](../examples/agent-run-lineage-records/).
 
 Key packages: `@peac/adapter-runtime-governance`, `@peac/adapter-managed-agents`, `@peac/protocol`.
 

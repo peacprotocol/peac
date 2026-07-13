@@ -360,6 +360,28 @@ importers:
         specifier: ^5.3.3
         version: 5.9.3
 
+  examples/agent-run-lineage-records:
+    dependencies:
+      '@peac/audit':
+        specifier: workspace:*
+        version: link:../../packages/audit
+      '@peac/crypto':
+        specifier: workspace:*
+        version: link:../../packages/crypto
+      '@peac/protocol':
+        specifier: workspace:*
+        version: link:../../packages/protocol
+      '@peac/schema':
+        specifier: workspace:*
+        version: link:../../packages/schema
+    devDependencies:
+      tsx:
+        specifier: ^4.21.0
+        version: 4.21.0
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+
   examples/cf-policy-x402-terms:
     dependencies:
       '@peac/adapter-x402':
