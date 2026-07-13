@@ -4,19 +4,22 @@
  * The example is a public, copy-paste artifact, so its end-to-end behavior is
  * gated here (vitest aliases @peac/* to source, so no build/install is needed).
  * Covers the documented evidence-consistency result and every invalid-evidence
- * classification: manifest validation (including nested descriptor getter/Proxy
- * traps and a valid-shaped oversize), strict record/extension/correlation
- * validation, full event/descriptor equality, finalization classification and
- * sequence, summary coverage and Merkle mutation, strict parent-fork evidence,
- * the changed-event binding, and privacy sentinels.
+ * classification: top-level input snapshotting (including public-key validation
+ * and copy isolation), manifest validation (including nested descriptor
+ * getter/Proxy traps and a valid-shaped oversize), strict record/extension/
+ * correlation validation, full event/descriptor equality, exact RFC 3339
+ * temporal ordering, finalization classification and sequence, summary coverage
+ * and Merkle mutation, strict parent-fork evidence, the changed-event binding,
+ * resource limits, and privacy sentinels.
  *
  * No network, no subprocess.
  */
 
 import { describe, it, expect } from 'vitest';
-import { computeJsonDocumentDigestJcs, verifyLocal } from '@peac/protocol';
-import { computeReceiptRef } from '@peac/schema';
+import { computeJsonDocumentDigestJcs, issue, verifyLocal } from '@peac/protocol';
+import { type AgentActionTypeUri, computeReceiptRef } from '@peac/schema';
 import { generateKeypair } from '@peac/crypto';
+import { buildReceiptMerkleCommitment } from '../../packages/audit/src/merkle';
 import {
   type AgentRunManifestV1,
   AGENT_RUN_MANIFEST_ARTIFACT_TYPE,
@@ -43,17 +46,49 @@ import {
 } from '../../examples/agent-run-lineage-records/verify';
 import {
   ISSUER,
+  KID,
   WORKFLOW_ID,
   RUN_REF,
   AGENT_REF,
   buildAgentRunManifest,
   buildForkManifest,
-  buildReceiptMerkleCommitment,
   issueRun,
-  issueRawRecord,
   runAgentRunLineageDemo,
   tamperPayload,
 } from '../../examples/agent-run-lineage-records/demo';
+
+/**
+ * Test-local raw issuer: emits an agent-action record with arbitrary extension
+ * payloads so tests can construct fixtures the strict verifier must reject.
+ */
+async function issueRawRecord(opts: {
+  privateKey: Uint8Array;
+  type: AgentActionTypeUri;
+  action: Record<string, unknown>;
+  correlation?: Record<string, unknown>;
+  lineage?: Record<string, unknown>;
+  summary?: Record<string, unknown>;
+  fork?: Record<string, unknown>;
+  issuer?: string;
+  jti?: string;
+}): Promise<string> {
+  const extensions: Record<string, unknown> = { [AGENT_ACTION_EXTENSION_KEY]: opts.action };
+  if (opts.correlation) extensions[CORRELATION_EXTENSION_KEY] = opts.correlation;
+  if (opts.lineage) extensions[RUN_LINEAGE_EXTENSION_KEY] = opts.lineage;
+  if (opts.summary) extensions[RUN_SUMMARY_EXTENSION_KEY] = opts.summary;
+  if (opts.fork) extensions[RUN_FORK_EXTENSION_KEY] = opts.fork;
+  const { jws } = await issue({
+    iss: opts.issuer ?? ISSUER,
+    kind: 'evidence',
+    type: opts.type,
+    pillars: ['provenance'],
+    ...(opts.jti !== undefined ? { jti: opts.jti } : {}),
+    extensions,
+    privateKey: opts.privateKey,
+    kid: KID,
+  });
+  return jws;
+}
 
 type Reason = string;
 const bad = (reason: Reason) => ({ kind: 'invalid-evidence', reason });
@@ -366,7 +401,7 @@ describe('agent-run-lineage-records: manifest validation', () => {
       event_count: events.length,
       events,
     };
-    // Every field is individually valid, so the ONLY failure is the byte bound.
+    // Every field is individually valid, so the only failure is the byte bound.
     expect(validateAgentRunManifest(m)).toEqual({ ok: false, reason: 'input-limit-exceeded' });
   });
 
@@ -448,8 +483,8 @@ describe('agent-run-lineage-records: manifest validation', () => {
 
   it('stateful descriptor Proxy whose SECOND ownKeys throws -> manifest-invalid without throwing', async () => {
     const m = await buildAgentRunManifest();
-    // Own-keys captured once inside the guard. An extra own key makes the first
-    // read fail hasExactKeys; a second ownKeys (the old bug) would throw.
+    // Own-keys are captured once inside the guard: an extra own key fails the
+    // key check on the first read, and a second ownKeys access would throw.
     const mkTampered = () => {
       let calls = 0;
       const target = { ...m.events[0], extra: 1 };
@@ -1331,7 +1366,6 @@ describe('agent-run-lineage-records: fork evidence', () => {
     }) => {
       fork?: Record<string, unknown>;
       parentEvidence?: { summaryRecord: string; forkPointRecord: string };
-      changedManifest?: boolean;
     } = () => ({})
   ) {
     const { publicKey, privateKey } = await generateKeypair();
@@ -1849,7 +1883,7 @@ describe('agent-run-lineage-records: introspection totality and fork corresponde
       publicKey,
       manifest: await buildAgentRunManifest(),
     });
-    const child = await mkChildFork({ runRef: RUN_REF }); // SAME run_ref as parent
+    const child = await mkChildFork({ runRef: RUN_REF }); // same run_ref as parent
     const forkRun = await issueRun({
       privateKey,
       publicKey,
@@ -2003,5 +2037,277 @@ describe('agent-run-lineage-records: introspection totality and fork corresponde
       records: [m.eventJws, finalJws],
     });
     expect(r).toEqual(bad('event-descriptor-mismatch'));
+  });
+  // ---- crypto input snapshot (public key + issuer) ----
+  it('non-Uint8Array public key -> record-invalid', async () => {
+    const manifest = await buildAgentRunManifest();
+    const r = await verifyAgentRunLineageEvidence({
+      expectedManifest: manifest,
+      records: [],
+      publicKey: 'not-a-key' as never,
+      expectedIssuer: ISSUER,
+    });
+    expect(r).toEqual(bad('record-invalid'));
+  });
+
+  it('empty or non-string issuer -> record-invalid', async () => {
+    const { publicKey } = await generateKeypair();
+    const manifest = await buildAgentRunManifest();
+    for (const issuer of ['', 42 as unknown as string]) {
+      const r = await verifyAgentRunLineageEvidence({
+        expectedManifest: manifest,
+        records: [],
+        publicKey,
+        expectedIssuer: issuer,
+      });
+      expect(r).toEqual(bad('record-invalid'));
+    }
+  });
+
+  it('public key is copied: mutating the caller buffer after the call does not affect verification', async () => {
+    const { publicKey, privateKey } = await generateKeypair();
+    const manifest = await buildAgentRunManifest();
+    const run = await issueRun({ privateKey, publicKey, manifest });
+    const records = [...run.eventJws, run.finalizationJws];
+    const mutableKey = new Uint8Array(publicKey);
+    const promise = verifyAgentRunLineageEvidence({
+      expectedManifest: manifest,
+      records,
+      publicKey: mutableKey,
+      expectedIssuer: ISSUER,
+    });
+    mutableKey.fill(0);
+    const r = await promise;
+    expect(r.kind).toBe('run-lineage-evidence-consistent');
+    expect(mutableKey.every((b) => b === 0)).toBe(true);
+  });
+
+  it('verification does not modify the caller public key', async () => {
+    const { publicKey, privateKey } = await generateKeypair();
+    const manifest = await buildAgentRunManifest();
+    const run = await issueRun({ privateKey, publicKey, manifest });
+    const before = Uint8Array.from(publicKey);
+    await verifyAgentRunLineageEvidence({
+      expectedManifest: manifest,
+      records: [...run.eventJws, run.finalizationJws],
+      publicKey,
+      expectedIssuer: ISSUER,
+    });
+    expect(Uint8Array.from(publicKey)).toEqual(before);
+  });
+
+  // ---- RFC 3339 exact temporal ordering ----
+  async function runWithTimes(eventObservedAt: string, finalizationObservedAt: string) {
+    const { publicKey, privateKey } = await generateKeypair();
+    const m = await materials(privateKey, publicKey, { observed_at: eventObservedAt });
+    const finalJws = await finalizeWith(privateKey, m, {
+      action: { ...m.finalAction, observed_at: finalizationObservedAt },
+    });
+    return verifyAgentRunLineageEvidence({
+      expectedManifest: m.manifest,
+      publicKey,
+      expectedIssuer: ISSUER,
+      records: [m.eventJws, finalJws],
+    });
+  }
+
+  it('sub-millisecond ordering: finalization fraction earlier than the last event -> temporal-order-invalid', async () => {
+    expect(await runWithTimes('2026-01-15T10:00:00.0009Z', '2026-01-15T10:00:00.0001Z')).toEqual(
+      bad('temporal-order-invalid')
+    );
+  });
+
+  it('sub-millisecond ordering: finalization fraction later than the last event -> consistent', async () => {
+    const r = await runWithTimes('2026-01-15T10:00:00.0001Z', '2026-01-15T10:00:00.0009Z');
+    expect(r.kind).toBe('run-lineage-evidence-consistent');
+  });
+
+  it('long fractional precision compares exactly', async () => {
+    expect(
+      await runWithTimes('2026-01-15T10:00:00.000000002Z', '2026-01-15T10:00:00.000000001Z')
+    ).toEqual(bad('temporal-order-invalid'));
+    const ok = await runWithTimes(
+      '2026-01-15T10:00:00.000000001Z',
+      '2026-01-15T10:00:00.000000002Z'
+    );
+    expect(ok.kind).toBe('run-lineage-evidence-consistent');
+  });
+
+  it('equivalent instants in different offsets are not treated as out of order', async () => {
+    const r = await runWithTimes('2026-01-15T10:00:00Z', '2026-01-15T15:30:00+05:30');
+    expect(r.kind).toBe('run-lineage-evidence-consistent');
+  });
+
+  it('a -00:00 offset is treated as UTC for ordering', async () => {
+    const r = await runWithTimes('2026-01-15T10:00:00Z', '2026-01-15T10:00:00-00:00');
+    expect(r.kind).toBe('run-lineage-evidence-consistent');
+  });
+
+  // ---- remaining result reasons + main-list resource limits ----
+  it('non-root event missing parent_ref -> dangling-reference', async () => {
+    const { publicKey, privateKey } = await generateKeypair();
+    const inA = await jcs({ k: 'in-a' });
+    const outA = await jcs({ k: 'out-a' });
+    const inB = await jcs({ k: 'in-b' });
+    const outB = await jcs({ k: 'out-b' });
+    const events = [
+      {
+        event_ref: 'urn:example:event:001',
+        sequence_index: 0,
+        event_kind: 'model-call',
+        agent_ref: AGENT_REF,
+        action_ref: 'urn:example:action:model-call',
+        observed_at: '2026-01-15T10:00:00Z',
+        input_digest: inA,
+        output_digest: outA,
+      },
+      {
+        event_ref: 'urn:example:event:002',
+        sequence_index: 1,
+        event_kind: 'tool-call',
+        agent_ref: AGENT_REF,
+        action_ref: 'urn:example:action:tool-call',
+        observed_at: '2026-01-15T10:01:00Z',
+        input_digest: inB,
+        output_digest: outB,
+      },
+    ];
+    const manifest = {
+      artifact_type: AGENT_RUN_MANIFEST_ARTIFACT_TYPE,
+      run_ref: RUN_REF,
+      workflow_id: WORKFLOW_ID,
+      event_count: 2,
+      events,
+    } as AgentRunManifestV1;
+    const md = await computeManifestDigest(manifest);
+    const dd0 = await computeEventDescriptorDigest(events[0] as never);
+    const dd1 = await computeEventDescriptorDigest(events[1] as never);
+    const e0 = await issueRawRecord({
+      privateKey,
+      type: INVOKED_TYPE,
+      action: {
+        event_kind: 'agent-action-invoked-observed',
+        agent_ref: AGENT_REF,
+        action_ref: 'urn:example:action:model-call',
+        observed_at: '2026-01-15T10:00:00Z',
+        upstream_artifact_ref: 'urn:example:event:001',
+        upstream_artifact_digest: dd0,
+      },
+      correlation: { workflow_id: WORKFLOW_ID },
+      lineage: { run_ref: RUN_REF, run_manifest_digest: md, sequence_index: 0 },
+    });
+    const e0ref = await refOf(e0);
+    const e0jti = await jtiOf(e0, publicKey);
+    // Non-root event with the correct correlation link but no parent_ref.
+    const e1 = await issueRawRecord({
+      privateKey,
+      type: INVOKED_TYPE,
+      action: {
+        event_kind: 'agent-action-invoked-observed',
+        agent_ref: AGENT_REF,
+        action_ref: 'urn:example:action:tool-call',
+        observed_at: '2026-01-15T10:01:00Z',
+        upstream_artifact_ref: 'urn:example:event:002',
+        upstream_artifact_digest: dd1,
+      },
+      correlation: { workflow_id: WORKFLOW_ID, parent_jti: e0jti, depends_on: [e0jti] },
+      lineage: { run_ref: RUN_REF, run_manifest_digest: md, sequence_index: 1 },
+    });
+    const e1ref = await refOf(e1);
+    const e1jti = await jtiOf(e1, publicKey);
+    const covered = [e0ref, e1ref].sort();
+    const commitment = buildReceiptMerkleCommitment(covered);
+    const fin = await issueRawRecord({
+      privateKey,
+      type: INVOKED_TYPE,
+      action: {
+        event_kind: 'agent-action-invoked-observed',
+        agent_ref: AGENT_REF,
+        action_ref: FINALIZATION_ACTION_REF,
+        observed_at: '2026-01-15T10:03:00Z',
+        parent_ref: e1ref,
+      },
+      correlation: { workflow_id: WORKFLOW_ID, parent_jti: e1jti, depends_on: [e1jti] },
+      lineage: { run_ref: RUN_REF, run_manifest_digest: md, sequence_index: 2 },
+      summary: {
+        covered_record_refs: covered,
+        covered_record_count: 2,
+        merkle_commitment: {
+          tree_alg: commitment.tree_alg,
+          hash_alg: commitment.hash_alg,
+          root: commitment.root,
+          tree_size: commitment.tree_size,
+        },
+      },
+    });
+    const r = await verifyAgentRunLineageEvidence({
+      expectedManifest: manifest,
+      publicKey,
+      expectedIssuer: ISSUER,
+      records: [e0, e1, fin],
+    });
+    expect(r).toEqual(bad('dangling-reference'));
+  });
+
+  it('two byte-distinct records sharing (iss, jti) -> ambiguous-reference', async () => {
+    const { publicKey, privateKey } = await generateKeypair();
+    const manifest = await buildAgentRunManifest();
+    const md = await computeManifestDigest(manifest);
+    const shared = '0192f1e0-1234-7abc-8def-000000000001';
+    const mk = (observedAt: string) =>
+      issueRawRecord({
+        privateKey,
+        jti: shared,
+        type: INVOKED_TYPE,
+        action: {
+          event_kind: 'agent-action-invoked-observed',
+          agent_ref: AGENT_REF,
+          action_ref: 'urn:example:action:model-call',
+          observed_at: observedAt,
+          upstream_artifact_ref: 'urn:example:event:001',
+          upstream_artifact_digest: `sha256:${'0'.repeat(64)}`,
+        },
+        correlation: { workflow_id: WORKFLOW_ID },
+        lineage: { run_ref: RUN_REF, run_manifest_digest: md, sequence_index: 0 },
+      });
+    const a1 = await mk('2026-01-15T10:00:00Z');
+    const a2 = await mk('2026-01-15T10:00:01Z');
+    expect(a1).not.toBe(a2);
+    const r = await verifyAgentRunLineageEvidence({
+      expectedManifest: manifest,
+      publicKey,
+      expectedIssuer: ISSUER,
+      records: [a1, a2],
+    });
+    expect(r).toEqual(bad('ambiguous-reference'));
+  });
+
+  it('a main record exceeding maxJwsBytes -> input-limit-exceeded', async () => {
+    const { publicKey } = await generateKeypair();
+    const manifest = await buildAgentRunManifest();
+    const oversized = 'A'.repeat(AGENT_RUN_LINEAGE_LIMITS.maxJwsBytes + 1);
+    const r = await verifyAgentRunLineageEvidence({
+      expectedManifest: manifest,
+      records: [oversized],
+      publicKey,
+      expectedIssuer: ISSUER,
+    });
+    expect(r).toEqual(bad('input-limit-exceeded'));
+  });
+
+  it('main records whose aggregate exceeds maxTotalJwsBytes -> input-limit-exceeded', async () => {
+    const { publicKey } = await generateKeypair();
+    const manifest = await buildAgentRunManifest();
+    const per = 'A'.repeat(60 * 1024); // under maxJwsBytes (64 KiB)
+    const count = Math.ceil(AGENT_RUN_LINEAGE_LIMITS.maxTotalJwsBytes / per.length) + 1;
+    expect(count).toBeLessThanOrEqual(AGENT_RUN_LINEAGE_LIMITS.maxRecords);
+    const records = Array.from({ length: count }, (_, i) => per + String(i));
+    const r = await verifyAgentRunLineageEvidence({
+      expectedManifest: manifest,
+      records,
+      publicKey,
+      expectedIssuer: ISSUER,
+    });
+    expect(r).toEqual(bad('input-limit-exceeded'));
   });
 });

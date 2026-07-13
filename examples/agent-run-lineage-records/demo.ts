@@ -11,25 +11,19 @@
  * outputs, tool inputs/outputs, headers, and credentials never appear in the
  * manifest, the records, or the logs.
  *
- * Issuance runs the SAME strict validators as verification: the manifest is
+ * Issuance runs the same strict validators as verification: the manifest is
  * validated and its sanitized snapshot is used, and every agent-action,
  * correlation, and example-local extension is validated before `issue()`.
- *
- * The exported builders are reused by the in-process smoke test so scenarios
- * are constructed without a network or subprocess.
  */
 
 import { computeJsonDocumentDigestJcs, issue, verifyLocal } from '@peac/protocol';
 import {
-  type AgentActionTypeUri,
   type ReceiptRef,
   CorrelationExtensionSchema,
   computeReceiptRef,
   validateAgentActionForType,
 } from '@peac/schema';
 import { buildReceiptMerkleCommitment } from '@peac/audit';
-
-export { buildReceiptMerkleCommitment } from '@peac/audit';
 import {
   type AgentRunEventDescriptorV1,
   type AgentRunManifestV1,
@@ -148,7 +142,14 @@ export async function buildForkManifest(changedSequenceIndex: number): Promise<{
   if (base.events.some((e) => e.event_ref === changedEventRef)) {
     throw new Error('buildForkManifest: changed event_ref collides with a base event_ref');
   }
-  const changedInputDigest = await digestOf({ kind: 'model-request', variant: 'forked', seed: 7 });
+  const changedKind = base.events[changedSequenceIndex].event_kind;
+  const requestKind =
+    changedKind === 'delegation'
+      ? 'delegation-request'
+      : changedKind === 'tool-call'
+        ? 'tool-request'
+        : 'model-request';
+  const changedInputDigest = await digestOf({ kind: requestKind, variant: 'forked', seed: 7 });
   const events = base.events.map((e, i) =>
     i === changedSequenceIndex
       ? ({
@@ -381,40 +382,6 @@ async function issueEventCaptured(opts: {
     privateKey: opts.privateKey,
     kid: KID,
   });
-}
-
-/**
- * Test-local raw issuer: emit an arbitrary agent-action record for building
- * malformed fixtures. Deliberately permissive (no pre-issue validation) so
- * tests can construct records the strict verifier must reject.
- */
-export async function issueRawRecord(opts: {
-  privateKey: Uint8Array;
-  type: AgentActionTypeUri;
-  action: Record<string, unknown>;
-  correlation?: Record<string, unknown>;
-  lineage?: Record<string, unknown>;
-  summary?: Record<string, unknown>;
-  fork?: Record<string, unknown>;
-  issuer?: string;
-  jti?: string;
-}): Promise<string> {
-  const extensions: Record<string, unknown> = { [AGENT_ACTION_EXTENSION_KEY]: opts.action };
-  if (opts.correlation) extensions[CORRELATION_EXTENSION_KEY] = opts.correlation;
-  if (opts.lineage) extensions[RUN_LINEAGE_EXTENSION_KEY] = opts.lineage;
-  if (opts.summary) extensions[RUN_SUMMARY_EXTENSION_KEY] = opts.summary;
-  if (opts.fork) extensions[RUN_FORK_EXTENSION_KEY] = opts.fork;
-  const { jws } = await issue({
-    iss: opts.issuer ?? ISSUER,
-    kind: 'evidence',
-    type: opts.type,
-    pillars: ['provenance'],
-    ...(opts.jti !== undefined ? { jti: opts.jti } : {}),
-    extensions,
-    privateKey: opts.privateKey,
-    kid: KID,
-  });
-  return jws;
 }
 
 /** Flip one character in the JWS payload segment (signature stays, verify fails). */

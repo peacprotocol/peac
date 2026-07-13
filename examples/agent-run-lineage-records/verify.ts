@@ -61,7 +61,7 @@ export const DELEGATED_TYPE = 'org.peacprotocol/agent-action-delegated-observed'
 export const FINALIZATION_ACTION_REF = 'urn:example:action:agent-run-summary-export' as const;
 
 /**
- * Fixed hard limits; NOT caller-configurable. `maxEvents` and `maxManifestBytes`
+ * Fixed hard limits; not caller-configurable. `maxEvents` and `maxManifestBytes`
  * are sourced from `MANIFEST_LIMITS` so the manifest-shape bounds have a single
  * source of truth.
  */
@@ -158,6 +158,37 @@ function isSortedUnique(refs: readonly string[]): boolean {
     if (compareAscii(refs[i - 1], refs[i]) >= 0) return false;
   }
   return true;
+}
+
+const RFC3339_PARTS = /^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})(?:\.(\d+))?(Z|[+-]\d{2}:\d{2})$/i;
+
+/** Whole UTC epoch second (offset-normalized) and the fractional digit string. */
+function splitRfc3339(value: string): { epochSeconds: bigint; frac: string } {
+  const m = RFC3339_PARTS.exec(value);
+  if (!m) return { epochSeconds: 0n, frac: '' };
+  const [, base, frac = '', offset] = m;
+  const ms = Date.parse(`${base}${offset.toUpperCase() === 'Z' ? 'Z' : offset}`);
+  return { epochSeconds: BigInt(Number.isNaN(ms) ? 0 : Math.floor(ms / 1000)), frac };
+}
+
+/**
+ * Compare two validated RFC 3339 instants exactly, preserving fractional-second
+ * precision that millisecond parsing would collapse. Whole seconds compare as
+ * the offset-normalized UTC epoch second; on a tie the fractional digit strings
+ * are right-padded and compared decimally. A numeric offset (including `-00:00`)
+ * is normalized to UTC.
+ */
+function compareRfc3339Instants(a: string, b: string): -1 | 0 | 1 {
+  const pa = splitRfc3339(a);
+  const pb = splitRfc3339(b);
+  if (pa.epochSeconds < pb.epochSeconds) return -1;
+  if (pa.epochSeconds > pb.epochSeconds) return 1;
+  const len = Math.max(pa.frac.length, pb.frac.length);
+  const fa = pa.frac.padEnd(len, '0');
+  const fb = pb.frac.padEnd(len, '0');
+  if (fa < fb) return -1;
+  if (fa > fb) return 1;
+  return 0;
 }
 
 // ---------------------------------------------------------------------------
@@ -330,7 +361,7 @@ function validateForkExtension(value: unknown): Parsed<AgentRunForkV1> {
 }
 
 /**
- * Issuance-time guards: the demo runs the SAME example-local validators before
+ * Issuance-time guards: the demo runs the same example-local validators before
  * `issue()` so issuance enforces the same invariants as verification.
  */
 export function isValidLineageExtension(value: unknown): boolean {
@@ -366,10 +397,8 @@ interface NormalizedRecord {
   readonly type: string;
   readonly agentRef: string;
   readonly actionRef: string;
-  /** Exact issuer-reported timestamp string (used for descriptor equality). */
+  /** Exact issuer-reported RFC 3339 timestamp string. */
   readonly observedAt: string;
-  /** Parsed instant in ms (used ONLY for chronological ordering). */
-  readonly observedAtMs: number;
   readonly upstreamRef: string | undefined;
   readonly upstreamDigest: string | undefined;
   readonly delegatedToRef: string | undefined;
@@ -418,8 +447,6 @@ function normalize(
   ) {
     return 'record-invalid';
   }
-  const observedAtMs = Date.parse(observedAt);
-  if (Number.isNaN(observedAtMs)) return 'record-invalid';
 
   const lineage = validateLineageExtension(extensions[RUN_LINEAGE_EXTENSION_KEY]);
   if (!lineage) return 'record-invalid';
@@ -459,7 +486,6 @@ function normalize(
     agentRef,
     actionRef,
     observedAt,
-    observedAtMs,
     upstreamRef:
       typeof action.upstream_artifact_ref === 'string' ? action.upstream_artifact_ref : undefined,
     upstreamDigest:
@@ -483,7 +509,7 @@ async function verifyOne(
   publicKey: Uint8Array,
   expectedIssuer: string
 ): Promise<NormalizedRecord | InvalidAgentRunLineageReason> {
-  // Catch ONLY the untrusted crypto/parse boundary. `normalize` runs OUTSIDE
+  // Catch only the untrusted crypto/parse boundary; `normalize` runs outside
   // the catch and is total through its own strict validators, so a bug in
   // trusted normalization surfaces rather than silently mapping to
   // `record-invalid`.
@@ -502,36 +528,47 @@ async function verifyOne(
   return normalize(ref, claims);
 }
 
-/** Enforce the raw record/JWS byte limits over a plain (already snapshotted) list. */
-function checkRawLimits(records: readonly unknown[]): InvalidAgentRunLineageReason | undefined {
-  if (records.length > AGENT_RUN_LINEAGE_LIMITS.maxRecords) return 'input-limit-exceeded';
-  let totalBytes = 0;
+/**
+ * Enforce the per-JWS byte limit over a plain (already snapshotted) list and
+ * accumulate onto a running total, so `maxTotalJwsBytes` bounds ALL supplied
+ * compact JWS (main records PLUS any parent-evidence records) combined, not
+ * each list independently. Returns the new running total or a reason.
+ */
+function accumulateJwsBytes(
+  records: readonly unknown[],
+  runningTotal: number
+): { readonly total: number } | InvalidAgentRunLineageReason {
+  let total = runningTotal;
   for (const jws of records) {
     if (typeof jws !== 'string') return 'record-invalid';
     const bytes = utf8ByteLength(jws);
     if (bytes > AGENT_RUN_LINEAGE_LIMITS.maxJwsBytes) return 'input-limit-exceeded';
-    totalBytes += bytes;
-    if (totalBytes > AGENT_RUN_LINEAGE_LIMITS.maxTotalJwsBytes) return 'input-limit-exceeded';
+    total += bytes;
+    if (total > AGENT_RUN_LINEAGE_LIMITS.maxTotalJwsBytes) return 'input-limit-exceeded';
   }
-  return undefined;
+  return { total };
 }
 
 interface InputSnapshot {
   readonly manifest: unknown;
   readonly records: readonly unknown[];
-  readonly publicKey: unknown;
-  readonly expectedIssuer: unknown;
+  /** A fresh, non-shared copy isolated from caller mutation. */
+  readonly publicKey: Uint8Array;
+  readonly expectedIssuer: string;
   readonly parentEvidence:
     | { readonly summaryRecord: unknown; readonly forkPointRecord: unknown }
     | undefined;
 }
 
 /**
- * Read the untrusted top-level input behind a guarded boundary: the input
- * object, the `records` array (length + each index copied once into a new plain
- * array), and `parentEvidence` are all read exactly once, so a hostile getter,
- * a throwing array `length`/index/iterator, or a Proxy trap yields a structured
- * result instead of escaping.
+ * Read the untrusted top-level input behind a guarded boundary. The input
+ * object, the `records` array (length + each index copied into a new plain
+ * array), the `publicKey` (validated and copied into a fresh non-shared
+ * `Uint8Array`), the `expectedIssuer` (validated non-empty string), and
+ * `parentEvidence` are all read exactly once. A hostile getter, a throwing
+ * array `length`/index/iterator, a Proxy trap, or an invalid crypto type yields
+ * a structured result instead of escaping; the copied key isolates verification
+ * from any concurrent mutation of the caller's buffer.
  */
 function snapshotInput(input: unknown): InputSnapshot | InvalidAgentRunLineageReason {
   try {
@@ -548,13 +585,18 @@ function snapshotInput(input: unknown): InputSnapshot | InvalidAgentRunLineageRe
     if (length > AGENT_RUN_LINEAGE_LIMITS.maxRecords) return 'input-limit-exceeded';
     const records: unknown[] = [];
     for (let i = 0; i < length; i += 1) records.push(rawRecords[i]);
+    if (!(publicKey instanceof Uint8Array)) return 'record-invalid';
+    if (typeof expectedIssuer !== 'string' || expectedIssuer.length === 0) return 'record-invalid';
+    // Copy into a fresh ArrayBuffer so verification is unaffected by any later
+    // mutation of the caller's (possibly SharedArrayBuffer-backed) key buffer.
+    const publicKeyCopy = new Uint8Array(publicKey);
     let parentEvidence: { summaryRecord: unknown; forkPointRecord: unknown } | undefined;
     if (rawParent !== undefined) {
       const p = asPlainObject(rawParent);
       if (!p) return 'record-invalid';
       parentEvidence = { summaryRecord: p.summaryRecord, forkPointRecord: p.forkPointRecord };
     }
-    return { manifest, records, publicKey, expectedIssuer, parentEvidence };
+    return { manifest, records, publicKey: publicKeyCopy, expectedIssuer, parentEvidence };
   } catch {
     return 'record-invalid';
   }
@@ -588,19 +630,19 @@ export async function verifyAgentRunLineageEvidence(
   const manifest: AgentRunManifestV1 = manifestResult.manifest;
   const manifestDigest = await computeManifestDigest(manifest);
 
-  // 2. Raw input limits (byte bounds) over the plain snapshot.
-  const rawLimit = checkRawLimits(records);
-  if (rawLimit) return invalid(rawLimit);
+  // 2. Raw input limits (byte bounds) over the plain snapshot. The running
+  // total is carried into the fork path so the aggregate bound covers every
+  // supplied JWS combined.
+  const mainBytes = accumulateJwsBytes(records, 0);
+  if (typeof mainBytes === 'string') return invalid(mainBytes);
   const stringRecords = records as readonly string[];
-  const pubKey = publicKey as Uint8Array;
-  const issuer = expectedIssuer as string;
 
   // 3. Dedup, canonical order, verify each once; common manifest binding.
   const uniqueJws = [...new Set(stringRecords)].sort(compareAscii);
   const byRef = new Map<string, NormalizedRecord>();
   const seenIssJti = new Map<string, Set<string>>();
   for (const jws of uniqueJws) {
-    const r = await verifyOne(jws, pubKey, issuer);
+    const r = await verifyOne(jws, publicKey, expectedIssuer);
     if (typeof r === 'string') return invalid(r);
     if (byRef.has(r.ref)) return invalid('record-invalid');
     let jtis = seenIssJti.get(r.iss);
@@ -674,8 +716,8 @@ export async function verifyAgentRunLineageEvidence(
     if (rec.agentRef !== descriptor.agent_ref || rec.actionRef !== descriptor.action_ref) {
       return invalid('event-descriptor-mismatch');
     }
-    // Exact string equality: two representations of the same instant are NOT
-    // the same descriptor field. (Ordering uses observedAtMs elsewhere.)
+    // Exact string equality: equivalent instants in different representations
+    // are not the same descriptor field.
     if (rec.observedAt !== descriptor.observed_at) {
       return invalid('event-descriptor-mismatch');
     }
@@ -726,7 +768,9 @@ export async function verifyAgentRunLineageEvidence(
   ) {
     return invalid('lineage-link-mismatch');
   }
-  if (finalization.observedAtMs < lastEvent.observedAtMs) return invalid('temporal-order-invalid');
+  if (compareRfc3339Instants(finalization.observedAt, lastEvent.observedAt) < 0) {
+    return invalid('temporal-order-invalid');
+  }
 
   // 8. Summary: coverage set == event records; mandatory Merkle commitment.
   const summary = finalization.summary;
@@ -750,8 +794,9 @@ export async function verifyAgentRunLineageEvidence(
       finalization.fork,
       manifest,
       parentEvidence,
-      pubKey,
-      issuer
+      publicKey,
+      expectedIssuer,
+      mainBytes.total
     );
     if (typeof forkResult === 'string') return invalid(forkResult);
     forkLink = forkResult;
@@ -773,7 +818,7 @@ export async function verifyAgentRunLineageEvidence(
  * current (forked) manifest. Establishes a link to a signed parent coverage
  * assertion; it does not fully re-verify the entire historical parent run
  * unless that run is separately supplied and verified. `diff_artifact_digest`
- * is validated as a signed grammar but is NOT independently recomputed (the
+ * is validated as a signed grammar but is not independently recomputed (the
  * diff artifact itself is not supplied to this verifier).
  */
 async function verifyForkEvidence(
@@ -783,7 +828,8 @@ async function verifyForkEvidence(
     | { readonly summaryRecord: unknown; readonly forkPointRecord: unknown }
     | undefined,
   publicKey: Uint8Array,
-  expectedIssuer: string
+  expectedIssuer: string,
+  priorBytesTotal: number
 ): Promise<
   | { parentRunSummaryRef: ReceiptRef; forkPointRecordRef: ReceiptRef; changedEventRef: string }
   | InvalidAgentRunLineageReason
@@ -797,9 +843,14 @@ async function verifyForkEvidence(
   const changedEvent = changed[0];
   if (changedEvent.input_digest !== fork.changed_input_digest) return 'fork-link-mismatch';
 
-  // Bound + type-check the two parent-evidence strings before cryptographic work.
-  const rawLimit = checkRawLimits([parentEvidence.summaryRecord, parentEvidence.forkPointRecord]);
-  if (rawLimit) return rawLimit;
+  // Bound + type-check the two parent-evidence strings before cryptographic
+  // work, continuing the aggregate byte total from the main records so the
+  // combined input is bounded.
+  const parentBytes = accumulateJwsBytes(
+    [parentEvidence.summaryRecord, parentEvidence.forkPointRecord],
+    priorBytesTotal
+  );
+  if (typeof parentBytes === 'string') return parentBytes;
 
   const parentSummary = await verifyOne(
     parentEvidence.summaryRecord as string,

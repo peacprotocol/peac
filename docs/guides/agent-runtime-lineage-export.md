@@ -67,6 +67,9 @@ coverage set of event-record refs (canonically sorted, and excluding the
 finalization record's own ref), the count, and a Merkle commitment over exactly
 those refs, produced with `@peac/audit` `buildReceiptMerkleCommitment` (a CT-style
 [RFC 9162](https://www.rfc-editor.org/rfc/rfc9162.html) sorted-set commitment).
+The finalization record's `agent_ref` equals the root event's `agent_ref` in the
+supplied manifest; it is an issuer-reported record, not an independently trusted
+runtime identity.
 
 A verifier given the manifest, the run records, one issuer key, and one issuer
 checks that the supplied records exactly match the coverage set asserted by the

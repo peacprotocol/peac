@@ -33,7 +33,8 @@ agent-action records:
   `action_ref` is `urn:example:action:agent-run-summary-export`) carries an
   example-local `com.example/agent-run-summary`: the sorted coverage set of
   event-record refs, its count, and a mandatory Merkle commitment
-  (`@peac/audit` `buildReceiptMerkleCommitment`) over exactly those refs.
+  (`@peac/audit` `buildReceiptMerkleCommitment`) over exactly those refs. Its
+  `agent_ref` equals the root event's `agent_ref` in the supplied manifest.
 - A forked run's finalization record carries an example-local
   `com.example/agent-run-fork` recording the parent run summary, the fork point,
   and the issuer-reported corresponding child event (`changed_event_ref`), whose

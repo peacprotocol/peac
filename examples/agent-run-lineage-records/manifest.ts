@@ -1,7 +1,7 @@
 /**
  * Agent run manifest for the agent-run-lineage-records example.
  *
- * The run manifest is an application-level, example-local artifact (NOT a PEAC
+ * The run manifest is an application-level, example-local artifact (not a PEAC
  * record). Each event record binds the JCS + SHA-256 digest of its matching
  * event descriptor through `upstream_artifact_digest`, and every record binds
  * the whole-manifest digest through the `com.example/agent-run-lineage`
@@ -13,7 +13,7 @@
  * tested; production integrations should not hash secrets or low-entropy
  * personal data directly.
  *
- * Validation is fail-closed and total: the untrusted top-level object AND every
+ * Validation is fail-closed and total: the untrusted top-level object and every
  * nested event descriptor are read behind a guarded introspection boundary, so
  * a throwing getter or a hostile Proxy trap returns a structured result rather
  * than escaping. Field grammars use the canonical `@peac/schema` validators
@@ -98,7 +98,7 @@ function isSha256(value: unknown): value is string {
 }
 
 function isTimestamp(value: unknown): value is string {
-  // Strict RFC 3339 (seconds precision required); NOT the deprecated
+  // Strict RFC 3339 (seconds precision required); not the deprecated
   // minute-precision Iso8601/Rfc3339Timestamp alias.
   return typeof value === 'string' && Rfc3339DateTimeSchema.safeParse(value).success;
 }
@@ -151,7 +151,7 @@ function hasExactKeys(keys: readonly string[], required: readonly string[]): boo
 }
 
 interface RawDescriptorFields {
-  /** Own enumerable keys captured ONCE inside the guard; never re-read. */
+  /** Own enumerable keys captured once inside the guard; never re-read. */
   readonly keys: readonly string[];
   readonly event_kind: unknown;
   readonly event_ref: unknown;
@@ -165,10 +165,10 @@ interface RawDescriptorFields {
 }
 
 /**
- * Read every untrusted descriptor field, AND its own-key set, exactly once
+ * Read every untrusted descriptor field, and its own-key set, exactly once
  * behind a guarded boundary. A throwing getter, or a Proxy that throws from
  * `getPrototypeOf`, `ownKeys`, `getOwnPropertyDescriptor`, or `get` (including
- * a stateful Proxy that only throws on a SECOND `ownKeys`), yields `undefined`
+ * a stateful Proxy that only throws on a second `ownKeys`), yields `undefined`
  * instead of escaping the validator: the original object is never touched
  * again after this function returns.
  */
@@ -176,7 +176,7 @@ function readDescriptorGuarded(value: unknown): RawDescriptorFields | undefined 
   try {
     const obj = asPlainObject(value);
     if (!obj) return undefined;
-    // Capture the own-key set ONCE here (contains a hostile ownKeys trap).
+    // Capture the own-key set once here (contains a hostile ownKeys trap).
     const keys = Object.keys(obj);
     return {
       keys,
