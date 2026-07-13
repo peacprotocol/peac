@@ -2,7 +2,9 @@
 /**
  * find-invisible-unicode.mjs
  *
- * Scans files for invisible/dangerous Unicode characters that GitHub warns about.
+ * Scans files for invisible/dangerous Unicode: bidi controls (Trojan Source),
+ * zero-width and format characters (category Cf), BOM, NBSP variants, C0/C1
+ * control characters, and DEL. TAB, LF, and CR are the only allowed controls.
  * Optionally fixes them with --fix mode.
  *
  * Usage:
@@ -85,14 +87,35 @@ const DANGEROUS_CODEPOINTS = {
 // Characters that should be replaced with a regular space
 const NBSP_CODEPOINTS = new Set([0x00a0, 0x202f]);
 
-// Build regex from codepoints
+// Control and format classes rejected beyond the explicit map above: C0 controls
+// (U+0000-U+001F) except the allowed whitespace TAB/LF/CR, DEL (U+007F), C1
+// controls (U+0080-U+009F), and every Unicode format character (category Cf).
+const CONTROL_AND_FORMAT_PATTERN =
+  '[\\u0000-\\u0008\\u000B\\u000C\\u000E-\\u001F\\u007F-\\u009F]|\\p{Cf}';
+
+// Build regex from the explicit codepoints plus the control/format classes.
 const codepointPattern = Object.keys(DANGEROUS_CODEPOINTS)
   .map((cp) => `\\u{${Number(cp).toString(16).padStart(4, '0')}}`)
   .join('|');
-const dangerousRegex = new RegExp(`(${codepointPattern})`, 'gu');
+const dangerousRegex = new RegExp(`(${codepointPattern}|${CONTROL_AND_FORMAT_PATTERN})`, 'gu');
+
+function codepointName(cp) {
+  if (DANGEROUS_CODEPOINTS[cp]) return DANGEROUS_CODEPOINTS[cp];
+  if (cp === 0x7f) return 'DELETE';
+  if (cp <= 0x1f) return 'C0 CONTROL';
+  if (cp >= 0x80 && cp <= 0x9f) return 'C1 CONTROL';
+  return 'FORMAT CHARACTER (Cf)';
+}
 
 function escapeForDisplay(str) {
-  return str.replace(/\n/g, '\\n').replace(/\r/g, '\\r').replace(/\t/g, '\\t');
+  return str
+    .replace(/\n/g, '\\n')
+    .replace(/\r/g, '\\r')
+    .replace(/\t/g, '\\t')
+    .replace(
+      /[\u0000-\u001F\u007F-\u009F]|\p{Cf}/gu,
+      (c) => `\\u${c.codePointAt(0).toString(16).toUpperCase().padStart(4, '0')}`
+    );
 }
 
 function scanFile(filePath) {
@@ -129,7 +152,7 @@ function scanFile(filePath) {
         line: lineNum + 1,
         col,
         codepoint: `U+${codepoint.toString(16).toUpperCase().padStart(4, '0')}`,
-        name: DANGEROUS_CODEPOINTS[codepoint] || 'UNKNOWN',
+        name: codepointName(codepoint),
         context: escapeForDisplay(context),
         isNbsp: NBSP_CODEPOINTS.has(codepoint),
       });
@@ -243,7 +266,9 @@ async function main() {
 
   if (totalFindings > 0) {
     if (fixMode) {
-      console.error(`\nFound ${totalFindings} dangerous Unicode character(s) in ${filesFixed} file(s) - FIXED`);
+      console.error(
+        `\nFound ${totalFindings} dangerous Unicode character(s) in ${filesFixed} file(s) - FIXED`
+      );
       process.exit(0);
     } else {
       console.error(`\nFound ${totalFindings} dangerous Unicode character(s)`);

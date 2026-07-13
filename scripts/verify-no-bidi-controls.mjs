@@ -2,14 +2,15 @@
 /**
  * verify-no-bidi-controls.mjs
  *
- * CI gate: no Unicode bidi controls or zero-width / invisible characters in
- * tracked source, docs, or configuration. Thin wrapper around
+ * CI gate: no Unicode bidi controls, zero-width / format characters, BOM, or
+ * C0/C1/DEL control characters (TAB, LF, and CR are the only allowed controls)
+ * in tracked source, docs, or configuration. Thin wrapper around
  * `scripts/find-invisible-unicode.mjs` with a tighter CI-facing summary.
  *
  * Scans every tracked `.ts` / `.tsx` / `.js` / `.jsx` / `.mjs` / `.cjs` /
  * `.json` / `.md` / `.yaml` / `.yml` file except `archive/` and
  * `node_modules/`, and exits non-zero on the first dangerous codepoint
- * (Trojan Source, zero-width, bidi controls, etc.).
+ * (Trojan Source, zero-width, control characters, etc.).
  *
  * Exit codes:
  *   0 - no dangerous Unicode found
@@ -30,7 +31,18 @@ if (!existsSync(SCANNER)) {
   process.exit(2);
 }
 
-const EXTS = ['*.ts', '*.tsx', '*.js', '*.jsx', '*.mjs', '*.cjs', '*.json', '*.md', '*.yaml', '*.yml'];
+const EXTS = [
+  '*.ts',
+  '*.tsx',
+  '*.js',
+  '*.jsx',
+  '*.mjs',
+  '*.cjs',
+  '*.json',
+  '*.md',
+  '*.yaml',
+  '*.yml',
+];
 
 const ls = spawnSync('git', ['ls-files', '--', ...EXTS], { encoding: 'utf8' });
 if (ls.status !== 0) {
