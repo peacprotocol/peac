@@ -19,7 +19,7 @@ What v0.13.0 holds invariant:
   default and the only format actively documented in the public OpenAPI
   contract. `peac-receipt/0.1` (Wire 0.1) remains a frozen verify-only
   path with no new-feature extensions. `peac.receipt/0.9` is archived
-  under [`archive/0.9.0-0.9.14/packages-core/`](../../archive/0.9.0-0.9.14/packages-core/);
+  under `archive/0.9.0-0.9.14/packages-core/`;
   `@peac/core` is not in the v0.13.0 active publish manifest.
 - The signing envelope. JWS Compact Serialization (RFC 7515) with
   Ed25519 (RFC 8032) is the only accepted shape. There is no algorithm

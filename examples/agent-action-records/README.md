@@ -46,7 +46,7 @@ pnpm verify
 ```
 
 `pnpm issue` writes the signed records and the public key to
-[`./out/`](./out/). `pnpm verify` reads them back and verifies each
+`./out/`. `pnpm verify` reads them back and verifies each
 record offline. The `out/` directory is gitignored.
 
 Expected output: 6 records issued, 6 verified, exit code 0.
