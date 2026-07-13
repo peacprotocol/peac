@@ -168,4 +168,76 @@ describe('find-invisible-unicode.mjs (CLI)', () => {
     const result = runScanner([file]);
     expect(result.stdout).toContain(file);
   });
+  it('detects NUL (U+0000) as a C0 control', () => {
+    const file = join(tmpDir, 'nul.ts');
+    writeFileSync(file, Buffer.from('const a = 1;\x00\n', 'binary'));
+
+    const result = runScanner([file]);
+    expect(result.exitCode).toBe(1);
+    expect(result.stdout).toContain('U+0000');
+    expect(result.stdout).toContain('C0 CONTROL');
+    // The report must not echo a raw control byte in its context.
+    expect(result.stdout).not.toContain('\x00');
+  });
+
+  it('detects BEL (U+0007) as a C0 control', () => {
+    const file = join(tmpDir, 'bel.ts');
+    writeFileSync(file, Buffer.from('const b = 2;\x07\n', 'binary'));
+
+    const result = runScanner([file]);
+    expect(result.exitCode).toBe(1);
+    expect(result.stdout).toContain('U+0007');
+    expect(result.stdout).toContain('C0 CONTROL');
+  });
+
+  it('detects ESC (U+001B) as a C0 control', () => {
+    const file = join(tmpDir, 'esc.ts');
+    writeFileSync(file, Buffer.from('const c = 3;\x1b\n', 'binary'));
+
+    const result = runScanner([file]);
+    expect(result.exitCode).toBe(1);
+    expect(result.stdout).toContain('U+001B');
+    expect(result.stdout).toContain('C0 CONTROL');
+  });
+
+  it('detects DEL (U+007F)', () => {
+    const file = join(tmpDir, 'del.ts');
+    writeFileSync(file, Buffer.from('const d = 4;\x7f\n', 'binary'));
+
+    const result = runScanner([file]);
+    expect(result.exitCode).toBe(1);
+    expect(result.stdout).toContain('U+007F');
+    expect(result.stdout).toContain('DELETE');
+  });
+
+  it('detects a C1 control (U+0085 NEL)', () => {
+    const file = join(tmpDir, 'c1.ts');
+    // U+0085 encodes as 0xC2 0x85 in UTF-8.
+    writeFileSync(file, Buffer.from('const e = 5;\xc2\x85\n', 'binary'));
+
+    const result = runScanner([file]);
+    expect(result.exitCode).toBe(1);
+    expect(result.stdout).toContain('U+0085');
+    expect(result.stdout).toContain('C1 CONTROL');
+  });
+
+  it('allows TAB, LF, and CR', () => {
+    const file = join(tmpDir, 'allowed.ts');
+    // TAB + CRLF + LF only.
+    writeFileSync(file, Buffer.from('const\tf = 6;\r\nconst g = 7;\n', 'binary'));
+
+    const result = runScanner([file]);
+    expect(result.exitCode).toBe(0);
+    expect(result.stdout).toContain('No dangerous Unicode');
+  });
+
+  it('--fix strips a C0 control character', () => {
+    const file = join(tmpDir, 'fix-nul.ts');
+    writeFileSync(file, Buffer.from('a\x00b\n', 'binary'));
+
+    const fix = runScanner(['--fix', file]);
+    expect(fix.exitCode).toBe(0);
+    expect(readFileSync(file, 'utf-8')).toBe('ab\n');
+    expect(runScanner([file]).exitCode).toBe(0);
+  });
 });
