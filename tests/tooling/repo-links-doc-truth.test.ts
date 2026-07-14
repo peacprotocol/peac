@@ -7,9 +7,12 @@
  * entry-doc set. Every relative file link must resolve to a real repository file
  * with EXACT case (development is often case-insensitive; CI is not).
  *
- * Static, filesystem-only: node:fs + node:path, no spawn, no network, no
- * dependency. Anchor (#fragment) validation and external URL liveness are out of
- * scope; only in-repo file existence is gated.
+ * Tracked-tree existence: a link must resolve to a git-TRACKED file or directory
+ * (validated against the git index), not merely to a path present in the local
+ * working directory. Untracked residue (a stale node_modules, an old build
+ * output) therefore cannot mask a broken link that a clean checkout would fail.
+ * Anchor (#fragment) validation and external URL liveness are out of scope; only
+ * in-repo tracked existence is gated.
  *
  * Scope:
  *   - Roots: docs/, .github/, surfaces/, examples/ (recursive).
@@ -26,12 +29,15 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { join } from 'node:path';
-import { dirname } from 'node:path';
+import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { spawnSync } from 'node:child_process';
 import {
   brokenLinksForDoc,
   existsCaseExact,
+  existsTrackedCaseExact,
   extractLinkTargets,
   isFileLink,
   walkMarkdownFiles,
@@ -122,6 +128,103 @@ describe('case-exact resolution rejects wrong-case links', () => {
     expect(existsCaseExact(REPO_ROOT, join(REPO_ROOT, 'README.md'))).toBe(true);
     expect(existsCaseExact(REPO_ROOT, join(REPO_ROOT, 'README.MD'))).toBe(false);
     expect(existsCaseExact(REPO_ROOT, join(REPO_ROOT, 'does-not-exist.md'))).toBe(false);
+  });
+});
+
+// The tracked-tree check must resolve links against the git index, not the
+// working directory: an untracked file or directory present on disk (residue
+// such as a stale node_modules or an old build output) must NOT satisfy a
+// repository-relative link, because a clean checkout would not have it. These
+// tests build throwaway git repositories with a known index so the abstraction
+// is exercised directly, independent of this checkout's layout.
+function gitFixtureRepo(): { root: string; git: (...args: string[]) => void } {
+  const root = mkdtempSync(join(tmpdir(), 'peac-link-gate-'));
+  const git = (...args: string[]): void => {
+    const res = spawnSync('git', ['-C', root, ...args], { encoding: 'utf8' });
+    if (res.status !== 0) {
+      throw new Error(`git ${args.join(' ')} failed: ${res.stderr || res.error?.message || ''}`);
+    }
+  };
+  git('init', '-q');
+  git('config', 'user.email', 'test@example.invalid');
+  git('config', 'user.name', 'Link Gate Test');
+  git('config', 'commit.gpgsign', 'false');
+  return { root, git };
+}
+
+describe('tracked-tree existence (git-index fixture)', () => {
+  it('accepts tracked files, tracked directories, staged files; rejects untracked residue and wrong case', () => {
+    const { root, git } = gitFixtureRepo();
+    try {
+      mkdirSync(join(root, 'docs'), { recursive: true });
+      writeFileSync(join(root, 'docs', 'guide.md'), '# guide\n');
+      // A tracked filename containing a space exercises NUL-delimited parsing.
+      writeFileSync(join(root, 'docs', 'a file.md'), '# spaced\n');
+      git('add', 'docs/guide.md', 'docs/a file.md');
+      git('commit', '-qm', 'init');
+
+      // Staged but not committed: present in the index, so it resolves.
+      writeFileSync(join(root, 'staged.md'), '# staged\n');
+      git('add', 'staged.md');
+
+      // Present on disk but never added: must NOT resolve.
+      writeFileSync(join(root, 'untracked.md'), '# untracked\n');
+      mkdirSync(join(root, 'residue'), { recursive: true });
+      writeFileSync(join(root, 'residue', 'x.md'), '# residue\n');
+
+      expect(existsTrackedCaseExact(root, join(root, 'docs', 'guide.md'))).toBe(true);
+      expect(existsTrackedCaseExact(root, join(root, 'docs'))).toBe(true);
+      expect(existsTrackedCaseExact(root, join(root, 'docs', 'a file.md'))).toBe(true);
+      expect(existsTrackedCaseExact(root, join(root, 'staged.md'))).toBe(true);
+      expect(existsTrackedCaseExact(root, root)).toBe(true);
+
+      // Untracked residue is on disk (the plain check accepts it) but is absent
+      // from the index (the tracked-tree check rejects it).
+      expect(existsCaseExact(root, join(root, 'untracked.md'))).toBe(true);
+      expect(existsTrackedCaseExact(root, join(root, 'untracked.md'))).toBe(false);
+      expect(existsCaseExact(root, join(root, 'residue'))).toBe(true);
+      expect(existsTrackedCaseExact(root, join(root, 'residue'))).toBe(false);
+
+      // Wrong case and repository escape are rejected.
+      expect(existsTrackedCaseExact(root, join(root, 'docs', 'GUIDE.md'))).toBe(false);
+      expect(existsTrackedCaseExact(root, join(root, '..', 'outside.md'))).toBe(false);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it('does not share cached index state between two repositories', () => {
+    const a = gitFixtureRepo();
+    const b = gitFixtureRepo();
+    try {
+      writeFileSync(join(a.root, 'only-in-a.md'), '# a\n');
+      a.git('add', 'only-in-a.md');
+      a.git('commit', '-qm', 'a');
+      writeFileSync(join(b.root, 'only-in-b.md'), '# b\n');
+      b.git('add', 'only-in-b.md');
+      b.git('commit', '-qm', 'b');
+
+      expect(existsTrackedCaseExact(a.root, join(a.root, 'only-in-a.md'))).toBe(true);
+      expect(existsTrackedCaseExact(a.root, join(a.root, 'only-in-b.md'))).toBe(false);
+      expect(existsTrackedCaseExact(b.root, join(b.root, 'only-in-b.md'))).toBe(true);
+      expect(existsTrackedCaseExact(b.root, join(b.root, 'only-in-a.md'))).toBe(false);
+    } finally {
+      rmSync(a.root, { recursive: true, force: true });
+      rmSync(b.root, { recursive: true, force: true });
+    }
+  });
+
+  it('fails closed when the git index cannot be read', () => {
+    // A fresh temp directory that is not a git repository has no readable index.
+    const notARepo = mkdtempSync(join(tmpdir(), 'peac-link-gate-norepo-'));
+    try {
+      writeFileSync(join(notARepo, 'file.md'), '# f\n');
+      expect(() => existsTrackedCaseExact(notARepo, join(notARepo, 'file.md'))).toThrow(
+        /tracked-tree link validation cannot continue/
+      );
+    } finally {
+      rmSync(notARepo, { recursive: true, force: true });
+    }
   });
 });
 
