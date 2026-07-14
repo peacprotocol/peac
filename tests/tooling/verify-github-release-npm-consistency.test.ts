@@ -21,6 +21,11 @@ import {
   parseReleaseTag,
   withRetry,
   determineIsActualLatest,
+  normalizeReleaseId,
+  parseGithubReleaseObject,
+  buildGithubApiArgs,
+  fetchReleaseByTag,
+  fetchActualLatestRelease,
   ReleaseConsistencyError,
   ERROR_KINDS,
 } from '../../scripts/verify-github-release-npm-consistency.mjs';
@@ -567,6 +572,257 @@ describe('determineIsActualLatest', () => {
         latestRelease: { id: null, tagName: 'v0.16.2' },
       })
     ).toBe(false);
+  });
+
+  it('matches the current Latest release when both REST ids are equal', () => {
+    expect(
+      determineIsActualLatest({
+        tag: 'v0.16.2',
+        releaseId: '353469866',
+        latestRelease: { id: '353469866', tagName: 'v0.16.2' },
+      })
+    ).toBe(true);
+    expect(
+      determineIsActualLatest({
+        tag: 'v0.16.2',
+        releaseId: '353469866',
+        latestRelease: { id: '999999999', tagName: 'v0.16.3' },
+      })
+    ).toBe(false);
+  });
+
+  it('fails closed on a mixed id space (GraphQL node id) instead of returning false', () => {
+    // A GraphQL node id versus a REST numeric id is a resolution failure, not
+    // evidence that the release is historical. Returning false here would skip
+    // the npm latest invariant, which is the original bug.
+    let kind: string | undefined;
+    try {
+      determineIsActualLatest({
+        tag: 'v0.16.2',
+        releaseId: 'RE_kwDOexampleGraphQLNodeId',
+        latestRelease: { id: '353469866', tagName: 'v0.16.2' },
+      });
+    } catch (err) {
+      kind = (err as ReleaseConsistencyError).kind;
+    }
+    expect(kind).toBe(ERROR_KINDS.INVALID_RELEASE_ID);
+  });
+});
+
+describe('normalizeReleaseId', () => {
+  it('accepts a positive REST numeric id (number or decimal string)', () => {
+    expect(normalizeReleaseId(353469866)).toBe('353469866');
+    expect(normalizeReleaseId('353469866')).toBe('353469866');
+    expect(normalizeReleaseId(1)).toBe('1');
+  });
+
+  it('rejects GraphQL node ids and other non-REST ids as INVALID_RELEASE_ID', () => {
+    const bad: unknown[] = [
+      'RE_kwDOexampleGraphQLNodeId',
+      '',
+      '0',
+      0,
+      -5,
+      '-5',
+      1.5,
+      '007',
+      'abc',
+      NaN,
+      Infinity,
+      null,
+      undefined,
+      {},
+      ['353469866'],
+    ];
+    for (const value of bad) {
+      let kind: string | undefined;
+      try {
+        normalizeReleaseId(value as never);
+      } catch (err) {
+        kind = (err as ReleaseConsistencyError).kind;
+      }
+      expect(kind, `expected ${JSON.stringify(value)} to be rejected`).toBe(
+        ERROR_KINDS.INVALID_RELEASE_ID
+      );
+    }
+  });
+});
+
+describe('parseGithubReleaseObject', () => {
+  const rest = {
+    id: 353469866,
+    node_id: 'RE_kwDOexampleGraphQLNodeId',
+    tag_name: 'v0.16.2',
+    draft: false,
+    prerelease: false,
+  };
+
+  it('returns a normalized decimal-string id and the exact boolean flags', () => {
+    const parsed = parseGithubReleaseObject(rest);
+    expect(parsed).toEqual({
+      id: '353469866',
+      tagName: 'v0.16.2',
+      isDraft: false,
+      isPrerelease: false,
+    });
+  });
+
+  it('enforces tag_name equality when expectedTag is supplied', () => {
+    expect(parseGithubReleaseObject(rest, { expectedTag: 'v0.16.2' }).tagName).toBe('v0.16.2');
+    let kind: string | undefined;
+    try {
+      parseGithubReleaseObject(rest, { expectedTag: 'v0.16.1' });
+    } catch (err) {
+      kind = (err as ReleaseConsistencyError).kind;
+    }
+    expect(kind).toBe(ERROR_KINDS.MALFORMED_GITHUB_RESPONSE);
+  });
+
+  it('fails closed on malformed shapes without truthiness coercion', () => {
+    const cases: Array<{ obj: unknown; kind: string }> = [
+      { obj: null, kind: ERROR_KINDS.MALFORMED_GITHUB_RESPONSE },
+      { obj: [rest], kind: ERROR_KINDS.MALFORMED_GITHUB_RESPONSE },
+      { obj: { ...rest, id: 'RE_kwDOexampleGraphQLNodeId' }, kind: ERROR_KINDS.INVALID_RELEASE_ID },
+      {
+        obj: { tag_name: 'v0.16.2', draft: false, prerelease: false },
+        kind: ERROR_KINDS.INVALID_RELEASE_ID,
+      },
+      { obj: { ...rest, tag_name: 123 }, kind: ERROR_KINDS.MALFORMED_GITHUB_RESPONSE },
+      { obj: { ...rest, draft: 'false' }, kind: ERROR_KINDS.MALFORMED_GITHUB_RESPONSE },
+      {
+        obj: { id: 1, tag_name: 'v0.16.2', draft: false },
+        kind: ERROR_KINDS.MALFORMED_GITHUB_RESPONSE,
+      },
+    ];
+    for (const { obj, kind } of cases) {
+      let got: string | undefined;
+      try {
+        parseGithubReleaseObject(obj as never);
+      } catch (err) {
+        got = (err as ReleaseConsistencyError).kind;
+      }
+      expect(got, `expected ${JSON.stringify(obj)} rejected`).toBe(kind);
+    }
+  });
+});
+
+describe('buildGithubApiArgs', () => {
+  it('builds a pinned, versioned REST GET for the given endpoint', () => {
+    expect(buildGithubApiArgs('repos/peacprotocol/peac/releases/tags/v0.16.2')).toEqual([
+      'api',
+      '--method',
+      'GET',
+      '-H',
+      'Accept: application/vnd.github+json',
+      '-H',
+      'X-GitHub-Api-Version: 2026-03-10',
+      'repos/peacprotocol/peac/releases/tags/v0.16.2',
+    ]);
+  });
+});
+
+describe('fetchReleaseByTag / fetchActualLatestRelease (injected REST lookup)', () => {
+  const restRelease = (over: Record<string, unknown> = {}) => ({
+    id: 353469866,
+    node_id: 'RE_kwDOexampleGraphQLNodeId',
+    tag_name: 'v0.16.2',
+    draft: false,
+    prerelease: false,
+    ...over,
+  });
+
+  it('fetchReleaseByTag calls exactly the REST releases-by-tag endpoint and normalizes the result', () => {
+    const calls: string[] = [];
+    const request = (endpoint: string) => {
+      calls.push(endpoint);
+      return restRelease();
+    };
+    const result = fetchReleaseByTag('v0.16.2', 'peacprotocol/peac', request);
+    expect(calls).toEqual(['repos/peacprotocol/peac/releases/tags/v0.16.2']);
+    expect(result).toEqual({
+      id: '353469866',
+      tagName: 'v0.16.2',
+      isDraft: false,
+      isPrerelease: false,
+    });
+  });
+
+  it('fetchActualLatestRelease calls exactly the REST releases/latest endpoint', () => {
+    const calls: string[] = [];
+    const request = (endpoint: string) => {
+      calls.push(endpoint);
+      return restRelease({ tag_name: 'v0.16.2' });
+    };
+    const result = fetchActualLatestRelease('peacprotocol/peac', request);
+    expect(calls).toEqual(['repos/peacprotocol/peac/releases/latest']);
+    expect(result).toEqual({ id: '353469866', tagName: 'v0.16.2' });
+  });
+
+  it('both lookups use the same pinned API version', () => {
+    expect(buildGithubApiArgs('repos/peacprotocol/peac/releases/tags/v0.16.2')).toContain(
+      'X-GitHub-Api-Version: 2026-03-10'
+    );
+    expect(buildGithubApiArgs('repos/peacprotocol/peac/releases/latest')).toContain(
+      'X-GitHub-Api-Version: 2026-03-10'
+    );
+  });
+
+  it('fetchReleaseByTag fails when the repository slug is missing', () => {
+    let kind: string | undefined;
+    try {
+      fetchReleaseByTag('v0.16.2', '', () => restRelease());
+    } catch (err) {
+      kind = (err as ReleaseConsistencyError).kind;
+    }
+    expect(kind).toBe(ERROR_KINDS.REGISTRY_PERMANENT_FAILURE);
+  });
+
+  it('fetchReleaseByTag fails closed on a GraphQL id, missing id, or tag mismatch', () => {
+    const bad: Array<{ over: Record<string, unknown>; kind: string }> = [
+      { over: { id: 'RE_kwDOexampleGraphQLNodeId' }, kind: ERROR_KINDS.INVALID_RELEASE_ID },
+      { over: { id: undefined }, kind: ERROR_KINDS.INVALID_RELEASE_ID },
+      { over: { tag_name: 'v0.16.1' }, kind: ERROR_KINDS.MALFORMED_GITHUB_RESPONSE },
+      { over: { draft: 'false' }, kind: ERROR_KINDS.MALFORMED_GITHUB_RESPONSE },
+    ];
+    for (const { over, kind } of bad) {
+      let got: string | undefined;
+      try {
+        fetchReleaseByTag('v0.16.2', 'peacprotocol/peac', () => restRelease(over));
+      } catch (err) {
+        got = (err as ReleaseConsistencyError).kind;
+      }
+      expect(got, `expected ${JSON.stringify(over)} rejected`).toBe(kind);
+    }
+  });
+
+  it('fetchReleaseByTag retries a transient failure within the bounded attempts', () => {
+    let calls = 0;
+    const request = (_endpoint: string) => {
+      calls += 1;
+      if (calls < 3) {
+        throw new ReleaseConsistencyError(ERROR_KINDS.REGISTRY_TRANSIENT_FAILURE, 'rate limited');
+      }
+      return restRelease();
+    };
+    const result = fetchReleaseByTag('v0.16.2', 'peacprotocol/peac', request);
+    expect(calls).toBe(3);
+    expect(result.id).toBe('353469866');
+  });
+
+  it('fetchReleaseByTag does not retry a permanent malformed-response failure', () => {
+    let calls = 0;
+    const request = (_endpoint: string) => {
+      calls += 1;
+      return restRelease({ id: 'RE_kwDOexampleGraphQLNodeId' });
+    };
+    let kind: string | undefined;
+    try {
+      fetchReleaseByTag('v0.16.2', 'peacprotocol/peac', request);
+    } catch (err) {
+      kind = (err as ReleaseConsistencyError).kind;
+    }
+    expect(kind).toBe(ERROR_KINDS.INVALID_RELEASE_ID);
+    expect(calls).toBe(1);
   });
 });
 
