@@ -50,8 +50,10 @@ export const ERROR_KINDS = Object.freeze({
   REGISTRY_TRANSIENT_FAILURE: 'REGISTRY_TRANSIENT_FAILURE',
   REGISTRY_PERMANENT_FAILURE: 'REGISTRY_PERMANENT_FAILURE',
   MALFORMED_REGISTRY_RESPONSE: 'MALFORMED_REGISTRY_RESPONSE',
+  MALFORMED_GITHUB_RESPONSE: 'MALFORMED_GITHUB_RESPONSE',
   INVALID_MANIFEST: 'INVALID_MANIFEST',
   INVALID_RELEASE_TAG: 'INVALID_RELEASE_TAG',
+  INVALID_RELEASE_ID: 'INVALID_RELEASE_ID',
 });
 
 const VERSION_PATTERN = /^\d+\.\d+\.\d+$/;
@@ -91,6 +93,80 @@ export function parseReleaseTag(tag) {
     );
   }
   return match[1];
+}
+
+/**
+ * Normalize a GitHub REST release id to a canonical decimal string.
+ *
+ * GitHub REST release objects carry a positive integer `id`; the GraphQL API
+ * (and `gh release view --json id`) carry an opaque `node_id` such as `RE_...`.
+ * Only the REST numeric id is accepted, so a GraphQL node id, a fractional or
+ * non-positive value, or a non-numeric string is a resolution failure rather
+ * than a comparison that silently returns false. Accepts a positive safe
+ * integer (number) or a string of digits with no leading zero; returns the
+ * decimal-string form. Throws INVALID_RELEASE_ID on anything else.
+ */
+export function normalizeReleaseId(raw) {
+  if (typeof raw === 'number') {
+    if (!Number.isInteger(raw) || raw <= 0 || !Number.isSafeInteger(raw)) {
+      throw new ReleaseConsistencyError(
+        ERROR_KINDS.INVALID_RELEASE_ID,
+        `release id must be a positive safe integer, got ${raw}`
+      );
+    }
+    return String(raw);
+  }
+  if (typeof raw === 'string' && /^[1-9][0-9]*$/.test(raw)) {
+    return raw;
+  }
+  throw new ReleaseConsistencyError(
+    ERROR_KINDS.INVALID_RELEASE_ID,
+    `release id is not a REST numeric id: ${raw === null ? 'null' : JSON.stringify(raw)}`
+  );
+}
+
+/**
+ * Validate a GitHub REST release object and return the fields the reconciler
+ * needs, failing closed on any shape violation. One parser is shared by the
+ * releases-by-tag and releases/latest lookups. Requires a non-array object, a
+ * normalized REST numeric `id`, a non-empty string `tag_name`, and boolean
+ * `draft` and `prerelease` flags (no truthiness coercion, so `"false"` or a
+ * missing flag is rejected, not silently treated as true or false). When
+ * `expectedTag` is supplied, `tag_name` must equal it.
+ */
+export function parseGithubReleaseObject(value, { expectedTag } = {}) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    throw new ReleaseConsistencyError(
+      ERROR_KINDS.MALFORMED_GITHUB_RESPONSE,
+      'GitHub release response is not an object'
+    );
+  }
+  const id = normalizeReleaseId(value.id);
+  if (typeof value.tag_name !== 'string' || value.tag_name.length === 0) {
+    throw new ReleaseConsistencyError(
+      ERROR_KINDS.MALFORMED_GITHUB_RESPONSE,
+      `GitHub release response has no string tag_name: ${JSON.stringify(value.tag_name)}`
+    );
+  }
+  if (typeof value.draft !== 'boolean') {
+    throw new ReleaseConsistencyError(
+      ERROR_KINDS.MALFORMED_GITHUB_RESPONSE,
+      `GitHub release draft flag is not a boolean: ${JSON.stringify(value.draft)}`
+    );
+  }
+  if (typeof value.prerelease !== 'boolean') {
+    throw new ReleaseConsistencyError(
+      ERROR_KINDS.MALFORMED_GITHUB_RESPONSE,
+      `GitHub release prerelease flag is not a boolean: ${JSON.stringify(value.prerelease)}`
+    );
+  }
+  if (expectedTag != null && value.tag_name !== expectedTag) {
+    throw new ReleaseConsistencyError(
+      ERROR_KINDS.MALFORMED_GITHUB_RESPONSE,
+      `GitHub release tag_name ${value.tag_name} does not match the requested tag ${expectedTag}`
+    );
+  }
+  return { id, tagName: value.tag_name, isDraft: value.draft, isPrerelease: value.prerelease };
 }
 
 /** Validate the publish manifest shape and return its package list. */
@@ -329,11 +405,16 @@ export function withRetry(operation, options = {}) {
  * with `draft`/`prerelease` true is never passed through this check by
  * the CLI; `latestRelease` being absent (no Latest release resolvable)
  * means the release under test cannot be the actual latest.
+ *
+ * When both ids are present they must both normalize to REST numeric ids;
+ * a GraphQL node id or other malformed id is a resolution failure (throws
+ * INVALID_RELEASE_ID), never a silent `false` that would misclassify the
+ * current Latest release as historical and skip the npm latest invariant.
  */
 export function determineIsActualLatest({ tag, releaseId, latestRelease }) {
   if (!latestRelease) return false;
   if (releaseId != null && latestRelease.id != null) {
-    return String(latestRelease.id) === String(releaseId);
+    return normalizeReleaseId(releaseId) === normalizeReleaseId(latestRelease.id);
   }
   if (tag && latestRelease.tagName) {
     return latestRelease.tagName === tag;
@@ -468,7 +549,7 @@ function ghRaw(args) {
       return JSON.parse(result.stdout);
     } catch (err) {
       throw new ReleaseConsistencyError(
-        ERROR_KINDS.MALFORMED_REGISTRY_RESPONSE,
+        ERROR_KINDS.MALFORMED_GITHUB_RESPONSE,
         `gh ${args.join(' ')} returned unparseable JSON: ${err.message}`
       );
     }
@@ -487,24 +568,73 @@ function ghRaw(args) {
   );
 }
 
-function fetchReleaseByTag(tag, repo) {
-  const args = ['release', 'view', tag, '--json', 'id,isDraft,isPrerelease'];
-  if (repo) args.push('--repo', repo);
-  return withRetry(() => ghRaw(args), { attempts: GH_MAX_ATTEMPTS }).value;
+// Pin an explicit GitHub REST API version so both release lookups share one
+// versioned surface and cannot drift to a moving default. Requests without a
+// version currently default to 2022-11-28, but GitHub documents that the
+// unversioned default can advance as older versions retire.
+const GITHUB_API_VERSION = '2026-03-10';
+
+/**
+ * Build the exact `gh api` argument vector for a REST GET, pinned to a single
+ * Accept header and API version. Exported so tests can assert both release
+ * lookups issue the same explicitly versioned request.
+ */
+export function buildGithubApiArgs(endpoint) {
+  return [
+    'api',
+    '--method',
+    'GET',
+    '-H',
+    'Accept: application/vnd.github+json',
+    '-H',
+    `X-GitHub-Api-Version: ${GITHUB_API_VERSION}`,
+    endpoint,
+  ];
 }
 
-/** Fetch the repository's actual current Latest release via the GitHub API. */
-function fetchActualLatestRelease(repo) {
+/** Real GitHub REST JSON lookup: one versioned `gh api` GET, parsed to an object. */
+function ghApiJson(endpoint) {
+  return ghRaw(buildGithubApiArgs(endpoint));
+}
+
+/**
+ * Resolve a release by tag through the REST releases-by-tag endpoint. `request`
+ * is injected (defaults to the real `gh api` GET) so the lookup path is
+ * directly testable. The response is validated by the shared parser, so its id
+ * shares the same REST id space as `fetchActualLatestRelease`; the gh CLI's
+ * `release view --json id` (a GraphQL node id) is deliberately not used, since
+ * it never equals the REST id and would misclassify the current Latest release
+ * as historical on the dispatch and schedule paths.
+ */
+export function fetchReleaseByTag(tag, repo, request = ghApiJson) {
+  if (!repo) {
+    throw new ReleaseConsistencyError(
+      ERROR_KINDS.REGISTRY_PERMANENT_FAILURE,
+      'a repository slug is required to resolve a release by tag (pass --repo or set GITHUB_REPOSITORY)'
+    );
+  }
+  const endpoint = `repos/${repo}/releases/tags/${tag}`;
+  const value = withRetry(() => request(endpoint), { attempts: GH_MAX_ATTEMPTS }).value;
+  return parseGithubReleaseObject(value, { expectedTag: tag });
+}
+
+/**
+ * Fetch the repository's actual current Latest release through the REST
+ * releases/latest endpoint. `request` is injected (defaults to the real
+ * `gh api` GET). The response is validated by the same shared parser, so its
+ * id shares the REST id space used by `fetchReleaseByTag`.
+ */
+export function fetchActualLatestRelease(repo, request = ghApiJson) {
   if (!repo) {
     throw new ReleaseConsistencyError(
       ERROR_KINDS.REGISTRY_PERMANENT_FAILURE,
       'a repository slug is required to resolve the actual latest release (pass --repo or set GITHUB_REPOSITORY)'
     );
   }
-  const value = withRetry(() => ghRaw(['api', `repos/${repo}/releases/latest`]), {
-    attempts: GH_MAX_ATTEMPTS,
-  }).value;
-  return { id: value.id != null ? String(value.id) : null, tagName: value.tag_name ?? null };
+  const endpoint = `repos/${repo}/releases/latest`;
+  const value = withRetry(() => request(endpoint), { attempts: GH_MAX_ATTEMPTS }).value;
+  const { id, tagName } = parseGithubReleaseObject(value);
+  return { id, tagName };
 }
 
 function printUsage(stream) {
