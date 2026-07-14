@@ -1,10 +1,10 @@
 # PEAC Protocol
 
-> Signed action records for AI agents, APIs, MCP tools, and gateways.
+> Portable signed records for agent, API, MCP, and cross-runtime interactions.
 
-Automated systems already call APIs, run MCP tools, make gateway decisions, report payment events, and provision resources across system boundaries.
+Automated systems call APIs, run tools, make gateway decisions, initiate commerce flows, and provision resources across organizational boundaries.
 
-PEAC records those actions, decisions, and events as portable signed interaction records, so another party can verify what happened later without relying on screenshots, private logs, or unverifiable assertions.
+PEAC lets those systems issue portable signed interaction records so another party can verify what the issuer reported, locally, offline, or across system boundaries, without relying only on screenshots or private logs.
 
 **Record locally. Verify across boundaries.**
 
@@ -13,95 +13,9 @@ PEAC records those actions, decisions, and events as portable signed interaction
 [![npm downloads](https://img.shields.io/npm/dm/@peac/protocol?style=flat&color=brightgreen)](https://www.npmjs.com/package/@peac/protocol)
 [![CI Status](https://img.shields.io/github/actions/workflow/status/peacprotocol/peac/ci.yml?branch=main&label=CI&color=brightgreen)](https://github.com/peacprotocol/peac/actions/workflows/ci.yml)
 
-## Start fast
+## Verify a record offline
 
-- **Verify a sample offline:** [`docs/guides/offline-sample-index.md`](docs/guides/offline-sample-index.md)
-- **Compare verification paths:** [`docs/guides/verification-options.md`](docs/guides/verification-options.md)
-- **Wire PEAC into MCP, OpenTelemetry, or a gateway:** [`docs/guides/integration-patterns.md`](docs/guides/integration-patterns.md)
-- **Choose by role:** [`docs/START_HERE.md`](docs/START_HERE.md)
-
-## What PEAC records
-
-PEAC is useful when a system does work and another party later needs to
-verify what happened without trusting that system's logs.
-
-| Event              | Familiar surfaces                                                                                     | Example record                                                                                                     |
-| ------------------ | ----------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| API call           | Stripe-style APIs, Cloudflare Workers, Vercel functions, internal HTTP services                       | request, response, usage, access decision, policy-visible outcome                                                  |
-| MCP tool run       | MCP servers, Smithery-listed tools, internal MCP servers                                              | tool input/output reference, tool result, issuer, timestamp, signature                                             |
-| Agent action       | A2A handoffs, agent-framework steps, Microsoft AGT-style runtime events                               | action invoked, delegated, approved, denied, cancelled, or timed out                                               |
-| Gateway decision   | Cloudflare, Portkey, Kong, API gateways, AI gateways                                                  | access, routing, export, or boundary decision reported by a gateway                                                |
-| Payment event      | x402, paymentauth / MPP, ACP, AP2-style commerce flows                                                | payment request, authorization, settlement observation, mandate, dispute context                                   |
-| Provisioning event | Stripe Projects-style provider setup, Vercel deployments, GitHub Actions, Terraform-managed resources | catalog, provider link, account, credential, budget, subscription, domain, deployment, or resource lifecycle event |
-
-These are orientation examples, not partnership claims or exclusive
-integration targets. PEAC records what those systems report; it does not
-replace them.
-
-PEAC does not make those decisions. It records what another system
-reported, binds it to an issuer and time, and makes it portable for
-verification.
-
-## What a PEAC record preserves
-
-A PEAC record is signed evidence about an interaction.
-
-| Field             | Meaning                                                                                              |
-| ----------------- | ---------------------------------------------------------------------------------------------------- |
-| Facts             | what the producing system reported happened                                                          |
-| Policy or context | the terms, policy, protocol, or configuration context that applied                                   |
-| Result            | allowed, denied, completed, failed, observed, settled, disputed, or another profile-specific outcome |
-| Time              | when the interaction was recorded                                                                    |
-| Issuer            | which service, runtime, gateway, or agent system issued the record                                   |
-| Signature         | a verifiable signature over the record                                                               |
-
-A counterparty can verify the record locally with the issuer's public key
-or through a self-hosted verifier. Records can also be exported into
-portable bundles for audit, review, dispute, compliance, or incident
-workflows.
-
-## How it works
-
-```text
-1. A system performs work
-   API call, MCP tool run, agent action, gateway decision,
-   payment event, provisioning event, runtime observation, or audit event
-
-2. The system issues a signed PEAC record
-   facts + policy/context + result + time + issuer + signature
-
-3. A counterparty verifies the record
-   locally, in CI, or through a self-hosted verifier using issuer keys
-
-4. The record travels
-   audit review, dispute review, compliance workflow, incident report,
-   exported bundle, or another system boundary
-```
-
-PEAC records what another system reported. It does not decide whether an
-action was allowed, authenticate the actor, settle payment, operate the
-runtime, or replace logs and traces.
-
-Full loop: [`docs/HOW-IT-WORKS.md`](docs/HOW-IT-WORKS.md). Artifact
-vocabulary (record, receipt, bundle, report):
-[`docs/ARTIFACTS.md`](docs/ARTIFACTS.md). Where PEAC sits next to other
-systems: [`docs/WHERE-IT-FITS.md`](docs/WHERE-IT-FITS.md). Protocol
-scope: [`docs/WHAT-PEAC-STANDARDIZES.md`](docs/WHAT-PEAC-STANDARDIZES.md).
-
-## Choose your path
-
-| If you...                                       | PEAC helps you...                                                                                                                      | Start here                                                                                                                                                                                         |
-| ----------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Run an API or metered service                   | issue signed records for requests, responses, usage, and policy-visible outcomes                                                       | [API Provider Quickstart](docs/guides/quickstart-api-provider.md)                                                                                                                                  |
-| Build MCP tools or agent workflows              | attach records to tool runs, command execution, handoffs, lifecycle events, and agent actions                                          | [MCP Integration Kit](integrator-kits/mcp/README.md), [Integration patterns guide](docs/guides/integration-patterns.md), or `npx -y @peac/mcp-server`                                              |
-| Build payment, gateway, or commerce flows       | preserve signed evidence around access, payment, settlement, mandate, gateway, and dispute events without operating the payment system | [MCP gateway records](docs/SOLUTIONS/mcp-gateway-receipts.md) or [Commerce evidence bundle](docs/SOLUTIONS/commerce-evidence-bundle.md)                                                            |
-| Track provisioning or resource lifecycle events | record catalog, provider-link, account, credential, budget, subscription, domain, deployment, and resource events                      | [Provisioning lifecycle records](docs/SOLUTIONS/verify-agent-provisioning.md)                                                                                                                      |
-| Need audit or review evidence                   | export portable records and bundles that can be referenced beside logs, traces, SIEMs, reports, and audit repositories                 | [Verification options](docs/guides/verification-options.md) or [Where PEAC fits](docs/WHERE-IT-FITS.md)                                                                                            |
-| Need to verify a record                         | verify a signed PEAC record with the issuer's public key or a self-hosted verifier                                                     | [Verification options](docs/guides/verification-options.md), [Offline sample index](docs/guides/offline-sample-index.md), or [Agent Operator Quickstart](docs/guides/quickstart-agent-operator.md) |
-
-Full path-by-role tree: [`docs/START_HERE.md`](docs/START_HERE.md).
-
-## Quickstart: verify a sample offline
+Generate the shipped sample records, then verify one locally with the generated issuer key set. The verification step does not fetch keys or call a remote verifier. `pnpm dlx` may download the CLI if it is not already cached.
 
 ```bash
 pnpm dlx @peac/cli samples generate -o ./s
@@ -114,123 +28,166 @@ Expected:
 Signature valid (offline).
 ```
 
-For browser and self-hosted verifier paths, see [`docs/guides/verification-options.md`](docs/guides/verification-options.md). For the full shipped sample set, see [`docs/guides/offline-sample-index.md`](docs/guides/offline-sample-index.md).
+- Compare verification paths: [`docs/guides/verification-options.md`](docs/guides/verification-options.md)
+- Wire PEAC into MCP, OpenTelemetry, or a gateway: [`docs/guides/integration-patterns.md`](docs/guides/integration-patterns.md)
+- Choose a starting point by role: [`docs/START_HERE.md`](docs/START_HERE.md)
 
-## Quickstart: verify one record in code
+## What PEAC records
+
+A PEAC record is a signed statement about an interaction or challenge: what the issuing system reported, not an independently established fact.
+
+| Record family      | What it represents                                                                                                 | Familiar surfaces                                       |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------- |
+| API call           | request, response, usage, access decision, policy-visible outcome                                                  | HTTP APIs, serverless functions, internal services      |
+| MCP tool run       | tool name, input and output digests or references, reported result, and correlation context                        | MCP servers and MCP-based tool integrations             |
+| Agent action       | invoked, delegated, approved, denied, cancelled, or timed out                                                      | Agent runtimes and multi-agent handoffs                 |
+| Gateway decision   | access, routing, export, or boundary decision                                                                      | API gateways and AI gateways                            |
+| Payment event      | request, authorization, settlement observation, mandate, dispute context                                           | Commerce flows such as x402, paymentauth, ACP, AP2, UCP |
+| Provisioning event | catalog, provider link, account, credential, budget, subscription, domain, deployment, or resource lifecycle event | Provisioning and resource-lifecycle systems             |
+
+These are orientation examples, not partnership claims or exclusive integration targets. PEAC records what those systems report; it does not replace them.
+
+At a high level, PEAC records can preserve:
+
+| Dimension         | Meaning                                                                                                    |
+| ----------------- | ---------------------------------------------------------------------------------------------------------- |
+| Facts             | what the issuer reports about the interaction                                                              |
+| Policy or context | applicable policy, protocol, configuration, or document bindings, when present                             |
+| Result            | a profile-specific issuer-reported outcome                                                                 |
+| Time              | signed issuance time (`iat`), plus optional issuer-reported event time (`occurred_at`) on evidence records |
+| Issuer            | the service or system that signed the record                                                               |
+| Signature         | a verifiable signature over the protected record                                                           |
+
+The required Wire 0.2 payload claims are `peac_version`, `kind`, `type`, `iss`, `iat`, and `jti`. The protected JWS header also carries the required signing and type-discrimination parameters, including `alg`, `kid`, and `typ`. Policy, `occurred_at`, actor, representation, pillars, and extensions are optional or profile-dependent. The normative envelope is defined in [`docs/specs/WIRE-0.2.md`](docs/specs/WIRE-0.2.md).
+
+A counterparty can verify the record locally with the issuer's public key or through a self-hosted verifier. Records can also be exported into portable bundles for audit, review, dispute, or compliance workflows.
+
+## How it works
+
+```text
+1. A system observes or reports an interaction
+   API call, MCP tool run, agent action, gateway decision,
+   payment event, or provisioning event
+
+2. An issuer creates a signed PEAC record
+   describing what that issuer reports about the interaction
+
+3. A counterparty verifies the signature, structure, and accepted bindings
+   locally, in CI, or through a self-hosted verifier, using the issuer's
+   public key
+
+4. The record travels
+   audit review, dispute review, compliance workflow, incident
+   report, exported bundle, or another system boundary
+```
+
+The issuer is the entity that signs the record. It may be the system that performed the work, an observer, a gateway, an adapter, or a runtime reporting an event; those roles stay separate.
+
+Full loop: [`docs/HOW-IT-WORKS.md`](docs/HOW-IT-WORKS.md). Artifact vocabulary (record, receipt, bundle, report): [`docs/ARTIFACTS.md`](docs/ARTIFACTS.md).
+
+## What PEAC does not do
+
+PEAC does not authorize actions, validate credentials, process payments, settle transactions, operate agents, assign trust scores, or replace observability systems.
+
+Full boundary, compared surface by surface: [`docs/WHERE-IT-FITS.md`](docs/WHERE-IT-FITS.md). Protocol scope: [`docs/WHAT-PEAC-STANDARDIZES.md`](docs/WHAT-PEAC-STANDARDIZES.md).
+
+## Evidence workflows
+
+Worked, offline-verifiable examples for common evidence shapes. Each adds no new wire format, schema field, or registry entry beyond what already ships. The PEAC records below preserve issuer-reported claims. Any linked payment, timestamp, transparency, or other external proof must also be evaluated under its own verification rules and trust model.
+
+| Workflow                    | Demonstrates                                                       | Start here                                                     |
+| --------------------------- | ------------------------------------------------------------------ | -------------------------------------------------------------- |
+| Paid resource               | x402 offer and receipt artifacts preserved in a payment record     | [example](examples/x402-paid-resource-records/)                |
+| Paid MCP tool               | tool-call digests linked to observed payment artifacts             | [example](examples/mcp-paid-tool-records/)                     |
+| Counterparty acknowledgment | one signed record referencing another by `(iss, jti, receipt_ref)` | [example](examples/counterparty-acknowledgment-records/)       |
+| Action approval             | consistency across reported approval and invocation records        | [example](examples/action-approval-records/)                   |
+| Agent-run lineage           | records, manifest, and coverage commitment verified together       | [guide](docs/guides/agent-runtime-lineage-export.md)           |
+| External anchoring          | a record digest registered or timestamped externally               | [guide](docs/guides/anchoring-evidence-digests.md)             |
+| Spend attribution           | issuer-observed amounts associated with a workflow                 | [guide](docs/SOLUTIONS/agent-spend-attribution.md)             |
+| Merkle commitment           | offline inclusion in a committed sorted set                        | [spec](docs/specs/WORKFLOW-CORRELATION.md#7-merkle-commitment) |
+
+These workflows establish signature validity and the internal consistency of the supplied evidence. They do not, by themselves, establish settlement finality, approver authority, accounting correctness, real-world completeness, or the validity of an underlying event.
+
+Full recipe catalog: [`docs/SOLUTIONS/`](docs/SOLUTIONS/). Full example catalog: [`examples/README.md`](examples/README.md).
+
+## Choose your path
+
+| Goal                                     | Start here                                                                                                                              |
+| ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| Issue records from an API                | [API Provider Quickstart](docs/guides/quickstart-api-provider.md)                                                                       |
+| Integrate MCP tools                      | [MCP Integration Kit](integrator-kits/mcp/README.md)                                                                                    |
+| Record agent or runtime actions          | [Agent Operator Quickstart](docs/guides/quickstart-agent-operator.md)                                                                   |
+| Preserve gateway or commerce evidence    | [Commerce evidence bundle](docs/SOLUTIONS/commerce-evidence-bundle.md) or [MCP gateway records](docs/SOLUTIONS/mcp-gateway-receipts.md) |
+| Record provisioning events               | [Provisioning lifecycle records](docs/SOLUTIONS/verify-agent-provisioning.md)                                                           |
+| Verify a record                          | [Verification options](docs/guides/verification-options.md) or [offline sample index](docs/guides/offline-sample-index.md)              |
+| Review security and operational evidence | [Trust-artifact index](docs/TRUST-ARTIFACTS.md)                                                                                         |
+
+Full path-by-role tree: [`docs/START_HERE.md`](docs/START_HERE.md).
+
+## Use PEAC in code
 
 ```bash
-npm install @peac/protocol @peac/crypto
+pnpm add @peac/protocol
 ```
+
+`@peac/protocol` re-exports the common crypto helpers, so a single package covers key generation, issuance, and local verification. The example below issues one concrete payment record; the same issuance and local-verification path applies to other PEAC record profiles.
 
 ```typescript
-import { verifyLocal } from '@peac/protocol';
+import { generateKeypair, issue, verifyLocal } from '@peac/protocol';
 
-const recordJws = response.headers.get('PEAC-Receipt');
+const ISSUER = 'https://api.example.com';
 
-if (!recordJws) {
-  throw new Error('Missing PEAC-Receipt header');
+async function main(): Promise<void> {
+  // The issuer holds the private key; a verifier needs only the public key.
+  const { privateKey, publicKey } = await generateKeypair();
+
+  // Issue one signed record in the current Interaction Record Format.
+  const { jws } = await issue({
+    iss: ISSUER,
+    kind: 'evidence',
+    type: 'org.peacprotocol/payment',
+    pillars: ['commerce'],
+    extensions: {
+      'org.peacprotocol/commerce': {
+        payment_rail: 'x402',
+        amount_minor: '1000',
+        currency: 'USD',
+      },
+    },
+    privateKey,
+    kid: 'https://api.example.com/keys/1',
+  });
+
+  // Verify locally with the public key, binding the expected issuer. No network
+  // request is made: the key is supplied here, not discovered remotely.
+  const result = await verifyLocal(jws, publicKey, { issuer: ISSUER });
+
+  if (!result.valid) {
+    throw new Error(`verification failed: ${result.code} ${result.message}`);
+  }
+
+  console.log(`verified record from ${result.claims.iss}`);
+  console.log(`kind: ${result.claims.kind}, type: ${result.claims.type}`);
 }
 
-const result = await verifyLocal(recordJws, publicKey, {
-  issuer: 'https://api.example.com',
+main().catch((error: unknown) => {
+  console.error(error);
+  process.exitCode = 1;
 });
-
-if (!result.valid) {
-  throw new Error(`${result.code}: ${result.message}`);
-}
-
-console.log(result.claims.iss, result.claims.kind, result.claims.type);
 ```
 
-This quickstart shows the developer path for one record. Operational
-latency and throughput baselines are tracked separately in
-[`docs/SLO.md`](docs/SLO.md).
+Expected:
 
-Node 24 tested, Node 22+ compatible. Go middleware and examples
-supported (Go 1.26+). Python via API-first examples and OpenAPI-driven
-flows.
+```text
+verified record from https://api.example.com
+kind: evidence, type: org.peacprotocol/payment
+```
 
-## Where PEAC fits
+For a longer walkthrough that also reads back typed extensions, see [`examples/minimal/`](examples/minimal/) (`pnpm --filter @peac/example-minimal demo`). Full CLI command catalog: [`packages/cli/README.md`](packages/cli/README.md).
 
-PEAC is useful when an action crosses a system, organization, protocol,
-agent, gateway, payment, provisioning, or audit boundary and the local
-log is not enough.
+### Run repository examples
 
-| Surface                         | What PEAC adds                                                                                                 |
-| ------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| APIs and HTTP services          | signed records for requests, responses, usage, and policy-visible outcomes                                     |
-| MCP tools and agent workflows   | records for tool runs, command execution, handoffs, lifecycle events, and agent actions                        |
-| Gateway and commerce systems    | records for access, payment, settlement, mandate, gateway, export, and dispute events                          |
-| Provisioning systems            | records for provider links, accounts, credentials, budgets, subscriptions, domains, deployments, and resources |
-| Runtime and evaluation systems  | portable observations from local runtime, policy, evaluation, and control systems                              |
-| Observability and audit systems | verifiable records that complement logs, traces, SIEMs, reports, bundles, and audit repositories               |
-
-PEAC does not replace those systems. It gives them a portable records
-layer: what was reported, by whom, when, under which context, and with
-which verifiable signature.
-
-If you work around MCP, A2A, x402, paymentauth / MPP, ACP, AP2-style
-commerce, UCP-style commerce, runtime governance, OpenTelemetry, or
-internal platform workflows, PEAC is the signed-record layer beside
-those systems, not a replacement for them.
-
-## Why PEAC
-
-Modern systems often need proof that travels beyond the system that
-produced the log.
-
-- Logs are local. PEAC records are portable and independently verifiable.
-- Traces correlate execution. PEAC records preserve signed claims across
-  organizational boundaries.
-- Auth, policy, runtime, and payment systems decide whether actions may
-  happen. PEAC records what another system reported happened.
-
-## For reviewers and operators
-
-PEAC is designed to be reviewed as protocol infrastructure, not as a
-hosted control plane.
-
-| Need                                      | Read                                                                         |
-| ----------------------------------------- | ---------------------------------------------------------------------------- |
-| Supported versions and disclosure process | [`SECURITY.md`](SECURITY.md)                                                 |
-| Measured local verification baselines     | [`docs/SLO.md`](docs/SLO.md)                                                 |
-| Stability classes and archived surfaces   | [`docs/STABILITY-CONTRACT.md`](docs/STABILITY-CONTRACT.md)                   |
-| Compatibility and deprecation status      | [`docs/COMPATIBILITY_MATRIX.md`](docs/COMPATIBILITY_MATRIX.md)               |
-| External standards references             | [`docs/STANDARDS_LEDGER.md`](docs/STANDARDS_LEDGER.md)                       |
-| Release-line invariant snapshots          | [`docs/baselines/`](docs/baselines/)                                         |
-| Verification paths                        | [`docs/guides/verification-options.md`](docs/guides/verification-options.md) |
-| Offline sample records                    | [`docs/guides/offline-sample-index.md`](docs/guides/offline-sample-index.md) |
-
-The reference verifier is self-hostable. Verification can also be
-performed locally when the record and issuer public key are available.
-
-## Use cases
-
-Practical recipes under [`docs/SOLUTIONS/`](docs/SOLUTIONS/):
-
-- [API record issuance](docs/SOLUTIONS/api-receipt-issuance.md)
-- [MCP tool-call records](docs/SOLUTIONS/mcp-tool-call-receipts.md)
-- [MCP gateway records](docs/SOLUTIONS/mcp-gateway-receipts.md)
-- [Agent action records](docs/SOLUTIONS/verify-agent-action.md)
-- [Gateway export records](docs/SOLUTIONS/verify-gateway-export.md)
-- [Commerce mandate records](docs/SOLUTIONS/verify-commerce-mandate.md)
-- [Commerce evidence bundle](docs/SOLUTIONS/commerce-evidence-bundle.md)
-- [Cloudflare x402 + PEAC](docs/SOLUTIONS/cloudflare-x402-peac.md)
-- [Runtime evidence export](docs/SOLUTIONS/runtime-evidence-export.md)
-- [Provisioning lifecycle verification](docs/SOLUTIONS/verify-agent-provisioning.md)
-- [Regulatory audit trail](docs/SOLUTIONS/regulatory-audit-trail.md)
-
-## Try it in 5 minutes
-
-- Verify a record locally with `verifyLocal()` or `pnpm dlx @peac/cli verify`.
-- Generate sample records and verify one offline with just a public key:
-  ```bash
-  pnpm dlx @peac/cli samples generate -o ./s
-  pnpm dlx @peac/cli verify ./s/valid/basic-record.jws --public-key ./s/bundles/sandbox-jwks.json
-  ```
-- Start the MCP server: `npx -y @peac/mcp-server`.
-
-The `pnpm dlx @peac/cli ...` and `npx ...` commands above run without cloning this repository. The examples below are repo-local: clone the repository first, then run:
+These commands are repo-local: clone the repository, install, and build first.
 
 ```bash
 pnpm install --frozen-lockfile
@@ -238,113 +195,56 @@ pnpm build
 pnpm demo:all
 ```
 
-`pnpm demo:all` runs the start-here examples end to end. The individual commands below are optional targeted demos you can run after that setup.
+`pnpm demo:all` runs the start-here examples end to end. Individually:
 
-- Run the minimal example: `pnpm --filter @peac/example-minimal demo`.
-- Run the MCP gateway records example:
-  ```bash
-  pnpm --filter @peac/example-mcp-gateway-receipts demo
-  pnpm --filter @peac/example-mcp-gateway-receipts demo:tamper
-  ```
-- Run the provisioning lifecycle example:
-  ```bash
-  pnpm --filter @peac/example-provisioning-lifecycle run issue
-  pnpm --filter @peac/example-provisioning-lifecycle run verify
-  ```
-- Self-host the reference verifier: [`surfaces/reference-verifier/`](surfaces/reference-verifier/).
+- Minimal example: `pnpm --filter @peac/example-minimal demo`
+- MCP gateway records: `pnpm --filter @peac/example-mcp-gateway-receipts demo` and `pnpm --filter @peac/example-mcp-gateway-receipts demo:tamper`
+- Provisioning lifecycle: `pnpm --filter @peac/example-provisioning-lifecycle run issue` and `pnpm --filter @peac/example-provisioning-lifecycle run verify`
+- MCP server: see the [`@peac/mcp-server` guide](packages/mcp-server/README.md)
+- Self-hosted reference verifier: [`surfaces/reference-verifier/`](surfaces/reference-verifier/)
 
-## Implementations and surfaces
+## Implementations and runtime support
 
-| Surface                                              | Where                                                                                    |
-| ---------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| TypeScript issuance and verification                 | [`@peac/protocol`](packages/protocol/)                                                   |
-| CLI and local tools                                  | [`@peac/cli`](packages/cli/)                                                             |
-| MCP server                                           | [`@peac/mcp-server`](packages/mcp-server/)                                               |
-| HTTP middleware and Go support                       | [`packages/middleware-express/`](packages/middleware-express/), [`sdks/go/`](sdks/go/)   |
-| Commerce, runtime, provenance, and protocol mappings | [`packages/mappings/`](packages/mappings/), [`packages/adapters/`](packages/adapters/)   |
-| Self-hostable reference verifier                     | [`apps/api/`](apps/api/), [`surfaces/reference-verifier/`](surfaces/reference-verifier/) |
-| Examples and recipes                                 | [`examples/`](examples/), [`docs/SOLUTIONS/`](docs/SOLUTIONS/)                           |
+| Runtime              | Status        | Notes                                                                                                                                            |
+| -------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| TypeScript / Node.js | Canonical     | Issuance and verification (`@peac/protocol`, `@peac/crypto`, `@peac/cli`). Node 24 is the canonical tested runtime; Node >=22.13.0 is supported. |
+| Go                   | Supported     | Record issuance and local verification (`sdks/go/`): Ed25519, RFC 8785 JCS. Requires Go 1.26+.                                                   |
+| Python               | Examples only | API-first examples for the verifier using standard HTTP. An OpenAPI specification is available, but there is no first-party Python SDK.          |
 
-Extended package catalog: [`docs/README_LONG.md`](docs/README_LONG.md).
+PEAC is pre-1.0. Stability is defined per surface in the [Stability Contract](docs/STABILITY-CONTRACT.md), not by this table. This README is informative; normative requirements live in the [Spec Index](docs/SPEC_INDEX.md).
 
-## Artifacts
+## Operational and enterprise review
 
-| Artifact                | Role                                                      |
-| ----------------------- | --------------------------------------------------------- |
-| `/.well-known/peac.txt` | Machine-readable terms                                    |
-| `PEAC-Receipt`          | HTTP response header carrying a signed interaction record |
-| `verifyLocal()`         | Offline verification once issuer keys are available       |
-| `peac-bundle/0.1`       | Portable audit and dispute package                        |
+PEAC supports audit and compliance workflows built on portable signed records. Using PEAC does not itself establish compliance with any regulation, framework, or certification.
 
-## CLI
+Verification requires signature validation before relying on record claims. `verifyLocal()` and the documented CLI `--public-key` path do not silently fall back to issuer discovery or other network access. Remote key-discovery paths apply SSRF protections and bounded resource limits.
 
-```bash
-# One-off
-pnpm dlx @peac/cli verify 'eyJhbGc...'
+| Need                                         | Read                                                                                           |
+| -------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| Trust-artifact index                         | [`docs/TRUST-ARTIFACTS.md`](docs/TRUST-ARTIFACTS.md)                                           |
+| Supported versions and disclosure process    | [`SECURITY.md`](SECURITY.md)                                                                   |
+| Threat model and mitigations                 | [`docs/THREAT_MODEL.md`](docs/THREAT_MODEL.md)                                                 |
+| Stability classes and archived surfaces      | [`docs/STABILITY-CONTRACT.md`](docs/STABILITY-CONTRACT.md)                                     |
+| Compatibility and deprecation status         | [`docs/COMPATIBILITY_MATRIX.md`](docs/COMPATIBILITY_MATRIX.md)                                 |
+| Conformance requirements and coverage        | [`docs/specs/CONFORMANCE-MATRIX.md`](docs/specs/CONFORMANCE-MATRIX.md)                         |
+| Benchmark methodology and measured baselines | [`docs/BENCHMARK-METHODOLOGY.md`](docs/BENCHMARK-METHODOLOGY.md), [`docs/SLO.md`](docs/SLO.md) |
+| External standards referenced or implemented | [`docs/STANDARDS_LEDGER.md`](docs/STANDARDS_LEDGER.md)                                         |
+| Privacy-aware deployment guidance            | [`docs/privacy/README.md`](docs/privacy/README.md)                                             |
+| Key custody and tenancy model                | [`docs/KEY-CUSTODY-AND-TENANCY.md`](docs/KEY-CUSTODY-AND-TENANCY.md)                           |
+| Release integrity and provenance             | [`docs/maintainers/RELEASE-INTEGRITY.md`](docs/maintainers/RELEASE-INTEGRITY.md)               |
 
-# Installed in your workspace
-pnpm add -D @peac/cli
-pnpm exec peac verify 'eyJhbGc...'
-```
+The reference verifier is self-hostable. Verification can also be performed locally whenever the record and the issuer's public key are available.
 
-Other commands: `peac observe command`, `peac record command`, `peac emit lifecycle`, `peac conformance run`, `peac reconcile a.bundle b.bundle`, `peac policy init|validate|generate`, `peac doctor`. Reference: [`packages/cli/README.md`](packages/cli/README.md).
+## Protocol status and versioning
 
-## Protocol boundary
-
-PEAC is a records layer, not a runtime control plane. It records what
-another system reported and makes that record portable, signed, and
-verifiable across boundaries.
-
-PEAC does not authorize actions, validate credentials, process payments,
-settle transactions, operate agents, host workflows, manage vaults,
-assign trust scores, or replace observability systems. Full boundary:
-[`docs/WHERE-IT-FITS.md`](docs/WHERE-IT-FITS.md).
-
-## Security
-
-- JWS signature verification is required before trusting any record claim.
-- Key discovery via `/.well-known/peac-issuer.json` JWKS with SSRF guards.
-- Kernel constraints enforced at issuance and verification (fail-closed).
-- No silent network fallback for offline verification.
-- Errors mapped to RFC 9457 Problem Details.
-
-See [`SECURITY.md`](SECURITY.md), [`docs/TRUST-ARTIFACTS.md`](docs/TRUST-ARTIFACTS.md), [`docs/specs/PROTOCOL-BEHAVIOR.md`](docs/specs/PROTOCOL-BEHAVIOR.md), [`docs/COMPATIBILITY_MATRIX.md`](docs/COMPATIBILITY_MATRIX.md), and [`docs/specs/VERSIONING.md`](docs/specs/VERSIONING.md).
-
-## Privacy-aware verification
-
-PEAC ships privacy-aware defaults and deployment guidance. Interaction
-evidence is hash-by-default on the record side
-(`docs/specs/PRIVACY-PROFILE.md`); the verifier separates immutable
-signed evidence from mutable derived metadata so retention, deletion,
-and rights-handling act on the right layer. Operator-facing guidance
-for privacy-sensitive and regulated environments (data classification,
-retention and deletion, deployment roles, data-subject rights, and a
-DPIA starter) lives in [`docs/privacy/`](docs/privacy/README.md). PEAC
-supports privacy-aware verification; it does not replace operator legal
-review, lawful-basis decisions, or controller obligations.
-
-## Versioning
-
-- **Current default format:** `interaction-record+jwt` (Wire 0.2).
-- **Legacy:** `peac-receipt/0.1` (Wire 0.1) is frozen and legacy-only; `verifyLocal()` returns `E_UNSUPPORTED_WIRE_VERSION` on legacy input.
+- Current format: Interaction Record Format 0.2 (`interaction-record+jwt`; repository shorthand: Wire 0.2).
+- Legacy: `peac-receipt/0.1` (Wire 0.1) is frozen and legacy-only; `verifyLocal()` returns `E_UNSUPPORTED_WIRE_VERSION` on legacy input.
 
 Full doctrine: [`docs/specs/VERSIONING.md`](docs/specs/VERSIONING.md).
 
-## Documentation
-
-- [Start Here](docs/START_HERE.md) — path by role.
-- [Integration patterns](docs/guides/integration-patterns.md) — MCP, OpenTelemetry, and gateway integration patterns using shipped surfaces.
-- [Verification options](docs/guides/verification-options.md), [Offline sample index](docs/guides/offline-sample-index.md) — verifier paths and sample records.
-- [How it works](docs/HOW-IT-WORKS.md), [Artifacts](docs/ARTIFACTS.md), [Where it fits](docs/WHERE-IT-FITS.md), [What PEAC standardizes](docs/WHAT-PEAC-STANDARDIZES.md).
-- [Use cases](docs/SOLUTIONS/) — practical recipes.
-- [Spec Index](docs/SPEC_INDEX.md) — normative specifications, including [Resource limits](docs/specs/RESOURCE-LIMITS.md).
-- [Standards ledger](docs/STANDARDS_LEDGER.md) — every external standard PEAC cites or implements, by status.
-- [Release-line baselines](docs/baselines/) — historical invariant snapshots and release-line references.
-- [Developer Guide](docs/README_LONG.md) — package catalog and extended examples.
-
 ## Contributing and license
 
-Contributions are welcome. For substantial changes, please open an issue first.
+Bug fixes, documentation, tests, and interoperability reports are welcome as pull requests. Changes to the wire format, schemas, registries, or public API need a design discussion first: open an issue before sending the pull request.
 
 Apache-2.0. See [`LICENSE`](LICENSE).
 
