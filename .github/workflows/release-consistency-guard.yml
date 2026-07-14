@@ -1,0 +1,93 @@
+# ---------------------------------------------------------------------------
+# Release Consistency
+#
+# Reconciles a GitHub Release against npm dist-tags across the full publish
+# manifest (scripts/publish-manifest.json), not a single representative
+# package. A release that is the repository's current Latest release must
+# carry the same version at npm `latest` for every published package. A
+# finalized release that is not the current Latest only needs the version to
+# exist on npm. Draft and prerelease releases are skipped: the npm latest
+# invariant does not apply until a release is finalized.
+#
+# This is detective, not preventive: GitHub does not let a workflow block a
+# release, so a red check here surfaces an inconsistency after the fact
+# instead of leaving it silent.
+# ---------------------------------------------------------------------------
+name: Release Consistency
+
+on:
+  release:
+    types: [published, released]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag to reconcile (for example v0.16.2)'
+        type: string
+        required: true
+  schedule:
+    - cron: '0 6 * * *'
+
+concurrency:
+  group: release-consistency-${{ github.event.release.id || inputs.tag || github.run_id }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  npm-latest-matches-release:
+    name: Stable Latest Release matches all npm packages
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: false
+
+      - name: Setup environment
+        uses: ./.github/actions/setup-env
+
+      - name: Resolve current Latest release tag
+        if: github.event_name == 'schedule'
+        id: latest
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          TAG=$(gh api "repos/${REPO}/releases/latest" --jq .tag_name)
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Reconcile published release against npm
+        if: github.event_name == 'release'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          RELEASE_ID: ${{ github.event.release.id }}
+          RELEASE_DRAFT: ${{ github.event.release.draft }}
+          RELEASE_PRERELEASE: ${{ github.event.release.prerelease }}
+        run: |
+          set -euo pipefail
+          ARGS=(--tag "$RELEASE_TAG" --release-id "$RELEASE_ID")
+          if [ "$RELEASE_DRAFT" = "true" ]; then
+            ARGS+=(--draft)
+          fi
+          if [ "$RELEASE_PRERELEASE" = "true" ]; then
+            ARGS+=(--prerelease)
+          fi
+          node scripts/verify-github-release-npm-consistency.mjs "${ARGS[@]}"
+
+      - name: Reconcile release against npm (manual dispatch)
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          INPUT_TAG: ${{ inputs.tag }}
+        run: node scripts/verify-github-release-npm-consistency.mjs --tag "$INPUT_TAG"
+
+      - name: Reconcile current Latest release against npm (scheduled)
+        if: github.event_name == 'schedule'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          LATEST_TAG: ${{ steps.latest.outputs.tag }}
+        run: node scripts/verify-github-release-npm-consistency.mjs --tag "$LATEST_TAG"
