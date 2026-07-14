@@ -443,6 +443,41 @@ jobs:
           retention-days: 90
 
   # ---------------------------------------------------------------------------
+  # Lane 3a: Tooling gates (tests/tooling)
+  #
+  # Runs the same `tests/tooling/**` suite included by the full release preflight
+  # `pnpm test`: the doc-truth / link gate, package-surface audit, distribution
+  # checks, and more. The per-package `pnpm test:core` run does not cover that
+  # suite, so before this lane a tooling-gate failure (such as a broken Markdown
+  # link, whose target can be any tracked file) could pass PR CI and only surface
+  # at release preflight. Because such a failure can be caused by a change
+  # anywhere in the tree, this lane runs on every non-stamp PR and every push to
+  # main, and skips only genuinely stamp-only PRs (whose paths are separately
+  # constrained). The build step is required: several tooling tests
+  # (verify-dist-private-leaks, verify-tarball-contents, readme-quickstart, and
+  # others) read built dist/ output.
+  # ---------------------------------------------------------------------------
+  tooling-gates:
+    name: Tooling Gates
+    needs: detect-changes
+    if: >-
+      github.ref == 'refs/heads/main' ||
+      needs.detect-changes.outputs.non_stamp == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: ./.github/actions/setup-env
+
+      - name: Build all packages
+        run: pnpm build
+
+      - name: Tooling gates (tests/tooling)
+        run: pnpm test:tooling
+
+  # ---------------------------------------------------------------------------
   # Lane 3b: Protocol rollback-path matrix (release-class gate)
   #
   # Runs the @peac/protocol test suite twice, once with the internal
@@ -652,7 +687,17 @@ jobs:
   # ---------------------------------------------------------------------------
   ci:
     name: Build, Lint, Test
-    needs: [workflow-lint, fast-guards, type-build, tests-core, examples-apps, pack-smoke]
+    needs:
+      [
+        detect-changes,
+        workflow-lint,
+        fast-guards,
+        type-build,
+        tests-core,
+        tooling-gates,
+        examples-apps,
+        pack-smoke,
+      ]
     if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 1
@@ -663,6 +708,7 @@ jobs:
           echo "fast-guards:   ${{ needs.fast-guards.result }}"
           echo "type-build:    ${{ needs.type-build.result }}"
           echo "tests-core:    ${{ needs.tests-core.result }}"
+          echo "tooling-gates: ${{ needs.tooling-gates.result }}"
           echo "examples-apps: ${{ needs.examples-apps.result }}"
           echo "pack-smoke:    ${{ needs.pack-smoke.result }}"
 
@@ -684,6 +730,24 @@ jobs:
           # tests-core: required when it runs, OK when skipped
           if [[ "${{ needs.tests-core.result }}" == "failure" || "${{ needs.tests-core.result }}" == "cancelled" ]]; then
             echo "FAIL: tests-core failed"; exit 1
+          fi
+
+          # tooling-gates: must SUCCEED on every non-stamp PR (an unexpected
+          # skip must not pass silently). A genuinely stamp-only PR
+          # (stamp_any and not non_stamp) may skip it.
+          TOOLING="${{ needs.tooling-gates.result }}"
+          STAMP_ANY="${{ needs.detect-changes.outputs.stamp_any }}"
+          NON_STAMP="${{ needs.detect-changes.outputs.non_stamp }}"
+          STAMP_ONLY="false"
+          if [[ "$STAMP_ANY" == "true" && "$NON_STAMP" == "false" ]]; then
+            STAMP_ONLY="true"
+          fi
+          if [[ "$STAMP_ONLY" == "true" ]]; then
+            if [[ "$TOOLING" != "success" && "$TOOLING" != "skipped" ]]; then
+              echo "FAIL: tooling-gates result '$TOOLING' unexpected on a stamp-only PR"; exit 1
+            fi
+          elif [[ "$TOOLING" != "success" ]]; then
+            echo "FAIL: tooling-gates must succeed on a non-stamp change (got '$TOOLING')"; exit 1
           fi
 
           # examples-apps: optional (success or skipped OK, failure blocks)
