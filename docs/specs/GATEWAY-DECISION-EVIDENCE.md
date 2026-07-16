@@ -7,9 +7,10 @@ This document adds no normative requirement to the wire format and no field to
 any record. It does not register a new receipt type, extension group, registry
 entry, error code, or conformance requirement. It describes how PEAC's existing
 `org.peacprotocol/access-decision` record composes to carry evidence for a
-terminal gateway access decision observed within an issuer-controlled gateway
-decision boundary, and, equally important, when a gateway observation is not
-issued at all. The semantics it defines are protocol-neutral and reuse existing
+terminal gateway access decision produced within an issuer-controlled gateway
+decision boundary, and, equally important, when no access-decision record is
+issued for a gateway observation. The semantics it defines are protocol-neutral
+and reuse existing
 PEAC primitives.
 
 Lowercase requirement words in this informative profile describe composition
@@ -22,15 +23,16 @@ than restating them as new conformance requirements.
 
 A gateway is a component that evaluates a request at a defined decision boundary
 before the request proceeds, is blocked, or is handed to another decision
-workflow (for example an API gateway, a model gateway, an MCP server, or a
-service-mesh policy point).
+workflow (for example an API gateway, a model gateway, an MCP server acting as
+a policy or decision point, or a service-mesh policy point).
 
 **In scope:**
 
 - Recording a terminal gateway access decision (`allow`, `deny`, or `review`)
-  observed within an issuer-controlled gateway decision boundary, as an existing
+  produced within an issuer-controlled gateway decision boundary, as an existing
   `org.peacprotocol/access-decision` record.
-- The conditions under which a gateway observation is not issued.
+- The conditions under which no access-decision record is issued for a gateway
+  observation.
 - The distinction between a check outcome, an access decision, and a handling
   action.
 
@@ -66,11 +68,12 @@ normative behavior:
   request to an internal signer
   ([GATEWAY-ISSUANCE-RECIPES.md](GATEWAY-ISSUANCE-RECIPES.md) Sections 3.1, 4.1,
   and 5.2).
-- The verifier trust model: a valid signature proves integrity and key
-  possession, not issuer authorization, and allowlisting and key pinning are
-  configurable policy
-  ([TRUST-PINNING-POLICY.md](TRUST-PINNING-POLICY.md) Sections 3.1, 3.2, 3.3, 6,
-  7).
+- The verifier trust model: a valid signature establishes record integrity and
+  possession of the corresponding signing key, not issuer legitimacy or
+  authorization; issuer acceptance, allowlisting, and key pinning are configured
+  verifier policy
+  ([TRUST-PINNING-POLICY.md](TRUST-PINNING-POLICY.md) Sections 3.2, 3.3, 6,
+  and 7).
 - The no-inline-value invariant for lifecycle observations
   ([LIFECYCLE-OBSERVATION-PROFILE.md](LIFECYCLE-OBSERVATION-PROFILE.md)
   Section 6), which this profile references to draw the boundary between an
@@ -81,7 +84,7 @@ normative behavior:
 ## 3. Terminology
 
 - **Gateway decision evidence**: a signed record that represents evidence of a
-  terminal gateway access decision observed within an issuer-controlled gateway
+  terminal gateway access decision produced within an issuer-controlled gateway
   decision boundary.
 - **Gateway decision boundary**: the point at which the gateway completes the
   decision represented by the record, before the request proceeds, is blocked,
@@ -154,9 +157,9 @@ decision the gateway reached. The issuer does not add claims it did not observe
 
 ## 6. Mandatory non-issuance conditions
 
-A gateway observation is not issued as an access decision when any of the
-following is true. In these cases the correct behavior is to not issue, rather
-than to issue a weaker or inferred decision.
+An access-decision record is not issued for a gateway observation when any of
+the following is true. In these cases the correct behavior is to not issue,
+rather than to issue a weaker or inferred decision.
 
 - Only a check outcome is known.
 - A retry remains possible within the gateway decision boundary.
@@ -169,9 +172,9 @@ than to issue a weaker or inferred decision.
   boundary (only a third-party report is available).
 - The input describes only lifecycle or handling behavior.
 
-Declining to issue is deliberate, not a limitation: it prevents a failed policy
-check, an intermediate block that a fallback later reverses, or a logging event
-from being recorded as a portable denial.
+Declining to issue the record is deliberate, not a limitation: it prevents a
+failed policy check, an intermediate block that a fallback later reverses, or a
+logging event from being recorded as a portable denial.
 
 ## 7. Mapping to the existing access-decision record
 
@@ -237,14 +240,15 @@ Section 12) and requires application-aware verifier policy.
 
 ## 10. Signature integrity versus issuer authorization
 
-Per [TRUST-PINNING-POLICY.md](TRUST-PINNING-POLICY.md) Sections 3.1 and 3.2:
-
 Signature verification establishes record integrity and possession of the
-corresponding signing key. Association of that key with the claimed issuer, and
-authorization of that issuer for the relying application's deployment context,
-are established by the relying application's configured trust policy (Section
-11), not by the signature alone. A valid signature does not prove that the
-decision was correct or that the deployment was configured as claimed.
+corresponding signing key. Per
+[TRUST-PINNING-POLICY.md](TRUST-PINNING-POLICY.md) Sections 3.2 and 3.3, that
+does not establish issuer legitimacy or authorization. Association of that key
+with the claimed issuer, and authorization of that issuer for the relying
+application's deployment context, are established by the relying application's
+configured trust policy (Section 11), not by the signature alone. A valid
+signature does not prove that the decision was correct or that the deployment
+was configured as claimed.
 
 ## 11. Verification-policy requirements
 
@@ -294,15 +298,18 @@ application-specific JSON shape.
   key may be held by the gateway process or by a constrained signing service
   acting for the issuer; raw request and response bodies need not cross the
   boundary solely for signing.
-- Raw prompt, completion, policy, request, and response bodies are not inlined
-  into the record ([PRIVACY-PROFILE.md](PRIVACY-PROFILE.md)).
-- The record carries the decision and its minimal identifying context
-  (`resource`, `action`, `decision`, occurrence time), not the content that was
-  evaluated.
+- This profile does not inline raw prompt, completion, policy, request, or
+  response bodies. Deployments and application-specific extensions remain
+  subject to the Privacy Profile ([PRIVACY-PROFILE.md](PRIVACY-PROFILE.md)).
+- The record carries the required decision context (`resource`, `action`,
+  `decision`) and, when present, occurrence time. It does not carry the content
+  that was evaluated.
 - A gateway issuer does not assert facts it did not observe
   ([GATEWAY-ISSUANCE-RECIPES.md](GATEWAY-ISSUANCE-RECIPES.md) Section 3.1).
-- Private signing keys are protected at the edge per
+- Private signing keys are protected according to
   [GATEWAY-ISSUANCE-RECIPES.md](GATEWAY-ISSUANCE-RECIPES.md) Section 5.
+  Deployments may protect the key as an edge secret or use a constrained
+  internal signing service.
 
 ## 14. Limitations, non-claims, and interoperability
 

@@ -19,8 +19,8 @@ not tighten any fields beyond what the schema already mandates.
 - Recording that an API gateway, MCP server, or service mesh evaluated
   an access request and reached a decision (allow, deny, or deferred
   for review)
-- Producing machine-verifiable evidence that a specific resource was
-  accessed (or denied) for a specific action at a specific time
+- Producing machine-verifiable evidence that a gateway evaluated a request
+  for a specific resource and action and reached an access decision
 - Creating auditable access decision logs that can be verified by third
   parties independently of the system that made the decision
 
@@ -30,8 +30,8 @@ All fields below belong to the `org.peacprotocol/access` extension group.
 
 | Field      | Schema Status | Profile Status | Rationale                                              |
 | ---------- | ------------- | -------------- | ------------------------------------------------------ |
-| `resource` | REQUIRED      | REQUIRED       | Identifies the resource being accessed                 |
-| `action`   | REQUIRED      | REQUIRED       | Identifies the action performed on the resource        |
+| `resource` | REQUIRED      | REQUIRED       | Identifies the evaluated resource or target            |
+| `action`   | REQUIRED      | REQUIRED       | Identifies the requested or evaluated operation        |
 | `decision` | REQUIRED      | REQUIRED       | Records the access control outcome (allow/deny/review) |
 
 All fields are schema-required. This profile does not tighten any
@@ -221,3 +221,6 @@ console.log(result.claims.type); // 'org.peacprotocol/access-decision'
   256 characters is valid
 - Access decisions are observations: recording an access decision does
   not constitute granting or revoking access
+- The presence of `resource`, `action`, and `decision` does not prove that
+  the operation executed, completed, or was prevented. The record represents
+  evidence of the access decision
