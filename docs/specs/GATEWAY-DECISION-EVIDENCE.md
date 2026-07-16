@@ -90,7 +90,7 @@ normative behavior:
   produced within a gateway decision boundary operated under the issuer's
   control. Signing may occur in the gateway process or through a constrained
   signing service operating within the same issuer trust boundary.
-- **Check outcome**: the result of a guardrail, policy, or filter check
+- **Check outcome**: the result of a policy, filter, or validation check
   (`passed`, `failed`, `error`). A check outcome is an input to a decision, not
   a decision.
 - **Access decision**: the decision emitted at the represented gateway decision
@@ -169,9 +169,9 @@ than to issue a weaker or inferred decision.
   boundary (only a third-party report is available).
 - The input describes only lifecycle or handling behavior.
 
-Not issuing is a feature, not a gap: it prevents a failed guardrail check, an
-intermediate block that a fallback later reverses, or a logging event from being
-recorded as a portable denial.
+Declining to issue is deliberate, not a limitation: it prevents a failed policy
+check, an intermediate block that a fallback later reverses, or a logging event
+from being recorded as a portable denial.
 
 ## 7. Mapping to the existing access-decision record
 
