@@ -18,8 +18,10 @@ signals, and compliance assessments. This profile defines how to record those
 artifacts as signed PEAC Interaction Records using existing Wire 0.2 primitives.
 
 PEAC is the records plane beneath these runtimes, not the control plane itself.
-A runtime decides and enforces; PEAC records what the runtime reported, in a
-form any third party can verify with the issuer's public key.
+The runtime or associated control component produces or reports the outcome;
+PEAC records the resulting artifact rather than making or enforcing the
+decision. A verifier can validate the PEAC record's structure and signature and
+evaluate the issuer under its configured trust policy.
 
 ## 2. Scope
 
@@ -27,12 +29,25 @@ This profile covers **observational records** from runtime governance systems.
 
 **In scope:**
 
-- Recording governance decisions (allow, deny, warn, require_approval, log)
+- Recording runtime policy outcomes (`allow`, `deny`, `warn`,
+  `require_approval`) and operational handling actions (`log`)
 - Recording audit entries with upstream integrity references
 - Recording authority and scope changes
 - Recording agent lifecycle state transitions
 - Recording trust signals as opaque observational data
 - Recording compliance assessments as opaque observational data
+
+> **Note (informative): a runtime-governance outcome is not the same as a value
+> of the `decision` field of the `org.peacprotocol/access` extension.** The list
+> above is this profile's own runtime-governance vocabulary for
+> `org.peacprotocol/runtime-governance-policy-decision` records, and it mixes
+> access-control outcomes with handling actions: some entries (for example `log`)
+> are operational handling actions, not access-control outcomes. The registered
+> access vocabulary in the `org.peacprotocol/access` extension is exactly
+> `allow`, `deny`, `review`; a handling action such as `log`, `retry`, or
+> `fallback` never populates the `decision` field of the `org.peacprotocol/access`
+> extension. See [GATEWAY-DECISION-EVIDENCE.md](GATEWAY-DECISION-EVIDENCE.md).
+> This note changes no field, enum, or requirement in this profile.
 
 **Out of scope:**
 
