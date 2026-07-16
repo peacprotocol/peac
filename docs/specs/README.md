@@ -49,11 +49,12 @@ See [STABILITY-POLICY.md](STABILITY-POLICY.md) for full stability guarantees.
 
 ## Integration Patterns
 
-| Specification                                              | Status      | Description                         |
-| ---------------------------------------------------------- | ----------- | ----------------------------------- |
-| [GATEWAY-ISSUANCE-RECIPES.md](GATEWAY-ISSUANCE-RECIPES.md) | INFORMATIVE | Cloudflare, nginx, Envoy patterns   |
-| [INTEROP.md](INTEROP.md)                                   | INFORMATIVE | Interoperability guidance           |
-| [HOT-PATH-RESILIENCE.md](HOT-PATH-RESILIENCE.md)           | INFORMATIVE | Performance and resilience patterns |
+| Specification                                                | Status      | Description                                                       |
+| ------------------------------------------------------------ | ----------- | ----------------------------------------------------------------- |
+| [GATEWAY-ISSUANCE-RECIPES.md](GATEWAY-ISSUANCE-RECIPES.md)   | INFORMATIVE | Cloudflare, nginx, Envoy patterns                                 |
+| [GATEWAY-DECISION-EVIDENCE.md](GATEWAY-DECISION-EVIDENCE.md) | INFORMATIVE | Terminal gateway access decisions as evidence; non-issuance rules |
+| [INTEROP.md](INTEROP.md)                                     | INFORMATIVE | Interoperability guidance                                         |
+| [HOT-PATH-RESILIENCE.md](HOT-PATH-RESILIENCE.md)             | INFORMATIVE | Performance and resilience patterns                               |
 
 ## Domain Extensions
 

@@ -293,6 +293,17 @@ interface PolicyContext {
 }
 ```
 
+> **Note (informative): policy context, access decision, and handling action are
+> distinct.** `PolicyContext.decision` is a policy-context field of an interaction
+> record and uses this interface's own vocabulary. It is not the same as an
+> access-control outcome: a gateway access decision is carried in the
+> `org.peacprotocol/access` extension of an `org.peacprotocol/access-decision`
+> record, whose `decision` vocabulary is `allow`, `deny`, `review`. A check or
+> policy result, an access decision, and a handling action (for example retry,
+> fallback, log) are three different things; see
+> [GATEWAY-DECISION-EVIDENCE.md](GATEWAY-DECISION-EVIDENCE.md). This note changes
+> no field, enum, or requirement.
+
 ### 4.9 Refs
 
 ```typescript
