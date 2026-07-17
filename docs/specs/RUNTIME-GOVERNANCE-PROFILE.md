@@ -40,10 +40,12 @@ This profile covers **observational records** from runtime governance systems.
 > **Note (informative): a runtime-governance outcome is not the same as a value
 > of the `decision` field of the `org.peacprotocol/access` extension.** The list
 > above is this profile's own runtime-governance vocabulary for
-> `org.peacprotocol/runtime-governance-policy-decision` records, and it mixes
-> access-control outcomes with handling actions: some entries (for example `log`)
-> are operational handling actions, not access-control outcomes. The registered
-> access vocabulary in the `org.peacprotocol/access` extension is exactly
+> `org.peacprotocol/runtime-governance-policy-decision` records, and it includes
+> both runtime policy outcomes and operational handling actions (for example
+> `log`). Some outcome labels may resemble access-control decisions, but they
+> remain values of this runtime-governance profile rather than values of the
+> `org.peacprotocol/access` extension. The registered access vocabulary in the
+> `org.peacprotocol/access` extension is exactly
 > `allow`, `deny`, `review`; a handling action such as `log`, `retry`, or
 > `fallback` never populates the `decision` field of the `org.peacprotocol/access`
 > extension. See [GATEWAY-DECISION-EVIDENCE.md](GATEWAY-DECISION-EVIDENCE.md).
