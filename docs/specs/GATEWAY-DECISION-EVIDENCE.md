@@ -185,10 +185,10 @@ A qualifying observation maps to the shipped record with no new surface:
 - **Receipt type**: `org.peacprotocol/access-decision`.
 - **Kind**: `evidence`.
 - **Extension**: `org.peacprotocol/access` with the three required fields
-  `resource`, `action`, and `decision` populated from the observed outcome
-  ([access profile](../profiles/access.md)). `resource` identifies the evaluated
-  target, and `action` identifies the requested or evaluated operation; their
-  presence does not prove whether the operation was executed, completed, or
+  populated so that `resource` comes from the evaluated target, `action` from
+  the requested or evaluated operation, and `decision` from the terminal gateway
+  outcome ([access profile](../profiles/access.md)). Their presence does not
+  prove whether the operation was executed, completed, or
   prevented.
 - **Occurrence time**: the time the gateway decision represented by the record
   became terminal at the issuer-controlled decision boundary, as supplied by
@@ -293,9 +293,10 @@ application-specific JSON shape.
 ## 13. Data minimization and security considerations
 
 - The three access fields `resource`, `action`, and `decision` are all
-  schema-required. If any is unavailable or not supportable, the issuer does not
-  issue the access-decision record (Section 6). Optional context is omitted
-  rather than guessed.
+  schema-required. If any required access field cannot be truthfully populated
+  from the issuer-controlled decision context, the issuer does not issue the
+  access-decision record (Section 6). Optional context is omitted rather than
+  guessed.
 - Issuance and signing remain inside the deployment trust boundary. The signing
   key may be held by the gateway process or by a constrained signing service
   acting for the issuer; raw request and response bodies need not cross the

@@ -29,11 +29,11 @@ not tighten any fields beyond what the schema already mandates.
 
 All fields below belong to the `org.peacprotocol/access` extension group.
 
-| Field      | Schema Status | Profile Status | Rationale                                              |
-| ---------- | ------------- | -------------- | ------------------------------------------------------ |
-| `resource` | REQUIRED      | REQUIRED       | Identifies the evaluated resource or target            |
-| `action`   | REQUIRED      | REQUIRED       | Identifies the requested or evaluated operation        |
-| `decision` | REQUIRED      | REQUIRED       | Records the access control outcome (allow/deny/review) |
+| Field      | Schema Status | Profile Status | Rationale                                                          |
+| ---------- | ------------- | -------------- | ------------------------------------------------------------------ |
+| `resource` | REQUIRED      | REQUIRED       | Identifies the evaluated resource or target                        |
+| `action`   | REQUIRED      | REQUIRED       | Identifies the requested or evaluated operation                    |
+| `decision` | REQUIRED      | REQUIRED       | Records the access-control decision (`allow`, `deny`, or `review`) |
 
 All fields are schema-required. This profile does not tighten any
 optional fields to REQUIRED status.
@@ -47,7 +47,6 @@ required fields.
 ```json
 {
   "iss": "https://gateway.example.com",
-  "aud": "https://consumer.example.com",
   "kind": "evidence",
   "type": "org.peacprotocol/access-decision",
   "pillars": ["access"],
@@ -65,8 +64,8 @@ required fields.
 
 - **Identity** (recommended, not enforced): when the access decision
   depends on a verified identity attestation, pairing an identity
-  receipt with an access receipt provides a complete evidence chain
-  from identity proof to access outcome
+  receipt with an access receipt provides a correlated evidence chain
+  from identity proof to the recorded access decision
 - **Compliance** (recommended for audit workflows): when access
   decisions are subject to regulatory audit, a companion compliance
   receipt records the framework and audit reference
@@ -78,11 +77,11 @@ enforced dependencies. Receipts are valid without companion profiles.
 
 The access extension group supports evidence relevant to:
 
-- SOC 2 Type II: access control evidence for CC6.1 (logical and
-  physical access controls)
-- ISO 27001: access control evidence for Annex A.9 (access control)
-- NIST SP 800-53: access control evidence for AC (Access Control)
-  family
+- SOC 2: evidence relevant to the Trust Services Criteria's logical and
+  physical access controls, including CC6.1 where applicable
+- ISO/IEC 27001:2022 and ISO/IEC 27002:2022: evidence relevant to access-control
+  controls selected through the organization's risk-treatment process
+- NIST SP 800-53 Rev. 5: evidence relevant to the AC (Access Control) family
 
 This profile can help document access decisions for audit purposes.
 PEAC is evidence infrastructure; these mappings do not themselves
@@ -155,7 +154,8 @@ equivalent for this group.
 ```
 
 This receipt pairs access evidence with an identity proof reference,
-providing a complete evidence chain from identity to access outcome.
+providing a correlated evidence chain from identity proof to the recorded
+access decision.
 
 ## Quick demo
 
