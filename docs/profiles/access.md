@@ -21,8 +21,9 @@ not tighten any fields beyond what the schema already mandates.
   for review)
 - Producing machine-verifiable evidence that a gateway evaluated a request
   for a specific resource and action and reached an access decision
-- Creating auditable access decision logs that can be verified by third
-  parties independently of the system that made the decision
+- Creating auditable access-decision records whose structure and signatures
+  can be independently validated, with issuer acceptance determined by the
+  verifier's configured trust policy
 
 ## Required / Recommended / Prohibited fields
 
@@ -219,8 +220,8 @@ console.log(result.claims.type); // 'org.peacprotocol/access-decision'
 - The `action` field is an open vocabulary string. Common values include
   `read`, `write`, `execute`, `delete`, `list`, but any string up to
   256 characters is valid
-- Access decisions are observations: recording an access decision does
-  not constitute granting or revoking access
+- Access-decision records are evidence of decisions: recording one does not
+  grant or revoke access
 - The presence of `resource`, `action`, and `decision` does not prove that
   the operation executed, completed, or was prevented. The record represents
   evidence of the access decision

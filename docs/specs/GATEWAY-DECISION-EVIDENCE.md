@@ -131,8 +131,8 @@ distinct, and only one of them may populate the `decision` field of an
 A failed check does not, by itself, establish a denial: the gateway may
 continue, retry, fall back, hand off for review, or separately reach a terminal
 denial. A passed check does not, by itself, establish an allow decision. A check
-outcome alone never populates the access `decision` field; a separately observed
-terminal access decision may. The registered access vocabulary is exactly
+outcome alone never populates the access `decision` field; only a separately
+reached terminal access decision may. The registered access vocabulary is exactly
 `allow`, `deny`, `review`; this profile introduces no fourth value and does not
 repurpose a handling action as a decision.
 
@@ -144,8 +144,9 @@ only when all of the following hold:
 - The outcome is **terminal** for the gateway decision boundary: no retry,
   fallback, or further processing within that boundary can change the emitted
   decision.
-- The **resource** is observed.
-- The **action** is observed.
+- The issuer can truthfully populate `resource` from the evaluated target.
+- The issuer can truthfully populate `action` from the requested or evaluated
+  operation.
 - The **decision** is one of `allow`, `deny`, `review`, drawn from the observed
   outcome and not derived from a check outcome or a handling action.
 - The decision was produced within a gateway decision boundary under the
@@ -158,15 +159,16 @@ decision the gateway reached. The issuer does not add claims it did not observe
 ## 6. Mandatory non-issuance conditions
 
 An access-decision record is not issued for a gateway observation when any of
-the following is true. In these cases the correct behavior is to not issue,
-rather than to issue a weaker or inferred decision.
+the following is true. In these cases the correct behavior is not to issue the
+record, rather than to issue a weaker or inferred decision.
 
 - Only a check outcome is known.
 - A retry remains possible within the gateway decision boundary.
 - A fallback remains possible within the gateway decision boundary.
 - The gateway has not completed the decision represented by the record.
-- The `resource`, `action`, or `decision` field is unavailable or not
-  supportable (the schema requires all three; see Section 13).
+- The `resource`, `action`, or `decision` field cannot be truthfully populated
+  from the issuer-controlled observation (the schema requires all three; see
+  Section 13).
 - Terminality cannot be established.
 - The decision was not produced within an issuer-controlled gateway decision
   boundary (only a third-party report is available).
