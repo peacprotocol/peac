@@ -1,54 +1,32 @@
 /**
- * Gateway Decision Evidence Example
+ * Gateway Decision Evidence
  *
- * A deployment operator that runs a gateway decision boundary issues a portable
- * signed record ONLY for a terminal gateway access decision it can truthfully
- * populate, and abstains (issues nothing) for every non-terminal state. A
- * relying party verifies the record offline under a configured issuer/key policy.
+ * A gateway decision boundary under an issuer's control issues a signed
+ * org.peacprotocol/access-decision record ONLY for a terminal access decision it
+ * can truthfully populate (allow/deny/review), and abstains for every
+ * non-terminal state. A relying party verifies it offline under an explicit
+ * issuer/key policy. Uses only the shipped access-decision record and the
+ * registered org.peacprotocol/access extension; no new protocol surface. See
+ * README.md for the full walkthrough.
  *
- * What this example demonstrates:
- * 1. Terminal issuance for all three registered decisions (allow, deny, review),
- *    using ONLY the shipped org.peacprotocol/access-decision record and the
- *    registered org.peacprotocol/access extension. No new protocol surface.
- * 2. Mandatory non-issuance (abstention) for: a check-only outcome, an
- *    intermediate decision where retry or fallback is still possible, a
- *    terminal-labelled event that does not explicitly establish
- *    retryOrFallbackPossible === false, a handling-action-only event
- *    (log/retry/fallback/continue/transform), a third-party-report-only event,
- *    and missing or unsupported access context.
- * 3. Offline verification under an explicit relying-party policy. The MANDATORY
- *    structural checks are always applied: the expected record kind, type,
- *    access pillar, a valid access extension, the correct issuer, and a valid
- *    signature. In addition the policy MAY require the expected kid (when the
- *    relying party configures one) and MAY reject records that produce a
- *    verification warning (a conservative, example-local choice, NOT a PEAC or
- *    GDE requirement: the profile permits application-specific extensions and
- *    treats them as application data).
- * 4. Three distinct trust failures: a tampered payload, a cryptographically
- *    valid record from a signer the relying party does not accept, and a valid
- *    record from an unexpected issuer.
+ * Trust boundary: parseIssuerControlledBoundaryEvent validates syntax and the
+ * explicit terminality claim only. It does NOT establish that an event came from
+ * an issuer-controlled gateway boundary; the deployment must establish that
+ * provenance before the issuance path. A valid signature proves record integrity
+ * and possession of the signing key, not issuer legitimacy or authorization,
+ * which are configured trust-policy decisions.
  *
- * Trust boundary (read carefully): shape validation does NOT establish issuer
- * control. `parseIssuerControlledBoundaryEvent` validates syntax and the explicit
- * terminality claim only. The deployment must ensure that only events emitted by
- * the issuer-controlled gateway decision boundary reach the issuance path.
- * Passing shape validation is not evidence of issuer control, authority, or
- * terminality. Signature validity establishes record integrity and possession of
- * the signing key; association of that key with a claimed issuer, and acceptance
- * of that issuer for a deployment context, are configured trust-policy decisions.
+ * Verification policy: the structural checks (kind, type, access pillar, valid
+ * access extension, issuer, signature) are always mandatory. The expected kid is
+ * enforced only when the policy configures one; rejecting on a verification
+ * warning is a conservative, example-local policy, NOT a PEAC or GDE requirement
+ * (the profile preserves application-specific extensions as application data).
  *
- * Occurrence time: this example does not set occurred_at. A production gateway
- * may populate the optional occurred_at from a trusted boundary timestamp under
- * Wire 0.2; the issuer must never manufacture an event time.
+ * occurred_at is never fabricated: a production gateway may set it from a trusted
+ * boundary timestamp (Wire 0.2); this synthetic example omits it (it is optional).
+ * Local values only: no network, no external services, no vendor SDK.
  *
- * This example uses local key generation and in-process values only: no network,
- * no external services, no vendor SDK.
- *
- * Run:
- *   pnpm demo               issue terminal allow/deny/review, show abstentions, verify
- *   pnpm demo:tamper        three trust failures (tampered payload, unaccepted signer, unexpected issuer)
- *   pnpm demo:show-record   print the decoded record header and payload
- *   pnpm test               run the assertion battery (node:test)
+ * Run: pnpm demo | pnpm demo:tamper | pnpm demo:show-record | pnpm test
  */
 
 import { issue, verifyLocal } from '@peac/protocol';
