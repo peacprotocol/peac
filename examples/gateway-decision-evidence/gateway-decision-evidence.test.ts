@@ -15,15 +15,29 @@ import { ACCESS_EXTENSION_KEY } from '@peac/schema';
 import {
   GATEWAY_ISSUER,
   GATEWAY_KID,
-  parseIssuerControlledBoundaryEvent,
+  parseGatewayBoundaryEvent,
   toAccessDecision,
-  issueAccessDecision,
+  issueTerminalAccessDecision,
   verifyGatewayDecision,
   jwsHeader,
   runDemo,
   type AccessDecision,
   type GatewayVerificationPolicy,
+  type TerminalGatewayAccessDecision,
 } from './demo.js';
+
+// Compile-time invariant (validated by `tsc --noEmit`, never executed): a plain
+// {resource, action, decision} object is NOT a TerminalGatewayAccessDecision, so
+// terminality cannot be bypassed by constructing a bare access object.
+type _PlainAccessIsNotTerminal = {
+  resource: string;
+  action: string;
+  decision: AccessDecision;
+} extends TerminalGatewayAccessDecision
+  ? false
+  : true;
+const _terminalInvariant: _PlainAccessIsNotTerminal = true;
+void _terminalInvariant;
 
 function strictPolicy(publicKey: Uint8Array): GatewayVerificationPolicy {
   return {
@@ -33,26 +47,33 @@ function strictPolicy(publicKey: Uint8Array): GatewayVerificationPolicy {
     rejectWarnings: true,
   };
 }
+function terminal(
+  resource: string,
+  action: string,
+  decision: AccessDecision
+): TerminalGatewayAccessDecision {
+  return { kind: 'terminal', resource, action, decision, retryOrFallbackPossible: false };
+}
 
 test('issues and verifies a terminal decision for allow, deny, and review', async () => {
   const gateway = await generateKeypair();
   for (const decision of ['allow', 'deny', 'review'] as AccessDecision[]) {
-    const obs = parseIssuerControlledBoundaryEvent({
+    const observation = parseGatewayBoundaryEvent({
       kind: 'terminal',
       resource: 'https://api.internal.example/records/42',
       action: 'records.read',
       decision,
       retryOrFallbackPossible: false,
     });
-    assert.ok(!('invalid' in obs), `expected valid parse for ${decision}`);
-    const mapped = toAccessDecision(obs);
+    assert.ok(!('invalid' in observation), `expected valid parse for ${decision}`);
+    const mapped = toAccessDecision(observation);
     assert.equal(mapped.issuable, true);
     if (!mapped.issuable) return;
-    const jws = await issueAccessDecision({
+    const jws = await issueTerminalAccessDecision({
       issuer: GATEWAY_ISSUER,
       privateKey: gateway.privateKey,
       kid: GATEWAY_KID,
-      access: mapped.access,
+      terminal: mapped.terminal,
     });
     const v = await verifyGatewayDecision(jws, strictPolicy(gateway.publicKey));
     assert.equal(v.valid, true);
@@ -64,6 +85,64 @@ test('issues and verifies a terminal decision for allow, deny, and review', asyn
   }
 });
 
+test('issuance boundary: terminality is retained from parse through issuance', async () => {
+  const observation = parseGatewayBoundaryEvent({
+    kind: 'terminal',
+    resource: 'https://x',
+    action: 'records.read',
+    decision: 'allow',
+    retryOrFallbackPossible: false,
+  });
+  assert.ok(!('invalid' in observation));
+  if ('invalid' in observation) return;
+  assert.equal(observation.kind, 'terminal');
+  assert.equal((observation as TerminalGatewayAccessDecision).retryOrFallbackPossible, false);
+
+  const mapped = toAccessDecision(observation);
+  assert.equal(mapped.issuable, true);
+  if (!mapped.issuable) return;
+  // The issuable result retains the terminal observation (not a bare access object).
+  assert.equal(mapped.terminal.kind, 'terminal');
+  assert.equal(mapped.terminal.retryOrFallbackPossible, false);
+
+  const gateway = await generateKeypair();
+  const jws = await issueTerminalAccessDecision({
+    issuer: GATEWAY_ISSUER,
+    privateKey: gateway.privateKey,
+    kid: GATEWAY_KID,
+    terminal: mapped.terminal,
+  });
+  const v = await verifyGatewayDecision(jws, strictPolicy(gateway.publicKey));
+  assert.equal(v.valid, true);
+});
+
+test('non-terminal and malformed states never produce an issuable result', () => {
+  const nonIssuable: unknown[] = [
+    { kind: 'check', result: 'failed' },
+    { kind: 'intermediate' },
+    { kind: 'handling-action', action: 'retry' },
+    { kind: 'third-party-report', source: 'https://collector.example' },
+    { kind: 'terminal', resource: 'https://x', action: 'records.read', decision: 'deny' }, // no retryOrFallbackPossible: false
+    {
+      kind: 'terminal',
+      resource: 'https://x',
+      action: 'records.read',
+      decision: 'block',
+      retryOrFallbackPossible: false,
+    },
+    { kind: 'terminal', resource: 'https://x', decision: 'allow', retryOrFallbackPossible: false }, // missing action
+  ];
+  for (const raw of nonIssuable) {
+    const parsed = parseGatewayBoundaryEvent(raw);
+    if ('invalid' in parsed) continue; // abstained at the boundary; cannot reach issuance
+    assert.equal(
+      toAccessDecision(parsed).issuable,
+      false,
+      `${JSON.stringify(raw)} must not be issuable`
+    );
+  }
+});
+
 test('terminality must be explicit: only retryOrFallbackPossible === false is accepted', () => {
   const base = {
     kind: 'terminal',
@@ -71,14 +150,14 @@ test('terminality must be explicit: only retryOrFallbackPossible === false is ac
     action: 'records.read',
     decision: 'allow',
   };
-  assert.ok(
-    !('invalid' in parseIssuerControlledBoundaryEvent({ ...base, retryOrFallbackPossible: false }))
-  );
+  assert.ok(!('invalid' in parseGatewayBoundaryEvent({ ...base, retryOrFallbackPossible: false })));
   for (const bad of [undefined, null, true, 'false', 0, {}]) {
     const raw: Record<string, unknown> = { ...base };
     if (bad !== undefined) raw.retryOrFallbackPossible = bad;
-    const parsed = parseIssuerControlledBoundaryEvent(raw);
-    assert.ok('invalid' in parsed, `retryOrFallbackPossible=${JSON.stringify(bad)} must abstain`);
+    assert.ok(
+      'invalid' in parseGatewayBoundaryEvent(raw),
+      `retryOrFallbackPossible=${JSON.stringify(bad)} must abstain`
+    );
   }
 });
 
@@ -89,7 +168,7 @@ test('non-terminal events carrying a decision are rejected as contradictory', ()
     { kind: 'intermediate', decision: 'allow' },
   ]) {
     assert.ok(
-      'invalid' in parseIssuerControlledBoundaryEvent(raw),
+      'invalid' in parseGatewayBoundaryEvent(raw),
       `${raw.kind} with a decision must be rejected`
     );
   }
@@ -98,7 +177,7 @@ test('non-terminal events carrying a decision are rejected as contradictory', ()
 test('whitespace-only strings abstain (resource, action, third-party source)', () => {
   assert.ok(
     'invalid' in
-      parseIssuerControlledBoundaryEvent({
+      parseGatewayBoundaryEvent({
         kind: 'terminal',
         resource: '   ',
         action: 'records.read',
@@ -108,7 +187,7 @@ test('whitespace-only strings abstain (resource, action, third-party source)', (
   );
   assert.ok(
     'invalid' in
-      parseIssuerControlledBoundaryEvent({
+      parseGatewayBoundaryEvent({
         kind: 'terminal',
         resource: 'https://x',
         action: '  ',
@@ -116,79 +195,16 @@ test('whitespace-only strings abstain (resource, action, third-party source)', (
         retryOrFallbackPossible: false,
       })
   );
-  assert.ok(
-    'invalid' in parseIssuerControlledBoundaryEvent({ kind: 'third-party-report', source: '  ' })
-  );
-});
-
-test('abstains (no record) for every non-terminal or unsupported state', () => {
-  const cases: Array<[string, unknown]> = [
-    ['check-only', { kind: 'check', result: 'failed' }],
-    ['intermediate', { kind: 'intermediate' }],
-    [
-      'terminal-without-established-terminality',
-      { kind: 'terminal', resource: 'https://x', action: 'records.read', decision: 'deny' },
-    ],
-    ['handling-action:log', { kind: 'handling-action', action: 'log' }],
-    ['handling-action:retry', { kind: 'handling-action', action: 'retry' }],
-    ['handling-action:fallback', { kind: 'handling-action', action: 'fallback' }],
-    ['handling-action:continue', { kind: 'handling-action', action: 'continue' }],
-    ['handling-action:transform', { kind: 'handling-action', action: 'transform' }],
-    ['third-party-report', { kind: 'third-party-report', source: 'https://collector.example' }],
-    [
-      'missing-resource',
-      {
-        kind: 'terminal',
-        action: 'records.read',
-        decision: 'allow',
-        retryOrFallbackPossible: false,
-      },
-    ],
-    [
-      'missing-action',
-      {
-        kind: 'terminal',
-        resource: 'https://x',
-        decision: 'allow',
-        retryOrFallbackPossible: false,
-      },
-    ],
-    [
-      'missing-decision',
-      {
-        kind: 'terminal',
-        resource: 'https://x',
-        action: 'records.read',
-        retryOrFallbackPossible: false,
-      },
-    ],
-    [
-      'unsupported-decision',
-      {
-        kind: 'terminal',
-        resource: 'https://x',
-        action: 'records.read',
-        decision: 'block',
-        retryOrFallbackPossible: false,
-      },
-    ],
-    ['unknown-kind', { kind: 'transformation' }],
-    ['not-an-object', 42],
-  ];
-  for (const [label, raw] of cases) {
-    const parsed = parseIssuerControlledBoundaryEvent(raw);
-    if ('invalid' in parsed) continue; // abstained at the boundary
-    assert.equal(toAccessDecision(parsed).issuable, false, `${label} must abstain`);
-  }
+  assert.ok('invalid' in parseGatewayBoundaryEvent({ kind: 'third-party-report', source: '  ' }));
 });
 
 test('verified claim shape: type, pillars, kid, access extension', async () => {
   const gateway = await generateKeypair();
-  const jws = await issueAccessDecision({
+  const jws = await issueTerminalAccessDecision({
     issuer: GATEWAY_ISSUER,
     privateKey: gateway.privateKey,
     kid: GATEWAY_KID,
-    access: { resource: 'https://x', action: 'records.read', decision: 'allow' },
+    terminal: terminal('https://x', 'records.read', 'allow'),
   });
   const v = await verifyGatewayDecision(jws, strictPolicy(gateway.publicKey));
   assert.equal(v.valid, true);
@@ -202,7 +218,8 @@ test('mandatory structural checks reject non-conforming but validly signed recor
   const policy = strictPolicy(gateway.publicKey);
   const goodAccess = { resource: 'https://x', action: 'records.read', decision: 'allow' as const };
 
-  // wrong record type (application-defined type preserved with a warning by verifyLocal)
+  // Adversarial: raw issue() intentionally builds non-conforming records that the
+  // example issuance helper could never produce.
   const wrongType = await issue({
     iss: GATEWAY_ISSUER,
     kind: 'evidence',
@@ -216,18 +233,16 @@ test('mandatory structural checks reject non-conforming but validly signed recor
   assert.equal(rWrongType.valid, false);
   if (!rWrongType.valid) assert.equal(rWrongType.reason, 'unexpected_record_type');
 
-  // unexpected kid
-  const wrongKid = await issueAccessDecision({
+  const wrongKid = await issueTerminalAccessDecision({
     issuer: GATEWAY_ISSUER,
     privateKey: gateway.privateKey,
     kid: 'some-other-kid',
-    access: goodAccess,
+    terminal: terminal('https://x', 'records.read', 'allow'),
   });
   const rWrongKid = await verifyGatewayDecision(wrongKid, policy);
   assert.equal(rWrongKid.valid, false);
   if (!rWrongKid.valid) assert.equal(rWrongKid.reason, 'unexpected_kid');
 
-  // missing access pillar (pillar check runs before the warning policy) -> exact reason
   const noPillar = await issue({
     iss: GATEWAY_ISSUER,
     kind: 'evidence',
@@ -240,6 +255,29 @@ test('mandatory structural checks reject non-conforming but validly signed recor
   const rNoPillar = await verifyGatewayDecision(noPillar.jws, policy);
   assert.equal(rNoPillar.valid, false);
   if (!rNoPillar.valid) assert.equal(rNoPillar.reason, 'missing_access_pillar');
+});
+
+test('optional kid policy: enforced only when configured', async () => {
+  const gateway = await generateKeypair();
+  const jws = await issueTerminalAccessDecision({
+    issuer: GATEWAY_ISSUER,
+    privateKey: gateway.privateKey,
+    kid: 'alternate-key',
+    terminal: terminal('https://x', 'records.read', 'allow'),
+  });
+
+  // policy omits expectedKid -> valid, and the record's kid is surfaced
+  const noKidPolicy = await verifyGatewayDecision(jws, {
+    expectedIssuer: GATEWAY_ISSUER,
+    acceptedPublicKey: gateway.publicKey,
+  });
+  assert.equal(noKidPolicy.valid, true);
+  if (noKidPolicy.valid) assert.equal(noKidPolicy.kid, 'alternate-key');
+
+  // policy pins gateway-key-1 -> rejected
+  const pinned = await verifyGatewayDecision(jws, strictPolicy(gateway.publicKey));
+  assert.equal(pinned.valid, false);
+  if (!pinned.valid) assert.equal(pinned.reason, 'unexpected_kid');
 });
 
 test('warning policy: application extensions accepted by default, rejected only under rejectWarnings', async () => {
@@ -255,17 +293,17 @@ test('warning policy: application extensions accepted by default, rejected only 
     kid: GATEWAY_KID,
   });
 
-  // default (warning-preserving) policy: accepted, warnings surfaced
   const permissive = await verifyGatewayDecision(withUnknownExt.jws, {
     expectedIssuer: GATEWAY_ISSUER,
     acceptedPublicKey: gateway.publicKey,
     expectedKid: GATEWAY_KID,
   });
   assert.equal(permissive.valid, true);
-  if (permissive.valid)
+  if (permissive.valid) {
     assert.ok(permissive.warnings.length >= 1, 'expected a preserved-extension warning');
+    for (const w of permissive.warnings) assert.equal(typeof w.code, 'string');
+  }
 
-  // conservative policy: same record rejected
   const conservative = await verifyGatewayDecision(
     withUnknownExt.jws,
     strictPolicy(gateway.publicKey)
@@ -278,13 +316,13 @@ test('three distinct trust failures: tamper, unaccepted signer, unexpected issue
   const gateway = await generateKeypair();
   const attacker = await generateKeypair();
   const policy = strictPolicy(gateway.publicKey);
-  const access = { resource: 'https://x', action: 'records.read', decision: 'allow' as const };
+  const decision = terminal('https://x', 'records.read', 'allow');
 
-  const jws = await issueAccessDecision({
+  const jws = await issueTerminalAccessDecision({
     issuer: GATEWAY_ISSUER,
     privateKey: gateway.privateKey,
     kid: GATEWAY_KID,
-    access,
+    terminal: decision,
   });
   const [h, , s] = jws.split('.');
   const claims = JSON.parse(Buffer.from(jws.split('.')[1], 'base64url').toString('utf8'));
@@ -294,21 +332,21 @@ test('three distinct trust failures: tamper, unaccepted signer, unexpected issue
   assert.equal(t.valid, false);
   if (!t.valid) assert.equal(t.reason, 'E_INVALID_SIGNATURE');
 
-  const impersonation = await issueAccessDecision({
+  const impersonation = await issueTerminalAccessDecision({
     issuer: GATEWAY_ISSUER,
     privateKey: attacker.privateKey,
     kid: GATEWAY_KID,
-    access,
+    terminal: decision,
   });
   const u = await verifyGatewayDecision(impersonation, policy);
   assert.equal(u.valid, false);
   if (!u.valid) assert.equal(u.reason, 'E_INVALID_SIGNATURE');
 
-  const rogue = await issueAccessDecision({
+  const rogue = await issueTerminalAccessDecision({
     issuer: 'https://rogue.example',
     privateKey: attacker.privateKey,
     kid: 'rogue',
-    access,
+    terminal: decision,
   });
   const r = await verifyGatewayDecision(rogue, {
     expectedIssuer: GATEWAY_ISSUER,

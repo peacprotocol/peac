@@ -9,12 +9,15 @@
  * registered org.peacprotocol/access extension; no new protocol surface. See
  * README.md for the full walkthrough.
  *
- * Trust boundary: parseIssuerControlledBoundaryEvent validates syntax and the
- * explicit terminality claim only. It does NOT establish that an event came from
- * an issuer-controlled gateway boundary; the deployment must establish that
- * provenance before the issuance path. A valid signature proves record integrity
- * and possession of the signing key, not issuer legitimacy or authorization,
- * which are configured trust-policy decisions.
+ * Trust boundary: parseGatewayBoundaryEvent validates event shape and the
+ * explicit terminality claim only. It does NOT establish that the event
+ * originated at a gateway decision boundary under the issuer's control; the
+ * deployment must establish that provenance before the issuance path. A valid
+ * signature proves record integrity and possession of the signing key, not
+ * issuer legitimacy or authorization, which are configured trust-policy
+ * decisions. Terminality does not disappear between classification and issuance:
+ * issueTerminalAccessDecision accepts only a TerminalGatewayAccessDecision, so a
+ * bare {resource, action, decision} object cannot be issued.
  *
  * Verification policy: the structural checks (kind, type, access pillar, valid
  * access extension, issuer, signature) are always mandatory. The expected kid is
@@ -42,17 +45,17 @@ export type AccessDecision = 'allow' | 'deny' | 'review';
 export type HandlingAction = 'log' | 'retry' | 'fallback' | 'continue' | 'transform';
 
 /**
- * An observation emitted by a gateway decision boundary under the issuer's
- * control, as a discriminated union. Only the `terminal` variant carries an
- * access decision, and it carries `retryOrFallbackPossible: false` so that
- * established terminality is a type-level invariant, not merely a parser fact.
- * Every other variant is a non-issuable state by construction.
+ * An observation from a gateway decision boundary, as a discriminated union.
+ * Only the `terminal` variant carries an access decision, and it carries
+ * `retryOrFallbackPossible: false` so that established terminality is a
+ * type-level invariant. Every other variant is a non-issuable state by
+ * construction.
  *
- * This is a TRUSTED application-domain type. Constructing one asserts that the
- * value came from the issuer-controlled boundary. Do not build it directly from
- * untrusted vendor input without establishing that provenance.
+ * This type describes SHAPE and terminality only. It does not assert that the
+ * value originated at a boundary under the issuer's control; that provenance is
+ * a deployment precondition established outside this module.
  */
-export type IssuerControlledGatewayObservation =
+export type GatewayBoundaryObservation =
   | {
       kind: 'terminal';
       resource: string;
@@ -65,10 +68,16 @@ export type IssuerControlledGatewayObservation =
   | { kind: 'handling-action'; action: HandlingAction }
   | { kind: 'third-party-report'; source: string };
 
+/** The only issuable observation: a terminal access decision. */
+export type TerminalGatewayAccessDecision = Extract<
+  GatewayBoundaryObservation,
+  { kind: 'terminal' }
+>;
+
 export type AccessRecord = { resource: string; action: string; decision: AccessDecision };
 
 export type MapResult =
-  | { issuable: true; access: AccessRecord }
+  | { issuable: true; terminal: TerminalGatewayAccessDecision }
   | { issuable: false; reason: string };
 
 const DECISIONS: ReadonlySet<string> = new Set<AccessDecision>(['allow', 'deny', 'review']);
@@ -92,23 +101,23 @@ function isNonBlankString(v: unknown): v is string {
 }
 
 /**
- * SYNTAX-ONLY validation of a raw event into an IssuerControlledGatewayObservation,
- * or a non-issuable reason.
+ * SYNTAX-ONLY validation of a raw event into a GatewayBoundaryObservation, or a
+ * non-issuable reason.
  *
- * PRECONDITION: this function validates SHAPE and the explicit terminality claim
- * only. It does NOT establish that an event was produced by an issuer-controlled
- * gateway decision boundary. The deployment MUST ensure that only events emitted
- * by that boundary reach the issuance path. Passing this check is not evidence of
- * issuer control, authority, or terminality.
+ * PRECONDITION: this function validates event shape and the explicit terminality
+ * claim only. It does NOT establish that the event originated at a gateway
+ * decision boundary under the issuer's control. The deployment must establish
+ * that provenance before the issuance path. Passing this check is not evidence
+ * of issuer control, authority, or terminality beyond the explicit claim.
  *
  * Terminality is explicit: a raw terminal event is accepted only when
  * `retryOrFallbackPossible` is EXACTLY `false`. A missing, null, truthy, or
- * non-boolean value abstains (terminality not established). A non-terminal event
- * that carries a `decision` field is rejected as contradictory.
+ * non-boolean value abstains. A non-terminal event carrying a `decision` field
+ * is rejected as contradictory.
  */
-export function parseIssuerControlledBoundaryEvent(
+export function parseGatewayBoundaryEvent(
   raw: unknown
-): IssuerControlledGatewayObservation | { invalid: string } {
+): GatewayBoundaryObservation | { invalid: string } {
   if (typeof raw !== 'object' || raw === null) return { invalid: 'event is not an object' };
   const e = raw as Record<string, unknown>;
   const kind = e.kind;
@@ -164,20 +173,13 @@ export function parseIssuerControlledBoundaryEvent(
 }
 
 /**
- * Map a trusted issuer-controlled observation to an issuable access record, or
- * abstain. Only a terminal decision is issuable; every other variant abstains.
+ * Classify a boundary observation: a terminal decision is issuable and is
+ * retained as a TerminalGatewayAccessDecision; every other variant abstains.
  */
-export function toAccessDecision(observation: IssuerControlledGatewayObservation): MapResult {
+export function toAccessDecision(observation: GatewayBoundaryObservation): MapResult {
   switch (observation.kind) {
     case 'terminal':
-      return {
-        issuable: true,
-        access: {
-          resource: observation.resource,
-          action: observation.action,
-          decision: observation.decision,
-        },
-      };
+      return { issuable: true, terminal: observation };
     case 'check':
       return { issuable: false, reason: `check-only (${observation.result}); not a decision` };
     case 'intermediate':
@@ -195,16 +197,26 @@ export function toAccessDecision(observation: IssuerControlledGatewayObservation
   }
 }
 
-export type IssueParams = {
+export type IssueTerminalAccessDecisionParams = {
   issuer: string;
   privateKey: Uint8Array;
   kid: string;
-  access: AccessRecord;
+  terminal: TerminalGatewayAccessDecision;
 };
 
-/** Issue a signed org.peacprotocol/access-decision record for a terminal access decision. */
-export async function issueAccessDecision(params: IssueParams): Promise<string> {
-  const access = AccessExtensionSchema.parse(params.access);
+/**
+ * Issue a signed org.peacprotocol/access-decision record. Accepts ONLY a
+ * TerminalGatewayAccessDecision, so terminality cannot be bypassed with a bare
+ * {resource, action, decision} object.
+ */
+export async function issueTerminalAccessDecision(
+  params: IssueTerminalAccessDecisionParams
+): Promise<string> {
+  const access = AccessExtensionSchema.parse({
+    resource: params.terminal.resource,
+    action: params.terminal.action,
+    decision: params.terminal.decision,
+  });
   const { jws } = await issue({
     iss: params.issuer,
     kind: 'evidence',
@@ -220,12 +232,12 @@ export async function issueAccessDecision(params: IssueParams): Promise<string> 
 /**
  * A relying party's configured acceptance policy.
  *
- * `expectedKid` is optional: it is enforced only when the relying party pins one
- * (PEAC's Trust Pinning Policy also makes a pin kid optional). `rejectWarnings`
- * is an OPTIONAL conservative, example-local choice: PEAC preserves well-formed
- * unknown extensions with an informational warning and treats them as
- * application data, so rejecting on any warning is an application policy, not a
- * PEAC or GDE requirement.
+ * `expectedKid` is enforced only when the relying party pins one (PEAC's Trust
+ * Pinning Policy also makes a pin kid optional). `rejectWarnings` is an OPTIONAL
+ * conservative, example-local choice: PEAC preserves well-formed unknown
+ * extensions with an informational warning and treats them as application data,
+ * so rejecting on any warning is an application policy, not a PEAC or GDE
+ * requirement.
  */
 export type GatewayVerificationPolicy = {
   expectedIssuer: string;
@@ -234,13 +246,16 @@ export type GatewayVerificationPolicy = {
   rejectWarnings?: boolean;
 };
 
+/** Verifier warning shape (structurally the shipped VerificationWarning). */
+export type GatewayVerificationWarning = { code: string; message: string; pointer?: string };
+
 export type VerifyOutcome =
   | {
       valid: true;
       decision: AccessDecision;
       kid: string | undefined;
       wireVersion: string;
-      warnings: string[];
+      warnings: readonly GatewayVerificationWarning[];
     }
   | { valid: false; reason: string };
 
@@ -275,7 +290,7 @@ export async function verifyGatewayDecision(
   const kid = jwsHeader(jws).kid as string | undefined;
   if (policy.expectedKid !== undefined && kid !== policy.expectedKid)
     return { valid: false, reason: 'unexpected_kid' };
-  const warnings = v.warnings.map((w) => String((w as { code?: string }).code ?? w));
+  const warnings: readonly GatewayVerificationWarning[] = v.warnings;
   if (policy.rejectWarnings === true && warnings.length !== 0)
     return { valid: false, reason: 'unexpected_verification_warning' };
 
@@ -296,6 +311,15 @@ export function jwsHeader(jws: string): Record<string, unknown> {
 }
 export function jwsClaims(jws: string): Record<string, unknown> {
   return JSON.parse(b64urlToUtf8(jws.split('.')[1]));
+}
+
+/** A terminal observation the synthetic issuer-controlled boundary produces. */
+function terminal(
+  resource: string,
+  action: string,
+  decision: AccessDecision
+): TerminalGatewayAccessDecision {
+  return { kind: 'terminal', resource, action, decision, retryOrFallbackPossible: false };
 }
 
 /** Synthetic boundary events covering the full matrix (raw, as an adapter might emit). */
@@ -360,9 +384,8 @@ export type DemoResult = {
 
 /**
  * Run the full flow over the sample events. Fails closed: if any issued record
- * does not pass verification, this throws (a developer copying the example must
- * not learn that verification failure is merely informational). A resolved call
- * is success; there is no separate ok flag.
+ * does not pass verification, this throws. A resolved call is success; there is
+ * no separate ok flag.
  */
 export async function runDemo(log: (m: string) => void = () => {}): Promise<DemoResult> {
   const gateway = await generateKeypair();
@@ -375,28 +398,28 @@ export async function runDemo(log: (m: string) => void = () => {}): Promise<Demo
   const result: DemoResult = { issued: [], abstained: [] };
 
   for (const [label, raw] of Object.entries(sampleEvents())) {
-    const obs = parseIssuerControlledBoundaryEvent(raw);
-    if ('invalid' in obs) {
-      result.abstained.push({ label, reason: obs.invalid });
-      log(`ABSTAIN  ${label}  --  ${obs.invalid}`);
+    const observation = parseGatewayBoundaryEvent(raw);
+    if ('invalid' in observation) {
+      result.abstained.push({ label, reason: observation.invalid });
+      log(`ABSTAIN  ${label}  --  ${observation.invalid}`);
       continue;
     }
-    const mapped = toAccessDecision(obs);
+    const mapped = toAccessDecision(observation);
     if (!mapped.issuable) {
       result.abstained.push({ label, reason: mapped.reason });
       log(`ABSTAIN  ${label}  --  ${mapped.reason}`);
       continue;
     }
-    const jws = await issueAccessDecision({
+    const jws = await issueTerminalAccessDecision({
       issuer: GATEWAY_ISSUER,
       privateKey: gateway.privateKey,
       kid: GATEWAY_KID,
-      access: mapped.access,
+      terminal: mapped.terminal,
     });
     const v = await verifyGatewayDecision(jws, policy);
     if (!v.valid) throw new Error(`issued record failed verification: ${v.reason}`);
-    result.issued.push({ label, decision: mapped.access.decision, verified: true, kid: v.kid });
-    log(`ISSUE    ${label}  --  decision=${mapped.access.decision} verified=true kid=${v.kid}`);
+    result.issued.push({ label, decision: mapped.terminal.decision, verified: true, kid: v.kid });
+    log(`ISSUE    ${label}  --  decision=${mapped.terminal.decision} verified=true kid=${v.kid}`);
   }
   return result;
 }
@@ -406,15 +429,11 @@ async function main(): Promise<void> {
 
   if (args.has('--show-record')) {
     const gateway = await generateKeypair();
-    const jws = await issueAccessDecision({
+    const jws = await issueTerminalAccessDecision({
       issuer: GATEWAY_ISSUER,
       privateKey: gateway.privateKey,
       kid: GATEWAY_KID,
-      access: {
-        resource: 'https://api.internal.example/records/42',
-        action: 'records.read',
-        decision: 'allow',
-      },
+      terminal: terminal('https://api.internal.example/records/42', 'records.read', 'allow'),
     });
     console.log('header:', JSON.stringify(jwsHeader(jws), null, 2));
     console.log('claims:', JSON.stringify(jwsClaims(jws), null, 2));
@@ -430,13 +449,14 @@ async function main(): Promise<void> {
       expectedKid: GATEWAY_KID,
       rejectWarnings: true,
     };
+    const decision = terminal('https://x', 'records.read', 'allow');
 
     // 1) tampered payload: flip the decision, keep the original signature
-    const jws = await issueAccessDecision({
+    const jws = await issueTerminalAccessDecision({
       issuer: GATEWAY_ISSUER,
       privateKey: gateway.privateKey,
       kid: GATEWAY_KID,
-      access: { resource: 'https://x', action: 'records.read', decision: 'allow' },
+      terminal: decision,
     });
     const [h, , s] = jws.split('.');
     const claims = jwsClaims(jws);
@@ -447,22 +467,22 @@ async function main(): Promise<void> {
 
     // 2) unaccepted signer: attacker signs a record CLAIMING the expected gateway issuer,
     //    verified with the relying party's configured accepted gateway public key
-    const impersonation = await issueAccessDecision({
+    const impersonation = await issueTerminalAccessDecision({
       issuer: GATEWAY_ISSUER,
       privateKey: attacker.privateKey,
       kid: GATEWAY_KID,
-      access: { resource: 'https://x', action: 'records.read', decision: 'allow' },
+      terminal: decision,
     });
     const u = await verifyGatewayDecision(impersonation, policy);
     console.log(`unaccepted signer  -> valid=${u.valid} reason=${u.valid ? 'n/a' : u.reason}`);
 
     // 3) unexpected issuer: attacker signs a cryptographically valid record claiming a
     //    rogue issuer; the relying party expects the gateway issuer
-    const rogue = await issueAccessDecision({
+    const rogue = await issueTerminalAccessDecision({
       issuer: 'https://rogue.example',
       privateKey: attacker.privateKey,
       kid: 'rogue',
-      access: { resource: 'https://x', action: 'records.read', decision: 'allow' },
+      terminal: decision,
     });
     const r = await verifyGatewayDecision(rogue, {
       expectedIssuer: GATEWAY_ISSUER,

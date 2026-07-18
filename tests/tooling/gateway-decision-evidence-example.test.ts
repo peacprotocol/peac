@@ -10,12 +10,21 @@
 import { describe, it, expect } from 'vitest';
 import {
   runDemo,
-  issueAccessDecision,
+  issueTerminalAccessDecision,
   verifyGatewayDecision,
   GATEWAY_ISSUER,
   GATEWAY_KID,
+  type TerminalGatewayAccessDecision,
 } from '../../examples/gateway-decision-evidence/demo.js';
 import { generateKeypair } from '@peac/crypto';
+
+const terminal: TerminalGatewayAccessDecision = {
+  kind: 'terminal',
+  resource: 'https://x',
+  action: 'records.read',
+  decision: 'allow',
+  retryOrFallbackPossible: false,
+};
 
 describe('gateway-decision-evidence example (smoke)', () => {
   it('runDemo issues three verified terminal decisions and abstains for the rest', async () => {
@@ -28,11 +37,11 @@ describe('gateway-decision-evidence example (smoke)', () => {
   it('rejects a valid record from a signer the relying party does not accept', async () => {
     const gateway = await generateKeypair();
     const attacker = await generateKeypair();
-    const impersonation = await issueAccessDecision({
+    const impersonation = await issueTerminalAccessDecision({
       issuer: GATEWAY_ISSUER,
       privateKey: attacker.privateKey,
       kid: GATEWAY_KID,
-      access: { resource: 'https://x', action: 'records.read', decision: 'allow' },
+      terminal,
     });
     const v = await verifyGatewayDecision(impersonation, {
       expectedIssuer: GATEWAY_ISSUER,

@@ -42,22 +42,25 @@ canonicalization.
 
 ## Domain modelling
 
-The trusted `IssuerControlledGatewayObservation` terminal variant requires
-`resource`, `action`, `decision`, and `retryOrFallbackPossible: false`, so
-established terminality is a type-level invariant, not merely a parser fact.
-Impossible states, such as a check that also carries a decision, are not
-representable. Untrusted adapter input arrives as `unknown` and is narrowed at
-the boundary (`parseIssuerControlledBoundaryEvent`); a claim of terminality that
-does not explicitly establish `retryOrFallbackPossible === false` does not narrow
-to the terminal variant and is not issued.
+`GatewayBoundaryObservation` is a discriminated union whose `terminal` variant
+requires `resource`, `action`, `decision`, and `retryOrFallbackPossible: false`,
+so established terminality is a type-level invariant. `TerminalGatewayAccessDecision`
+is that variant. Impossible states, such as a check that also carries a decision,
+are not representable. Untrusted adapter input arrives as `unknown` and is
+narrowed at the boundary (`parseGatewayBoundaryEvent`); a claim of terminality
+that does not explicitly establish `retryOrFallbackPossible === false` does not
+narrow to the terminal variant. Terminality is then preserved through issuance:
+`issueTerminalAccessDecision` accepts only a `TerminalGatewayAccessDecision`, so a
+bare `{ resource, action, decision }` object cannot be issued.
 
 ## Trust boundary
 
-`parseIssuerControlledBoundaryEvent` validates syntax and the explicit
-terminality claim only. It does not establish that the input was emitted by a
-gateway decision boundary under the issuer's control. A deployment must establish
-that provenance before passing an observation to the issuance path. Passing shape
-validation is not evidence of issuer control, authority, or terminality.
+`parseGatewayBoundaryEvent` validates event shape and the explicit terminality
+claim only. It does not establish that the event originated at a gateway decision
+boundary under the issuer's control. A deployment must establish that the parsed
+observation originated at such a boundary before calling the issuance helper.
+Passing shape validation is not evidence of issuer control, authority, or
+terminality beyond the explicit claim.
 
 ## Occurrence time
 
