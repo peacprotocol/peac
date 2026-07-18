@@ -12,25 +12,30 @@
  *    registered org.peacprotocol/access extension. No new protocol surface.
  * 2. Mandatory non-issuance (abstention) for: a check-only outcome, an
  *    intermediate decision where retry or fallback is still possible, a
- *    "terminal"-labelled event that does not explicitly establish terminality, a
- *    handling-action-only event (log/retry/fallback/continue/transform), a
- *    third-party-report-only event, and missing or unsupported access context.
- * 3. Profile-strict offline verification under a configured issuer/key policy:
- *    signature validity alone is not sufficient. The verifier also requires the
- *    expected record kind, type, access pillar, a valid access extension, the
- *    expected kid, and no verification warnings.
+ *    terminal-labelled event that does not explicitly establish
+ *    retryOrFallbackPossible === false, a handling-action-only event
+ *    (log/retry/fallback/continue/transform), a third-party-report-only event,
+ *    and missing or unsupported access context.
+ * 3. Offline verification under an explicit relying-party policy. The MANDATORY
+ *    structural checks are always applied: the expected record kind, type,
+ *    access pillar, a valid access extension, the correct issuer, and a valid
+ *    signature. In addition the policy MAY require the expected kid (when the
+ *    relying party configures one) and MAY reject records that produce a
+ *    verification warning (a conservative, example-local choice, NOT a PEAC or
+ *    GDE requirement: the profile permits application-specific extensions and
+ *    treats them as application data).
  * 4. Three distinct trust failures: a tampered payload, a cryptographically
  *    valid record from a signer the relying party does not accept, and a valid
  *    record from an unexpected issuer.
  *
  * Trust boundary (read carefully): shape validation does NOT establish issuer
- * control. `parseBoundaryEvent` validates syntax only. The deployment must ensure
- * that only events emitted by the issuer-controlled gateway decision boundary
- * reach the issuance path. Passing shape validation is not evidence of issuer
- * control, authority, or terminality. Signature validity establishes record
- * integrity and possession of the signing key; association of that key with a
- * claimed issuer, and acceptance of that issuer for a deployment context, are
- * configured trust-policy decisions.
+ * control. `parseIssuerControlledBoundaryEvent` validates syntax and the explicit
+ * terminality claim only. The deployment must ensure that only events emitted by
+ * the issuer-controlled gateway decision boundary reach the issuance path.
+ * Passing shape validation is not evidence of issuer control, authority, or
+ * terminality. Signature validity establishes record integrity and possession of
+ * the signing key; association of that key with a claimed issuer, and acceptance
+ * of that issuer for a deployment context, are configured trust-policy decisions.
  *
  * Occurrence time: this example does not set occurred_at. A production gateway
  * may populate the optional occurred_at from a trusted boundary timestamp under
@@ -61,7 +66,8 @@ export type HandlingAction = 'log' | 'retry' | 'fallback' | 'continue' | 'transf
 /**
  * An observation emitted by a gateway decision boundary under the issuer's
  * control, as a discriminated union. Only the `terminal` variant carries an
- * access decision, and it is constructed only after terminality is established.
+ * access decision, and it carries `retryOrFallbackPossible: false` so that
+ * established terminality is a type-level invariant, not merely a parser fact.
  * Every other variant is a non-issuable state by construction.
  *
  * This is a TRUSTED application-domain type. Constructing one asserts that the
@@ -69,7 +75,13 @@ export type HandlingAction = 'log' | 'retry' | 'fallback' | 'continue' | 'transf
  * untrusted vendor input without establishing that provenance.
  */
 export type IssuerControlledGatewayObservation =
-  | { kind: 'terminal'; resource: string; action: string; decision: AccessDecision }
+  | {
+      kind: 'terminal';
+      resource: string;
+      action: string;
+      decision: AccessDecision;
+      retryOrFallbackPossible: false;
+    }
   | { kind: 'check'; result: 'passed' | 'failed' | 'error' }
   | { kind: 'intermediate' }
   | { kind: 'handling-action'; action: HandlingAction }
@@ -97,26 +109,26 @@ const KINDS: ReadonlySet<string> = new Set([
   'third-party-report',
 ]);
 
-function isNonEmptyString(v: unknown): v is string {
-  return typeof v === 'string' && v.length > 0;
+function isNonBlankString(v: unknown): v is string {
+  return typeof v === 'string' && v.trim().length > 0;
 }
 
 /**
  * SYNTAX-ONLY validation of a raw event into an IssuerControlledGatewayObservation,
  * or a non-issuable reason.
  *
- * PRECONDITION: this function validates SHAPE only. It does NOT establish that an
- * event was produced by an issuer-controlled gateway decision boundary. The
- * deployment MUST ensure that only events emitted by that boundary reach the
- * issuance path. Passing this check is not evidence of issuer control, authority,
- * or terminality.
+ * PRECONDITION: this function validates SHAPE and the explicit terminality claim
+ * only. It does NOT establish that an event was produced by an issuer-controlled
+ * gateway decision boundary. The deployment MUST ensure that only events emitted
+ * by that boundary reach the issuance path. Passing this check is not evidence of
+ * issuer control, authority, or terminality.
  *
  * Terminality is explicit: a raw terminal event is accepted only when
  * `retryOrFallbackPossible` is EXACTLY `false`. A missing, null, truthy, or
  * non-boolean value abstains (terminality not established). A non-terminal event
  * that carries a `decision` field is rejected as contradictory.
  */
-export function parseBoundaryEvent(
+export function parseIssuerControlledBoundaryEvent(
   raw: unknown
 ): IssuerControlledGatewayObservation | { invalid: string } {
   if (typeof raw !== 'object' || raw === null) return { invalid: 'event is not an object' };
@@ -136,8 +148,8 @@ export function parseBoundaryEvent(
           invalid: 'terminality not established (retryOrFallbackPossible must be exactly false)',
         };
       if (
-        !isNonEmptyString(e.resource) ||
-        !isNonEmptyString(e.action) ||
+        !isNonBlankString(e.resource) ||
+        !isNonBlankString(e.action) ||
         typeof e.decision !== 'string'
       )
         return { invalid: 'missing required access context (resource/action/decision)' };
@@ -147,6 +159,7 @@ export function parseBoundaryEvent(
         resource: e.resource,
         action: e.action,
         decision: e.decision as AccessDecision,
+        retryOrFallbackPossible: false,
       };
     }
     case 'check': {
@@ -164,7 +177,7 @@ export function parseBoundaryEvent(
       return { kind: 'handling-action', action: action as HandlingAction };
     }
     case 'third-party-report': {
-      if (!isNonEmptyString(e.source)) return { invalid: 'third-party-report missing source' };
+      if (!isNonBlankString(e.source)) return { invalid: 'third-party-report missing source' };
       return { kind: 'third-party-report', source: e.source };
     }
     default:
@@ -226,22 +239,40 @@ export async function issueAccessDecision(params: IssueParams): Promise<string> 
   return jws;
 }
 
-/** A relying party's configured acceptance policy. */
+/**
+ * A relying party's configured acceptance policy.
+ *
+ * `expectedKid` is optional: it is enforced only when the relying party pins one
+ * (PEAC's Trust Pinning Policy also makes a pin kid optional). `rejectWarnings`
+ * is an OPTIONAL conservative, example-local choice: PEAC preserves well-formed
+ * unknown extensions with an informational warning and treats them as
+ * application data, so rejecting on any warning is an application policy, not a
+ * PEAC or GDE requirement.
+ */
 export type GatewayVerificationPolicy = {
   expectedIssuer: string;
   acceptedPublicKey: Uint8Array;
   expectedKid?: string;
+  rejectWarnings?: boolean;
 };
 
 export type VerifyOutcome =
-  | { valid: true; decision: AccessDecision; kid: string | undefined; wireVersion: string }
+  | {
+      valid: true;
+      decision: AccessDecision;
+      kid: string | undefined;
+      wireVersion: string;
+      warnings: string[];
+    }
   | { valid: false; reason: string };
 
 /**
- * Profile-strict offline verification. After the base signature/issuer check,
- * require the expected record kind, type, access pillar, a valid access
- * extension, the expected kid (when configured), and no verification warnings.
- * Returns example-local failure reasons; introduces no PEAC kernel errors.
+ * Profile-aware verification under an explicit relying-party policy. The
+ * mandatory structural checks (kind, type, access pillar, valid access
+ * extension, issuer, signature) are always applied. The expected kid is enforced
+ * only when configured, and warnings are rejected only when the policy sets
+ * `rejectWarnings: true`. Returns example-local failure reasons; introduces no
+ * PEAC kernel errors.
  */
 export async function verifyGatewayDecision(
   jws: string,
@@ -266,13 +297,16 @@ export async function verifyGatewayDecision(
   const kid = jwsHeader(jws).kid as string | undefined;
   if (policy.expectedKid !== undefined && kid !== policy.expectedKid)
     return { valid: false, reason: 'unexpected_kid' };
-  if (v.warnings.length !== 0) return { valid: false, reason: 'unexpected_verification_warning' };
+  const warnings = v.warnings.map((w) => String((w as { code?: string }).code ?? w));
+  if (policy.rejectWarnings === true && warnings.length !== 0)
+    return { valid: false, reason: 'unexpected_verification_warning' };
 
   return {
     valid: true,
     decision: parsed.data.decision as AccessDecision,
     kid,
     wireVersion: v.wireVersion,
+    warnings,
   };
 }
 
@@ -337,7 +371,6 @@ export function sampleEvents(): Record<string, unknown> {
 }
 
 export type DemoResult = {
-  ok: boolean;
   issued: Array<{
     label: string;
     decision: AccessDecision;
@@ -349,8 +382,9 @@ export type DemoResult = {
 
 /**
  * Run the full flow over the sample events. Fails closed: if any issued record
- * does not pass strict verification, this throws (a developer copying the
- * example must not learn that verification failure is merely informational).
+ * does not pass verification, this throws (a developer copying the example must
+ * not learn that verification failure is merely informational). A resolved call
+ * is success; there is no separate ok flag.
  */
 export async function runDemo(log: (m: string) => void = () => {}): Promise<DemoResult> {
   const gateway = await generateKeypair();
@@ -358,11 +392,12 @@ export async function runDemo(log: (m: string) => void = () => {}): Promise<Demo
     expectedIssuer: GATEWAY_ISSUER,
     acceptedPublicKey: gateway.publicKey,
     expectedKid: GATEWAY_KID,
+    rejectWarnings: true,
   };
-  const result: DemoResult = { ok: true, issued: [], abstained: [] };
+  const result: DemoResult = { issued: [], abstained: [] };
 
   for (const [label, raw] of Object.entries(sampleEvents())) {
-    const obs = parseBoundaryEvent(raw);
+    const obs = parseIssuerControlledBoundaryEvent(raw);
     if ('invalid' in obs) {
       result.abstained.push({ label, reason: obs.invalid });
       log(`ABSTAIN  ${label}  --  ${obs.invalid}`);
@@ -381,7 +416,7 @@ export async function runDemo(log: (m: string) => void = () => {}): Promise<Demo
       access: mapped.access,
     });
     const v = await verifyGatewayDecision(jws, policy);
-    if (!v.valid) throw new Error(`issued record failed strict verification: ${v.reason}`);
+    if (!v.valid) throw new Error(`issued record failed verification: ${v.reason}`);
     result.issued.push({ label, decision: mapped.access.decision, verified: true, kid: v.kid });
     log(`ISSUE    ${label}  --  decision=${mapped.access.decision} verified=true kid=${v.kid}`);
   }
@@ -415,6 +450,7 @@ async function main(): Promise<void> {
       expectedIssuer: GATEWAY_ISSUER,
       acceptedPublicKey: gateway.publicKey,
       expectedKid: GATEWAY_KID,
+      rejectWarnings: true,
     };
 
     // 1) tampered payload: flip the decision, keep the original signature
@@ -453,6 +489,7 @@ async function main(): Promise<void> {
     const r = await verifyGatewayDecision(rogue, {
       expectedIssuer: GATEWAY_ISSUER,
       acceptedPublicKey: attacker.publicKey,
+      rejectWarnings: true,
     });
     console.log(`unexpected issuer  -> valid=${r.valid} reason=${r.valid ? 'n/a' : r.reason}`);
     return;
@@ -460,9 +497,9 @@ async function main(): Promise<void> {
 
   const result = await runDemo((m) => console.log(m));
   console.log(
-    `\nok=${result.ok} issued=${result.issued.length} verified=${result.issued.filter((i) => i.verified).length} abstained=${result.abstained.length}`
+    `\nissued=${result.issued.length} verified=${result.issued.filter((i) => i.verified).length} abstained=${result.abstained.length}`
   );
-  if (!result.ok || result.issued.length !== 3 || !result.issued.every((i) => i.verified)) {
+  if (result.issued.length !== 3 || !result.issued.every((i) => i.verified)) {
     throw new Error('demo did not reach the expected end state');
   }
 }

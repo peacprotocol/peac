@@ -20,7 +20,6 @@ import { generateKeypair } from '@peac/crypto';
 describe('gateway-decision-evidence example (smoke)', () => {
   it('runDemo issues three verified terminal decisions and abstains for the rest', async () => {
     const r = await runDemo();
-    expect(r.ok).toBe(true);
     expect(r.issued.length).toBe(3);
     expect(r.issued.every((i) => i.verified && i.kid === GATEWAY_KID)).toBe(true);
     expect(r.abstained.length).toBe(7);

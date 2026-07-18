@@ -17,17 +17,23 @@ canonicalization.
   `decision` from the terminal outcome.
 - **Mandatory non-issuance (abstention)** for every state that is not a terminal
   access decision: a check-only outcome, an intermediate decision where retry or
-  fallback is still possible, a `terminal`-labelled event that still permits
-  retry/fallback, a handling-action-only event (`log`/`retry`/`fallback`/
-  `continue`/`transform`), a third-party-report-only event, and missing or
-  unsupported access context.
-- **Profile-strict offline verification** under a configured issuer/key policy.
-  Signature validity alone is not sufficient: after the base signature and issuer
-  check, the verifier also requires the expected record kind (`evidence`), the
-  type `org.peacprotocol/access-decision`, the `access` pillar, a valid
-  `org.peacprotocol/access` extension, the expected `kid`, and no verification
-  warnings. A validly signed record of a different type, with an unexpected
-  `kid`, or carrying an extension that raises a warning is rejected.
+  fallback is still possible, a terminal-labelled event that does not explicitly
+  establish `retryOrFallbackPossible === false`, a handling-action-only event
+  (`log`/`retry`/`fallback`/`continue`/`transform`), a third-party-report-only
+  event, and missing or unsupported access context.
+- **Profile-aware offline verification under an explicit relying-party policy.**
+  Signature validity alone is not sufficient. The MANDATORY structural checks are
+  always applied: the expected record kind (`evidence`), the type
+  `org.peacprotocol/access-decision`, the `access` pillar, a valid
+  `org.peacprotocol/access` extension, the correct issuer, and a valid signature.
+  In addition the policy MAY require the expected `kid` (only when the relying
+  party configures one) and MAY reject records that produce a verification
+  warning. Rejecting on any warning is a conservative, example-local choice, NOT
+  a PEAC or GDE requirement: the profile permits application-specific extensions,
+  which generic verification preserves as application data with an informational
+  warning. This example sets `rejectWarnings: true` to show a conservative
+  relying-party policy; the default policy preserves the record and surfaces its
+  warnings for application-aware handling.
 - **Three distinct trust failures**: a tampered payload
   (`E_INVALID_SIGNATURE`); a cryptographically valid record from a signer the
   relying party does not accept, even though it claims the expected issuer
@@ -36,12 +42,22 @@ canonicalization.
 
 ## Domain modelling
 
-A terminal decision is a variant of a discriminated union that requires
-`resource`, `action`, `decision`, and `retryOrFallbackPossible: false`.
+The trusted `IssuerControlledGatewayObservation` terminal variant requires
+`resource`, `action`, `decision`, and `retryOrFallbackPossible: false`, so
+established terminality is a type-level invariant, not merely a parser fact.
 Impossible states, such as a check that also carries a decision, are not
 representable. Untrusted adapter input arrives as `unknown` and is narrowed at
-the boundary (`parseGatewayEvent`); a claim of terminality that still permits
-retry or fallback does not narrow to the terminal variant and is not issued.
+the boundary (`parseIssuerControlledBoundaryEvent`); a claim of terminality that
+does not explicitly establish `retryOrFallbackPossible === false` does not narrow
+to the terminal variant and is not issued.
+
+## Trust boundary
+
+`parseIssuerControlledBoundaryEvent` validates syntax and the explicit
+terminality claim only. It does not establish that the input was emitted by a
+gateway decision boundary under the issuer's control. A deployment must establish
+that provenance before passing an observation to the issuance path. Passing shape
+validation is not evidence of issuer control, authority, or terminality.
 
 ## Occurrence time
 
