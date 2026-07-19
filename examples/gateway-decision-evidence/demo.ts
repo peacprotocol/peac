@@ -15,15 +15,17 @@
  * deployment must establish that provenance before the issuance path. A valid
  * signature proves record integrity and possession of the signing key, not
  * issuer legitimacy or authorization, which are configured trust-policy
- * decisions. Terminality does not disappear between classification and issuance:
- * issueTerminalAccessDecision accepts only a TerminalGatewayAccessDecision, so a
- * bare {resource, action, decision} object cannot be issued.
+ * decisions. issueTerminalAccessDecision enforces the terminal shape at both the
+ * TypeScript and runtime boundaries (the TypeScript type prevents accidental
+ * misuse in typed callers; a runtime guard also rejects malformed JavaScript or
+ * cast inputs). Neither mechanism proves issuer-controlled provenance.
  *
- * Verification policy: the structural checks (kind, type, access pillar, valid
- * access extension, issuer, signature) are always mandatory. The expected kid is
- * enforced only when the policy configures one; rejecting on a verification
- * warning is a conservative, example-local policy, NOT a PEAC or GDE requirement
- * (the profile preserves application-specific extensions as application data).
+ * Verification policy: the wrapper verifies the signature and expected issuer,
+ * then requires the expected record kind and type, the access pillar, and a
+ * valid access extension. The expected kid is enforced only when the policy
+ * configures one; rejecting on a verification warning is a conservative,
+ * example-local policy, NOT a PEAC or GDE requirement (the profile preserves
+ * application-specific extensions as application data).
  *
  * occurred_at is never fabricated: a production gateway may set it from a trusted
  * boundary timestamp (Wire 0.2); this synthetic example omits it (it is optional).
@@ -32,7 +34,12 @@
  * Run: pnpm demo | pnpm demo:tamper | pnpm demo:show-record | pnpm test
  */
 
-import { issue, verifyLocal } from '@peac/protocol';
+import {
+  issue,
+  verifyLocal,
+  type VerifyLocalSuccess,
+  type VerifyLocalErrorCode,
+} from '@peac/protocol';
 import { AccessExtensionSchema, ACCESS_EXTENSION_KEY } from '@peac/schema';
 import { generateKeypair } from '@peac/crypto';
 
@@ -74,7 +81,7 @@ export type TerminalGatewayAccessDecision = Extract<
   { kind: 'terminal' }
 >;
 
-export type AccessRecord = { resource: string; action: string; decision: AccessDecision };
+type AccessRecord = { resource: string; action: string; decision: AccessDecision };
 
 export type MapResult =
   | { issuable: true; terminal: TerminalGatewayAccessDecision }
@@ -197,6 +204,21 @@ export function toAccessDecision(observation: GatewayBoundaryObservation): MapRe
   }
 }
 
+/**
+ * Runtime guard: return a validated TerminalGatewayAccessDecision, or throw.
+ * TypeScript types are erased at runtime, so this also rejects malformed
+ * JavaScript or cast inputs (a bare access object, a non-terminal kind, or a
+ * terminal claim without retryOrFallbackPossible === false).
+ */
+function requireTerminalGatewayAccessDecision(value: unknown): TerminalGatewayAccessDecision {
+  const parsed = parseGatewayBoundaryEvent(value);
+  if ('invalid' in parsed || parsed.kind !== 'terminal')
+    throw new TypeError(
+      'a terminal gateway access decision with retryOrFallbackPossible=false is required'
+    );
+  return parsed;
+}
+
 export type IssueTerminalAccessDecisionParams = {
   issuer: string;
   privateKey: Uint8Array;
@@ -205,17 +227,18 @@ export type IssueTerminalAccessDecisionParams = {
 };
 
 /**
- * Issue a signed org.peacprotocol/access-decision record. Accepts ONLY a
- * TerminalGatewayAccessDecision, so terminality cannot be bypassed with a bare
- * {resource, action, decision} object.
+ * Issue a signed org.peacprotocol/access-decision record. Enforces the terminal
+ * shape at the TypeScript type AND at runtime, so a bare {resource, action,
+ * decision} object cannot be issued.
  */
 export async function issueTerminalAccessDecision(
   params: IssueTerminalAccessDecisionParams
 ): Promise<string> {
-  const access = AccessExtensionSchema.parse({
-    resource: params.terminal.resource,
-    action: params.terminal.action,
-    decision: params.terminal.decision,
+  const terminal = requireTerminalGatewayAccessDecision(params.terminal);
+  const access: AccessRecord = AccessExtensionSchema.parse({
+    resource: terminal.resource,
+    action: terminal.action,
+    decision: terminal.decision,
   });
   const { jws } = await issue({
     iss: params.issuer,
@@ -246,33 +269,48 @@ export type GatewayVerificationPolicy = {
   rejectWarnings?: boolean;
 };
 
-/** Verifier warning shape (structurally the shipped VerificationWarning). */
-export type GatewayVerificationWarning = { code: string; message: string; pointer?: string };
+/** Verifier warning, derived from the shipped verifier contract (not re-declared). */
+export type GatewayVerificationWarning = VerifyLocalSuccess['warnings'][number];
+
+/** Verification failure reasons: shipped verifier codes plus this example's policy checks. */
+export type GatewayVerificationFailureReason =
+  | VerifyLocalErrorCode
+  | 'unexpected_record_kind'
+  | 'unexpected_record_type'
+  | 'missing_access_pillar'
+  | 'invalid_access_extension'
+  | 'unexpected_kid'
+  | 'unexpected_verification_warning';
 
 export type VerifyOutcome =
   | {
       valid: true;
       decision: AccessDecision;
-      kid: string | undefined;
-      wireVersion: string;
+      kid: string;
+      wireVersion: '0.2';
       warnings: readonly GatewayVerificationWarning[];
     }
-  | { valid: false; reason: string };
+  | { valid: false; reason: GatewayVerificationFailureReason };
 
 /**
- * Profile-aware verification under an explicit relying-party policy. The
- * mandatory structural checks (kind, type, access pillar, valid access
- * extension, issuer, signature) are always applied. The expected kid is enforced
- * only when configured, and warnings are rejected only when the policy sets
- * `rejectWarnings: true`. Returns example-local failure reasons; introduces no
- * PEAC kernel errors.
+ * Profile-aware verification under an explicit relying-party policy. Verifies the
+ * signature and expected issuer, then requires the expected record kind, type,
+ * access pillar, and a valid access extension. The expected kid is enforced only
+ * when configured; warnings are rejected only when the policy sets
+ * `rejectWarnings: true`. Consumes the verifier's validated output (kid, warnings,
+ * failure code) rather than re-decoding the JWS. Never throws.
  */
 export async function verifyGatewayDecision(
   jws: string,
   policy: GatewayVerificationPolicy
 ): Promise<VerifyOutcome> {
-  const v = await verifyLocal(jws, policy.acceptedPublicKey, { issuer: policy.expectedIssuer });
-  if (!v.valid) return { valid: false, reason: (v as { code?: string }).code ?? 'invalid' };
+  let v;
+  try {
+    v = await verifyLocal(jws, policy.acceptedPublicKey, { issuer: policy.expectedIssuer });
+  } catch {
+    return { valid: false, reason: 'E_INVALID_FORMAT' };
+  }
+  if (!v.valid) return { valid: false, reason: v.code };
 
   const claims = v.claims as {
     kind?: string;
@@ -287,29 +325,30 @@ export async function verifyGatewayDecision(
     return { valid: false, reason: 'missing_access_pillar' };
   const parsed = AccessExtensionSchema.safeParse(claims.extensions?.[ACCESS_EXTENSION_KEY]);
   if (!parsed.success) return { valid: false, reason: 'invalid_access_extension' };
-  const kid = jwsHeader(jws).kid as string | undefined;
-  if (policy.expectedKid !== undefined && kid !== policy.expectedKid)
+  if (policy.expectedKid !== undefined && v.kid !== policy.expectedKid)
     return { valid: false, reason: 'unexpected_kid' };
-  const warnings: readonly GatewayVerificationWarning[] = v.warnings;
-  if (policy.rejectWarnings === true && warnings.length !== 0)
+  if (policy.rejectWarnings === true && v.warnings.length !== 0)
     return { valid: false, reason: 'unexpected_verification_warning' };
 
   return {
     valid: true,
     decision: parsed.data.decision as AccessDecision,
-    kid,
+    kid: v.kid,
     wireVersion: v.wireVersion,
-    warnings,
+    warnings: v.warnings,
   };
 }
 
+// These helpers decode compact JWS segments for display and deliberate tampering
+// only. Their output is unverified and must never drive authorization or trust
+// policy. They are intentionally not exported.
 function b64urlToUtf8(seg: string): string {
   return Buffer.from(seg, 'base64url').toString('utf8');
 }
-export function jwsHeader(jws: string): Record<string, unknown> {
+function decodeJwsHeaderForDisplay(jws: string): Record<string, unknown> {
   return JSON.parse(b64urlToUtf8(jws.split('.')[0]));
 }
-export function jwsClaims(jws: string): Record<string, unknown> {
+function decodeJwsClaimsForDemo(jws: string): Record<string, unknown> {
   return JSON.parse(b64urlToUtf8(jws.split('.')[1]));
 }
 
@@ -373,12 +412,7 @@ export function sampleEvents(): Record<string, unknown> {
 }
 
 export type DemoResult = {
-  issued: Array<{
-    label: string;
-    decision: AccessDecision;
-    verified: boolean;
-    kid: string | undefined;
-  }>;
+  issued: Array<{ label: string; decision: AccessDecision; verified: boolean; kid: string }>;
   abstained: Array<{ label: string; reason: string }>;
 };
 
@@ -435,8 +469,17 @@ async function main(): Promise<void> {
       kid: GATEWAY_KID,
       terminal: terminal('https://api.internal.example/records/42', 'records.read', 'allow'),
     });
-    console.log('header:', JSON.stringify(jwsHeader(jws), null, 2));
-    console.log('claims:', JSON.stringify(jwsClaims(jws), null, 2));
+    const v = await verifyGatewayDecision(jws, {
+      expectedIssuer: GATEWAY_ISSUER,
+      acceptedPublicKey: gateway.publicKey,
+      expectedKid: GATEWAY_KID,
+      rejectWarnings: true,
+    });
+    if (!v.valid) throw new Error(`show-record: verification failed: ${v.reason}`);
+    console.log('verified:', true);
+    // Decode only after verification; the decoded values are for display only.
+    console.log('header:', JSON.stringify(decodeJwsHeaderForDisplay(jws), null, 2));
+    console.log('claims:', JSON.stringify(decodeJwsClaimsForDemo(jws), null, 2));
     return;
   }
 
@@ -459,7 +502,7 @@ async function main(): Promise<void> {
       terminal: decision,
     });
     const [h, , s] = jws.split('.');
-    const claims = jwsClaims(jws);
+    const claims = decodeJwsClaimsForDemo(jws);
     (claims.extensions as Record<string, AccessRecord>)[ACCESS_EXTENSION_KEY].decision = 'deny';
     const tampered = `${h}.${Buffer.from(JSON.stringify(claims), 'utf8').toString('base64url')}.${s}`;
     const t = await verifyGatewayDecision(tampered, policy);

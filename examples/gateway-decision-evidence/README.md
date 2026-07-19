@@ -22,11 +22,12 @@ canonicalization.
   (`log`/`retry`/`fallback`/`continue`/`transform`), a third-party-report-only
   event, and missing or unsupported access context.
 - **Profile-aware offline verification under an explicit relying-party policy.**
-  Signature validity alone is not sufficient. The MANDATORY structural checks are
-  always applied: the expected record kind (`evidence`), the type
-  `org.peacprotocol/access-decision`, the `access` pillar, a valid
-  `org.peacprotocol/access` extension, the correct issuer, and a valid signature.
-  In addition the policy MAY require the expected `kid` (only when the relying
+  Signature validity alone is not sufficient. The wrapper always verifies the
+  signature and expected issuer, then requires the expected record kind
+  (`evidence`), the type `org.peacprotocol/access-decision`, the `access` pillar,
+  and a valid `org.peacprotocol/access` extension. It consumes the verifier's
+  validated output (`kid`, warnings, failure code) rather than re-decoding the
+  JWS. In addition the policy MAY require the expected `kid` (only when the relying
   party configures one) and MAY reject records that produce a verification
   warning. Rejecting on any warning is a conservative, example-local choice, NOT
   a PEAC or GDE requirement: the profile permits application-specific extensions,
@@ -50,8 +51,12 @@ are not representable. Untrusted adapter input arrives as `unknown` and is
 narrowed at the boundary (`parseGatewayBoundaryEvent`); a claim of terminality
 that does not explicitly establish `retryOrFallbackPossible === false` does not
 narrow to the terminal variant. Terminality is then preserved through issuance:
-`issueTerminalAccessDecision` accepts only a `TerminalGatewayAccessDecision`, so a
-bare `{ resource, action, decision }` object cannot be issued.
+`issueTerminalAccessDecision` enforces the terminal shape at both the TypeScript
+and runtime boundaries: the type prevents accidental misuse in typed callers, and
+a runtime guard also rejects malformed JavaScript or cast inputs (a bare
+`{ resource, action, decision }` object, a non-terminal kind, or a terminal claim
+without `retryOrFallbackPossible === false`). Neither mechanism proves
+issuer-controlled provenance; the deployment establishes that precondition.
 
 ## Trust boundary
 
