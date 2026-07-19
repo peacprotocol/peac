@@ -242,11 +242,11 @@ test('verified claim shape: decision and kid from the validated verifier output'
   assert.equal(v.kid, GATEWAY_KID);
 });
 
-test('malformed JWS returns a typed failure and does not throw', async () => {
+test('malformed JWS keeps the verifier canonical code (E_INVALID_FORMAT) and does not throw', async () => {
   const gateway = await generateKeypair();
   const v = await verifyGatewayDecision('not-a-jws', strictPolicy(gateway.publicKey));
-  assert.equal(v.valid, false);
-  if (!v.valid) assert.equal(typeof v.reason, 'string');
+  // Malformed input is classified by verifyLocal, not by the outer E_INTERNAL fallback.
+  assert.deepEqual(v, { valid: false, reason: 'E_INVALID_FORMAT' });
 });
 
 test('mandatory checks reject non-conforming but validly signed records', async () => {

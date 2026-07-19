@@ -298,7 +298,10 @@ export type VerifyOutcome =
  * access pillar, and a valid access extension. The expected kid is enforced only
  * when configured; warnings are rejected only when the policy sets
  * `rejectWarnings: true`. Consumes the verifier's validated output (kid, warnings,
- * failure code) rather than re-decoding the JWS. Never throws.
+ * failure code) rather than re-decoding the JWS, and never throws. Verifier
+ * failures retain their canonical codes (for example malformed input is
+ * `E_INVALID_FORMAT`); an unexpected exception outside the verifier's normal
+ * typed-result contract is reported as `E_INTERNAL`.
  */
 export async function verifyGatewayDecision(
   jws: string,
@@ -308,7 +311,7 @@ export async function verifyGatewayDecision(
   try {
     v = await verifyLocal(jws, policy.acceptedPublicKey, { issuer: policy.expectedIssuer });
   } catch {
-    return { valid: false, reason: 'E_INVALID_FORMAT' };
+    return { valid: false, reason: 'E_INTERNAL' };
   }
   if (!v.valid) return { valid: false, reason: v.code };
 
