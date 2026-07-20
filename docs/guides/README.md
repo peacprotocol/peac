@@ -12,5 +12,6 @@
 - [Go SDK Middleware](go-middleware.md) — chi, gin, and net/http integration
 - [Multi-Tenant Deployment](multi-tenant.md)
 - [Edge Workers](edge/) — Cloudflare, Fastly, Akamai
+- [Gateway Decision Evidence](gateway-decision-evidence.md) — terminal gateway access decisions with mandatory non-issuance and offline verification
 
 See [ARCHITECTURE.md](../ARCHITECTURE.md) for the layered package model.
