@@ -1,22 +1,23 @@
 # Gateway decision evidence guide
 
-> **Status:** Informative. This guide explains how to apply PEAC's existing
-> access-decision surfaces to terminal gateway decisions; it adds no normative
-> wire or conformance requirements.
+> **Status:** Informative.
 
-This guide shows how to issue and verify a portable signed record of a terminal
+This guide applies PEAC's existing access-decision surfaces to terminal gateway
+decisions: how to issue and verify a portable signed record of a terminal
 gateway access decision using surfaces that already ship in this repository. It
-adds no new protocol, schema, registry, wire, or package surface: it uses the
+adds no new protocol, schema, registry, wire, or package surface; it uses the
 existing `org.peacprotocol/access-decision` record and the registered
 `org.peacprotocol/access` extension.
 
 The [Gateway Decision Evidence Profile](../specs/GATEWAY-DECISION-EVIDENCE.md) is
-also informative composition guidance; normative requirements remain in the
-linked PEAC specifications and registries. This guide is the integrator-facing
-companion to that profile, and to the runnable
+the primary informative reference for this composition pattern, and this guide is
+its integrator-facing companion, alongside the runnable
 [`examples/gateway-decision-evidence/`](../../examples/gateway-decision-evidence/)
-example. If this guide conflicts with the profile, follow the profile for this
-composition pattern.
+example. Normative requirements remain in the linked PEAC specifications and
+registries.
+
+If this guide and the profile differ, follow the profile's composition guidance;
+the normative specifications and registries govern protocol requirements.
 
 ## When to use this guide
 
@@ -49,15 +50,15 @@ Issue an `org.peacprotocol/access-decision` record only when every precondition
 below holds; otherwise the correct behavior is to issue nothing, not to issue a
 weaker or inferred decision.
 
-| Situation                                                                                              | Action  | Why                                                                                  |
-| ------------------------------------------------------------------------------------------------------ | ------- | ------------------------------------------------------------------------------------ |
-| Terminal `allow`/`deny`/`review`, with a truthful `resource` and `action`                              | Issue   | A terminal decision the issuer can populate                                          |
-| A check outcome only (a processed check is not a decision)                                             | Abstain | A check result is not an access decision                                             |
-| Intermediate: retry or fallback is still possible                                                      | Abstain | Terminality is not established                                                       |
-| Terminality cannot be established: retry, fallback, or further processing may still change the outcome | Abstain | The represented decision is not terminal                                             |
-| Handling action only (log, retry, fallback, continue, transform)                                       | Abstain | Lifecycle behavior is not an access decision                                         |
-| Third-party report only (not issuer-controlled)                                                        | Abstain | Out of profile: only decisions produced within an issuer-controlled gateway boundary |
-| `resource`, `action`, or `decision` cannot be truthfully populated                                     | Abstain | The `access` extension requires all three                                            |
+| Situation                                                                                              | Action  | Why                                          |
+| ------------------------------------------------------------------------------------------------------ | ------- | -------------------------------------------- |
+| Terminal `allow`/`deny`/`review`, with a truthful `resource` and `action`                              | Issue   | A terminal decision the issuer can populate  |
+| A check outcome only (a processed check is not a decision)                                             | Abstain | A check result is not an access decision     |
+| Intermediate: retry or fallback is still possible                                                      | Abstain | Terminality is not established               |
+| Terminality cannot be established: retry, fallback, or further processing may still change the outcome | Abstain | The represented decision is not terminal     |
+| Handling action only (log, retry, fallback, continue, transform)                                       | Abstain | Lifecycle behavior is not an access decision |
+| Third-party report only; no issuer-controlled gateway observation                                      | Abstain | Out of profile for the core composition      |
+| `resource`, `action`, or `decision` cannot be truthfully populated                                     | Abstain | The `access` extension requires all three    |
 
 The three access fields are schema-required. If any of them cannot be truthfully
 populated from the issuer-controlled decision context, do not issue the record.
@@ -152,13 +153,14 @@ those from the bare record.
 Three distinct verification failures are worth testing, and the example does:
 
 - a tampered payload fails signature verification (`E_INVALID_SIGNATURE`);
-- a valid record from a signer the relying party does not accept fails
-  (`E_INVALID_SIGNATURE`);
-- a valid record from an unexpected issuer fails (`E_INVALID_ISSUER`).
+- a record signed by an unaccepted key fails when checked against the relying
+  party's configured accepted public key (`E_INVALID_SIGNATURE`);
+- a cryptographically valid record carrying an unexpected issuer fails the
+  configured issuer policy (`E_INVALID_ISSUER`).
 
-Malformed inputs keep the verifier's canonical codes (for example
-`E_INVALID_FORMAT`); an unexpected out-of-contract exception is reported as
-`E_INTERNAL`.
+In the example wrapper, malformed inputs retain the verifier's canonical codes
+(for example `E_INVALID_FORMAT`), while an unexpected exception outside the typed
+verifier-result contract is mapped to `E_INTERNAL`.
 
 ## Data minimization
 
@@ -207,8 +209,9 @@ This profile standardizes no assertion-basis field, issuer-role field,
 upstream-source provenance, deployment identifier, terminality field, or
 content-commitment encoding. Applications that need such data define it under
 their own extension namespace; generic PEAC verification treats it as
-application data, and its presence is not a PEAC conformance signal. PEAC v0.16.3
-registers no gateway-decision extension.
+application data, and its presence is not a PEAC conformance signal. This profile
+registers no gateway-decision extension and standardizes no application-specific
+JSON shape.
 
 ## Non-claims and limitations
 
