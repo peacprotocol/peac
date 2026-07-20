@@ -13,6 +13,8 @@ PEAC lets those systems issue portable signed interaction records so another par
 [![npm downloads](https://img.shields.io/npm/dm/@peac/protocol?style=flat&color=brightgreen)](https://www.npmjs.com/package/@peac/protocol)
 [![CI Status](https://img.shields.io/github/actions/workflow/status/peacprotocol/peac/ci.yml?branch=main&label=CI&color=brightgreen)](https://github.com/peacprotocol/peac/actions/workflows/ci.yml)
 
+PEAC Protocol is published and maintained by [Originary](https://www.originary.xyz/).
+
 ## Verify a record offline
 
 Generate the shipped sample records, then verify one locally with the generated issuer key set. The verification step does not fetch keys or call a remote verifier. `pnpm dlx` may download the CLI if it is not already cached.
@@ -250,6 +252,6 @@ Apache-2.0. See [`LICENSE`](LICENSE).
 
 ---
 
-PEAC Protocol is an open-source project stewarded by [Originary](https://www.originary.xyz/) and community contributors.
+PEAC Protocol is an open-source project published and maintained by [Originary](https://www.originary.xyz/) and community contributors.
 
 [Docs](https://www.peacprotocol.org) &middot; [GitHub](https://github.com/peacprotocol/peac) &middot; [Discussions](https://github.com/peacprotocol/peac/discussions)
