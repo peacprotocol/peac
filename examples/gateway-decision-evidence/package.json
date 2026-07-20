@@ -1,0 +1,24 @@
+{
+  "name": "@peac/example-gateway-decision-evidence",
+  "version": "0.0.0",
+  "private": true,
+  "description": "PEAC gateway decision evidence example: a deployment operator issues a signed record ONLY for a terminal gateway access decision, abstains for every non-terminal state, and verifies offline with issuer/key acceptance",
+  "type": "module",
+  "scripts": {
+    "demo": "tsx demo.ts",
+    "demo:tamper": "tsx demo.ts --tamper",
+    "demo:show-record": "tsx demo.ts --show-record",
+    "test": "node --import tsx --test gateway-decision-evidence.test.ts",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@peac/crypto": "workspace:*",
+    "@peac/protocol": "workspace:*",
+    "@peac/schema": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "^4.21.0",
+    "typescript": "^5.3.3"
+  }
+}
