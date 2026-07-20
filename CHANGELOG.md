@@ -5,7 +5,48 @@ All notable changes to PEAC Protocol will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.16.2] - 2026-07-13
+## [0.16.3] - 2026-07-21
+
+Gateway Decision Evidence.
+
+Adds portable signed records for terminal gateway access decisions, composed from
+the existing `org.peacprotocol/access-decision` record and the registered
+`org.peacprotocol/access` extension, without changing the wire format, public
+schema, registered record types, extension groups, or structural sentinels.
+
+Specs: adds an informative Gateway Decision Evidence profile and semantic guidance
+for terminal access decisions and mandatory non-issuance. Checks, intermediate
+outcomes, handling actions, and observations outside the issuer-controlled gateway
+boundary are not access decisions and produce no record.
+Examples: adds a runnable, offline-verifiable gateway-decision example that issues
+only for a terminal decision, abstains for every non-terminal state, and verifies
+under an explicit relying-party issuer and key policy, with runtime and TypeScript
+safeguards that retain terminality through issuance (build_targets 112 to 113).
+Guides: adds an integrator guide covering the issue and non-issuance matrix, issuer
+and key policy, data minimization, deployment and privacy, document binding, and
+telemetry correlation.
+Docs: improves README developer entry points and discoverability, and records that
+PEAC Protocol is an open-source project published and maintained by Originary, with
+contributions from the community.
+Security: updates the `qs` resolution to the patched 6.15.2 (GHSA-q8mj-m7cp-5q26 /
+CVE-2026-8723 stringify denial of service; retains the earlier GHSA-w7fw-mjwx-w883
+arrayLimit coverage).
+CI: adds a GitHub-release-to-npm consistency guard and runs the repository tooling
+gates in PR CI.
+Wire format: unchanged (0.2).
+Public schema: unchanged.
+Registered extension groups: unchanged (19).
+Registered receipt types: unchanged (61).
+Conformance sections: unchanged (32).
+Conformance requirement IDs: unchanged (290).
+Published packages: unchanged (36).
+
+Verification of a gateway decision record establishes signed-record integrity and
+possession of the signing key. It does not independently establish that the
+decision occurred, was complete, was correct, was enforced, or that the issuer is
+authorized for a deployment.
+
+## [0.16.2]
 
 Portable Evidence Pack.
 
