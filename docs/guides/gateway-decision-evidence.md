@@ -1,27 +1,34 @@
 # Gateway decision evidence guide
 
+> **Status:** Informative. This guide explains how to apply PEAC's existing
+> access-decision surfaces to terminal gateway decisions; it adds no normative
+> wire or conformance requirements.
+
 This guide shows how to issue and verify a portable signed record of a terminal
 gateway access decision using surfaces that already ship in this repository. It
 adds no new protocol, schema, registry, wire, or package surface: it uses the
 existing `org.peacprotocol/access-decision` record and the registered
 `org.peacprotocol/access` extension.
 
-The normative rules live in the
-[Gateway Decision Evidence Profile](../specs/GATEWAY-DECISION-EVIDENCE.md). This
-guide is the integrator-facing companion to that profile, and to the runnable
+The [Gateway Decision Evidence Profile](../specs/GATEWAY-DECISION-EVIDENCE.md) is
+also informative composition guidance; normative requirements remain in the
+linked PEAC specifications and registries. This guide is the integrator-facing
+companion to that profile, and to the runnable
 [`examples/gateway-decision-evidence/`](../../examples/gateway-decision-evidence/)
-example. Where this guide and the profile differ, the profile governs.
+example. If this guide conflicts with the profile, follow the profile for this
+composition pattern.
 
 ## When to use this guide
 
 Use it when you operate a gateway decision boundary (for example an API gateway
 or an AI gateway) and want a portable signed record of a **terminal access
 decision** that the gateway reached, so a relying party can verify it offline
-with the issuer's public key and an accepted-issuer policy.
+with the issuer's public key and a configured expected-issuer policy.
 
-Do not use it to record check results, retries, fallbacks, logging, or other
-handling behavior: those are not access decisions, and the profile requires the
-issuer to abstain for them.
+Do not use this access-decision composition to represent check results, retries,
+fallbacks, logging, or other handling behavior. Other PEAC profiles may represent
+applicable lifecycle or operational observations, but those values must not be
+coerced into an access decision.
 
 ## What the record is, and is not
 
@@ -42,15 +49,15 @@ Issue an `org.peacprotocol/access-decision` record only when every precondition
 below holds; otherwise the correct behavior is to issue nothing, not to issue a
 weaker or inferred decision.
 
-| Situation                                                                   | Action  | Why                                              |
-| --------------------------------------------------------------------------- | ------- | ------------------------------------------------ |
-| Terminal `allow`/`deny`/`review`, with a truthful `resource` and `action`   | Issue   | A terminal decision the issuer can populate      |
-| A check outcome only (a processed check is not a decision)                  | Abstain | A check result is not an access decision         |
-| Intermediate: retry or fallback is still possible                           | Abstain | Terminality is not established                   |
-| A "terminal" label that does not establish `retryOrFallbackPossible: false` | Abstain | Terminality claim is not explicit                |
-| Handling action only (log, retry, fallback, continue, transform)            | Abstain | Lifecycle behavior is not an access decision     |
-| Third-party report only (not issuer-controlled)                             | Abstain | Out of profile: only issuer-controlled decisions |
-| `resource`, `action`, or `decision` cannot be truthfully populated          | Abstain | The `access` extension requires all three        |
+| Situation                                                                                              | Action  | Why                                                                                  |
+| ------------------------------------------------------------------------------------------------------ | ------- | ------------------------------------------------------------------------------------ |
+| Terminal `allow`/`deny`/`review`, with a truthful `resource` and `action`                              | Issue   | A terminal decision the issuer can populate                                          |
+| A check outcome only (a processed check is not a decision)                                             | Abstain | A check result is not an access decision                                             |
+| Intermediate: retry or fallback is still possible                                                      | Abstain | Terminality is not established                                                       |
+| Terminality cannot be established: retry, fallback, or further processing may still change the outcome | Abstain | The represented decision is not terminal                                             |
+| Handling action only (log, retry, fallback, continue, transform)                                       | Abstain | Lifecycle behavior is not an access decision                                         |
+| Third-party report only (not issuer-controlled)                                                        | Abstain | Out of profile: only decisions produced within an issuer-controlled gateway boundary |
+| `resource`, `action`, or `decision` cannot be truthfully populated                                     | Abstain | The `access` extension requires all three                                            |
 
 The three access fields are schema-required. If any of them cannot be truthfully
 populated from the issuer-controlled decision context, do not issue the record.
@@ -67,6 +74,17 @@ is issuable, while an unresolved or still-processing state is not.
 The example models this as three steps: narrow an untrusted boundary event,
 classify it, and issue only for a terminal decision. It reuses the shipped
 `issue()` and the registered `org.peacprotocol/access` extension.
+
+The names in this section are local to the runnable example.
+`parseGatewayBoundaryEvent`, `toAccessDecision`, `TerminalGatewayAccessDecision`,
+`issueTerminalAccessDecision`, `GatewayVerificationPolicy`, and `rejectWarnings`
+are example-local adapter types and helpers, not PEAC wire fields, registered
+schema fields, `@peac/protocol` exports, or standardized gateway APIs. In
+particular, `retryOrFallbackPossible` is an example adapter-input field, not a
+PEAC wire claim, registered schema field, or standardized gateway API. Other
+deployments may establish terminality from their own boundary state, provided
+they do so before issuance and do not infer it from a check result or handling
+action.
 
 1. **Narrow the boundary event.** `parseGatewayBoundaryEvent(raw: unknown)`
    validates event shape and the explicit terminality claim only. It accepts a
@@ -116,7 +134,8 @@ takes a `GatewayVerificationPolicy`:
   type `org.peacprotocol/access-decision`, the `access` pillar, and a valid
   `org.peacprotocol/access` extension.
 - **Key pinning (when configured).** Enforce an expected `kid` only when the
-  relying application pins one. A pin `kid` is optional
+  relying application pins one. A trust pin may omit `kid`; the example enforces
+  an expected `kid` only when the relying-party policy configures one
   ([Trust Pinning Policy](../specs/TRUST-PINNING-POLICY.md) Sections 6 and 7).
 - **Warning policy (application choice).** PEAC preserves well-formed unknown
   extensions with an informational warning and treats them as application data.
@@ -125,9 +144,10 @@ takes a `GatewayVerificationPolicy`:
   `rejectWarnings` flag.
 
 The relying application supplies the expected gateway or deployment context out
-of band and maps it to accepted issuer and key policy. The core access-decision
-record does not identify a gateway deployment, an issuer role, or a named
-upstream source; do not infer any of those from the bare record.
+of band and maps it to configured issuer-acceptance and, when applicable,
+key-pinning policy. The core access-decision record does not identify a gateway
+deployment, an issuer role, or a named upstream source; do not infer any of
+those from the bare record.
 
 Three distinct verification failures are worth testing, and the example does:
 
@@ -143,12 +163,43 @@ Malformed inputs keep the verifier's canonical codes (for example
 ## Data minimization
 
 The record carries the required decision context (`resource`, `action`,
-`decision`) and, when present, an issuer-observed occurrence time. It does not
-carry the request or response content that was evaluated, and it does not inline
-raw prompt, completion, policy, request, or response bodies. `occurred_at` is
-optional and, when present, describes the observed decision time; an issuer must
-never fabricate it. Deployments and any application-specific extensions remain
-subject to the [Privacy Profile](../specs/PRIVACY-PROFILE.md).
+`decision`) and, when present, an issuer-observed occurrence time. The core
+gateway-decision composition neither requires nor inlines the request or response
+content that was evaluated, nor raw prompt, completion, policy, request, or
+response bodies. `occurred_at` is optional and, when present, describes the
+observed decision time; an issuer must never fabricate it. Deployments and any
+application-specific extensions remain subject to the
+[Privacy Profile](../specs/PRIVACY-PROFILE.md).
+
+## Deployment and privacy checklist
+
+- Establish the issuer-controlled gateway boundary before issuance. Shape
+  validation alone does not establish provenance.
+- Prefer issuance in the gateway process or through a constrained internal
+  signing service. Raw request or response bodies need not leave the deployment
+  boundary solely for signing.
+- Do not place private keys, API keys, bearer tokens, cookies, authorization
+  headers, credentials, raw prompts or completions, complete request or response
+  bodies, full policy documents, or unnecessary personal data in the record.
+- Omit optional context rather than guessing or copying it indiscriminately.
+- When `occurred_at` is supplied, use the time the represented decision became
+  terminal at the boundary, not a later signing time. Omit it when that time
+  cannot be established.
+- Application-specific digests or references should be computed within the
+  deployment boundary. A plain digest is not confidentiality protection for
+  predictable or low-entropy content; apply the
+  [Privacy Profile](../specs/PRIVACY-PROFILE.md) and the repository's
+  [document-binding guidance](../specs/DOCUMENT-BINDING.md).
+
+## Correlation and telemetry
+
+A deployment may correlate a gateway decision record with an existing workflow,
+trace, or parent reference using PEAC's existing correlation surfaces. W3C Trace
+Context and OpenTelemetry identifiers are correlation carriers only: they do not
+establish issuer authority, decision correctness, occurrence, or PEAC finality.
+
+See
+[Correlating PEAC records with OpenTelemetry traces](telemetry-otel-correlation.md).
 
 ## Application-specific provenance
 
@@ -161,9 +212,9 @@ registers no gateway-decision extension.
 
 ## Non-claims and limitations
 
-A gateway decision evidence record establishes only that a terminal gateway
-access decision was signed by a holder of the signing key. It does not, by
-itself, establish:
+Successful verification establishes the integrity of the signed record and
+possession of the corresponding signing key. The record states that the issuer
+reports a terminal gateway access decision; it does not independently establish:
 
 - that the decision was correct, fair, or complete;
 - that the decision was enforced or executed;
@@ -178,9 +229,11 @@ See profile Section
 
 ## Related specifications and examples
 
-- [Gateway Decision Evidence Profile](../specs/GATEWAY-DECISION-EVIDENCE.md) (normative)
+- [Gateway Decision Evidence Profile](../specs/GATEWAY-DECISION-EVIDENCE.md) (informative profile)
 - [`examples/gateway-decision-evidence/`](../../examples/gateway-decision-evidence/) (runnable)
 - [Access Profile](../profiles/access.md)
 - [Trust Pinning Policy](../specs/TRUST-PINNING-POLICY.md)
 - [Privacy Profile](../specs/PRIVACY-PROFILE.md)
+- [Document Binding](../specs/DOCUMENT-BINDING.md)
 - [Gateway Issuance Recipes](../specs/GATEWAY-ISSUANCE-RECIPES.md)
+- [Correlating PEAC records with OpenTelemetry traces](telemetry-otel-correlation.md)
