@@ -13,7 +13,9 @@ PEAC lets those systems issue portable signed interaction records so another par
 [![npm downloads](https://img.shields.io/npm/dm/@peac/protocol?style=flat&color=brightgreen)](https://www.npmjs.com/package/@peac/protocol)
 [![CI Status](https://img.shields.io/github/actions/workflow/status/peacprotocol/peac/ci.yml?branch=main&label=CI&color=brightgreen)](https://github.com/peacprotocol/peac/actions/workflows/ci.yml)
 
-PEAC Protocol is an open-source project published and maintained by [Originary](https://www.originary.xyz/) and community contributors.
+PEAC Protocol is open-source software published and maintained by [Originary](https://www.originary.xyz/), with contributions from the community.
+
+This repository contains the official source code, releases, and developer tooling distributed under the Apache-2.0 license.
 
 ## Verify a record offline
 
@@ -97,16 +99,17 @@ Full boundary, compared surface by surface: [`docs/WHERE-IT-FITS.md`](docs/WHERE
 
 Worked, offline-verifiable examples for common evidence shapes. Each adds no new wire format, schema field, or registry entry beyond what already ships. The PEAC records below preserve issuer-reported claims. Any linked payment, timestamp, transparency, or other external proof must also be evaluated under its own verification rules and trust model.
 
-| Workflow                    | Demonstrates                                                       | Start here                                                     |
-| --------------------------- | ------------------------------------------------------------------ | -------------------------------------------------------------- |
-| Paid resource               | x402 offer and receipt artifacts preserved in a payment record     | [example](examples/x402-paid-resource-records/)                |
-| Paid MCP tool               | tool-call digests linked to observed payment artifacts             | [example](examples/mcp-paid-tool-records/)                     |
-| Counterparty acknowledgment | one signed record referencing another by `(iss, jti, receipt_ref)` | [example](examples/counterparty-acknowledgment-records/)       |
-| Action approval             | consistency across reported approval and invocation records        | [example](examples/action-approval-records/)                   |
-| Agent-run lineage           | records, manifest, and coverage commitment verified together       | [guide](docs/guides/agent-runtime-lineage-export.md)           |
-| External anchoring          | a record digest registered or timestamped externally               | [guide](docs/guides/anchoring-evidence-digests.md)             |
-| Spend attribution           | issuer-observed amounts associated with a workflow                 | [guide](docs/SOLUTIONS/agent-spend-attribution.md)             |
-| Merkle commitment           | offline inclusion in a committed sorted set                        | [spec](docs/specs/WORKFLOW-CORRELATION.md#7-merkle-commitment) |
+| Workflow                    | Demonstrates                                                                  | Start here                                                                                                 |
+| --------------------------- | ----------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Gateway decision            | terminal access decisions with mandatory non-issuance for non-terminal states | [profile](docs/specs/GATEWAY-DECISION-EVIDENCE.md) &middot; [example](examples/gateway-decision-evidence/) |
+| Paid resource               | x402 offer and receipt artifacts preserved in a payment record                | [example](examples/x402-paid-resource-records/)                                                            |
+| Paid MCP tool               | tool-call digests linked to observed payment artifacts                        | [example](examples/mcp-paid-tool-records/)                                                                 |
+| Counterparty acknowledgment | one signed record referencing another by `(iss, jti, receipt_ref)`            | [example](examples/counterparty-acknowledgment-records/)                                                   |
+| Action approval             | consistency across reported approval and invocation records                   | [example](examples/action-approval-records/)                                                               |
+| Agent-run lineage           | records, manifest, and coverage commitment verified together                  | [guide](docs/guides/agent-runtime-lineage-export.md)                                                       |
+| External anchoring          | a record digest registered or timestamped externally                          | [guide](docs/guides/anchoring-evidence-digests.md)                                                         |
+| Spend attribution           | issuer-observed amounts associated with a workflow                            | [guide](docs/SOLUTIONS/agent-spend-attribution.md)                                                         |
+| Merkle commitment           | offline inclusion in a committed sorted set                                   | [spec](docs/specs/WORKFLOW-CORRELATION.md#7-merkle-commitment)                                             |
 
 These workflows establish signature validity and the internal consistency of the supplied evidence. They do not, by themselves, establish settlement finality, approver authority, accounting correctness, real-world completeness, or the validity of an underlying event.
 
@@ -119,7 +122,8 @@ Full recipe catalog: [`docs/SOLUTIONS/`](docs/SOLUTIONS/). Full example catalog:
 | Issue records from an API                | [API Provider Quickstart](docs/guides/quickstart-api-provider.md)                                                                       |
 | Integrate MCP tools                      | [MCP Integration Kit](integrator-kits/mcp/README.md)                                                                                    |
 | Record agent or runtime actions          | [Agent Operator Quickstart](docs/guides/quickstart-agent-operator.md)                                                                   |
-| Preserve gateway or commerce evidence    | [Commerce evidence bundle](docs/SOLUTIONS/commerce-evidence-bundle.md) or [MCP gateway records](docs/SOLUTIONS/mcp-gateway-receipts.md) |
+| Record terminal gateway decisions        | [Gateway Decision Evidence](examples/gateway-decision-evidence/)                                                                        |
+| Preserve commerce evidence               | [Commerce evidence bundle](docs/SOLUTIONS/commerce-evidence-bundle.md) or [MCP gateway records](docs/SOLUTIONS/mcp-gateway-receipts.md) |
 | Record provisioning events               | [Provisioning lifecycle records](docs/SOLUTIONS/verify-agent-provisioning.md)                                                           |
 | Verify a record                          | [Verification options](docs/guides/verification-options.md) or [offline sample index](docs/guides/offline-sample-index.md)              |
 | Review security and operational evidence | [Trust-artifact index](docs/TRUST-ARTIFACTS.md)                                                                                         |
@@ -201,6 +205,7 @@ pnpm demo:all
 
 - Minimal example: `pnpm --filter @peac/example-minimal demo`
 - MCP gateway records: `pnpm --filter @peac/example-mcp-gateway-receipts demo` and `pnpm --filter @peac/example-mcp-gateway-receipts demo:tamper`
+- Gateway decision evidence: `pnpm --filter @peac/example-gateway-decision-evidence demo` and `pnpm --filter @peac/example-gateway-decision-evidence demo:tamper`
 - Provisioning lifecycle: `pnpm --filter @peac/example-provisioning-lifecycle run issue` and `pnpm --filter @peac/example-provisioning-lifecycle run verify`
 - MCP server: see the [`@peac/mcp-server` guide](packages/mcp-server/README.md)
 - Self-hosted reference verifier: [`surfaces/reference-verifier/`](surfaces/reference-verifier/)
@@ -252,6 +257,8 @@ Apache-2.0. See [`LICENSE`](LICENSE).
 
 ---
 
-PEAC Protocol is an open-source project published and maintained by [Originary](https://www.originary.xyz/) and community contributors.
+PEAC Protocol is open-source software published and maintained by [Originary](https://www.originary.xyz/), with contributions from the community.
+
+It is licensed under Apache-2.0 and may be independently implemented and self-hosted. Use and verification do not require an Originary-hosted service.
 
 [Docs](https://www.peacprotocol.org) &middot; [GitHub](https://github.com/peacprotocol/peac) &middot; [Discussions](https://github.com/peacprotocol/peac/discussions)
