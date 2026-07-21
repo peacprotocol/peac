@@ -1,6 +1,6 @@
 {
   "name": "@peac/monorepo",
-  "version": "0.16.2",
+  "version": "0.16.3",
   "private": true,
   "description": "Portable signed records for agent, API, MCP, and cross-runtime interactions.",
   "repository": {
@@ -171,7 +171,10 @@
       "postcss@<8.5.10": ">=8.5.10",
       "form-data@<4.0.6": ">=4.0.6",
       "vite@<6.4.2": ">=8.0.16",
-      "ws@>=8.0.0 <8.21.0": "8.21.0"
+      "ws@>=8.0.0 <8.21.0": "8.21.0",
+      "brace-expansion@>=5.0.0 <5.0.7": "5.0.7",
+      "js-yaml@>=4.0.0 <4.3.0": "4.3.0",
+      "js-yaml@>=3.0.0 <3.15.0": "3.15.0"
     },
     "overridesComments": {
       "minimatch": "Cross-major pin to 10.2.4: typescript-estree requires ^9.0.4 but 9.x has no patch for GHSA-3ppc-4f35-3m26. minimatch 10.x is API-compatible (same globbing interface). 10.2.4 patches GHSA-7r86-cg39-jmmj and GHSA-23c5-xmqv-rm74 (ReDoS). Drops Node 18 (fine: repo baseline is >=22.0.0). Lint verified clean.",
@@ -194,7 +197,10 @@
       "ws@>=8.0.0 <8.21.0": "Range-scoped to the v8 line below 8.21.0 only, pinned to exact 8.21.0 (the fixed v8 release). Fixes CVE-2026-48779 / GHSA-96hv-2xvq-fx4p (memory-exhaustion DoS from tiny fragments/data chunks) by resolving ws v8 to the patched 8.21.0 line. Dev/examples-only: resolves via dev wrangler -> miniflare -> ws and examples/erc8004-feedback -> isows; not in any published package. Exact pin (not a >= bound) keeps the lockfile diff narrow and stays on the v8 line.",
       "hono": "Bumped to >=4.12.25 to pull patches for CVE-2026-44455 (bodyLimit() bypass for chunked / unknown-length requests), CVE-2026-44456 (hono/jsx unvalidated JSX tag names), CVE-2026-44457 (CSS declaration injection via Style Object Values in JSX SSR), CVE-2026-44458 (Cache Middleware ignores Vary: Authorization / Vary: Cookie), CVE-2026-44459 (improper validation of NumericDate JWT claims), and GHSA-88fw-hqm2-52qc (CORS Middleware reflects any Origin, patched in 4.12.25). Prod dep via apps/api, apps/sandbox-issuer, packages/mcp-server, packages/server.",
       "fast-uri@<3.1.2": "Range-scoped to <3.1.2 only (forces patched 3.1.2+, fixes CVE-2026-6321 path traversal via percent-encoded dot segments and CVE-2026-6322 host confusion via percent-encoded authority delimiters). Transitive prod dep via ajv / ajv-formats (in @peac/protocol, @peac/receipts, apps/api) and @modelcontextprotocol/sdk (in @peac/mcp-server).",
-      "ip-address@<=10.1.0": "Range-scoped to <=10.1.0 only (forces patched 10.1.1+, fixes CVE-2026-42338 XSS in Address6 HTML-emitting methods). Transitive prod dep via @modelcontextprotocol/sdk -> express-rate-limit."
+      "ip-address@<=10.1.0": "Range-scoped to <=10.1.0 only (forces patched 10.1.1+, fixes CVE-2026-42338 XSS in Address6 HTML-emitting methods). Transitive prod dep via @modelcontextprotocol/sdk -> express-rate-limit.",
+      "brace-expansion@>=5.0.0 <5.0.7": "Range-scoped to the v5 line below 5.0.7 only, pinned to the patched 5.0.7. Fixes GHSA-3jxr-9vmj-r5cp (DoS via exponential-time expansion of consecutive non-expanding {} groups; vulnerable >=3.0.0 <5.0.7). Dev-only via eslint -> minimatch@10 -> brace-expansion@5.0.2; not in any published package. Scoped to the present v5 range so no 3.x/4.x consumer is forced across a major.",
+      "js-yaml@>=4.0.0 <4.3.0": "Range-scoped to the v4 line below 4.3.0 only, pinned to the patched 4.3.0. Fixes GHSA-52cp-r559-cp3m (YAML merge-key chains force quadratic CPU; 4.x vulnerable >=4.0.0 <4.3.0). Dev-only: root devDependency used by repo tooling; not in any published package. Same-major minor bump preserves the js-yaml 4.x API.",
+      "js-yaml@>=3.0.0 <3.15.0": "Range-scoped to the v3 line below 3.15.0 only, pinned to the patched 3.15.0. Fixes GHSA-52cp-r559-cp3m (YAML merge-key chains force quadratic CPU; 3.x vulnerable >=3.0.0 <3.15.0). Dev/test-only via apps/api -> jest -> babel-plugin-istanbul -> @istanbuljs/load-nyc-config -> js-yaml@3.14.2; not in any published package. Same-major patch bump preserves the js-yaml 3.x API that istanbul expects."
     }
   },
   "lint-staged": {
