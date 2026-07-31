@@ -1,0 +1,37 @@
+{
+  "advisories": {
+    "2": {
+      "github_advisory_id": "GHSA-cccc-2222-dddd",
+      "severity": "high",
+      "module_name": "next",
+      "url": "https://github.com/advisories/GHSA-cccc-2222-dddd",
+      "patched_versions": ">=15.6.0",
+      "findings": [
+        {
+          "paths": ["surfaces/nextjs/middleware > next"]
+        }
+      ]
+    },
+    "3": {
+      "github_advisory_id": "GHSA-eeee-3333-ffff",
+      "severity": "high",
+      "module_name": "protobufjs",
+      "url": "https://github.com/advisories/GHSA-eeee-3333-ffff",
+      "patched_versions": ">=8.0.3",
+      "findings": [
+        {
+          "paths": ["examples/telemetry-otel > protobufjs"]
+        }
+      ]
+    }
+  },
+  "metadata": {
+    "vulnerabilities": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 4,
+      "critical": 0
+    }
+  }
+}
