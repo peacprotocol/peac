@@ -71,10 +71,20 @@ Consumers verify published packages via 5 methods documented in
 
 ## CI Matrix
 
-| Node Version              | Role                               | Blocking? |
-| ------------------------- | ---------------------------------- | --------- |
-| Node 24 (Active LTS)      | Primary gate, canonical benchmarks | Yes       |
-| Node 22 (Maintenance LTS) | Compat smoke, informational perf   | No        |
+| Node Version      | Role                                              | Blocking? |
+| ----------------- | ------------------------------------------------- | --------- |
+| Node 22           | Blocking published-package compatibility floor    | Yes       |
+| Node 24 LTS       | Primary maintainer and release-validation runtime | Yes       |
+| Node 26 (Current) | Non-blocking forward-compatibility canary         | No        |
+
+Node 22 is the compatibility floor because published packages declare `engines.node >= 22.13.0`;
+it is not a lower-priority smoke lane. Node 24 LTS is the primary release-validation and maintainer
+runtime and is the version pinned in `.node-version`; it is not the minimum supported consumer
+runtime. Node 26 is the current Node release line, run as a canary so a forward-compatibility
+regression reports without blocking a release. Node 25 was removed from the matrix as end-of-life.
+
+The canonical runtime facts are recorded in `docs/releases/facts.json` under `runtime.node_matrix`
+and are verified against the live Node release index before any change to `.node-version`.
 
 See DD-161 for rationale.
 
