@@ -889,7 +889,7 @@ jobs:
           cache: 'pnpm'
           check-latest: ${{ matrix.check-latest }}
 
-      - name: Record resolved Node version (canary reproducibility)
+      - name: Record resolved Node version
         run: |
           echo "resolved-node=$(node --version)" | tee "node-resolved-${{ matrix.node-version }}.txt"
 
@@ -899,8 +899,19 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build core packages
-        run: pnpm --filter @peac/kernel --filter @peac/schema --filter @peac/crypto --filter @peac/protocol build
+      # Build the closure the smoke actually packs. TARGETS in
+      # scripts/release/pack-install-smoke.mjs is kernel + protocol + cli, and the
+      # CLI ships a bundled bin rather than a programmatic surface, so omitting it
+      # here leaves dist/index.cjs absent and the smoke fails on a missing bin.
+      - name: Build representative package targets
+        run: >
+          pnpm
+          --filter '@peac/kernel...'
+          --filter '@peac/schema...'
+          --filter '@peac/crypto...'
+          --filter '@peac/protocol...'
+          --filter '@peac/cli...'
+          build
 
       - name: Test core packages
         run: pnpm --filter @peac/kernel --filter @peac/schema --filter @peac/crypto --filter @peac/protocol test
