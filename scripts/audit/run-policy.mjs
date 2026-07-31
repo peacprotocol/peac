@@ -10,7 +10,9 @@
  * raw advisory records it came from.
  */
 import { execFileSync } from 'node:child_process';
-import { readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, existsSync, mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import Ajv2020 from 'ajv/dist/2020.js';
@@ -22,6 +24,13 @@ import {
 } from './policies.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
+
+/** Invoke the package manager version the repository declares, not whatever is first on PATH. */
+const PACKAGE_MANAGER = JSON.parse(
+  readFileSync(resolve(ROOT, 'package.json'), 'utf8')
+).packageManager;
+const PM = ['corepack', [PACKAGE_MANAGER ?? 'pnpm']];
+const pm = (args, opts) => execFileSync(PM[0], [...PM[1], ...args], opts);
 const argv = process.argv.slice(2);
 const policy = argv[0];
 const arg = (name, fallback) => {
@@ -33,7 +42,7 @@ const arg = (name, fallback) => {
 function audit(extra = []) {
   let out;
   try {
-    out = execFileSync('pnpm', ['audit', '--json', ...extra], {
+    out = pm(['audit', '--json', ...extra], {
       cwd: ROOT,
       encoding: 'utf8',
       maxBuffer: 64 * 1024 * 1024,
@@ -95,17 +104,18 @@ try {
     const baseRef = arg('--base', 'origin/main');
     const headJson = audit();
     // Produce the base report from a clean checkout of the base ref in a temp worktree.
-    const tmp = execFileSync('mktemp', ['-d'], { encoding: 'utf8' }).trim();
+    // Node temp handling: external shell utilities are not portable to Windows runners.
+    const tmp = mkdtempSync(join(tmpdir(), 'peac-audit-'));
     execFileSync('git', ['worktree', 'add', '-q', '--detach', tmp, baseRef], { cwd: ROOT });
     let baseJson;
     try {
-      execFileSync('pnpm', ['install', '--frozen-lockfile', '--ignore-scripts'], {
+      pm(['install', '--frozen-lockfile', '--ignore-scripts'], {
         cwd: tmp,
         stdio: 'ignore',
       });
       let out;
       try {
-        out = execFileSync('pnpm', ['audit', '--json'], {
+        out = pm(['audit', '--json'], {
           cwd: tmp,
           encoding: 'utf8',
           maxBuffer: 64 * 1024 * 1024,
@@ -116,7 +126,12 @@ try {
       }
       baseJson = JSON.parse(out);
     } finally {
-      execFileSync('git', ['worktree', 'remove', '--force', tmp], { cwd: ROOT, stdio: 'ignore' });
+      // Remove the worktree registration before the directory it points at.
+      try {
+        execFileSync('git', ['worktree', 'remove', '--force', tmp], { cwd: ROOT, stdio: 'ignore' });
+      } finally {
+        rmSync(tmp, { recursive: true, force: true });
+      }
     }
     const r = workspaceDelta({ baseAuditJson: baseJson, headAuditJson: headJson });
     console.log('== Audit: Workspace Delta (blocking) ==');

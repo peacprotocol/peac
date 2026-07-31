@@ -1,15 +1,10 @@
 /**
- * The three audit policies.
+ * Dependency-audit policies.
  *
- *   production-absolute  zero unexcepted high/critical reaching published packages or deployed
- *                        applications. Blocking. Fails closed.
- *   workspace-delta      head must not introduce or worsen findings relative to base. Blocking on
- *                        pull requests. Historical debt passes unchanged.
- *   workspace-absolute   complete debt inventory across examples, surfaces and tooling. Advisory:
- *                        it reports truthfully and completes successfully.
- *
- * Splitting these replaces a single ambiguous "strict mode" that failed on unrelated historical debt
- * and so could not distinguish "this change is unsafe" from "this repository has known debt".
+ * Production policy blocks unexcepted high and critical findings on production-classified paths.
+ * Delta policy blocks newly introduced or worsened findings. Workspace inventory reports the
+ * complete dependency state without conflating existing findings with changes introduced by the
+ * current revision.
  */
 import {
   buildFindings,
@@ -17,6 +12,8 @@ import {
   reconcile,
   BLOCKING_SEVERITIES,
   classifyPath,
+  normalizePath,
+  assertValidAuditInput,
 } from './findings.mjs';
 
 /** Path classes that count as production for the absolute policy. */
@@ -47,10 +44,20 @@ export function selectActiveExceptions(exceptions, today, validate) {
   return { active, problems };
 }
 
+/**
+ * Match an exception to a finding path.
+ *
+ * Descendant matching is anchored at the dependency separator: an unconstrained prefix test would
+ * let an exception scoped to `apps/api` also cover `apps/api-other`.
+ */
 const matchesException = (record, path, ex) =>
   ex.advisory === record.id &&
   ex.package === record.module &&
-  ex.affectedPaths.some((p) => path === p || path.startsWith(p));
+  ex.affectedPaths.some((prefix) => {
+    const a = normalizePath(path);
+    const b = normalizePath(prefix);
+    return a === b || a.startsWith(`${b} > `);
+  });
 
 /**
  * production-absolute.
@@ -59,9 +66,7 @@ const matchesException = (record, path, ex) =>
  * not run are all failures. "We could not check" must never read as "nothing found".
  */
 export function productionAbsolute({ auditJson, exceptions, today, validate }) {
-  if (!auditJson || typeof auditJson !== 'object') {
-    throw new AuditPolicyError('production-absolute: audit output missing or unparseable');
-  }
+  assertValidAuditInput(auditJson, 'production-absolute');
   const model = buildFindings(auditJson);
   const { active, problems } = selectActiveExceptions(exceptions, today, validate);
 
@@ -110,11 +115,10 @@ export function productionAbsolute({ auditJson, exceptions, today, validate }) {
   };
 }
 
-/** workspace-delta: block regressions, permit unchanged historical debt. */
+/** workspace-delta: block regressions; pre-existing findings pass unchanged. */
 export function workspaceDelta({ baseAuditJson, headAuditJson }) {
-  if (!baseAuditJson || !headAuditJson) {
-    throw new AuditPolicyError('workspace-delta: base or head audit output missing');
-  }
+  assertValidAuditInput(baseAuditJson, 'workspace-delta base');
+  assertValidAuditInput(headAuditJson, 'workspace-delta head');
   const base = buildFindings(baseAuditJson);
   const head = buildFindings(headAuditJson);
   const delta = computeDelta(base, head);
@@ -130,7 +134,8 @@ export function workspaceDelta({ baseAuditJson, headAuditJson }) {
 
 /** workspace-absolute: advisory inventory. Reports debt; does not fail the build on it. */
 export function workspaceAbsolute({ auditJson }) {
-  const model = buildFindings(auditJson ?? {});
+  assertValidAuditInput(auditJson, 'workspace-absolute');
+  const model = buildFindings(auditJson);
   const debt = model.records.filter((r) => BLOCKING_SEVERITIES.includes(r.severity));
   return {
     policy: 'workspace-absolute',

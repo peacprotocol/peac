@@ -1,23 +1,52 @@
 /**
- * Deterministic audit findings model.
+ * Canonical model for dependency-audit findings.
  *
- * The previous gate printed a single number ("6 high") that could not be derived from the raw audit
- * output: the same repository state simultaneously yielded 8 distinct advisory records, registry
- * metadata reporting 9 high plus 1 critical, and a policy result of 6 high. Those are four different
- * quantities, and conflating them makes a security number impossible to audit.
- *
- * Every quantity is therefore named, counted separately, and reconciled with explicit arithmetic:
- *
- *   rawAdvisoryRecords          unique advisory IDs returned by the audit tool
- *   affectedPackageRecords      unique advisory + package pairs
- *   vulnerablePaths             unique normalised dependency paths
- *   activeExceptionRecords      structured, non-expired exceptions actually applied
- *   excludedNonProductionRecords findings excluded from production policy, with reasons
- *   effectivePolicyFindings     what remains after classification and exceptions
- *
- * Registry metadata counts are reported alongside, never substituted for advisory records: the tool
- * derives them independently and they are not guaranteed to equal any of the above.
+ * Advisory records, affected packages, and dependency paths are distinct quantities and are
+ * reported separately; a single conflated total cannot be traced back to its inputs. Output is
+ * normalized and sorted deterministically so policy decisions are reproducible across platforms.
  */
+
+export class AuditInputError extends Error {}
+
+/** Severities recognised by policy. An unrecognised severity is an error, never a low rank. */
+export const KNOWN_SEVERITIES = ['critical', 'high', 'moderate', 'low', 'info'];
+
+/**
+ * Validate audit output before any policy runs.
+ *
+ * An absent or malformed report must not present as a clean result: an unreadable audit and an
+ * audit with zero findings are different outcomes, and only one of them is safe to proceed on.
+ */
+export function assertValidAuditInput(auditJson, label) {
+  if (!auditJson || typeof auditJson !== 'object' || Array.isArray(auditJson)) {
+    throw new AuditInputError(`${label}: audit output missing or not an object`);
+  }
+  if (!('advisories' in auditJson)) {
+    throw new AuditInputError(
+      `${label}: audit output has no advisories field; an empty audit must state {"advisories":{}}`
+    );
+  }
+  const advisories = auditJson.advisories;
+  if (advisories === null || typeof advisories !== 'object' || Array.isArray(advisories)) {
+    throw new AuditInputError(`${label}: advisories must be an object`);
+  }
+  for (const [key, adv] of Object.entries(advisories)) {
+    if (!adv || typeof adv !== 'object')
+      throw new AuditInputError(`${label}: advisory ${key} is not an object`);
+    if (!adv.module_name) throw new AuditInputError(`${label}: advisory ${key} has no module_name`);
+    const sev = String(adv.severity ?? '').toLowerCase();
+    if (!KNOWN_SEVERITIES.includes(sev)) {
+      throw new AuditInputError(`${label}: advisory ${key} has unknown severity "${adv.severity}"`);
+    }
+    if (!Array.isArray(adv.findings))
+      throw new AuditInputError(`${label}: advisory ${key} has no findings array`);
+    for (const fnd of adv.findings) {
+      if (!Array.isArray(fnd?.paths))
+        throw new AuditInputError(`${label}: advisory ${key} has a finding without paths`);
+    }
+  }
+  return true;
+}
 
 /** Severities this policy treats as blocking, most severe first. */
 export const BLOCKING_SEVERITIES = ['critical', 'high'];
@@ -119,8 +148,8 @@ export function findingKeys(model) {
 /**
  * Compare a base model with a head model.
  *
- * Blocks only on regressions, so a change that removes findings (or leaves historical debt
- * untouched) passes, while any newly introduced or worsened finding fails.
+ * Blocks only on regressions: a revision that removes findings, or leaves existing ones
+ * unchanged, passes; any newly introduced or worsened finding fails.
  */
 export function computeDelta(baseModel, headModel) {
   const baseKeys = findingKeys(baseModel);
@@ -175,13 +204,13 @@ export function severityRank(s) {
 }
 
 /**
- * Reconciliation report: the explicit arithmetic from raw records to the blocking number.
+ * Reconciliation report: the explicit arithmetic from advisory records to the blocking count.
  *
- * Printing the final number without this transition is what made the previous output unauditable.
+ * A policy number is only auditable if every step from raw input to decision is shown.
  */
 export function reconcile({ model, excluded, exceptioned, effective }) {
-  // Reconcile like with like: the buckets below only ever contain blocking-severity records, so the
-  // arithmetic must start from the blocking subset, not from every advisory at every severity.
+  // Reconcile like with like: the buckets contain only blocking-severity records, so the arithmetic
+  // starts from the blocking subset rather than from every advisory at every severity.
   const blocking = model.records.filter((r) => BLOCKING_SEVERITIES.includes(r.severity)).length;
   const lines = [];
   lines.push(`  rawAdvisoryRecords          ${model.counts.rawAdvisoryRecords}  (all severities)`);
