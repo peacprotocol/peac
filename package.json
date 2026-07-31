@@ -161,7 +161,7 @@
       "yaml": "2.8.3",
       "@hono/node-server": ">=1.19.13",
       "hono": ">=4.12.25",
-      "fast-uri@<3.1.2": ">=3.1.2",
+      "fast-uri@<3.1.5": ">=3.1.5 <4",
       "ip-address@<=10.1.0": ">=10.1.1",
       "protobufjs": "8.0.2",
       "@protobufjs/utf8": "1.1.1",
