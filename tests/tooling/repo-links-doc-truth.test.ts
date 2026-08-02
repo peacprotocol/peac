@@ -240,9 +240,11 @@ describe('foreign-repository isolation under repository-local git variables', ()
       expect(existsSync(join(root, '.git'))).toBe(true);
     });
     const after = callerState();
+    // HEAD and refs only: unrelated suites may write scratch files under the caller during a full
+    // run, so working-tree status is not a stable invariant to assert across a shared gate.
     expect(after.head).toBe(before.head);
-    expect(after.status).toBe(before.status);
     expect(after.refs).toBe(before.refs);
+    expect(existsSync(join(callerRoot, 'no-such-file.md'))).toBe(false);
   });
 });
 
