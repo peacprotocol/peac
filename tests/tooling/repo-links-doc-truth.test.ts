@@ -31,13 +31,14 @@
 import { describe, it, expect } from 'vitest';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
 import {
   brokenLinksForDoc,
   existsCaseExact,
   existsTrackedCaseExact,
+  foreignRepositoryGitEnvironment,
   extractLinkTargets,
   isFileLink,
   walkMarkdownFiles,
@@ -139,8 +140,9 @@ describe('case-exact resolution rejects wrong-case links', () => {
 // is exercised directly, independent of this checkout's layout.
 function gitFixtureRepo(): { root: string; git: (...args: string[]) => void } {
   const root = mkdtempSync(join(tmpdir(), 'peac-link-gate-'));
+  const env = foreignRepositoryGitEnvironment();
   const git = (...args: string[]): void => {
-    const res = spawnSync('git', ['-C', root, ...args], { encoding: 'utf8' });
+    const res = spawnSync('git', ['-C', root, ...args], { encoding: 'utf8', env });
     if (res.status !== 0) {
       throw new Error(`git ${args.join(' ')} failed: ${res.stderr || res.error?.message || ''}`);
     }
@@ -151,6 +153,98 @@ function gitFixtureRepo(): { root: string; git: (...args: string[]) => void } {
   git('config', 'commit.gpgsign', 'false');
   return { root, git };
 }
+
+/**
+ * Git exports repository-local environment variables when it invokes a hook, and those variables
+ * take precedence over `git -C <dir>`. Foreign-repository operations must therefore sanitize the
+ * environment, or a fixture silently reads and writes the caller's repository instead of its own.
+ *
+ * These cases recreate that environment explicitly: an ordinary test process does not have the
+ * variables set, so without simulating them a regression here would go unnoticed.
+ */
+describe('foreign-repository isolation under repository-local git variables', () => {
+  const callerRoot = REPO_ROOT;
+  const gitOut = (...args: string[]): string =>
+    spawnSync('git', ['-C', callerRoot, ...args], { encoding: 'utf8' }).stdout.trim();
+  const callerState = () => ({
+    head: gitOut('rev-parse', 'HEAD'),
+    ref: gitOut('symbolic-ref', '-q', '--short', 'HEAD'),
+    status: gitOut('status', '--porcelain=v1', '--untracked-files=all'),
+    refs: gitOut('for-each-ref', '--format=%(refname) %(objectname)'),
+  });
+
+  /** Run `fn` with the caller's repository-local variables populated, always restoring them. */
+  function withRepositoryLocalEnv<T>(fn: () => T): T {
+    const gitDir = gitOut('rev-parse', '--absolute-git-dir');
+    const workTree = gitOut('rev-parse', '--show-toplevel');
+    const saved = { GIT_DIR: process.env.GIT_DIR, GIT_WORK_TREE: process.env.GIT_WORK_TREE };
+    process.env.GIT_DIR = gitDir;
+    process.env.GIT_WORK_TREE = workTree;
+    try {
+      return fn();
+    } finally {
+      for (const [k, v] of Object.entries(saved)) {
+        if (v === undefined) delete process.env[k];
+        else process.env[k] = v;
+      }
+    }
+  }
+
+  it('creates fixture commits in the temporary repository and leaves the caller untouched', () => {
+    const before = callerState();
+    const seen = withRepositoryLocalEnv(() => {
+      const { root, git } = gitFixtureRepo();
+      mkdirSync(join(root, 'docs'), { recursive: true });
+      writeFileSync(join(root, 'docs', 'isolated.md'), '# isolated\n');
+      git('add', 'docs/isolated.md');
+      git('commit', '-qm', 'isolated fixture');
+
+      // The commit landed in the fixture repository, not the caller.
+      const count = spawnSync('git', ['-C', root, 'rev-list', '--count', 'HEAD'], {
+        encoding: 'utf8',
+        env: foreignRepositoryGitEnvironment(),
+      }).stdout.trim();
+      expect(count).toBe('1');
+
+      // The reader resolves against the fixture index, not the caller's.
+      expect(existsTrackedCaseExact(root, join(root, 'docs', 'isolated.md'))).toBe(true);
+      expect(existsTrackedCaseExact(root, join(root, 'docs', 'ISOLATED.md'))).toBe(false);
+      return root;
+    });
+
+    const after = callerState();
+    expect(after.head).toBe(before.head);
+    expect(after.ref).toBe(before.ref);
+    expect(after.status).toBe(before.status);
+    expect(after.refs).toBe(before.refs);
+    expect(existsSync(join(callerRoot, 'docs', 'isolated.md'))).toBe(false);
+    expect(seen).toBeTruthy();
+  });
+
+  it('restores the caller environment even when the fixture body throws', () => {
+    const had = 'GIT_DIR' in process.env;
+    expect(() =>
+      withRepositoryLocalEnv(() => {
+        throw new Error('deliberate');
+      })
+    ).toThrow('deliberate');
+    expect('GIT_DIR' in process.env).toBe(had);
+  });
+
+  it('surfaces a failing foreign-repository command without touching the caller', () => {
+    const before = callerState();
+    withRepositoryLocalEnv(() => {
+      const { root, git } = gitFixtureRepo();
+      // A pathspec that matches nothing must fail loudly rather than resolve against the caller.
+      expect(() => git('add', 'no-such-file.md')).toThrow(/git add no-such-file\.md failed/);
+      expect(existsSync(join(root, '.git'))).toBe(true);
+    });
+    const after = callerState();
+    expect(after.head).toBe(before.head);
+    expect(after.status).toBe(before.status);
+    expect(after.refs).toBe(before.refs);
+  });
+});
 
 describe('tracked-tree existence (git-index fixture)', () => {
   it('accepts tracked files, tracked directories, staged files; rejects untracked residue and wrong case', () => {
