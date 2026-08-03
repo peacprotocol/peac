@@ -16,7 +16,12 @@ jobs:
   analyze:
     name: Analyze
     runs-on: ubuntu-latest
+    # Bound the run explicitly. Without this the job inherits GitHub's 360-minute
+    # ceiling, so a hung analysis would occupy a runner for six hours.
+    timeout-minutes: 30
     permissions:
+      # Least privilege: security-events:write is the minimum CodeQL needs to upload
+      # SARIF (including on pull_request runs); contents and actions stay read-only.
       security-events: write
       contents: read
       actions: read
@@ -28,18 +33,18 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@3b1a19a80ab047f35cbb237b5bd9bdc1e14f166c # v3
+        uses: github/codeql-action/init@f205ea1c3313d32999d8d6a48b4f6530d4437b38 # v4.37.4
         with:
           languages: ${{ matrix.language }}
           queries: security-extended
 
       - name: Autobuild
-        uses: github/codeql-action/autobuild@3b1a19a80ab047f35cbb237b5bd9bdc1e14f166c # v3
+        uses: github/codeql-action/autobuild@f205ea1c3313d32999d8d6a48b4f6530d4437b38 # v4.37.4
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@3b1a19a80ab047f35cbb237b5bd9bdc1e14f166c # v3
+        uses: github/codeql-action/analyze@f205ea1c3313d32999d8d6a48b4f6530d4437b38 # v4.37.4
         with:
           category: '/language:${{matrix.language}}'

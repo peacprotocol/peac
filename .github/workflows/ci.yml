@@ -37,7 +37,7 @@ jobs:
       security_config: ${{ steps.filter.outputs.security_config }}
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Detect changed paths
         id: filter
@@ -130,7 +130,7 @@ jobs:
     timeout-minutes: 2
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Install actionlint (pinned v1.7.11 with checksum)
         run: |
@@ -164,7 +164,7 @@ jobs:
     timeout-minutes: 2
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
 
@@ -190,7 +190,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/setup-env
 
       - name: Format check
@@ -320,7 +320,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/setup-env
 
       - name: TypeScript check (core packages)
@@ -383,7 +383,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/setup-env
 
       - name: Build all packages
@@ -433,7 +433,7 @@ jobs:
 
       - name: Upload benchmark artifacts
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: benchmark-results-${{ github.sha }}
           path: |
@@ -468,7 +468,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/setup-env
 
       - name: Build all packages
@@ -513,18 +513,19 @@ jobs:
       fail-fast: false
       matrix:
         legacy_path: ['0', '1']
-        node-version: ['22', '24']
+        # Exact patch versions: a major-only selector floats and is not reproducible.
+        # 22.13.0 = declared engines minimum; 24.18.1 = primary release-validation runtime.
+        node-version: ['22.13.0', '24.18.1']
 
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # Exactly ONE install, under the matrix runtime. Do not add a later
+      # setup-node override: that would install under the repository pin first
+      # and leave lifecycle/native artefacts built by the wrong runtime.
       - uses: ./.github/actions/setup-env
-
-      - name: Override Node to ${{ matrix.node-version }}
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'pnpm'
 
       - name: Build @peac/protocol and its workspace dependencies
         # Trailing `...` selects @peac/protocol AND every workspace
@@ -539,15 +540,26 @@ jobs:
         run: pnpm --filter @peac/protocol test
 
   # ---------------------------------------------------------------------------
-  # Lane 3c: Protocol rollback-path matrix (advisory Current Node lane)
+  # Lane 3c: Protocol rollback-path matrix (Node 26 Current canary lane)
   #
   # Runs the same @peac/protocol test suite under both legacy-path
-  # values on the latest Node Current line. Advisory only:
-  # `continue-on-error: true` so a Current-line regression does not
-  # block release. Required gating stays on the LTS lanes (Lane 3b).
+  # values on Node 26 Current: a non-blocking forward-compatibility
+  # canary, not the maintenance/blocking LTS baseline. Advisory only:
+  # `continue-on-error: true` so a Node 26 regression does not block
+  # release. Required gating stays on the LTS lanes (Lane 3b: Node 22
+  # compatibility floor + Node 24 LTS primary runtime).
+  #
+  # RUNTIME SELECTOR POLICY (three deliberately different kinds):
+  #   '22.13.0' exact  -- the supported floor; must equal engines.node
+  #   '24.18.1' exact  -- the primary release-validation runtime
+  #   '26'      MAJOR  -- INTENTIONALLY FLOATING within the Current major
+  # The canary floats deliberately: no automation refreshes an exact canary pin,
+  # and a stale exact pin no longer tracks the Current line. Reproducibility comes
+  # instead from recording the RESOLVED `node --version` as a build artifact, so
+  # every run documents the exact runtime it tested.
   # ---------------------------------------------------------------------------
   protocol-rollback-path-matrix-current-node:
-    name: Protocol Rollback-Path Matrix (Node Current, advisory)
+    name: Protocol Rollback-Path Matrix (Node 26 Current, advisory)
     needs: detect-changes
     if: >-
       github.ref == 'refs/heads/main' ||
@@ -565,17 +577,25 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # Exactly ONE install, under the intentionally floating Current-major canary.
+      # check-latest: true so this canary always resolves the newest matching
+      # runtime instead of a possibly-stale runner tool-cache hit for the
+      # floating major selector.
       - uses: ./.github/actions/setup-env
-
-      - name: Setup Node Current
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
-          # `current` resolves to the latest released Node line. Verify
-          # at maintenance time that this still maps to a supported
-          # Current major (Node release schedule moves over time).
-          node-version: 'current'
-          cache: 'pnpm'
+          node-version: '26'
+          check-latest: true
+
+      # A floating selector is only reproducible if the resolved version is recorded.
+      # Every Node 26 lane must capture it, not just the compat lane.
+      - name: Record resolved canary runtime
+        run: |
+          echo "resolved-node=$(node --version)" | tee "node-resolved-26-rollback-${{ matrix.legacy_path }}.txt"
+          node --version >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Require resolved runtime record
+        run: test -s "node-resolved-26-rollback-${{ matrix.legacy_path }}.txt"
 
       - name: Build @peac/protocol and its workspace dependencies
         run: pnpm --filter '@peac/protocol...' build
@@ -584,6 +604,15 @@ jobs:
         env:
           PEAC_INTERNAL_LEGACY_PATH: ${{ matrix.legacy_path }}
         run: pnpm --filter @peac/protocol test
+
+      - name: Upload resolved-runtime record
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: resolved-node-rollback-${{ matrix.legacy_path }}-${{ github.sha }}
+          path: node-resolved-*.txt
+          if-no-files-found: error
+          retention-days: 90
 
   # ---------------------------------------------------------------------------
   # Lane 4: Examples + Apps (only when relevant paths changed)
@@ -603,7 +632,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/setup-env
 
       - name: Build all packages
@@ -663,7 +692,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: ./.github/actions/setup-env
 
       - name: Build all packages
@@ -679,11 +708,11 @@ jobs:
   # Aggregator: evaluates all lane results.
   # Uses `if: always()` so it runs even when optional lanes skip.
   #
-  # Branch-protection continuity: this job preserves the required check name
-  # "Build, Lint, Test" (job id: ci). No branch-protection rename is needed.
-  # The old single-job `ci` is replaced internally by this aggregator over
-  # parallel lane jobs. ci-windows, node-compat, and scope-guard remain
-  # separate required checks.
+  # Branch-protection continuity: this job carries the check name
+  # "Build, Lint, Test" (job id: ci). Branch protection selects checks by name,
+  # so renaming this job would stop that context from reporting.
+  # Audit Gate (Windows), node-compat, and scope-guard remain separate checks
+  # and are intentionally evaluated outside this aggregator.
   # ---------------------------------------------------------------------------
   ci:
     name: Build, Lint, Test
@@ -778,13 +807,13 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup pnpm
         uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
 
       - name: Setup Node.js
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version-file: '.node-version'
           cache: 'pnpm'
@@ -804,37 +833,101 @@ jobs:
         run: pnpm exec vitest run tests/scripts/audit-gate.test.ts
 
   # ---------------------------------------------------------------------------
-  # Node.js compatibility matrix (unchanged except pinned pnpm action)
+  # Node.js compatibility matrix.
+  #
+  # Three-tier policy: Node 22 = blocking compatibility floor for
+  # published packages; Node 24 = primary release-validation and
+  # maintainer runtime; Node 26 = non-blocking forward-compatibility
+  # canary (Current, not LTS). Node 25 was removed as EOL.
+  #
+  # `experimental` drives job-level `continue-on-error` below so the
+  # Node 26 cell reports without blocking the required check.
   # ---------------------------------------------------------------------------
   node-compat:
     name: Node ${{ matrix.node-version }} (compat)
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    # Covers packing tarballs and clean temp-project installs in addition to the
+    # test run, so the ceiling carries margin over the test time alone.
+    timeout-minutes: 30
+    continue-on-error: ${{ matrix.experimental }}
     strategy:
       fail-fast: false
       matrix:
-        node-version: ['22', '25']
+        include:
+          # Three deliberately different selector kinds, not a uniform pinning rule:
+          #   '22.13.0' exact -- supported floor, must equal engines.node
+          #   '24.18.1' exact -- primary release-validation runtime
+          #   '26'      major -- INTENTIONALLY FLOATING Current-line canary; reproducibility
+          #                      comes from capturing the resolved `node --version` as an
+          #                      artifact, not from an exact pin nobody automates.
+          - node-version: '22.13.0' # blocking: declared engines.node minimum
+            experimental: false
+            check-latest: false
+          - node-version: '24.18.1' # blocking: primary + release-validation runtime
+            experimental: false
+            check-latest: false
+          # Canary is INTENTIONALLY FLOATING within the major: no automation keeps an
+          # exact pin fresh, and a forgotten exact pin stops being a Current canary.
+          # The resolved version is captured below so the tested version is recorded.
+          # check-latest: true so setup-node bypasses a possibly-stale runner
+          # tool-cache hit for the floating major and always resolves newest.
+          - node-version: '26' # non-blocking: Current-line canary (floating)
+            experimental: true
+            check-latest: true
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Setup pnpm
         uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
 
       - name: Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'pnpm'
+          check-latest: ${{ matrix.check-latest }}
+
+      - name: Record resolved Node version
+        run: |
+          echo "resolved-node=$(node --version)" | tee "node-resolved-${{ matrix.node-version }}.txt"
+
+      - name: Require resolved runtime record
+        run: test -s "node-resolved-${{ matrix.node-version }}.txt"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build core packages
-        run: pnpm --filter @peac/kernel --filter @peac/schema --filter @peac/crypto --filter @peac/protocol build
+      # Build the closure the smoke actually packs. TARGETS in
+      # scripts/release/pack-install-smoke.mjs is kernel + protocol + cli, and the
+      # CLI ships a bundled bin rather than a programmatic surface, so omitting it
+      # here leaves dist/index.cjs absent and the smoke fails on a missing bin.
+      - name: Build representative package targets
+        run: >
+          pnpm
+          --filter '@peac/kernel...'
+          --filter '@peac/schema...'
+          --filter '@peac/crypto...'
+          --filter '@peac/protocol...'
+          --filter '@peac/cli...'
+          build
 
       - name: Test core packages
         run: pnpm --filter @peac/kernel --filter @peac/schema --filter @peac/crypto --filter @peac/protocol test
+
+      # A compatibility-floor claim about PUBLISHED packages cannot rest on
+      # source-tree tests of four packages. This runs the existing release gate
+      # (scripts/release/pack-install-smoke.mjs) on each matrix runtime:
+      # pnpm pack -> clean temp project -> install the tarball and its workspace
+      # deps -> import the public surface -> exercise a representative function
+      # -> assert no dependency on a workspace-private package. On Node 22 this
+      # is evidence for the floor across the load-bearing published layers
+      # (@peac/kernel, @peac/protocol, @peac/cli) -- it is REPRESENTATIVE, not
+      # proof of compatibility for all 36 published packages. Full-manifest
+      # structural/export validation remains a separate gate. On Node 26 this
+      # step is advisory via the job-level continue-on-error.
+      - name: Representative load-bearing package smoke (Node ${{ matrix.node-version }})
+        run: node scripts/release/pack-install-smoke.mjs
 
       - name: Extension regression (Node ${{ matrix.node-version }}, advisory)
         continue-on-error: true
@@ -842,13 +935,26 @@ jobs:
           PEAC_BENCH_JSON="tests/perf/ci-compat-${{ matrix.node-version }}.json" \
             pnpm exec vitest run tests/perf/extension-regression.test.ts --reporter=dot
 
-      - name: Upload compat benchmark artifacts
+      # Split into two uploads so a missing resolved-runtime record cannot pass
+      # silently: the benchmark JSON is advisory (ignore), but the resolved
+      # version is what makes the intentionally-floating Node 26 canary
+      # reproducible after the fact, so its upload fails closed (error).
+      - name: Upload compat benchmark artifact
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: compat-bench-node-${{ matrix.node-version }}-${{ github.sha }}
+          name: compat-node-${{ matrix.node-version }}-${{ github.sha }}
           path: tests/perf/ci-compat-*.json
           if-no-files-found: ignore
+          retention-days: 90
+
+      - name: Upload resolved-runtime artifact
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: compat-node-${{ matrix.node-version }}-resolved-${{ github.sha }}
+          path: node-resolved-*.txt
+          if-no-files-found: error
           retention-days: 90
 
   # ---------------------------------------------------------------------------
@@ -864,7 +970,7 @@ jobs:
       pull-requests: read
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Check PR scope
         env:
@@ -890,7 +996,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Enable Corepack
         run: |
@@ -903,7 +1009,7 @@ jobs:
         uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
 
       - name: Setup Node.js
-        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version-file: '.node-version'
           cache: 'pnpm'

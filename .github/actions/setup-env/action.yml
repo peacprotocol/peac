@@ -1,5 +1,5 @@
 name: Setup Environment
-description: Shared setup for CI jobs (checkout, Node.js, Corepack, pnpm, install)
+description: Shared setup for CI jobs (Node.js, Corepack, pnpm, install)
 
 # Callers MUST run actions/checkout BEFORE using this action.
 # GitHub Actions needs the repo checked out to find local action.yml files.
@@ -9,9 +9,48 @@ description: Shared setup for CI jobs (checkout, Node.js, Corepack, pnpm, instal
 #   2. pnpm/action-setup (makes pnpm binary available for cache key resolution)
 #   3. setup-node with cache: pnpm (requires pnpm to already exist for cache path)
 #   4. install
-# This matches the repo's proven setup sequence. setup-node's pnpm cache
-# integration requires pnpm to be on PATH before it runs, so pnpm/action-setup
-# must come first. Changing this order will break the pnpm store cache.
+# setup-node's pnpm cache integration requires pnpm to be on PATH before it
+# runs, so pnpm/action-setup must come first. Changing this order will break
+# the pnpm store cache.
+#
+# RUNTIME SELECTION: callers that need a runtime other than the
+# repository pin MUST pass `node-version` here rather than overriding Node in a
+# later step. Dependencies are installed at step 4, AFTER the runtime is
+# selected at step 3, so passing the version in produces exactly ONE install
+# under the intended runtime. Overriding afterwards and reinstalling does not
+# reliably rebuild lifecycle-generated or native artefacts, so a compatibility
+# lane built that way does not prove clean installation on the target runtime.
+
+inputs:
+  node-version:
+    description: >-
+      Node version to install (for example "22.13.0"). When omitted, the
+      repository pin in .node-version is used.
+
+      BLOCKING lanes MUST pass an exact patch version. A major-only selector
+      floats within the major, so a blocking lane using one would change what it
+      validates without any change to the repository.
+
+      A NON-BLOCKING canary lane MAY pass a major-only selector deliberately
+      (for example "26") to track the Current release line. That is an intentional
+      exception, not an oversight: nothing automates refreshing an exact canary
+      pin, and a stale exact pin quietly stops being a canary. Any lane that
+      floats MUST record the resolved `node --version` as a job artifact so the
+      tested runtime is recoverable after the fact.
+    required: false
+    default: ''
+  check-latest:
+    description: >-
+      Forwarded to actions/setup-node's `check-latest` input. setup-node
+      checks the runner's local tool cache before the network, so a floating
+      major selector (like the "26" canary above) can silently resolve to a
+      stale cached version instead of the newest matching release. Leave this
+      false (default) for every EXACT-pinned lane (reproducibility depends on
+      installing precisely the pinned patch version, not "latest matching
+      cache"); set it true only for a floating canary lane so it always
+      re-resolves the newest matching runtime.
+    required: false
+    default: 'false'
 
 runs:
   using: composite
@@ -31,11 +70,23 @@ runs:
     - name: Setup pnpm
       uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
 
-    - name: Setup Node.js
-      uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+    # Exactly one of the two setup-node steps runs. setup-node rejects
+    # node-version and node-version-file together, so they are split on `if:`.
+    - name: Setup Node.js (repository pin)
+      if: inputs.node-version == ''
+      uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
       with:
         node-version-file: '.node-version'
         cache: 'pnpm'
+        check-latest: ${{ inputs.check-latest }}
+
+    - name: Setup Node.js ${{ inputs.node-version }} (caller-supplied)
+      if: inputs.node-version != ''
+      uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: 'pnpm'
+        check-latest: ${{ inputs.check-latest }}
 
     - name: Install dependencies
       shell: bash

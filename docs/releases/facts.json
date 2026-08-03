@@ -14,10 +14,19 @@
     "conformance_sections": 32
   },
   "runtime": {
-    "node_canonical": "24.14.1",
+    "node_canonical": "24.18.1",
     "node_minimum": ">=22.13.0",
     "node_compat": "22",
-    "node_forward_compat": "25+"
+    "node_matrix": {
+      "supported_floor": "22.13.0",
+      "primary_lts": "24.18.1",
+      "canary_major": "26",
+      "canary_blocking": false,
+      "canary_release_line": "Current",
+      "last_verified": "2026-07-31",
+      "primary_source": "https://nodejs.org/dist/index.json",
+      "canary_pin_policy": "Intentionally floating within the major: no automation refreshes an exact canary pin, and a stale exact pin no longer tracks the Current release line. CI records the resolved node --version as a job artifact so the exact runtime under test is always documented."
+    }
   },
   "sdks": {
     "typescript": "default",
