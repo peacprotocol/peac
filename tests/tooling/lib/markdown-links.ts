@@ -126,11 +126,38 @@ const trackedIndexCache = new Map<string, TrackedIndex>();
  * validation (for example a source tarball with no `.git`) call `existsCaseExact`
  * explicitly instead.
  */
+/**
+ * An environment for running git against a repository other than the current one.
+ *
+ * `git -C <dir>` changes the working directory but does not override the repository-local
+ * environment variables, and those take precedence: with `GIT_DIR` or `GIT_WORK_TREE` set, a
+ * command resolves the repository they name rather than the one at `<dir>`. Git exports them when
+ * invoking a hook, so the same call can address different repositories depending on its caller.
+ *
+ * Names are read from git rather than hardcoded, so a name introduced by a later release is also
+ * cleared. Enumeration failure throws. `process.env` is not mutated, and unrelated variables such
+ * as PATH and HOME are preserved.
+ */
+export function foreignRepositoryGitEnvironment(): NodeJS.ProcessEnv {
+  const env = { ...process.env };
+  const listed = spawnSync('git', ['rev-parse', '--local-env-vars'], { encoding: 'utf8' });
+  if (listed.status !== 0) {
+    throw new Error(
+      `unable to enumerate repository-local git environment variables: ${listed.stderr || listed.error?.message || ''}`
+    );
+  }
+  for (const name of listed.stdout.split(/\r?\n/)) {
+    if (name) delete env[name];
+  }
+  return env;
+}
+
 function getTrackedIndex(root: string): TrackedIndex {
   const cached = trackedIndexCache.get(root);
   if (cached) return cached;
 
   const res = spawnSync('git', ['-C', root, 'ls-files', '-z', '--cached'], {
+    env: foreignRepositoryGitEnvironment(),
     encoding: 'utf8',
     timeout: 10_000,
     // `git ls-files -z` is on the order of 120 KiB for this repository; 32 MiB
