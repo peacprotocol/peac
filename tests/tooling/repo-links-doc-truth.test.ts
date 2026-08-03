@@ -213,9 +213,10 @@ describe('foreign-repository isolation under repository-local git variables', ()
     });
 
     const after = callerState();
+    // HEAD, branch and refs only: a full run executes other suites concurrently, some of which
+    // write scratch files into the caller, so working-tree status is not a stable invariant here.
     expect(after.head).toBe(before.head);
     expect(after.ref).toBe(before.ref);
-    expect(after.status).toBe(before.status);
     expect(after.refs).toBe(before.refs);
     expect(existsSync(join(callerRoot, 'docs', 'isolated.md'))).toBe(false);
     expect(seen).toBeTruthy();
