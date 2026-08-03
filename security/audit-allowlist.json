@@ -219,26 +219,6 @@
       "owner": "jithinraj",
       "added_at": "2026-06-13",
       "reviewed_at": "2026-06-13"
-    },
-    {
-      "advisory_id": "GHSA-mp2f-45pm-3cg9",
-      "package": "decompress",
-      "reason": "decompress archive extraction can create files/links outside the target directory (zip-slip / arbitrary file write, CRITICAL, CVE-2026-53486). Dev/build-only via @peac/worker-fastly devDependency @fastly/js-compute -> @bytecodealliance/weval -> decompress@4.2.1. No patched decompress release exists (patched: <0.0.0).",
-      "why_not_exploitable": "decompress is reached only through @bytecodealliance/weval in the @fastly/js-compute build toolchain for the private Fastly worker surface. PEAC does not expose an API, CLI, worker route, or runtime path that accepts attacker-controlled archives and passes them to decompress. @peac/worker-fastly is private and unpublished, @fastly/js-compute is a devDependency, and no published @peac/* package depends on decompress, @fastly/js-compute, or @bytecodealliance/weval.",
-      "where_used": "surfaces/workers/fastly (@peac/worker-fastly, private:true, not in publish-manifest) devDependency: @fastly/js-compute@3.40.1 -> @bytecodealliance/weval@0.3.4 -> decompress@4.2.1",
-      "expires_at": "2026-08-07",
-      "remediation": "No patched decompress release exists; every @bytecodealliance/weval version (0.3.x and latest 0.4.x) still depends on decompress@4.2.1, and the latest @fastly/js-compute@3.43.1 still requires weval ^0.3.2. Re-evaluate at expiry for a patched decompress, a weval/js-compute release that drops it, or a pnpm.overrides pin once a safe version exists.",
-      "issue_url": "https://github.com/advisories/GHSA-mp2f-45pm-3cg9",
-      "scope": "dev",
-      "dependency_chain": [
-        "@fastly/js-compute@3.40.1",
-        "@bytecodealliance/weval@0.3.4",
-        "decompress@4.2.1"
-      ],
-      "verified_by": "pnpm audit --prod shows no CRITICAL (decompress is not a production dependency); pnpm why decompress confirms the @peac/worker-fastly devDependency-only path; @peac/worker-fastly is private:true and absent from scripts/publish-manifest.json; latest @fastly/js-compute@3.43.1 and all @bytecodealliance/weval releases still pull decompress@4.2.1 (no upgrade removes it).",
-      "owner": "jithinraj",
-      "added_at": "2026-07-07",
-      "reviewed_at": "2026-07-07"
     }
   ]
 }
