@@ -708,11 +708,11 @@ jobs:
   # Aggregator: evaluates all lane results.
   # Uses `if: always()` so it runs even when optional lanes skip.
   #
-  # Branch-protection continuity: this job preserves the required check name
-  # "Build, Lint, Test" (job id: ci). No branch-protection rename is needed.
-  # The old single-job `ci` is replaced internally by this aggregator over
-  # parallel lane jobs. ci-windows, node-compat, and scope-guard remain
-  # separate required checks.
+  # Branch-protection continuity: this job carries the check name
+  # "Build, Lint, Test" (job id: ci). Branch protection selects checks by name,
+  # so renaming this job would stop that context from reporting.
+  # Audit Gate (Windows), node-compat, and scope-guard remain separate checks
+  # and are intentionally evaluated outside this aggregator.
   # ---------------------------------------------------------------------------
   ci:
     name: Build, Lint, Test
@@ -847,8 +847,7 @@ jobs:
     name: Node ${{ matrix.node-version }} (compat)
     runs-on: ubuntu-latest
     # Covers packing tarballs and clean temp-project installs in addition to the
-    # test run. Provisional ceiling with margin; tighten to observed p95 once
-    # this lane has run enough times to have one.
+    # test run, so the ceiling carries margin over the test time alone.
     timeout-minutes: 30
     continue-on-error: ${{ matrix.experimental }}
     strategy:

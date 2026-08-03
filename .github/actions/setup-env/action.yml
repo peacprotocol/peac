@@ -13,7 +13,7 @@ description: Shared setup for CI jobs (Node.js, Corepack, pnpm, install)
 # runs, so pnpm/action-setup must come first. Changing this order will break
 # the pnpm store cache.
 #
-# RUNTIME SELECTION (2026-07-28): callers that need a runtime other than the
+# RUNTIME SELECTION: callers that need a runtime other than the
 # repository pin MUST pass `node-version` here rather than overriding Node in a
 # later step. Dependencies are installed at step 4, AFTER the runtime is
 # selected at step 3, so passing the version in produces exactly ONE install
