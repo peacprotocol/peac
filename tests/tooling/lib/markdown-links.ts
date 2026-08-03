@@ -127,19 +127,16 @@ const trackedIndexCache = new Map<string, TrackedIndex>();
  * explicitly instead.
  */
 /**
- * An environment for running git against a repository other than the one this process was started
- * in.
+ * An environment for running git against a repository other than the current one.
  *
  * `git -C <dir>` changes the working directory but does not override the repository-local
  * environment variables, and those take precedence: with `GIT_DIR` or `GIT_WORK_TREE` set, a
- * command reads and writes the repository they name rather than the one at `<dir>`. Git exports
- * exactly those variables when it invokes a hook, so code that behaves correctly from a shell can
- * silently target the wrong repository when the same code runs from a commit or push hook.
+ * command resolves the repository they name rather than the one at `<dir>`. Git exports them when
+ * invoking a hook, so the same call can address different repositories depending on its caller.
  *
- * The variable names are asked of git rather than hardcoded, so names added by a future release are
- * cleared too. Enumeration failure is fatal: continuing would reintroduce the ambiguity this exists
- * to remove. `process.env` is never mutated, and unrelated variables such as PATH and HOME are
- * preserved.
+ * Names are read from git rather than hardcoded, so a name introduced by a later release is also
+ * cleared. Enumeration failure throws. `process.env` is not mutated, and unrelated variables such
+ * as PATH and HOME are preserved.
  */
 export function foreignRepositoryGitEnvironment(): NodeJS.ProcessEnv {
   const env = { ...process.env };

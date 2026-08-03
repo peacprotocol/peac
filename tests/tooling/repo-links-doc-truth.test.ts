@@ -155,12 +155,9 @@ function gitFixtureRepo(): { root: string; git: (...args: string[]) => void } {
 }
 
 /**
- * Git exports repository-local environment variables when it invokes a hook, and those variables
- * take precedence over `git -C <dir>`. Foreign-repository operations must therefore sanitize the
- * environment, or a fixture silently reads and writes the caller's repository instead of its own.
- *
- * These cases recreate that environment explicitly: an ordinary test process does not have the
- * variables set, so without simulating them a regression here would go unnoticed.
+ * Git exports repository-local environment variables when invoking a hook, and they take
+ * precedence over `git -C <dir>`. These cases populate those variables explicitly, because a test
+ * process does not otherwise have them set.
  */
 describe('foreign-repository isolation under repository-local git variables', () => {
   const callerRoot = REPO_ROOT;
@@ -236,7 +233,7 @@ describe('foreign-repository isolation under repository-local git variables', ()
     const before = callerState();
     withRepositoryLocalEnv(() => {
       const { root, git } = gitFixtureRepo();
-      // A pathspec that matches nothing must fail loudly rather than resolve against the caller.
+      // A pathspec matching nothing must fail rather than resolve against the caller.
       expect(() => git('add', 'no-such-file.md')).toThrow(/git add no-such-file\.md failed/);
       expect(existsSync(join(root, '.git'))).toBe(true);
     });

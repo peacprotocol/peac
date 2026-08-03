@@ -151,12 +151,10 @@ echo "[pre-push] Tier 2: full CI-parity gate"
 echo "[pre-push] To skip Tier 2: PEAC_SKIP_FULL_PRE_PUSH=1 git push"
 echo ""
 
-# Git exports repository-local variables such as GIT_DIR and GIT_WORK_TREE to its hooks, and those
-# take precedence over a command's own working directory. Any test that runs git against a different
-# repository would therefore read and write THIS repository instead. Launch the gate without them so
-# the suite sees an ordinary environment; everything else, including PATH, HOME and push metadata,
-# is preserved. Fixture helpers sanitize their own child processes as well, so foreign-repository
-# operations stay isolated wherever they run.
+# Git exports repository-local variables such as GIT_DIR and GIT_WORK_TREE to its hooks, and they
+# take precedence over a command's working directory. The gate therefore runs without them, so a
+# test that targets another repository resolves that repository rather than this one. PATH, HOME
+# and push metadata are preserved.
 if ! git_local_env_vars="$(git rev-parse --local-env-vars)"; then
   echo "[pre-push] ERROR: unable to enumerate repository-local Git environment variables." >&2
   echo "[pre-push] Refusing to run the gate with an ambiguous repository environment." >&2
