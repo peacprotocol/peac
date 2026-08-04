@@ -2,6 +2,7 @@ import { defineConfig } from 'vitest/config';
 import { resolve } from 'path';
 
 export default defineConfig({
+  define: { __PEAC_VERIFIER_BUILD__: JSON.stringify('test-build') },
   resolve: {
     alias: {
       '@peac/protocol/verify-local': resolve(
@@ -13,7 +14,5 @@ export default defineConfig({
       '@peac/kernel': resolve(__dirname, '../../packages/kernel/src/index.ts'),
     },
   },
-  test: {
-    include: ['tests/**/*.test.ts'],
-  },
+  test: { include: ['tests/**/*.test.ts'] },
 });
