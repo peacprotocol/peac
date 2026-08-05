@@ -14,7 +14,7 @@ const MODE_COPY: Record<UiMode, string> = {
   'constraints-checked':
     'The reported values matched the supplied constraints, but the signing key was not independently trusted.',
   'trusted-key':
-    'The signature is valid under a verifier-trusted key. The reported issuer and record type matched the supplied constraints where present.',
+    'The selected key matched a thumbprint in the supplied verification context. The verifier did not establish how that context was obtained.',
 };
 
 function el(tag: string, text?: string, cls?: string): HTMLElement {
