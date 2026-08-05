@@ -647,6 +647,26 @@ jobs:
       - name: DID verification example
         run: pnpm --filter @peac/example-did-verification verify
 
+      - name: Verifier typecheck
+        run: pnpm --filter @peac/app-verifier typecheck
+
+      - name: Verifier tests
+        run: pnpm --filter @peac/app-verifier test
+
+      - name: Verifier source boundary
+        run: |
+          node scripts/check-browser-verifier-boundary.mjs
+          node scripts/check-browser-verifier-boundary.mjs --self-test
+
+      # The emitted-bundle check inspects build output, so it must follow the build.
+      - name: Verifier build
+        run: pnpm --filter @peac/app-verifier build
+
+      - name: Verifier emitted bundle
+        run: |
+          node scripts/check-verifier-bundle.mjs
+          node scripts/check-verifier-bundle.mjs --self-test
+
       - name: ERC-8004 mapping conformance
         run: pnpm --filter @peac/example-erc8004-feedback verify
 
