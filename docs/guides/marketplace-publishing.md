@@ -24,9 +24,8 @@ surface (paths, configs, samples, guides, skills, rules, READMEs).
 
 ## Submission checklist (maintainer-facing)
 
-Use the items below when preparing a new marketplace submission. Record
-the submission outcome in `reference/PROOF_OF_ACTION_LOCAL.md`
-(local-only) with date, marketplace, publisher account, listing URL.
+Use the items below when preparing a new marketplace submission, and
+record the outcome as a durable evidence record (see below).
 
 - [ ] Listing title exactly matches the canonical string above.
 - [ ] Short description exactly matches the canonical string above.
@@ -45,6 +44,30 @@ the submission outcome in `reference/PROOF_OF_ACTION_LOCAL.md`
 - [ ] No Originary product names in the submitted artifact itself;
       publisher identity appears only in the marketplace account field
       and, if the marketplace requires it, the support URL.
+
+## Submission evidence record
+
+Every submission produces a durable evidence record. Where that record is kept is the publishing
+organization's choice; what it must contain is not. A record is complete only when it carries:
+
+| Field                            | Requirement                                                                                                     |
+| -------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| Marketplace                      | The distribution surface submitted to.                                                                          |
+| Submission date                  | Date the submission was made.                                                                                   |
+| Submitted package and version    | Exact package identifier and exact semver, never a moving tag.                                                  |
+| Publisher account                | The account or organization under which it was submitted.                                                       |
+| Listing or submission identifier | The marketplace's own identifier for the listing or submission.                                                 |
+| Resulting URL                    | The listing or review URL the marketplace returned.                                                             |
+| Outcome / status                 | Submitted, in review, published, rejected, or withdrawn.                                                        |
+| Evidence capture date            | When the evidence above was captured, which may differ from the submission date.                                |
+| Durable reference                | An organization-controlled reference that remains resolvable if the marketplace changes or removes the listing. |
+
+Two rules constrain what may be recorded:
+
+- Credentials, API tokens, private correspondence and personal data beyond the publisher account
+  identifier must never be committed to this repository or any artifact derived from it.
+- A screenshot may supplement a record but must never replace the listing or submission identifier.
+  A screenshot is not resolvable, not verifiable by a third party, and not durable.
 
 ## Trust boundary classes
 

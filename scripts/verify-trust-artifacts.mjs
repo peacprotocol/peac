@@ -10,10 +10,9 @@
  *   2. docs/STABILITY-CONTRACT.md table rows: every row must name a
  *      concrete public surface (path, package, or identifier). Empty or
  *      placeholder rows fail.
- *   3. Public docs (everything under docs/, SECURITY.md, .github/SECURITY.md,
- *      README.md) MUST NOT link to gitignored reference/ paths. The
- *      reference/ tree is local-only; external contributors cannot
- *      resolve those links.
+ *   3. Public documentation links (everything under docs/, SECURITY.md,
+ *      .github/SECURITY.md, README.md) MUST resolve to tracked repository
+ *      paths available in a fresh clone.
  *   4. docs/specs/RESOURCE-LIMITS.md invariant tables: every row must
  *      carry at least one markdown link in its Constant column and one
  *      in its Test column, and every linked repository-relative path
@@ -101,7 +100,12 @@ function checkThreatModel() {
     const cells = line.split('|').map((c) => c.trim());
     // Expected layout: [empty, threatId, threat, mitigation, testCoverage, ...empty]
     if (cells.length < 5) {
-      addViolation('threat-model-row-shape', THREAT_MODEL, i + 1, `${threatId}: row has too few columns`);
+      addViolation(
+        'threat-model-row-shape',
+        THREAT_MODEL,
+        i + 1,
+        `${threatId}: row has too few columns`
+      );
       continue;
     }
 
@@ -275,7 +279,9 @@ function checkResourceLimits() {
           .split('|')
           .map((c) => c.trim())
           .filter((_, idx, arr) => idx > 0 && idx < arr.length - 1);
-        constantCol = cells.findIndex((c) => /^constant$/i.test(c) || /constant\s*\/\s*file/i.test(c));
+        constantCol = cells.findIndex(
+          (c) => /^constant$/i.test(c) || /constant\s*\/\s*file/i.test(c)
+        );
         testCol = cells.findIndex((c) => /^test$/i.test(c));
         if (constantCol >= 0 && testCol >= 0) {
           inTable = true;
@@ -384,7 +390,7 @@ function checkResourceLimits() {
   void tableStartLine;
 }
 
-// ---------- Check 4: no gitignored reference/ links in public docs ----------
+// ---------- Check 4: public doc links resolve in a fresh clone ----------
 
 function listPublicDocs() {
   try {
@@ -403,17 +409,12 @@ function listPublicDocs() {
 
 function checkNoReferenceLinks() {
   const docs = listPublicDocs();
-  // A link to "reference/foo" is a gitignored-target leak EXCEPT when it's
-  // the explicit reference/ directory at the repository root that happens
-  // to be tracked. In this repo, reference/ is gitignored (CLAUDE.md). So
-  // any markdown link into reference/ from a tracked public doc is a leak.
+  // A public document may only link to paths a fresh clone contains. The
+  // prefix below is untracked, so a link into it resolves for nobody.
 
   for (const doc of docs) {
-    // Skip this script file itself (it discusses reference/ in prose).
+    // This file states the prefix it searches for, so it cannot scan itself.
     if (doc.endsWith('scripts/verify-trust-artifacts.mjs')) continue;
-    // Skip the OPERATING_MODEL / TRUTH_MATRIX etc which are local-only
-    // anyway (they're under reference/ so wouldn't match). listPublicDocs
-    // only matches docs/ and tracked surfaces. Safe.
 
     const text = readFileSync(doc, 'utf8');
     const lines = text.split('\n');
@@ -431,10 +432,10 @@ function checkNoReferenceLinks() {
         const norm = noFragment.replace(/^(\.\.\/)+/, '');
         if (norm.startsWith('reference/') || norm === 'reference') {
           addViolation(
-            'public-doc-references-gitignored-reference-tree',
+            'public-doc-link-does-not-resolve-in-a-fresh-clone',
             doc,
             i + 1,
-            `markdown link to gitignored reference/ path: ${target}`
+            `markdown link does not resolve in a fresh clone: ${target}`
           );
         }
       }
@@ -459,16 +460,14 @@ try {
 }
 
 if (JSON_MODE) {
-  process.stdout.write(
-    JSON.stringify({ ok: violations.length === 0, violations }, null, 2) + '\n'
-  );
+  process.stdout.write(JSON.stringify({ ok: violations.length === 0, violations }, null, 2) + '\n');
 } else {
   if (violations.length === 0) {
     process.stdout.write('verify-trust-artifacts: OK\n');
     process.stdout.write('  threat-model rows: per-row test links resolve\n');
     process.stdout.write('  stability-contract rows: surface identifiers present\n');
     process.stdout.write('  resource-limits invariant rows: constant + test links resolve\n');
-    process.stdout.write('  public docs: no links to gitignored reference/ tree\n');
+    process.stdout.write('  public docs: every link resolves in a fresh clone\n');
   } else {
     process.stderr.write(`verify-trust-artifacts: ${violations.length} violation(s)\n\n`);
     for (const v of violations) {

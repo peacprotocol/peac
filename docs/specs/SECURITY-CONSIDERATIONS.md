@@ -1,7 +1,6 @@
 # Security Considerations
 
 > **Status:** Normative | **Wire Version:** 0.2 (`interaction-record+jwt`)
-> **Cross-reference:** `reference/THREAT_MODEL_MCP.md` (MCP-specific threats T1-T10)
 
 This document describes the security properties, trust model, and deployment
 guidance for the PEAC protocol. Normative requirements use BCP 14 keywords
@@ -183,6 +182,27 @@ PEAC receipts follow a hash-first design (DD-138):
   tenant isolation
 
 ---
+
+## 8a. Privileged MCP Tool Availability
+
+This section describes the behaviour of the reference MCP server implementation and its
+deployment configuration. It is **not** a Wire-format requirement and places no obligation on a
+record producer or consumer.
+
+The reference server registers privileged tools only when its configuration supplies what the tool
+needs:
+
+| Tool                 | Registered only when                                      |
+| -------------------- | --------------------------------------------------------- |
+| `peac_issue`         | an issuer key **and** an issuer identifier are configured |
+| `peac_create_bundle` | the above **and** a bundle directory is configured        |
+
+A tool that is not registered is **omitted from `tools/list`** rather than advertised and refused,
+so a client cannot discover a capability the deployment does not have.
+
+Configured policy may further disable a tool that is otherwise registered; such a call is refused
+with `E_MCP_TOOL_DISABLED`. A policy file is not required: when none is supplied the server
+materializes its default policy.
 
 ## 9. Threat Model Summary
 

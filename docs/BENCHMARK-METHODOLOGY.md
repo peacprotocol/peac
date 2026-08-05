@@ -21,14 +21,14 @@ execution-surface carrier (tracked for v0.14.1).
 Baseline captures run on the PEAC reference machine profile. Production
 performance varies with hardware, network, workload, and receipt size.
 
-| Field      | Value                                                          |
-| ---------- | -------------------------------------------------------------- |
-| CPU        | Documented at capture time in `reference/bench/<package>.json` |
-| Memory     | Documented at capture time                                     |
-| OS         | Documented at capture time (macOS or Linux)                    |
-| Node.js    | v24.14.1 (current Active LTS; canonical per `.node-version`)   |
-| pnpm       | Pinned via `packageManager` in root `package.json`             |
-| Filesystem | Local APFS or ext4; loopback HTTP for `/v1/verify` runs        |
+| Field      | Value                                                        |
+| ---------- | ------------------------------------------------------------ |
+| CPU        | Recorded at capture time in `bench-results/manifest.json`    |
+| Memory     | Documented at capture time                                   |
+| OS         | Documented at capture time (macOS or Linux)                  |
+| Node.js    | v24.14.1 (current Active LTS; canonical per `.node-version`) |
+| pnpm       | Pinned via `packageManager` in root `package.json`           |
+| Filesystem | Local APFS or ext4; loopback HTTP for `/v1/verify` runs      |
 
 `PEAC_BENCH_JSON=<path>` emits a structured record including `platform` and
 `node_version` alongside per-operation metrics.
@@ -67,8 +67,8 @@ git checkout v0.12.12
 pnpm install --frozen-lockfile
 pnpm build
 
-# vitest bench across crypto / schema / protocol packages;
-# outputs JSON into reference/bench/<package>.json.
+# vitest bench across crypto / schema / protocol packages; writes local
+# diagnostic JSON plus a manifest into the ignored bench-results/ directory.
 node scripts/bench-capture.mjs
 
 # Wire 0.2 SLO gate (verifyLocal p95 <= 10 ms; issue() soft target):
@@ -93,11 +93,33 @@ replay a fixture using the fetch-based client of your choice; record `p50`,
 
 | Artifact                           | Source                                                 | Purpose                                           |
 | ---------------------------------- | ------------------------------------------------------ | ------------------------------------------------- |
-| `reference/bench/<package>.json`   | `scripts/bench-capture.mjs`                            | Per-package vitest bench JSON                     |
+| `bench-results/<package>.json`     | `scripts/bench-capture.mjs`                            | Per-package vitest bench JSON (ignored, local)    |
+| `bench-results/manifest.json`      | `scripts/bench-capture.mjs`                            | Capture provenance (ignored, local)               |
 | `tests/perf/wire02-slo.json`       | `tests/perf/wire02-slo.test.ts` (with env var)         | Wire 0.2 SLO run metrics                          |
 | `tests/perf/repeated-results.json` | `scripts/bench-repeated.sh`                            | Cross-run p95 aggregation                         |
 | `specs/benchmarks/baseline.json`   | Human-maintained; refreshed on intended baseline drift | Regression-gate reference                         |
 | `specs/benchmarks/slo.json`        | Human-maintained                                       | Machine-readable SLO targets and iteration counts |
+
+## Local captures versus the tracked baseline
+
+These are different artifacts and must not be confused.
+
+- `bench-results/` is **ignored local diagnostic evidence**. It records what one machine measured
+  at one moment. It is not tracked, not reviewed, and not comparable across machines or runs.
+- [`specs/benchmarks/baseline.json`](../specs/benchmarks/baseline.json) is the **reviewed tracked
+  regression baseline**. Changing it is a deliberate, reviewed change.
+- [`specs/benchmarks/slo.json`](../specs/benchmarks/slo.json) is the **tracked threshold
+  authority**: the targets and iteration counts the gate enforces.
+
+Each capture writes `bench-results/manifest.json` recording the manifest schema version, UTC
+capture timestamp, commit SHA, whether the worktree was clean or dirty, Node and pnpm versions,
+operating system, architecture, CPU model, CPU count, total memory, the package filters executed,
+the output filenames, and the success state. A capture that cannot record a clean commit is
+diagnostic only and must not be used to argue a performance claim.
+
+Capture is all-or-nothing. Benchmarks run into a temporary directory and replace the previous
+capture only when every package succeeds; a failed run leaves the previous complete capture intact
+and exits non-zero.
 
 ## Regression gate (CI)
 
