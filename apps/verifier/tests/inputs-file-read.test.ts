@@ -163,6 +163,92 @@ describe('the normal hint returns after a successful read', () => {
   });
 });
 
+describe('a superseded read cannot apply', () => {
+  it('clearing the selection invalidates a read already in flight', async () => {
+    const { fields, inputs } = await mountInputs();
+    const target = fields.record as unknown as MiniNode;
+    const recordInput = inputs[0];
+
+    const inFlight = deferredFile(enc.encode('FILE-BYTES'));
+    selectFile(recordInput, inFlight.file);
+    await flush();
+    expect(fields.hasPendingRead()).toBe(true);
+
+    // Clearing the control is a change event with no file. The read must not land afterwards.
+    recordInput.files = [];
+    recordInput.dispatchEvent('change');
+    await flush();
+    expect(fields.hasPendingRead()).toBe(false);
+
+    inFlight.settle();
+    await flush();
+    expect(target.value).toBe('');
+  });
+
+  it('manual input invalidates a read already in flight', async () => {
+    const { fields, node, inputs } = await mountInputs();
+    const target = fields.record as unknown as MiniNode;
+    const textarea = node.querySelectorAll('textarea')[0];
+
+    const inFlight = deferredFile(enc.encode('FILE-BYTES'));
+    selectFile(inputs[0], inFlight.file);
+    await flush();
+    expect(fields.hasPendingRead()).toBe(true);
+
+    textarea.value = 'TYPED-BY-OPERATOR';
+    textarea.dispatchEvent('input');
+    expect(fields.hasPendingRead()).toBe(false);
+
+    inFlight.settle();
+    await flush();
+    expect(target.value).toBe('TYPED-BY-OPERATOR');
+  });
+
+  it('a read cannot overwrite text typed after it started', async () => {
+    const { fields, node, inputs } = await mountInputs();
+    const target = fields.record as unknown as MiniNode;
+    const textarea = node.querySelectorAll('textarea')[0];
+
+    const slow = deferredFile(enc.encode('FROM-FILE'));
+    selectFile(inputs[0], slow.file);
+    await flush();
+
+    textarea.value = 'TYPED-LATER';
+    textarea.dispatchEvent('input');
+    slow.settle();
+    await flush();
+    await flush();
+
+    expect(target.value).toBe('TYPED-LATER');
+  });
+});
+
+describe('the shared revision advances on every value change', () => {
+  it('covers manual input, a completed read and a failed read', async () => {
+    const { fields, node, inputs } = await mountInputs();
+    const textarea = node.querySelectorAll('textarea')[0];
+
+    const start = fields.revision();
+    textarea.value = 'x';
+    textarea.dispatchEvent('input');
+    const afterTyping = fields.revision();
+    expect(afterTyping).toBeGreaterThan(start);
+
+    const ok = deferredFile(enc.encode('LOADED'));
+    selectFile(inputs[0], ok.file);
+    ok.settle();
+    await flush();
+    const afterRead = fields.revision();
+    expect(afterRead).toBeGreaterThan(afterTyping);
+
+    const broken = deferredFile(null);
+    selectFile(inputs[1], broken.file);
+    broken.settle();
+    await flush();
+    expect(fields.revision()).toBeGreaterThan(afterRead);
+  });
+});
+
 describe('each field tracks its own reads', () => {
   it('a read on one field does not disturb another', async () => {
     const { fields, inputs } = await mountInputs();

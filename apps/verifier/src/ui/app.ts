@@ -4,6 +4,10 @@
  * Deliberately minimal rather than designed. This exists so the no-network,
  * no-persistence and CSP gates run against a built application that actually verifies, rather than
  * against an empty shell.
+ *
+ * A displayed result always describes the exact inputs submitted for that run. Verification and
+ * file reads are both asynchronous, so a run is bound to a monotonic run token and to the input
+ * revision captured at submission, and renders only while both remain current.
  */
 import { initializeLocalVerifier, type LocalVerifier } from '../verify.js';
 import { verifierBuildFromEnvironment } from '../lib/build-info.js';
@@ -57,14 +61,19 @@ export async function initApp(root: HTMLElement): Promise<void> {
     return;
   }
 
-  /**
-   * Monotonic run token.
-   *
-   * Verification is asynchronous, so two runs can be in flight and complete out of order. Rendering
-   * whichever finishes last would show a verdict for inputs the operator has already replaced. Each
-   * run captures the token it started with and renders only while that token is still current.
-   */
   let runToken = 0;
+  let running = false;
+
+  function updateAvailability(): void {
+    // Unavailable while a run is active, and while any file read is unresolved: the field contents
+    // are not yet settled, so a submission could carry a value the operator has not seen.
+    button.disabled = running || fields.hasPendingRead();
+  }
+
+  function clearOutputs(): void {
+    results.replaceChildren();
+    renderReport(undefined, reportPanel);
+  }
 
   function showRunFailure(): void {
     results.replaceChildren();
@@ -76,37 +85,51 @@ export async function initApp(root: HTMLElement): Promise<void> {
     renderReport(undefined, reportPanel);
   }
 
+  fields.onChange(() => {
+    updateAvailability();
+    // The inputs no longer match anything on screen.
+    clearOutputs();
+  });
+  updateAvailability();
+
   button.addEventListener('click', () => {
-    // A second submission while a run is active would start a concurrent verification whose result
-    // races the first. The button is disabled for the duration and restored in `finally`.
     if (button.disabled) return;
-    button.disabled = true;
 
     const token = ++runToken;
-    const ctx = fields.contextDocument.value;
+    const revision = fields.revision();
+    const contextDocument = fields.contextDocument.value;
+    // Captured once. Nothing read from the fields after this point reaches the verifier.
+    const input = Object.freeze({
+      record: fields.record.value,
+      keyDocument: fields.keyDocument.value,
+      ...(contextDocument.length > 0 ? { contextDocument } : {}),
+      evaluationTimeUnixSeconds: Math.floor(Date.now() / 1000),
+      maxClockSkewSeconds: DEFAULT_MAX_CLOCK_SKEW_SECONDS,
+    });
+
+    running = true;
+    fields.setDisabled(true);
+    updateAvailability();
 
     void verifier
-      .verify({
-        record: fields.record.value,
-        keyDocument: fields.keyDocument.value,
-        ...(ctx.length > 0 ? { contextDocument: ctx } : {}),
-        evaluationTimeUnixSeconds: Math.floor(Date.now() / 1000),
-        maxClockSkewSeconds: DEFAULT_MAX_CLOCK_SKEW_SECONDS,
-      })
+      .verify(input)
       .then((result) => {
-        if (token !== runToken) return;
+        if (token !== runToken || revision !== fields.revision()) return;
         renderResults(result, results);
         renderReport(result.report, reportPanel);
       })
       .catch(() => {
         // verify() is a total boundary and should not reject. If it does, the operator must still
         // see that the run failed rather than face a control that silently does nothing.
-        if (token !== runToken) return;
+        if (token !== runToken || revision !== fields.revision()) return;
         showRunFailure();
       })
       .finally(() => {
-        // Restored on every path, so a failure cannot leave the interface permanently inert.
-        button.disabled = false;
+        // A superseded run must not restore controls a newer run is holding.
+        if (token !== runToken) return;
+        running = false;
+        fields.setDisabled(false);
+        updateAvailability();
       });
   });
 }
