@@ -1,0 +1,27 @@
+{
+  "manifest": "ed25519-cctv-subset-integrity",
+  "upstream_repository": "https://github.com/C2SP/CCTV",
+  "upstream_path": "ed25519/ed25519vectors.json",
+  "upstream_commit": "3ec4d716e80597545ed285cf62af3dded3a14f65",
+  "upstream_source_sha256": "b38e84caf3e7e89170ff520292dbeae421b0a794c27408ce5ce973018fe3d7f9",
+  "retrieved": "2026-08-06",
+  "selection_algorithm_version": "1",
+  "selection": "First 3 vectors by ascending upstream number for each of low_order_A, low_order_R, low_order_component_A, low_order_component_R, non_canonical_A, non_canonical_R, plus all available unflagged ordinary controls from the pinned source; one exists at the pinned commit. Duplicates collapse by upstream number.",
+  "selected_vector_numbers": [
+    0,
+    1,
+    2,
+    4,
+    8,
+    9,
+    10,
+    14,
+    15,
+    16,
+    305
+  ],
+  "subset_path": "ed25519-cctv-subset.json",
+  "subset_sha256": "86a80b0e78c7f81d756d7601e0717939f6988e3969e34587993c07c1e694e180",
+  "license_path": "ed25519-cctv-LICENSE.txt",
+  "license_sha256": "9fe727c21f00a770a683a4c8491bf24203ec839628bad09b026258c5afc17076"
+}

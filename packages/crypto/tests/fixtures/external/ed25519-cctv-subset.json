@@ -1,0 +1,148 @@
+{
+  "corpus": "c2sp-cctv-ed25519-subset",
+  "form": "DERIVED SUBSET. A transformed selection of upstream vectors, not a copy of the upstream file. Externally sourced test material with pinned provenance: formatting is controlled locally to preserve stable reviewable bytes, and the selection is reproducible from the pinned upstream commit and the deterministic rules recorded in the manifest. The accompanying licence file IS an exact upstream copy.",
+  "oracle_role": "External mathematical oracle. Upstream flags are an INDEPENDENT classification: low_order_* means the point itself has small order, while low_order_component_* without low_order_* means the point carries a low-order component, that is, mixed order. That is the distinction a finite blocklist cannot make in general, and the reason this corpus cross-checks the PEAC classifier rather than being trusted alone.",
+  "license": "BSD-3-Clause",
+  "copyright": [
+    "Copyright 2019 Google LLC",
+    "Copyright 2022 Filippo Valsorda"
+  ],
+  "vectors": [
+    {
+      "number": 0,
+      "key": "0000000000000000000000000000000000000000000000000000000000000000",
+      "sig": "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "msg": "ed25519vectors 3",
+      "flags": [
+        "low_order_R",
+        "low_order_A",
+        "low_order_component_R",
+        "low_order_component_A",
+        "low_order_residue"
+      ]
+    },
+    {
+      "number": 1,
+      "key": "0000000000000000000000000000000000000000000000000000000000000000",
+      "sig": "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "msg": "ed25519vectors 11",
+      "flags": [
+        "low_order_R",
+        "low_order_A",
+        "low_order_component_R",
+        "low_order_component_A"
+      ]
+    },
+    {
+      "number": 2,
+      "key": "0000000000000000000000000000000000000000000000000000000000000000",
+      "sig": "36684ea91032ba5b1dbab2d02f4debc74c3327f2b3802e2e4d371aa42b12b56b05ba9a796274d80437afa36f1236563f2f3b0aa84cecddc3d20914615ba4fe02",
+      "msg": "ed25519vectors 7",
+      "flags": [
+        "low_order_A",
+        "low_order_component_R",
+        "low_order_component_A",
+        "low_order_residue"
+      ]
+    },
+    {
+      "number": 4,
+      "key": "10eb7c3acfb2bed3e0d6ab89bf5a3d6afddd1176ce4812e38d9fd485058fdb1f",
+      "sig": "00000000000000000000000000000000000000000000000000000000000000005e176f12cfb0d4e6eb6929b19ae4c998ef05c1c2cf628a9b1fa1c21312627108",
+      "msg": "ed25519vectors 7",
+      "flags": [
+        "low_order_R",
+        "low_order_component_R",
+        "low_order_component_A",
+        "low_order_residue"
+      ]
+    },
+    {
+      "number": 8,
+      "key": "edffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f",
+      "sig": "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "msg": "ed25519vectors 8",
+      "flags": [
+        "low_order_R",
+        "low_order_A",
+        "low_order_component_R",
+        "low_order_component_A",
+        "low_order_residue",
+        "non_canonical_A"
+      ]
+    },
+    {
+      "number": 9,
+      "key": "edffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f",
+      "sig": "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "msg": "ed25519vectors 6",
+      "flags": [
+        "low_order_R",
+        "low_order_A",
+        "low_order_component_R",
+        "low_order_component_A",
+        "non_canonical_A"
+      ]
+    },
+    {
+      "number": 10,
+      "key": "edffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f",
+      "sig": "36684ea91032ba5b1dbab2d02f4debc74c3327f2b3802e2e4d371aa42b12b56b05ba9a796274d80437afa36f1236563f2f3b0aa84cecddc3d20914615ba4fe02",
+      "msg": "ed25519vectors 4",
+      "flags": [
+        "low_order_A",
+        "low_order_component_R",
+        "low_order_component_A",
+        "low_order_residue",
+        "non_canonical_A"
+      ]
+    },
+    {
+      "number": 14,
+      "key": "0000000000000000000000000000000000000000000000000000000000000000",
+      "sig": "edffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f0000000000000000000000000000000000000000000000000000000000000000",
+      "msg": "ed25519vectors 3",
+      "flags": [
+        "low_order_R",
+        "low_order_A",
+        "low_order_component_R",
+        "low_order_component_A",
+        "low_order_residue",
+        "non_canonical_R"
+      ]
+    },
+    {
+      "number": 15,
+      "key": "0000000000000000000000000000000000000000000000000000000000000000",
+      "sig": "edffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f0000000000000000000000000000000000000000000000000000000000000000",
+      "msg": "ed25519vectors 10",
+      "flags": [
+        "low_order_R",
+        "low_order_A",
+        "low_order_component_R",
+        "low_order_component_A",
+        "non_canonical_R"
+      ]
+    },
+    {
+      "number": 16,
+      "key": "10eb7c3acfb2bed3e0d6ab89bf5a3d6afddd1176ce4812e38d9fd485058fdb1f",
+      "sig": "edffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f1cb421dfbd92aa6c30d550bff53c81cf650ace6deb96a8ec22d2fef84dbbe20b",
+      "msg": "ed25519vectors 6",
+      "flags": [
+        "low_order_R",
+        "low_order_component_R",
+        "low_order_component_A",
+        "low_order_residue",
+        "non_canonical_R"
+      ]
+    },
+    {
+      "number": 305,
+      "key": "ef75b20e7540e3dff77404193652ba2bd13df99c1508eee1515e27ae25f28076",
+      "sig": "b62cf890de42c413b11b1411c9f01f1c4d77aa87ef182258d1251f69af2a350640657f1cb030f12543549bbabd848dc6403d354e7c99c4d0dcee9f63c9033b00",
+      "msg": "ed25519vectors 5",
+      "flags": []
+    }
+  ]
+}
