@@ -26,6 +26,11 @@ perf-results.json
 tests/perf/ci-bench-result.json
 tests/perf/repeated-results.json
 
+# Local benchmark captures. Diagnostic evidence for the machine that produced them, never a
+# tracked baseline: specs/benchmarks/baseline.json and specs/benchmarks/slo.json are tracked.
+/bench-results/
+/bench-results.incoming/
+
 # Environment
 .env
 .env.*

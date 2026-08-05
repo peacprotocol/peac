@@ -1,8 +1,16 @@
-# Go SDK Implementation Plan - v0.9.29
+# Go SDK Implementation Plan (historical record, v0.9.29)
 
-Full Go SDK parity with TypeScript implementation.
-
-**Last Updated:** 2026-01-10 (DOC SYNC with locked decisions)
+> **Status: HISTORICAL. Not an API reference.**
+>
+> This is the planning record written for the v0.9.29 Go SDK work. The work it describes has
+> shipped. Its code blocks are design-time pseudocode: signatures, parameter types and return
+> types in this document do **not** define the supported API and in several places never matched
+> it.
+>
+> **The shipped Go source is the only authority for the Go API.** Read it with `go doc`, for
+> example `go doc ./policy EnforceDecision`, or browse the package sources under `sdks/go/`.
+>
+> Retained for design rationale and decision provenance. Do not copy code from it.
 
 ---
 
@@ -44,17 +52,28 @@ Optional middleware (chi, gin) in separate go.mod submodules.
 
 ### EnforceDecision Return Type
 
-Returns `(int, http.Header)` not `map[string]string`.
+Design-time intent was a status code plus typed headers rather than `map[string]string`.
 
-See `reference/GO_SDK_IMPLEMENTATION_PLAN.md` for full decision rationale.
+The shipped API supersedes this and both spellings below: `policy.EnforceDecision` takes the
+decision by value together with the verified-receipt state and returns a single struct.
+
+```go
+func EnforceDecision(decision Decision, receiptVerified bool) *EnforcementResult
+```
+
+`EnforcementResult` carries `StatusCode int`, `Headers http.Header`, `Allowed bool` and
+`Challenge bool`. The related shipped entry points are `policy.EnforceResult` and
+`policy.EvaluateAndEnforce`.
 
 ---
 
 ## Status
 
-- **Verify()** - Implemented in v0.9.25
-- ⏳ **Issue()** - Pending (this document)
-- ⏳ **Policy Evaluation** - Pending (this document)
+All three areas below have shipped. The status list is preserved as written at the time.
+
+- **Verify()** - implemented in v0.9.25; shipped as `jws.VerifyJWS` and `jws.VerifyEd25519`
+- **Issue()** - shipped as `IssueJWS(opts IssueOptions) (string, error)`
+- **Policy Evaluation** - shipped in the `policy` package
 
 ## Issue() Function
 
@@ -375,7 +394,9 @@ func (p *PolicyDocument) Evaluate(ctx EvaluationContext) (*Decision, error) {
 }
 
 // EnforceDecision converts a policy decision to an HTTP response.
-func EnforceDecision(decision *Decision) (int, map[string]string) {
+// SUPERSEDED PSEUDOCODE. Shipped signature:
+//   func EnforceDecision(decision Decision, receiptVerified bool) *EnforcementResult
+func enforceDecisionSketch(decision *Decision) (int, map[string]string) {
 	// Implementation:
 	// 1. Map decision.Allow to HTTP status:
 	//    - "allow" -> 200
@@ -509,7 +530,9 @@ func applyRule(rule PolicyRule, ctx EvaluationContext) *Decision {
 #### 3. HTTP Enforcement
 
 ```go
-func EnforceDecision(decision *Decision) (int, map[string]string) {
+// SUPERSEDED PSEUDOCODE. Shipped signature:
+//   func EnforceDecision(decision Decision, receiptVerified bool) *EnforcementResult
+func enforceDecisionSketch(decision *Decision) (int, map[string]string) {
 	headers := make(map[string]string)
 
 	switch decision.Allow {

@@ -45,8 +45,8 @@ const FORBIDDEN_DEFER_TO = ['defer', 'to'].join(' ');
 // contiguous DD-NNN token shape (broader public-prose grep over
 // tests/tooling/ does not false-positive on the negative-assertion).
 const DD_NUMBER_PATTERN = new RegExp(['\\bD', 'D-', '[0-9]+\\b'].join(''));
-// Additional category-claiming and surface-claiming phrases the
-// maintainer flagged in PR 3 rev-1 review; assembled non-contiguously.
+// Further phrases that would claim a category or surface PEAC does not
+// occupy; assembled non-contiguously.
 const FORBIDDEN_PEAC_OWNS = ['PEAC', 'owns'].join(' ');
 const FORBIDDEN_PEAC_MAY_EMIT = ['PEAC may', 'emit'].join(' ');
 const FORBIDDEN_SCORES_A_RESULT = ['scores a', 'result'].join(' ');
@@ -115,8 +115,8 @@ const HARNESS_OVERCLAIM_PATTERN = new RegExp(
   `PEAC.{0,40}(${OVERCLAIM_VERBS_HARNESS}).{0,40}harness`
 );
 
-// Boundary-block negation verbs each recipe MUST carry, per the
-// maintainer-supplied "PEAC does NOT" checklist for execution-surface
+// Boundary-block negation verbs each recipe MUST carry, from the
+// "PEAC does NOT" list for execution-surface
 // recipes (run evaluations, score model quality, certify safety,
 // operate the harness, decide benchmark pass/fail truth, replace
 // evaluator logs, authorize deployment, create training-data
@@ -132,11 +132,11 @@ const REQUIRED_NEGATIONS: ReadonlyArray<{ verb: string; pattern: RegExp }> = [
   { verb: 'create training-data provenance', pattern: /create training-data provenance/i },
 ];
 
-// Canonical-line patterns used to confirm each recipe carries the
-// approved positioning from ANTI_ABSORPTION_LOCAL.md (harness-
-// engineering rule) or the existing lifecycle-observation profile §8
-// boundary wording. Assembled non-contiguously so the literal lines
-// never appear in this test source as contiguous strings.
+// Canonical patterns used to ensure public execution-surface recipes
+// retain the required scope-boundary language: either the harness
+// boundary statement or the lifecycle-observation profile §8 wording.
+// Assembled non-contiguously so the literal lines never appear in this
+// test source as contiguous strings.
 const HARNESS_CANONICAL_LINE = new RegExp(
   ['Harnesses control execution', 'PEAC records bounded work', 'Logs stay local'].join('.{0,40}')
 );
@@ -304,7 +304,7 @@ describe('execution-surface recipes: scope discipline (docs/test only)', () => {
   }
 });
 
-describe('execution-surface recipes: PR 3 rev-2 maintainer-required negations', () => {
+describe('execution-surface recipes: required boundary negations', () => {
   for (const [name, text] of [
     ['eval-platform-records', EVAL_TEXT],
     ['harness-records-quickstart', HARNESS_TEXT],
@@ -336,7 +336,7 @@ describe('execution-surface recipes: PR 3 rev-2 maintainer-required negations', 
   }
 });
 
-describe('eval-platform-records recipe: PR 3 rev-2 outcome wording', () => {
+describe('eval-platform-records recipe: outcome wording', () => {
   it('keeps the upstream scoring vocabulary out of the top-of-recipe outcome block', () => {
     // The Outcome block is the blockquote at the top of the recipe.
     // Use the first 1,000 characters as a generous top-of-recipe scope.
@@ -404,7 +404,7 @@ describe('execution-surface recipes: no jq dependency in clean-clone steps', () 
   }
 });
 
-describe('execution-surface recipes: PR 3 rev-3 clean-clone command honesty', () => {
+describe('execution-surface recipes: clean-clone command honesty', () => {
   for (const [name, text] of [
     ['eval-platform-records', EVAL_TEXT],
     ['harness-records-quickstart', HARNESS_TEXT],

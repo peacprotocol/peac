@@ -89,7 +89,8 @@ console.log('valid:', result.valid, 'variant:', result.variant);
 
 ## Verification Record
 
-After each release, create `reference/releases/vX.Y.Z.md` containing:
+After each release, record the following for that version. Where the record is kept is the
+releasing organization's choice; the content is not optional:
 
 - Tag commit hash
 - CI run IDs
