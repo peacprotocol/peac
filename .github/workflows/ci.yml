@@ -812,6 +812,13 @@ jobs:
             echo "FAIL: examples-apps failed"; exit 1
           fi
 
+          # When verifier-affecting paths changed, the verifier lane MUST have succeeded.
+          # `skipped` is not acceptable here: a skipped job reports success to its dependents,
+          # so without this the aggregate could stay green while the verifier never ran.
+          if [[ "${{ needs.detect-changes.outputs.verifier_ci }}" == "true" && "${{ needs.examples-apps.result }}" != "success" ]]; then
+            echo "FAIL: verifier-affecting paths changed but the verifier lane did not succeed (result: ${{ needs.examples-apps.result }})"; exit 1
+          fi
+
           # pack-smoke: optional (success or skipped OK, failure blocks)
           if [[ "${{ needs.pack-smoke.result }}" == "failure" || "${{ needs.pack-smoke.result }}" == "cancelled" ]]; then
             echo "FAIL: pack-smoke failed"; exit 1
