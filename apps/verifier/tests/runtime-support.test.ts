@@ -1,154 +1,64 @@
 /**
- * Runtime-support tests for the browser verifier.
+ * Runtime-capability probe.
  *
- * PEAC Ed25519 verification requires a runtime with WebCrypto Ed25519. The
- * verifier must (a) detect support up front, and (b) report an unsupported
- * runtime as exactly that -- never as an invalid receipt.
+ * PEAC Ed25519 verification requires WebCrypto Ed25519. The verifier must detect an unsupported
+ * runtime up front and report it as a CAPABILITY state -- never as an invalid record, and never as
+ * an input failure -- and it must process no user data in that state.
  */
+import { describe, it, expect, afterEach, vi } from 'vitest';
+import {
+  ed25519WebCryptoSupported,
+  resetRuntimeProbeForTests,
+} from '../src/lib/runtime-support.js';
+import { initializeLocalVerifier } from '../src/verify.js';
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-
-import { generateKeypair, sign, base64urlEncode } from '@peac/crypto';
-
-import { verifyReceipt, ed25519WebCryptoSupported } from '../src/verify.js';
-import { addIssuer, clearStore } from '../src/lib/trust-store.js';
-
-// Mock localStorage so the trust store works in the test runtime.
-const storage = new Map<string, string>();
-const mockLocalStorage = {
-  getItem: (key: string) => storage.get(key) ?? null,
-  setItem: (key: string, value: string) => storage.set(key, value),
-  removeItem: (key: string) => storage.delete(key),
-  clear: () => storage.clear(),
-  get length() {
-    return storage.size;
-  },
-  key: (_index: number) => null,
-};
-Object.defineProperty(globalThis, 'localStorage', {
-  value: mockLocalStorage,
-  configurable: true,
+afterEach(() => {
+  vi.restoreAllMocks();
+  resetRuntimeProbeForTests();
 });
 
-const KID = 'runtime-test-kid';
-
-async function buildReceiptAndTrustKey(): Promise<string> {
-  const { privateKey, publicKey } = await generateKeypair();
-  const claims = {
-    iss: 'https://issuer.example.com',
-    aud: 'https://aud.example.com',
-    iat: 1000,
-    exp: 2000,
-    rid: 'runtime-test',
-  };
-  const jws = await sign(claims, privateKey, KID);
-  addIssuer({
-    issuer: 'https://issuer.example.com',
-    keys: [{ kid: KID, kty: 'OKP', crv: 'Ed25519', x: base64urlEncode(publicKey) }],
-  });
-  return jws;
-}
-
-describe('verifier runtime support', () => {
-  const realCrypto = globalThis.crypto;
-
-  beforeEach(() => {
-    storage.clear();
-    clearStore();
-  });
-
-  afterEach(() => {
-    Object.defineProperty(globalThis, 'crypto', { value: realCrypto, configurable: true });
-  });
-
-  it('ed25519WebCryptoSupported() is true on a supporting runtime', async () => {
+describe('ed25519WebCryptoSupported', () => {
+  it('verifies the committed RFC 8032 vector on a supporting runtime', async () => {
     expect(await ed25519WebCryptoSupported()).toBe(true);
   });
 
-  it('ed25519WebCryptoSupported() is false when importKey raises NotSupportedError', async () => {
-    Object.defineProperty(globalThis, 'crypto', {
-      value: {
-        ...realCrypto,
-        subtle: {
-          importKey: async () => {
-            const err = new Error('Ed25519 unsupported');
-            err.name = 'NotSupportedError';
-            throw err;
-          },
-          verify: async () => {
-            throw new Error('verify must not run after a failed import');
-          },
-        },
-      },
-      configurable: true,
-    });
+  it('is memoized: the probe runs once even under concurrent initialization', async () => {
+    resetRuntimeProbeForTests();
+    const spy = vi.spyOn(globalThis.crypto.subtle, 'verify');
+    await Promise.all([
+      ed25519WebCryptoSupported(),
+      ed25519WebCryptoSupported(),
+      ed25519WebCryptoSupported(),
+    ]);
+    expect(spy).toHaveBeenCalledTimes(1);
+  });
+
+  it('returns false rather than throwing when the algorithm is unavailable', async () => {
+    resetRuntimeProbeForTests();
+    vi.spyOn(globalThis.crypto.subtle, 'importKey').mockRejectedValue(
+      new Error('NotSupportedError')
+    );
     expect(await ed25519WebCryptoSupported()).toBe(false);
   });
+});
 
-  it('ed25519WebCryptoSupported() is false when verify raises NotSupportedError', async () => {
-    Object.defineProperty(globalThis, 'crypto', {
-      value: {
-        ...realCrypto,
-        subtle: {
-          importKey: async () => ({}) as never,
-          verify: async () => {
-            const err = new Error('Ed25519 verify unsupported');
-            err.name = 'NotSupportedError';
-            throw err;
-          },
-        },
-      },
-      configurable: true,
+describe('unsupported runtime', () => {
+  it('is a capability state that processes no user input and produces no report', async () => {
+    resetRuntimeProbeForTests();
+    vi.spyOn(globalThis.crypto.subtle, 'importKey').mockRejectedValue(
+      new Error('NotSupportedError')
+    );
+    const verifier = await initializeLocalVerifier({ verifierBuild: 'test-build' });
+    expect(verifier.supported).toBe(false);
+
+    // Deliberately invalid inputs: none of them may be parsed in this state.
+    const r = await verifier.verify({
+      record: '   not a record   ',
+      keyDocument: '{',
+      evaluationTimeUnixSeconds: Number.NaN,
     });
-    expect(await ed25519WebCryptoSupported()).toBe(false);
-  });
-
-  it('ed25519WebCryptoSupported() is false when the known-good vector does not verify', async () => {
-    // A runtime that imports and runs verify but returns false for the RFC 8032
-    // known-good vector is not a runtime we can trust to verify Ed25519.
-    Object.defineProperty(globalThis, 'crypto', {
-      value: {
-        ...realCrypto,
-        subtle: {
-          importKey: async () => ({}) as never,
-          verify: async () => false,
-        },
-      },
-      configurable: true,
-    });
-    expect(await ed25519WebCryptoSupported()).toBe(false);
-  });
-
-  it('reports an unsupported runtime as unsupported-runtime, not invalid', async () => {
-    const jws = await buildReceiptAndTrustKey();
-
-    Object.defineProperty(globalThis, 'crypto', {
-      value: {
-        ...realCrypto,
-        subtle: {
-          importKey: async () => {
-            const err = new Error('Ed25519 unsupported');
-            err.name = 'NotSupportedError';
-            throw err;
-          },
-        },
-      },
-      configurable: true,
-    });
-
-    const result = await verifyReceipt(jws);
-    expect(result.status).toBe('unsupported-runtime');
-    expect(result.status).not.toBe('invalid');
-    expect(result.message).toMatch(/does not support Ed25519 WebCrypto/i);
-  });
-
-  it('reaches verification (not unsupported-runtime) on a supporting runtime', async () => {
-    // On a runtime that supports Ed25519, the probe must NOT short-circuit; the
-    // result is a real verification outcome. (Full valid/invalid verification is
-    // covered by the crypto round-trip and conformance suites; here we only
-    // assert the runtime gate let the request through.)
-    const jws = await buildReceiptAndTrustKey();
-    const result = await verifyReceipt(jws);
-    expect(result.status).not.toBe('unsupported-runtime');
+    expect('capability' in r && r.capability).toBe('ed25519_unsupported');
+    expect('failureStage' in r).toBe(false);
+    expect(r.report).toBeUndefined();
   });
 });

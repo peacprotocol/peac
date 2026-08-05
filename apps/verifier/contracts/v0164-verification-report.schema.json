@@ -1,0 +1,538 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://peacprotocol.org/schemas/v0164-verification-report.v1.json",
+  "title": "VerificationReportCoreV1",
+  "description": "Deterministic, UNSIGNED verifier report core. Canonicalized via JCS; reportSha256 = SHA-256(JCS(core without reportSha256)). Each constraint failureCode is BOUND to its own mismatched result field, and mismatch precedence is deterministic: trusted_key > issuer > protected kid > record type.",
+  "type": "object",
+  "unevaluatedProperties": false,
+  "required": [
+    "reportVersion",
+    "verifierProfile",
+    "verifierBuild",
+    "recordSha256",
+    "selectedJwkThumbprint",
+    "evaluationTimeUnixSeconds",
+    "maxClockSkewSeconds",
+    "signatureResult",
+    "recordValidationResult",
+    "trustedKeyResult",
+    "issuerConstraintResult",
+    "kidConstraintResult",
+    "recordTypeConstraintResult",
+    "outcome",
+    "warningCodes",
+    "limitationCodes",
+    "reportSha256"
+  ],
+  "properties": {
+    "reportVersion": {
+      "const": "1"
+    },
+    "verifierProfile": {
+      "const": "peac.local-record-verification.v1"
+    },
+    "verifierBuild": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "recordSha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "selectedJwkThumbprint": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]{43}$"
+    },
+    "protectedKid": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "selectedJwkKid": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "verificationContextSha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "evaluationTimeUnixSeconds": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    },
+    "maxClockSkewSeconds": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 3600
+    },
+    "signatureResult": {
+      "enum": ["valid_under_supplied_key", "invalid_under_supplied_key", "not_evaluated"]
+    },
+    "recordValidationResult": {
+      "enum": ["valid", "invalid", "not_evaluated"]
+    },
+    "trustedKeyResult": {
+      "$ref": "#/$defs/expectationResult"
+    },
+    "issuerConstraintResult": {
+      "$ref": "#/$defs/expectationResult"
+    },
+    "kidConstraintResult": {
+      "$ref": "#/$defs/expectationResult"
+    },
+    "recordTypeConstraintResult": {
+      "$ref": "#/$defs/expectationResult"
+    },
+    "outcome": {
+      "enum": ["accepted", "rejected"]
+    },
+    "failureStage": {
+      "enum": [
+        "signature",
+        "record_validation_pre_signature",
+        "record_validation_post_signature",
+        "trusted_key",
+        "constraints",
+        "internal_error"
+      ]
+    },
+    "failureCode": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "recordType": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "reportedIssuer": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "warningCodes": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "limitationCodes": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "reportSha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    }
+  },
+  "$defs": {
+    "expectationResult": {
+      "enum": ["matched", "mismatched", "not_provided", "not_evaluated"]
+    },
+    "preSignatureCodes": {
+      "enum": [
+        "E_INVALID_FORMAT",
+        "E_JWS_EMBEDDED_KEY",
+        "E_JWS_CRIT_REJECTED",
+        "E_JWS_MISSING_KID",
+        "E_JWS_B64_REJECTED",
+        "E_JWS_ZIP_REJECTED",
+        "E_IJSON_DUPLICATE_MEMBER_NAME",
+        "E_IJSON_NUMBER_OUT_OF_RANGE",
+        "E_IJSON_INVALID_STRING",
+        "E_WIRE_VERSION_MISMATCH",
+        "E_UNSUPPORTED_WIRE_VERSION"
+      ]
+    },
+    "postSignatureCodes": {
+      "enum": [
+        "E_CONSTRAINT_VIOLATION",
+        "E_EXPIRED",
+        "E_NOT_YET_VALID",
+        "E_INVALID_ISSUER",
+        "E_INVALID_AUDIENCE",
+        "E_INVALID_SUBJECT",
+        "E_INVALID_RECEIPT_ID",
+        "E_MISSING_EXP",
+        "E_OCCURRED_AT_FUTURE",
+        "E_POLICY_BINDING_FAILED",
+        "E_EXTENSION_GROUP_REQUIRED",
+        "E_EXTENSION_GROUP_MISMATCH"
+      ]
+    },
+    "allExpectationsNotEvaluated": {
+      "properties": {
+        "trustedKeyResult": {
+          "const": "not_evaluated"
+        },
+        "issuerConstraintResult": {
+          "const": "not_evaluated"
+        },
+        "kidConstraintResult": {
+          "const": "not_evaluated"
+        },
+        "recordTypeConstraintResult": {
+          "const": "not_evaluated"
+        }
+      }
+    },
+    "noClaimFields": {
+      "not": {
+        "anyOf": [
+          {
+            "required": ["recordType"]
+          },
+          {
+            "required": ["reportedIssuer"]
+          }
+        ]
+      }
+    },
+    "rejectedRequired": {
+      "required": ["failureStage", "failureCode"]
+    }
+  },
+  "oneOf": [
+    {
+      "title": "accepted",
+      "description": "Signature valid under the supplied key, record validation valid, no expectation mismatched or not_evaluated. recordType and reportedIssuer are REQUIRED here: a success report without them is not a usable evidence artifact.",
+      "required": ["recordType", "reportedIssuer"],
+      "properties": {
+        "outcome": {
+          "const": "accepted"
+        },
+        "signatureResult": {
+          "const": "valid_under_supplied_key"
+        },
+        "recordValidationResult": {
+          "const": "valid"
+        },
+        "trustedKeyResult": {
+          "enum": ["matched", "not_provided"]
+        },
+        "issuerConstraintResult": {
+          "enum": ["matched", "not_provided"]
+        },
+        "kidConstraintResult": {
+          "enum": ["matched", "not_provided"]
+        },
+        "recordTypeConstraintResult": {
+          "enum": ["matched", "not_provided"]
+        }
+      },
+      "not": {
+        "anyOf": [
+          {
+            "required": ["failureStage"]
+          },
+          {
+            "required": ["failureCode"]
+          }
+        ]
+      }
+    },
+    {
+      "title": "rejected:signature",
+      "description": "verifyLocal returned E_INVALID_SIGNATURE. That is the ONLY code legal at this stage.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/rejectedRequired"
+        },
+        {
+          "$ref": "#/$defs/allExpectationsNotEvaluated"
+        },
+        {
+          "$ref": "#/$defs/noClaimFields"
+        }
+      ],
+      "properties": {
+        "outcome": {
+          "const": "rejected"
+        },
+        "failureStage": {
+          "const": "signature"
+        },
+        "failureCode": {
+          "const": "E_INVALID_SIGNATURE"
+        },
+        "signatureResult": {
+          "const": "invalid_under_supplied_key"
+        },
+        "recordValidationResult": {
+          "const": "not_evaluated"
+        }
+      }
+    },
+    {
+      "title": "rejected:record_validation_pre_signature",
+      "description": "A canonical PRE-signature code: verifyLocal never reached signature evaluation, so signatureResult MUST be not_evaluated.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/rejectedRequired"
+        },
+        {
+          "$ref": "#/$defs/allExpectationsNotEvaluated"
+        },
+        {
+          "$ref": "#/$defs/noClaimFields"
+        }
+      ],
+      "properties": {
+        "outcome": {
+          "const": "rejected"
+        },
+        "failureStage": {
+          "const": "record_validation_pre_signature"
+        },
+        "failureCode": {
+          "$ref": "#/$defs/preSignatureCodes"
+        },
+        "signatureResult": {
+          "const": "not_evaluated"
+        },
+        "recordValidationResult": {
+          "const": "invalid"
+        }
+      }
+    },
+    {
+      "title": "rejected:record_validation_post_signature",
+      "description": "A canonical POST-signature code: the signature verified, then PEAC validation rejected the record.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/rejectedRequired"
+        },
+        {
+          "$ref": "#/$defs/allExpectationsNotEvaluated"
+        },
+        {
+          "$ref": "#/$defs/noClaimFields"
+        }
+      ],
+      "properties": {
+        "outcome": {
+          "const": "rejected"
+        },
+        "failureStage": {
+          "const": "record_validation_post_signature"
+        },
+        "failureCode": {
+          "$ref": "#/$defs/postSignatureCodes"
+        },
+        "signatureResult": {
+          "const": "valid_under_supplied_key"
+        },
+        "recordValidationResult": {
+          "const": "invalid"
+        }
+      }
+    },
+    {
+      "title": "rejected:trusted_key",
+      "description": "Signature valid, record valid, but a supplied trusted JWK thumbprint did not match.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/rejectedRequired"
+        },
+        {
+          "$ref": "#/$defs/noClaimFields"
+        }
+      ],
+      "properties": {
+        "outcome": {
+          "const": "rejected"
+        },
+        "failureStage": {
+          "const": "trusted_key"
+        },
+        "failureCode": {
+          "const": "E_VERIFIER_TRUSTED_KEY_MISMATCH"
+        },
+        "signatureResult": {
+          "const": "valid_under_supplied_key"
+        },
+        "recordValidationResult": {
+          "const": "valid"
+        },
+        "trustedKeyResult": {
+          "const": "mismatched"
+        },
+        "issuerConstraintResult": {
+          "enum": ["matched", "mismatched", "not_provided"]
+        },
+        "kidConstraintResult": {
+          "enum": ["matched", "mismatched", "not_provided"]
+        },
+        "recordTypeConstraintResult": {
+          "enum": ["matched", "mismatched", "not_provided"]
+        }
+      }
+    },
+    {
+      "title": "rejected:constraints:E_VERIFIER_ISSUER_MISMATCH",
+      "description": "Signature valid, record valid, trusted key matched or not provided. This is the highest-priority constraint mismatch.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/rejectedRequired"
+        },
+        {
+          "$ref": "#/$defs/noClaimFields"
+        }
+      ],
+      "properties": {
+        "outcome": {
+          "const": "rejected"
+        },
+        "failureStage": {
+          "const": "constraints"
+        },
+        "failureCode": {
+          "const": "E_VERIFIER_ISSUER_MISMATCH"
+        },
+        "signatureResult": {
+          "const": "valid_under_supplied_key"
+        },
+        "recordValidationResult": {
+          "const": "valid"
+        },
+        "trustedKeyResult": {
+          "enum": ["matched", "not_provided"]
+        },
+        "issuerConstraintResult": {
+          "const": "mismatched"
+        },
+        "kidConstraintResult": {
+          "enum": ["matched", "mismatched", "not_provided"]
+        },
+        "recordTypeConstraintResult": {
+          "enum": ["matched", "mismatched", "not_provided"]
+        }
+      }
+    },
+    {
+      "title": "rejected:constraints:E_VERIFIER_KID_MISMATCH",
+      "description": "Signature valid, record valid, trusted key matched or not provided. Higher-priority constraints (issuerConstraintResult) are not mismatched, so this code wins by precedence.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/rejectedRequired"
+        },
+        {
+          "$ref": "#/$defs/noClaimFields"
+        }
+      ],
+      "properties": {
+        "outcome": {
+          "const": "rejected"
+        },
+        "failureStage": {
+          "const": "constraints"
+        },
+        "failureCode": {
+          "const": "E_VERIFIER_KID_MISMATCH"
+        },
+        "signatureResult": {
+          "const": "valid_under_supplied_key"
+        },
+        "recordValidationResult": {
+          "const": "valid"
+        },
+        "trustedKeyResult": {
+          "enum": ["matched", "not_provided"]
+        },
+        "issuerConstraintResult": {
+          "enum": ["matched", "not_provided"]
+        },
+        "kidConstraintResult": {
+          "const": "mismatched"
+        },
+        "recordTypeConstraintResult": {
+          "enum": ["matched", "mismatched", "not_provided"]
+        }
+      }
+    },
+    {
+      "title": "rejected:constraints:E_VERIFIER_RECORD_TYPE_MISMATCH",
+      "description": "Signature valid, record valid, trusted key matched or not provided. Higher-priority constraints (issuerConstraintResult, kidConstraintResult) are not mismatched, so this code wins by precedence.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/rejectedRequired"
+        },
+        {
+          "$ref": "#/$defs/noClaimFields"
+        }
+      ],
+      "properties": {
+        "outcome": {
+          "const": "rejected"
+        },
+        "failureStage": {
+          "const": "constraints"
+        },
+        "failureCode": {
+          "const": "E_VERIFIER_RECORD_TYPE_MISMATCH"
+        },
+        "signatureResult": {
+          "const": "valid_under_supplied_key"
+        },
+        "recordValidationResult": {
+          "const": "valid"
+        },
+        "trustedKeyResult": {
+          "enum": ["matched", "not_provided"]
+        },
+        "issuerConstraintResult": {
+          "enum": ["matched", "not_provided"]
+        },
+        "kidConstraintResult": {
+          "enum": ["matched", "not_provided"]
+        },
+        "recordTypeConstraintResult": {
+          "const": "mismatched"
+        }
+      }
+    },
+    {
+      "title": "rejected:internal_error",
+      "description": "The verifier reached a state it cannot classify -- an unmapped canonical code, or verifyLocal returning E_INTERNAL. Fails closed with the FULL assessment tuple pinned to not_evaluated: an internal error can never assert that the signature or record was valid.",
+      "allOf": [
+        {
+          "$ref": "#/$defs/rejectedRequired"
+        },
+        {
+          "$ref": "#/$defs/allExpectationsNotEvaluated"
+        },
+        {
+          "$ref": "#/$defs/noClaimFields"
+        }
+      ],
+      "properties": {
+        "outcome": {
+          "const": "rejected"
+        },
+        "failureStage": {
+          "const": "internal_error"
+        },
+        "failureCode": {
+          "enum": ["E_VERIFIER_INTERNAL_ERROR", "E_VERIFIER_UNMAPPED_CANONICAL_CODE"]
+        },
+        "signatureResult": {
+          "const": "not_evaluated"
+        },
+        "recordValidationResult": {
+          "const": "not_evaluated"
+        }
+      }
+    }
+  ],
+  "$comment": "trusted_key > issuer > protected kid > record type. Result fields still report EVERY evaluated mismatch; failureStage/failureCode follow this order so the report is reproducible."
+}

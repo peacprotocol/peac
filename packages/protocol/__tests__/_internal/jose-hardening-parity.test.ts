@@ -152,6 +152,44 @@ describe('jose-hardening edge cases (LEFT vs RIGHT)', () => {
     expect(r).toEqual({ accepted: true });
   });
 
+  // The vectors above are ASCII, where UTF-16 code units and UTF-8 bytes coincide. A divergence in
+  // the UNIT the two implementations measure is therefore invisible to them. These cases separate
+  // the two units and are the ones that fail if either side drifts.
+  it('kid of exactly 256 UTF-8 bytes built from 3-byte code points is accepted', () => {
+    const kid = '\u0800'.repeat(85) + 'a'; // 85 * 3 + 1 = 256 bytes, 86 code units
+    expect(new TextEncoder().encode(kid).length).toBe(256);
+    expect(kid.length).toBe(86);
+    const r = bothAgree({ ...VALID_BASE, kid });
+    expect(r.accepted).toBe(true);
+  });
+
+  it('kid of 257 UTF-8 bytes is rejected even though it is far under 256 code units', () => {
+    const kid = '\u0800'.repeat(85) + 'ab'; // 257 bytes, 87 code units
+    expect(new TextEncoder().encode(kid).length).toBe(257);
+    expect(kid.length).toBeLessThan(256);
+    const r = bothAgree({ ...VALID_BASE, kid });
+    expect(r.errorCode).toBe('CRYPTO_JWS_MISSING_KID');
+  });
+
+  it('astral kid of 256 UTF-8 bytes is accepted; 260 bytes is rejected', () => {
+    const ok = '\u{1F600}'.repeat(64); // 128 code units, 256 bytes
+    expect(new TextEncoder().encode(ok).length).toBe(256);
+    expect(bothAgree({ ...VALID_BASE, kid: ok }).accepted).toBe(true);
+
+    const tooLong = '\u{1F600}'.repeat(65); // 130 code units, 260 bytes
+    expect(bothAgree({ ...VALID_BASE, kid: tooLong }).errorCode).toBe('CRYPTO_JWS_MISSING_KID');
+  });
+
+  it.each([
+    ['unpaired high surrogate', '\uD83D'],
+    ['unpaired low surrogate', '\uDC00'],
+    ['high surrogate after ascii', 'k\uD83D'],
+    ['reversed surrogate pair', '\uDC00\uD83D'],
+  ])('malformed kid (%s): CRYPTO_JWS_MISSING_KID', (_label, kid) => {
+    const r = bothAgree({ ...VALID_BASE, kid });
+    expect(r.errorCode).toBe('CRYPTO_JWS_MISSING_KID');
+  });
+
   it('kid one over max length (257 chars): CRYPTO_JWS_MISSING_KID', () => {
     const r = bothAgree({ ...VALID_BASE, kid: 'k'.repeat(257) });
     expect(r).toEqual({ accepted: false, errorCode: 'CRYPTO_JWS_MISSING_KID' });

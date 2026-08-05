@@ -16,7 +16,7 @@
  *
  *   1. kid presence and length:
  *      - missing kid (undefined / non-string / empty) -> CRYPTO_JWS_MISSING_KID
- *      - kid length > 256 chars -> CRYPTO_JWS_MISSING_KID
+ *      - kid malformed, or longer than 256 UTF-8 bytes -> CRYPTO_JWS_MISSING_KID
  *
  *   2. embedded key material (jwk, x5c, x5u, jku):
  *      - any of the four set -> CRYPTO_JWS_EMBEDDED_KEY
@@ -54,7 +54,40 @@ export type JoseHardeningResult =
   | { readonly accepted: true }
   | { readonly accepted: false; readonly errorCode: string };
 
-const KID_MAX_LENGTH = 256;
+const KID_MAX_UTF8_BYTES = 256;
+
+/**
+ * Independent implementation of the canonical kid rule.
+ *
+ * Deliberately NOT imported from @peac/crypto. This module observes the canonical validator's
+ * behaviour from a separate implementation, and sharing the predicate would make the parity tests
+ * compare a function with itself.
+ *
+ * The rule: a non-empty, well-formed Unicode string whose UTF-8 serialization is at most 256 bytes.
+ * Length is measured in UTF-8 bytes because that is what bounds the serialized protected header;
+ * counting UTF-16 code units admits a 256-unit astral kid that serializes to 1024 bytes. Lone
+ * surrogates are rejected because they cannot be encoded, so a header carrying one is refused by the
+ * I-JSON gate regardless.
+ */
+function isAcceptableKid(kid: unknown): kid is string {
+  if (typeof kid !== 'string' || kid.length === 0) return false;
+  let bytes = 0;
+  for (let i = 0; i < kid.length; i++) {
+    const c = kid.charCodeAt(i);
+    if (c < 0x80) bytes += 1;
+    else if (c < 0x800) bytes += 2;
+    else if (c >= 0xd800 && c <= 0xdbff) {
+      const next = i + 1 < kid.length ? kid.charCodeAt(i + 1) : 0;
+      if (next < 0xdc00 || next > 0xdfff) return false;
+      bytes += 4;
+      i++;
+    } else if (c >= 0xdc00 && c <= 0xdfff) {
+      return false;
+    } else bytes += 3;
+    if (bytes > KID_MAX_UTF8_BYTES) return false;
+  }
+  return true;
+}
 
 const ACCEPTED: JoseHardeningResult = { accepted: true } as const;
 
@@ -63,13 +96,8 @@ function rejected(errorCode: string): JoseHardeningResult {
 }
 
 export function validateJoseHardeningInternal(header: JoseHardeningInput): JoseHardeningResult {
-  // 1. kid presence and length
-  if (
-    !header.kid ||
-    typeof header.kid !== 'string' ||
-    header.kid.length === 0 ||
-    header.kid.length > KID_MAX_LENGTH
-  ) {
+  // 1. kid presence and validity
+  if (!isAcceptableKid(header.kid)) {
     return rejected('CRYPTO_JWS_MISSING_KID');
   }
 

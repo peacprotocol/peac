@@ -19,6 +19,7 @@ import {
 import { base64urlEncode, base64urlDecode, base64urlEncodeString } from './base64url';
 import { CryptoError } from './errors';
 import { assertIJson } from './ijson';
+import { isValidKid, MAX_KID_UTF8_BYTES } from './kid';
 
 // ---------------------------------------------------------------------------
 // JWS header types: 3-variant discriminated union (Correction 1)
@@ -96,22 +97,20 @@ const ACCEPTED_TYP_VALUES = new Set<string>([WIRE_01_JWS_TYP, ...WIRE_02_JWS_TYP
  *   - crit header (critical extensions)
  *   - b64: false (RFC 7797 unencoded payload)
  *   - zip header (payload compression)
- *   - Missing, empty, or oversized kid (DoS safety: max 256 chars)
+ *   - Missing, empty, or oversized kid (DoS safety: max 256 UTF-8 bytes)
  *
  * @param header - Raw parsed JWS header object
  * @throws CryptoError with CRYPTO_JWS_* code on any violation
  */
 export function validateWire02Header(header: Record<string, unknown>): void {
-  // kid: required, non-empty, max 256 chars (Correction 9, DoS safety)
-  if (
-    !header.kid ||
-    typeof header.kid !== 'string' ||
-    header.kid.length === 0 ||
-    header.kid.length > 256
-  ) {
+  // kid: required, non-empty, at most MAX_KID_UTF8_BYTES UTF-8 bytes (Correction 9, DoS safety).
+  // Measured in UTF-8 BYTES, not String.length: `.length` counts UTF-16 code units and does not
+  // bound the serialized header at all (256 astral code units serialize to 1024 bytes), and it makes
+  // the accepted set differ between JavaScript, Go, Python and Rust implementations. See kid.ts.
+  if (!isValidKid(header.kid)) {
     throw new CryptoError(
       'CRYPTO_JWS_MISSING_KID',
-      'kid is missing, empty, or exceeds 256 characters'
+      `kid is missing, empty, or exceeds ${MAX_KID_UTF8_BYTES} UTF-8 bytes`
     );
   }
 
@@ -210,6 +209,14 @@ export async function sign(payload: unknown, privateKey: Uint8Array, kid: string
   if (privateKey.length !== 32) {
     throw new CryptoError('CRYPTO_INVALID_KEY_LENGTH', 'Ed25519 private key must be 32 bytes');
   }
+  // Enforce the SAME rule on the signing side. Minting a record whose own verifier rejects it is a
+  // defect that only surfaces at the recipient, where it is indistinguishable from tampering.
+  if (!isValidKid(kid)) {
+    throw new CryptoError(
+      'CRYPTO_JWS_MISSING_KID',
+      `kid is missing, empty, or exceeds ${MAX_KID_UTF8_BYTES} UTF-8 bytes`
+    );
+  }
 
   const header: Wire01JWSHeader = {
     typ: WIRE_01_JWS_TYP,
@@ -241,7 +248,7 @@ export async function sign(payload: unknown, privateKey: Uint8Array, kid: string
  *
  * @param payload - JSON-serializable Wire 0.2 claims payload
  * @param privateKey - Ed25519 private key (32 bytes)
- * @param kid - Key ID (max 256 chars per JOSE hardening rules)
+ * @param kid - Key ID; non-empty, well-formed Unicode, at most 256 UTF-8 bytes (see kid.ts)
  * @returns JWS compact serialization (header.payload.signature)
  */
 export async function signWire02(
@@ -253,11 +260,12 @@ export async function signWire02(
     throw new CryptoError('CRYPTO_INVALID_KEY_LENGTH', 'Ed25519 private key must be 32 bytes');
   }
 
-  // Validate kid length (Correction 9, DoS safety)
-  if (!kid || kid.length === 0 || kid.length > 256) {
+  // The canonical kid rule (Correction 9, DoS safety). Applied here as well as on the verification
+  // path so the signer cannot mint a record its own verifier rejects.
+  if (!isValidKid(kid)) {
     throw new CryptoError(
       'CRYPTO_JWS_MISSING_KID',
-      'kid is missing, empty, or exceeds 256 characters'
+      `kid is missing, empty, malformed, or exceeds ${MAX_KID_UTF8_BYTES} UTF-8 bytes`
     );
   }
 
