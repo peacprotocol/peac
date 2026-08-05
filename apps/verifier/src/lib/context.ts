@@ -3,7 +3,7 @@
  *
  * Reuses the CANONICAL PEAC validators rather than inventing looser app-local ones.
  */
-import { canonicalize, sha256Hex } from '@peac/crypto';
+import { base64urlDecode, base64urlEncode, canonicalize, sha256Hex } from '@peac/crypto';
 import { isCanonicalIss, isValidReceiptType } from '@peac/schema';
 import { VerifierError } from './errors.js';
 import {
@@ -22,6 +22,9 @@ const invalid = (m: string) => new VerifierError('E_VERIFIER_CONTEXT_INVALID', m
 
 /** Unpadded base64url alphabet, RFC 4648 section 5. */
 const BASE64URL_ALPHABET = /^[A-Za-z0-9_-]+$/;
+/** A SHA-256 digest is 32 bytes, which is 43 unpadded base64url characters. */
+const SHA256_BYTES = 32;
+const SHA256_BASE64URL_LENGTH = 43;
 
 /**
  * An RFC 7638 JWK thumbprint: SHA-256, unpadded base64url, decoding to exactly 32 bytes.
@@ -33,24 +36,17 @@ const BASE64URL_ALPHABET = /^[A-Za-z0-9_-]+$/;
  * Requiring the value to re-encode identically admits exactly the canonical spelling.
  */
 function isCanonicalJwkThumbprint(s: string): boolean {
-  if (s.length !== 43 || !BASE64URL_ALPHABET.test(s)) return false;
+  if (s.length !== SHA256_BASE64URL_LENGTH || !BASE64URL_ALPHABET.test(s)) return false;
   let bytes: Uint8Array;
   try {
-    const b64 = s.replace(/-/g, '+').replace(/_/g, '/') + '=';
-    const bin = atob(b64);
-    bytes = new Uint8Array(bin.length);
-    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    bytes = base64urlDecode(s);
   } catch {
     return false;
   }
-  if (bytes.length !== 32) return false;
-  // Re-encode and compare: this is what rejects a non-canonical alias whose unused trailing bits
-  // are non-zero.
-  let re = btoa(String.fromCharCode(...bytes))
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_');
-  re = re.replace(/=+$/, '');
-  return re === s;
+  if (bytes.length !== SHA256_BYTES) return false;
+  // Re-encode and compare: this rejects a non-canonical alias whose unused trailing bits are
+  // non-zero.
+  return base64urlEncode(bytes) === s;
 }
 
 /** Arrays are SETS: non-empty, unique, bounded, each member bounded, then sorted for canonicalization. */

@@ -2,41 +2,23 @@
 /**
  * Resolve the verifier build identifier.
  *
- * THE PROBLEM THIS SOLVES
+ * Resolution order:
+ *   0. PEAC_VERIFIER_REQUIRE_CLEAN=1 is checked FIRST, against the repository, before any supplied
+ *      identifier is accepted. A supplied value cannot make a dirty tree clean.
+ *   1. PEAC_VERIFIER_BUILD, validated exactly and never normalized.
+ *   2. clean worktree      `<sha>`
+ *   3. dirty worktree      `<sha>-dirty.<digest>`, or a failure under PEAC_VERIFIER_REQUIRE_CLEAN=1
+ *   4. not a git checkout  a failure in production
  *
- * A bare `git rev-parse HEAD` labels a build with the last COMMIT, not with the source that produced
- * it. A build from an uncommitted working tree would be stamped with the last commit, and two
- * materially different working trees would emit an identical `verifierBuild` -- false provenance in a
- * document whose whole purpose is reproducibility. A plain `-dirty` suffix does not fix it either.
+ * The digest covers the declared source/configuration closure. Modification, deletion, rename and
+ * untracked addition all change it, because the digest is computed over the enumerated content of
+ * that closure.
  *
- * RESOLUTION ORDER
+ * The identifier represents source and configuration provenance: the commit, the build mode, and a
+ * collision-resistant digest of the declared closure. It is not an identifier for the exact emitted
+ * binary, because the toolchain, runtime and host environment are not represented.
  *
- *   0. PEAC_VERIFIER_REQUIRE_CLEAN=1 -- checked FIRST, against the repository, before any identifier
- *                                       is accepted. A supplied identifier cannot make a dirty tree
- *                                       clean, so it must not be able to bypass the check.
- *   1. PEAC_VERIFIER_BUILD           -- an explicit immutable identifier (CI/release), validated.
- *   2. clean worktree                -- `<sha>`
- *   3. dirty worktree                -- `<sha>-dirty.<32-hex build-input digest>`
- *   4. not a git checkout            -- hard failure in production
- *
- * THE BUILD-INPUT CLOSURE
- *
- * The digest covers every input capable of changing the emitted bundle or its embedded build
- * identity -- including this resolver itself, the lockfile and the workspace configuration, because a
- * change to any of them changes what is built. Modified, untracked, deleted and renamed files all
- * change the result: the digest is computed over the ENUMERATED CONTENT of the closure, so a removed
- * file changes it exactly as a modified one does.
- *
- * WHAT THE IDENTIFIER REPRESENTS
- *
- * SOURCE AND CONFIGURATION PROVENANCE: the commit, the build mode, and a collision-resistant digest
- * of the declared build-input closure. It is NOT an identifier for the exact emitted binary, because
- * the toolchain version, the Node runtime and the host environment are not represented. Two builds
- * sharing an identifier had the same declared inputs; they are not thereby proven byte-identical.
- *
- * The build MODE is part of the identifier because it changes emitted output (minification and
- * `import.meta.env` substitution at minimum), so a development and a production build of the same
- * tree must not be indistinguishable.
+ * The build mode is part of the identifier because it changes emitted output.
  *
  * No wall-clock value, no random value, no silent "unknown".
  */

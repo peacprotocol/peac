@@ -57,8 +57,34 @@ export async function initApp(root: HTMLElement): Promise<void> {
     return;
   }
 
+  /**
+   * Monotonic run token.
+   *
+   * Verification is asynchronous, so two runs can be in flight and complete out of order. Rendering
+   * whichever finishes last would show a verdict for inputs the operator has already replaced. Each
+   * run captures the token it started with and renders only while that token is still current.
+   */
+  let runToken = 0;
+
+  function showRunFailure(): void {
+    results.replaceChildren();
+    const p = document.createElement('p');
+    p.textContent = 'The verifier failed unexpectedly. No verification outcome was established.';
+    results.appendChild(p);
+    // Clear any report from a previous run: leaving it visible beside a failure invites reading it
+    // as the outcome of this one.
+    renderReport(undefined, reportPanel);
+  }
+
   button.addEventListener('click', () => {
+    // A second submission while a run is active would start a concurrent verification whose result
+    // races the first. The button is disabled for the duration and restored in `finally`.
+    if (button.disabled) return;
+    button.disabled = true;
+
+    const token = ++runToken;
     const ctx = fields.contextDocument.value;
+
     void verifier
       .verify({
         record: fields.record.value,
@@ -68,18 +94,19 @@ export async function initApp(root: HTMLElement): Promise<void> {
         maxClockSkewSeconds: DEFAULT_MAX_CLOCK_SKEW_SECONDS,
       })
       .then((result) => {
+        if (token !== runToken) return;
         renderResults(result, results);
         renderReport(result.report, reportPanel);
       })
       .catch(() => {
-        // verify() is a total boundary and should never reject. If it somehow does, the operator
-        // must still see that the run failed rather than face a button that silently does nothing.
-        results.replaceChildren();
-        const p = document.createElement('p');
-        p.textContent =
-          'The verifier failed unexpectedly. No verification outcome was established.';
-        results.appendChild(p);
-        renderReport(undefined, reportPanel);
+        // verify() is a total boundary and should not reject. If it does, the operator must still
+        // see that the run failed rather than face a control that silently does nothing.
+        if (token !== runToken) return;
+        showRunFailure();
+      })
+      .finally(() => {
+        // Restored on every path, so a failure cannot leave the interface permanently inert.
+        button.disabled = false;
       });
   });
 }

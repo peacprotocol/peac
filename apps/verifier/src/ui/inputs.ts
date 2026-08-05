@@ -24,17 +24,44 @@ function field(parent: HTMLElement, id: string, label: string, hint: string): HT
   p.textContent = hint;
   const file = document.createElement('input');
   file.type = 'file';
+
+  /**
+   * Per-field read generation.
+   *
+   * Reads are asynchronous, so selecting a second file before the first resolves leaves two reads in
+   * flight. Whichever settles last would win, which can place the contents of a file the operator
+   * has already replaced into the field. Each read captures the generation it started with and
+   * applies its result only while that generation is still current.
+   */
+  let readGeneration = 0;
+
   file.addEventListener('change', () => {
     const f = file.files?.[0];
     if (!f) return;
-    void f.arrayBuffer().then((buf) => {
-      try {
-        ta.value = decodeFileBytesStrict(new Uint8Array(buf), 'E_VERIFIER_RECORD_MALFORMED');
-      } catch {
+    const generation = ++readGeneration;
+
+    void f
+      .arrayBuffer()
+      .then((buf) => {
+        if (generation !== readGeneration) return;
+        try {
+          ta.value = decodeFileBytesStrict(new Uint8Array(buf), 'E_VERIFIER_RECORD_MALFORMED');
+          // Restore the field's own guidance after a successful read, so a previous failure notice
+          // does not persist beside content that loaded correctly.
+          p.textContent = hint;
+        } catch {
+          ta.value = '';
+          p.textContent = 'That file is not valid UTF-8 and was not loaded.';
+        }
+      })
+      .catch(() => {
+        // arrayBuffer() rejects when the file is unreadable: removed, permission-denied, or a
+        // hardware error mid-read. Without this the rejection would be unhandled and the operator
+        // would see no indication that nothing was loaded.
+        if (generation !== readGeneration) return;
         ta.value = '';
-        p.textContent = 'That file is not valid UTF-8 and was not loaded.';
-      }
-    });
+        p.textContent = 'That file could not be read and was not loaded.';
+      });
   });
   wrap.append(l, ta, file, p);
   parent.appendChild(wrap);

@@ -1,29 +1,38 @@
 /**
- * Minimal DOM stub for the report-panel lifecycle tests.
+ * Minimal DOM stub for the UI lifecycle and concurrency tests.
  *
- * WHY NOT jsdom: no DOM environment is installed in this workspace, and the property under test is
- * the verifier's own object-URL BOOKKEEPING -- mint counts, revoke counts, what survives a
- * re-render. That logic is DOM-independent; a full DOM emulator would add a large dependency without
- * strengthening the assertion.
+ * No DOM environment is installed in this workspace, and the properties under test are the
+ * application's own bookkeeping: object-URL mint and revoke counts, run tokens, and file-read
+ * generations. That logic is DOM-independent, so a full emulator would add a large dependency
+ * without strengthening the assertions.
  *
- * WHAT THIS DOES NOT PROVE: real browser download behaviour, real Blob retention, real event
- * dispatch. Those belong to the real-browser smoke test, not here.
+ * It does not prove real browser download behaviour, real Blob retention or real event dispatch;
+ * those belong to the browser smoke test.
  *
- * It implements only the surface report-panel.ts actually uses. Anything else throws loudly rather
- * than silently returning undefined and making a test pass for the wrong reason.
+ * Only the surface the UI modules use is implemented. Anything else throws rather than returning
+ * undefined and letting a test pass for the wrong reason.
  */
 export interface MiniNode {
   tagName: string;
   textContent: string;
+  id?: string;
+  type?: string;
+  rows?: number;
+  value: string;
+  disabled: boolean;
+  htmlFor?: string;
   download?: string;
   href?: string;
+  files?: unknown[];
   childNodes: MiniNode[];
   appendChild(n: MiniNode): MiniNode;
+  append(...n: MiniNode[]): void;
   replaceChildren(...n: MiniNode[]): void;
   addEventListener(type: string, fn: () => void): void;
   dispatchEvent(type: string): void;
   getAttribute(name: string): string | undefined;
   querySelector(sel: string): MiniNode | undefined;
+  querySelectorAll(sel: string): MiniNode[];
 }
 
 function node(tagName: string): MiniNode {
@@ -31,10 +40,15 @@ function node(tagName: string): MiniNode {
   const self: MiniNode = {
     tagName,
     textContent: '',
+    value: '',
+    disabled: false,
     childNodes: [],
     appendChild(n) {
       self.childNodes.push(n);
       return n;
+    },
+    append(...n) {
+      self.childNodes.push(...n);
     },
     replaceChildren(...n) {
       self.childNodes = [...n];
@@ -50,19 +64,24 @@ function node(tagName: string): MiniNode {
     getAttribute(name) {
       if (name === 'href') return self.href;
       if (name === 'download') return self.download;
+      if (name === 'id') return self.id;
+      if (name === 'type') return self.type;
       throw new Error(`mini-dom: unsupported attribute ${name}`);
     },
     querySelector(sel) {
+      return self.querySelectorAll(sel)[0];
+    },
+    querySelectorAll(sel) {
       const want = sel.toUpperCase();
-      const walk = (n: MiniNode): MiniNode | undefined => {
+      const out: MiniNode[] = [];
+      const walk = (n: MiniNode): void => {
         for (const c of n.childNodes) {
-          if (c.tagName.toUpperCase() === want) return c;
-          const hit = walk(c);
-          if (hit) return hit;
+          if (c.tagName.toUpperCase() === want) out.push(c);
+          walk(c);
         }
-        return undefined;
       };
-      return walk(self);
+      walk(self);
+      return out;
     },
   };
   return self;
@@ -71,7 +90,7 @@ function node(tagName: string): MiniNode {
 export function installMiniDom(): { createElement: (t: string) => MiniNode } {
   const doc = {
     createElement: node,
-    // Anything report-panel might reach for that is NOT implemented must fail loudly.
+    // Anything a module reaches for that is NOT implemented must fail loudly.
     get body(): never {
       throw new Error('mini-dom: document.body is not implemented');
     },
@@ -80,6 +99,15 @@ export function installMiniDom(): { createElement: (t: string) => MiniNode } {
   return doc;
 }
 
+export function uninstallMiniDom(): void {
+  delete (globalThis as { document?: unknown }).document;
+}
+
 export function createContainer(): MiniNode {
   return node('div');
+}
+
+/** First descendant whose text content matches, for locating a control by its label. */
+export function findByText(root: MiniNode, tag: string, text: RegExp): MiniNode | undefined {
+  return root.querySelectorAll(tag).find((n) => text.test(n.textContent));
 }

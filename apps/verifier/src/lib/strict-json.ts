@@ -15,13 +15,12 @@ const BOM = '\uFEFF';
 
 /** UTF-8 byte length of a JS string. */
 /**
- * UTF-8 byte length for input SIZE LIMITS.
+ * UTF-8 byte length for input size limits.
  *
- * Deliberately distinct from the Layer-0 helper of the same name, which throws on malformed UTF-16
- * because it backs a validity rule. This one measures arbitrary user input before anything is known
- * about it, so it must return a number for every string: a size check that throws would convert an
- * oversized-input rejection into an internal error. The two are not duplicates and must not be
- * consolidated.
+ * Measures arbitrary input before anything is known about it, so it returns a number for every
+ * string. The kid-validation helper of the same name throws on malformed UTF-16 because it backs a
+ * validity rule; a size check that threw would turn an oversized-input rejection into an internal
+ * error. The two are not duplicates.
  */
 export function utf8ByteLength(s: string): number {
   return new TextEncoder().encode(s).length;

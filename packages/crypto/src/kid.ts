@@ -1,40 +1,21 @@
 /**
- * The canonical `kid` validity rule, in ONE place.
+ * The canonical `kid` rule.
  *
- * WHY UTF-8 BYTES, NOT `String.length`
+ * A `kid` is a non-empty, well-formed Unicode string whose UTF-8 serialization is at most
+ * MAX_KID_UTF8_BYTES bytes.
  *
- * The length bound exists to cap the size of the serialized protected header (DoS safety).
- * JavaScript's `.length` counts UTF-16 code units, which does NOT bound that size: a 256-code-unit
- * kid built from astral code points serializes to 1024 UTF-8 bytes, four times the intended cap.
- * Bounding the UTF-8 serialization bounds the thing the rule is actually about.
+ * The bound is in UTF-8 bytes because that is what bounds the serialized protected header: 256
+ * UTF-16 code units of astral code points serialize to 1024 bytes. It is also the only unit on which
+ * independent implementations agree, since a bound stated in "characters" counts code units in
+ * JavaScript, bytes in Go and Rust, and code points in Python and JSON Schema.
  *
- * It is also the only unit that is deterministic ACROSS implementations. A bound stated in
- * "characters" denotes a different accepted set in JavaScript (UTF-16 code units), in Go and Rust
- * (bytes) and in Python (code points), so three conforming implementations would disagree about the
- * same record. A JSON Schema `maxLength` counts code points, which is a fourth answer again.
+ * Well-formedness is part of the same rule because signing serializes the header with
+ * JSON.stringify, which emits an unpaired surrogate as an escape that the I-JSON verifier rejects.
+ * Without this check a signer could mint a record its own verifier refuses. Malformed input is
+ * rejected rather than replaced with U+FFFD, which would change the identifier the caller supplied.
  *
- * WHY WELL-FORMEDNESS IS PART OF THE SAME RULE
- *
- * A length-only predicate accepted lone surrogates, and that was not merely untidy. Canonical
- * signing validates the kid and then `JSON.stringify`s the header, which emits an unpaired surrogate
- * as an escape such as `"\ud83d"`. The resulting protected header is rejected by the canonical I-JSON
- * verifier. The signer would therefore mint a record its own verifier refuses, and the failure would
- * surface at the recipient, where it is indistinguishable from tampering.
- *
- * There is no earlier raw-I-JSON boundary on the signing path or on programmatic schema validation,
- * so well-formedness must be checked HERE. Malformed UTF-16 is REJECTED, never silently replaced
- * with U+FFFD: substituting a replacement character would change the identifier the caller asked
- * for, and a verifier looking for the original kid would not find it.
- *
- * PACKAGE-PRIVATE. It sits beside the JWS implementation that owns kid validation and is exported
- * from no barrel; it does not need to be part of any published API to do its job.
- *
- * Applied to: the protected-header `kid` on signing and on verification, the JWK and JWKS `kid`, and
- * `VerificationContextV1.constraints.allowedKids` members. The internal JOSE-hardening observer in
- * `@peac/protocol` implements the same rule independently, so parity compares separate
- * implementations rather than a function with itself.
- *
- * NOT applied to the issuer-config revoked-key `kid`, which keeps its existing semantics.
+ * Package-private: applied by signing, header validation, and the verifier application through an
+ * explicit source import.
  */
 
 /** Maximum `kid` length, measured as UTF-8 bytes of the string's serialization. */
@@ -43,9 +24,8 @@ export const MAX_KID_UTF8_BYTES = 256;
 /**
  * True when every surrogate in `s` belongs to a well-formed pair.
  *
- * Equivalent to `String.prototype.isWellFormed()` (ES2024), implemented directly so a Layer-0 rule
- * consumed by a browser app, by Node and by the test suites does not depend on the runtime's lib
- * level.
+ * Equivalent to `String.prototype.isWellFormed()` (ES2024), implemented directly so the rule does
+ * not depend on the runtime's lib level.
  */
 export function isWellFormedUnicode(s: string): boolean {
   for (let i = 0; i < s.length; i++) {
@@ -66,9 +46,8 @@ export function isWellFormedUnicode(s: string): boolean {
 /**
  * UTF-8 byte length of a WELL-FORMED string, computed without allocating an encoded copy.
  *
- * THROWS on malformed UTF-16 rather than returning a number. Returning one would invite callers to
- * accept a string on length grounds when it cannot be encoded at all; making the check impossible to
- * skip is what fixes the ordering, not a comment asking callers to remember.
+ * Throws on malformed UTF-16 rather than returning a number, so a caller cannot accept a string on
+ * length grounds when it cannot be encoded at all.
  */
 export function utf8ByteLength(s: string): number {
   let n = 0;

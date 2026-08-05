@@ -1,18 +1,10 @@
 /**
- * Routing / kid-constraint consistency.
+ * Routing and the kid constraint agree.
  *
- * THE QUESTION: does an input exist where routing FAILS to read the protected header, canonical
- * verification nonetheless SUCCEEDS, and a supplied `allowedKids` constraint is then evaluated
- * against an absent protected kid -- producing a `mismatched` verdict for an inequality that was
- * never actually tested?
- *
- * Such an input exists whenever routing and canonical verification measure `kid` in DIFFERENT UNITS.
- * A value of 200 three-byte code points is 200 UTF-16 code units and 600 UTF-8 bytes, so a bound
- * stated in one unit accepts it while the same number stated in the other does not.
- *
- * This file pins both halves of the resolution: both surfaces apply one predicate in one unit, and
- * the unsound state is made unrepresentable by a backstop that fails closed for any divergence the
- * vectors do not enumerate.
+ * If routing fails to read the protected header while canonical verification succeeds, a supplied
+ * `allowedKids` constraint would be evaluated against an absent kid and reported as a mismatch that
+ * was never tested. Both surfaces therefore apply one predicate in one unit, and a fail-closed
+ * backstop covers any divergence the vectors do not enumerate.
  */
 import { describe, it, expect, vi } from 'vitest';
 import { VerifierError } from '../src/lib/errors.js';
@@ -35,13 +27,12 @@ describe('routing and canonical kid bounds use the same unit', () => {
   /**
    * The unit matrix itself now lives in kid-length-vectors.test.ts, which checks EVERY layer
    * (kernel rule, canonical verification, routing, JWK, context) against the same accepted set.
-   * What remains here is the specific unit mismatch that motivated the shared rule, and the
-   * fail-closed backstop that covers any divergence not enumerated by those vectors.
+   * The full unit matrix lives in kid-acceptance-matrix.test.ts. What remains here is the backstop
+   * for a divergence the vectors do not enumerate.
    */
-  it('the kid that caused the original divergence is now treated identically everywhere', () => {
-    // 200 three-byte code points: 200 UTF-16 units (the OLD routing bound accepted it) and 600
-    // UTF-8 bytes (the canonical bound, correctly, does not). Both layers now reject it, and for
-    // the same reason -- which is the whole point.
+  it('a value whose two length units differ is treated identically by both surfaces', () => {
+    // 200 three-byte code points: 200 UTF-16 code units, 600 UTF-8 bytes. A bound stated in one unit
+    // accepts it while the same number in the other does not, so it separates the two.
     const kid = 'ࠀ'.repeat(200);
     expect(kid.length).toBe(200);
     expect(new TextEncoder().encode(kid).length).toBe(600);
@@ -86,10 +77,8 @@ describe('the fail-closed backstop is live code, not a dead check', () => {
 
       // The kid genuinely DOES match. A verifier that reported `mismatched` here would be asserting
       // an inequality it never evaluated, so the only honest outcome is a fail-closed internal error.
-      // The failure code must be one the report schema ADMITS. A dedicated inconsistency code was
-      // used here at first; it is a forbidden term in the machine contract and absent from the
-      // schema enum, so the backstop was emitting a schema-invalid report. The divergence is now
-      // carried as a bounded app-local diagnostic instead.
+      // The failure code must be one the report schema admits, so the divergence is carried as a
+      // bounded application-local diagnostic rather than as a distinct error code.
       expect(result).toMatchObject({
         ok: false,
         failureStage: 'internal_error',
