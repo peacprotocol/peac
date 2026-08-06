@@ -23,6 +23,10 @@ const CORPUS_DIR = join(REPO_ROOT, 'specs', 'conformance', 'parity-corpus', 'ed2
 const argv = process.argv.slice(2);
 const check = argv.includes('--check');
 const outIndex = argv.indexOf('--out');
+if (outIndex !== -1 && (argv[outIndex + 1] === undefined || argv[outIndex + 1].startsWith('--'))) {
+  console.error('merge-ed25519-observations: --out requires a value');
+  process.exit(2);
+}
 const outPath = resolve(
   outIndex === -1 ? join(CORPUS_DIR, 'runtime-observations.json') : argv[outIndex + 1]
 );
@@ -40,6 +44,18 @@ const fail = (message) => {
   process.exit(1);
 };
 
+/** A shape check accepts 2026-99-99, so the value must also round-trip as a real UTC date. */
+function isCalendarDate(value) {
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const [year, month, day] = value.split('-').map(Number);
+  const parsed = new Date(Date.UTC(year, month - 1, day));
+  return (
+    parsed.getUTCFullYear() === year &&
+    parsed.getUTCMonth() + 1 === month &&
+    parsed.getUTCDate() === day
+  );
+}
+
 const corpus = JSON.parse(readFileSync(join(CORPUS_DIR, 'vectors.json'), 'utf8'));
 const vectorIds = new Set(corpus.vectors.map((v) => v.id));
 const OUTCOMES = new Set(['accept', 'reject', 'unsupported']);
@@ -47,20 +63,43 @@ const OUTCOMES = new Set(['accept', 'reject', 'unsupported']);
 const environments = {};
 const byIdentity = new Map();
 const observedOn = new Set();
+const sourceRevisions = new Set();
+const seenInputs = new Set();
 
 for (const input of inputs) {
-  const doc = JSON.parse(readFileSync(resolve(input), 'utf8'));
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(doc.observed_on ?? ''))
-    fail(`${input}: observed_on is missing or malformed`);
+  // Passing one file twice cannot produce a larger or more convincing matrix.
+  const resolved = resolve(input);
+  if (seenInputs.has(resolved)) fail(`input supplied more than once: ${resolved}`);
+  seenInputs.add(resolved);
+
+  const doc = JSON.parse(readFileSync(resolved, 'utf8'));
+  if (doc.measurement_source_revision) sourceRevisions.add(doc.measurement_source_revision);
+  if (!isCalendarDate(doc.observed_on)) {
+    fail(`${input}: observed_on is missing, malformed or not a real date: ${doc.observed_on}`);
+  }
   observedOn.add(doc.observed_on);
 
   for (const [id, env] of Object.entries(doc.environments ?? {})) {
-    for (const field of ['implementation', 'version', 'platform', 'harness', 'harness_sha256']) {
+    for (const field of [
+      'implementation',
+      'version',
+      'platform',
+      'harness',
+      'harness_sha256',
+      'corpus_sha256',
+      'lockfile_sha256',
+    ]) {
       if (!env[field]) fail(`${input}: environment ${id} is missing ${field}`);
     }
     const existing = environments[id];
-    if (existing && JSON.stringify(existing) !== JSON.stringify(env)) {
-      fail(`environment ${id} is defined twice with different values`);
+    if (existing) {
+      // An identical redefinition is still a duplicate: it means one environment was measured
+      // twice, and silently keeping either copy hides that.
+      fail(
+        JSON.stringify(existing) === JSON.stringify(env)
+          ? `environment ${id} is defined twice with identical values`
+          : `environment ${id} is defined twice with different values`
+      );
     }
     environments[id] = env;
   }
@@ -72,9 +111,12 @@ for (const input of inputs) {
     if (!OUTCOMES.has(o.outcome)) fail(`${input}: ${o.vector_id}: invalid outcome ${o.outcome}`);
     const identity = `${o.vector_id} ${o.environment_id}`;
     const prior = byIdentity.get(identity);
-    if (prior && prior.outcome !== o.outcome) {
+    if (prior) {
+      // An identical repeat is still two measurements of one cell; keeping either copy hides that.
       fail(
-        `conflicting outcomes for ${o.vector_id} in ${o.environment_id}: ${prior.outcome} vs ${o.outcome}`
+        prior.outcome === o.outcome
+          ? `duplicate observation for ${o.vector_id} in ${o.environment_id}`
+          : `conflicting outcomes for ${o.vector_id} in ${o.environment_id}: ${prior.outcome} vs ${o.outcome}`
       );
     }
     byIdentity.set(identity, o);
@@ -105,6 +147,9 @@ if (!outcomes.has('accept') || !outcomes.has('reject')) {
 if (observedOn.size !== 1) {
   fail(`inputs were measured on different dates: ${[...observedOn].sort().join(', ')}`);
 }
+if (sourceRevisions.size > 1) {
+  fail(`inputs name different source revisions: ${[...sourceRevisions].sort().join(', ')}`);
+}
 
 const document = {
   $schema: './runtime-observations.schema.json',
@@ -114,6 +159,7 @@ const document = {
     'Measured Ed25519 primitive decisions per implementation version. Evidence only: no ' +
     'conformance decision reads this file. The normative outcome is peac_expected in vectors.json.',
   observed_on: [...observedOn][0],
+  ...(sourceRevisions.size === 1 ? { measurement_source_revision: [...sourceRevisions][0] } : {}),
   environments,
   observations,
 };

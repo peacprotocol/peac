@@ -2,10 +2,12 @@
  * Bounded Ed25519 point-encoding admissibility precheck.
  *
  * Applies an enumerated set of encoding and low-order rejections to the public key A and to the
- * signature component R before delegating to the runtime primitive, so that the verification
- * decision is identical across runtimes. RFC 8032 permits the cofactored verification equation;
- * Web Cryptography Level 2 specifies the cofactorless equation with prior rejection of invalid and
- * small-order points. The two accept different sets at these edges.
+ * signature component R before delegating to the runtime primitive. PEAC decides the enumerated
+ * admissibility cases before delegation, removing the observed divergence for those cases. Inputs
+ * outside this bounded set remain subject to the delegated primitive's point decoding and
+ * verification semantics. RFC 8032 permits the cofactored verification equation; Web Cryptography
+ * Level 2 specifies the cofactorless equation with prior rejection of invalid and small-order
+ * points. The two accept different sets at these edges.
  *
  * Scope: not complete point decoding, curve validation, prime-subgroup membership testing or
  * general mixed-order rejection. Curve validity and the signature equation remain with the runtime

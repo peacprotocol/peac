@@ -2,8 +2,10 @@
  * Behaviour of the bounded admissibility profile, exercised through the public verify() surface.
  *
  * Each case covers a decision the profile makes before delegating to the runtime primitive, so the
- * outcome is required to be identical regardless of which primitive is underneath. The corpus is
- * the classified edge set together with ordinary signatures that must continue to verify.
+ * outcome for that enumerated case is required to be the same whichever primitive is underneath.
+ * Inputs outside the bounded set are decided by the delegated primitive and are not covered by
+ * that requirement. The corpus is the classified edge set together with ordinary signatures that
+ * must continue to verify.
  */
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
@@ -115,6 +117,40 @@ describe('encoded-y boundaries are rejected in both positions and both sign vari
 
   it.each(cases)('%s is rejected as R', async (_label, y, signBit) => {
     expect(await ed25519Verify(signatureWithR(encode(y, signBit)), MESSAGE, validKey)).toBe(false);
+  });
+});
+
+describe('the documented guarantee stays bounded', () => {
+  // The profile decides an enumerated set and delegates everything else, so it cannot promise that
+  // every Ed25519 input decides identically on every runtime. That claim was published once and
+  // must not return.
+  const sources = [
+    join(CRYPTO_ROOT, 'src', 'internal', 'ed25519-admissibility.ts'),
+    join(CRYPTO_ROOT, 'src', 'ed25519.ts'),
+    join(REPO_ROOT, 'sdks', 'go', 'jws', 'ed25519_admissibility.go'),
+    join(REPO_ROOT, 'sdks', 'go', 'jws', 'ed25519.go'),
+  ];
+
+  it.each(sources)('%s makes no absolute cross-runtime claim', (source) => {
+    const text = readFileSync(source, 'utf8');
+    for (const forbidden of [
+      /identical across runtimes/i,
+      /identical on every runtime/i,
+      /same (?:result|decision) on (?:all|every) runtimes?/i,
+      /deterministic across all runtimes/i,
+    ]) {
+      expect(forbidden.test(text), `${source} claims unbounded cross-runtime determinism`).toBe(
+        false
+      );
+    }
+  });
+
+  it('states the delegated remainder explicitly', () => {
+    for (const source of sources.slice(0, 1)) {
+      const text = readFileSync(source, 'utf8');
+      expect(text).toMatch(/outside this bounded set/i);
+      expect(text).toMatch(/not complete point decoding/i);
+    }
   });
 });
 

@@ -46,6 +46,11 @@ const observedOn = opt('--observed-on', new Date().toISOString().slice(0, 10));
 if (!/^\d{4}-\d{2}-\d{2}$/.test(observedOn)) {
   throw new Error(`--observed-on must be YYYY-MM-DD, got: ${observedOn}`);
 }
+// The commit whose sources were measured. Recorded so evidence names the revision it describes.
+const sourceRevision = opt('--source-revision', null);
+if (sourceRevision !== null && !/^[0-9a-f]{40}$/.test(sourceRevision)) {
+  throw new Error(`--source-revision must be a full commit SHA, got: ${sourceRevision}`);
+}
 
 /** An unexpected condition. Never recorded as a measurement. */
 class HarnessError extends Error {}
@@ -66,13 +71,11 @@ const bytes = (hex) => Uint8Array.from(Buffer.from(hex, 'hex'));
 /** DER SubjectPublicKeyInfo prefix for a raw Ed25519 public key (RFC 8410). */
 const SPKI_PREFIX = Buffer.from('302a300506032b6570032100', 'hex');
 
-/** Errors that mean the primitive refused the input, as opposed to being misconfigured. */
-const WEBCRYPTO_INPUT_ERRORS = new Set(['DataError', 'OperationError']);
-const NODE_INPUT_ERROR_CODES = new Set([
-  'ERR_CRYPTO_INVALID_KEY_OBJECT_TYPE',
-  'ERR_OSSL_UNSUPPORTED',
-  'ERR_OSSL_EVP_DECODE_ERROR',
-]);
+// Measured on Node 22.13.0, 22.23.2, 24.18.0, 24.19.0, 26.4.0, 26.5.0, 26.6.0 and 26.7.0: no
+// corpus vector raises an exception on either path. Only a returned boolean is a cryptographic
+// decision. OperationError in particular is specified as "the operation failed for an
+// operation-specific reason" and is not a synonym for an invalid signature, so it aborts rather
+// than being recorded as a rejection.
 
 async function nodeWebCrypto(vector) {
   const subtle = webcrypto?.subtle;
@@ -84,7 +87,6 @@ async function nodeWebCrypto(vector) {
     ]);
   } catch (err) {
     if (err?.name === 'NotSupportedError') return 'unsupported';
-    if (WEBCRYPTO_INPUT_ERRORS.has(err?.name)) return 'reject';
     abort(`${vector.id}: node:webcrypto importKey`, err);
   }
   try {
@@ -98,7 +100,6 @@ async function nodeWebCrypto(vector) {
       abort(`${vector.id}: node:webcrypto verify`, new Error('non-boolean'));
     return ok ? 'accept' : 'reject';
   } catch (err) {
-    if (WEBCRYPTO_INPUT_ERRORS.has(err?.name)) return 'reject';
     abort(`${vector.id}: node:webcrypto verify`, err);
   }
 }
@@ -113,7 +114,6 @@ function nodeCrypto(vector) {
     });
   } catch (err) {
     if (err?.code === 'ERR_CRYPTO_UNSUPPORTED_OPERATION') return 'unsupported';
-    if (NODE_INPUT_ERROR_CODES.has(err?.code)) return 'reject';
     abort(`${vector.id}: node:crypto createPublicKey`, err);
   }
   try {
@@ -156,6 +156,9 @@ const nobleVersion = createRequire(join(CRYPTO_ROOT, 'package.json'))(
 ).version;
 const harnessSha256 = sha256(readFileSync(SELF));
 const HARNESS_PATH = 'packages/crypto/tests/tools/measure-ed25519-runtimes.mjs';
+// Bind the evidence to the inputs that determine it, not only to the harness.
+const corpusSha256 = sha256(readFileSync(vectorsPath));
+const lockfileSha256 = sha256(readFileSync(join(REPO_ROOT, 'pnpm-lock.yaml')));
 const platform = `${process.platform}/${process.arch}`;
 
 const environments = {};
@@ -165,6 +168,8 @@ const define = (id, fields) => {
     os_release: release(),
     harness: HARNESS_PATH,
     harness_sha256: harnessSha256,
+    corpus_sha256: corpusSha256,
+    lockfile_sha256: lockfileSha256,
     ...fields,
   };
   return id;
@@ -255,5 +260,14 @@ if (observations.length !== corpus.vectors.length * 4) {
 }
 
 process.stdout.write(
-  `${JSON.stringify({ observed_on: observedOn, environments, observations }, null, 2)}\n`
+  `${JSON.stringify(
+    {
+      observed_on: observedOn,
+      ...(sourceRevision ? { measurement_source_revision: sourceRevision } : {}),
+      environments,
+      observations,
+    },
+    null,
+    2
+  )}\n`
 );

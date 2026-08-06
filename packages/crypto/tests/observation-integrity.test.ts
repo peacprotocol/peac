@@ -99,3 +99,92 @@ describe('the committed runtime observations', () => {
     }
   });
 });
+
+describe('the schema rejects what it must', () => {
+  const compile = () => {
+    const ajv = new Ajv2020({ allErrors: true, strict: false });
+    return ajv.compile(schema);
+  };
+
+  /** A minimal valid document, so each case differs from it by exactly one defect. */
+  const minimal = (): Record<string, unknown> =>
+    structuredClone(document) as Record<string, unknown>;
+
+  const browserEnvironmentId = (): string =>
+    Object.entries(document.environments).find(([, e]) => e.surface === 'peac-wrapper')![0];
+
+  it.each([
+    [
+      'an unknown environment field',
+      (d: Record<string, unknown>) => {
+        const envs = d.environments as Record<string, Record<string, unknown>>;
+        envs[Object.keys(envs)[0]].unexpected_field = 'x';
+      },
+    ],
+    [
+      'a misspelled known field',
+      (d: Record<string, unknown>) => {
+        const envs = d.environments as Record<string, Record<string, unknown>>;
+        const first = envs[Object.keys(envs)[0]];
+        first.open_ssl = first.openssl ?? '3.0.0';
+        delete first.openssl;
+      },
+    ],
+    [
+      'a wrapper environment without its measured artifact',
+      (d: Record<string, unknown>) => {
+        const envs = d.environments as Record<string, Record<string, unknown>>;
+        delete envs[browserEnvironmentId()].measured_artifact_sha256;
+      },
+    ],
+    [
+      'a browser environment without bundler metadata',
+      (d: Record<string, unknown>) => {
+        const envs = d.environments as Record<string, Record<string, unknown>>;
+        delete envs[browserEnvironmentId()].bundler_version;
+      },
+    ],
+    [
+      'a harness path that escapes the repository',
+      (d: Record<string, unknown>) => {
+        const envs = d.environments as Record<string, Record<string, unknown>>;
+        envs[Object.keys(envs)[0]].harness = '../outside/harness.mjs';
+      },
+    ],
+    [
+      'a wrong $schema value',
+      (d: Record<string, unknown>) => {
+        d.$schema = 'https://example.invalid/other.json';
+      },
+    ],
+    [
+      'an uppercase digest',
+      (d: Record<string, unknown>) => {
+        const envs = d.environments as Record<string, Record<string, unknown>>;
+        const first = envs[Object.keys(envs)[0]];
+        first.corpus_sha256 = String(first.corpus_sha256).toUpperCase();
+      },
+    ],
+  ])('rejects %s', (_label, breakIt) => {
+    const validate = compile();
+    const broken = minimal();
+    breakIt(broken);
+    expect(validate(broken), 'schema accepted a document it must reject').toBe(false);
+  });
+
+  it('accepts the committed document, so the cases above fail for their own reason', () => {
+    expect(compile()(minimal())).toBe(true);
+  });
+});
+
+describe('the observation date is a real calendar date', () => {
+  // A pattern alone accepts 2026-99-99; JSON Schema date formats are optional in AJV without a
+  // formats package, so this is checked programmatically.
+  it('parses back to itself', () => {
+    const [year, month, day] = document.observed_on.split('-').map(Number);
+    const parsed = new Date(Date.UTC(year, month - 1, day));
+    expect(parsed.getUTCFullYear()).toBe(year);
+    expect(parsed.getUTCMonth() + 1).toBe(month);
+    expect(parsed.getUTCDate()).toBe(day);
+  });
+});

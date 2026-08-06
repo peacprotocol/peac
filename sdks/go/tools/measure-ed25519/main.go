@@ -41,6 +41,8 @@ type environment struct {
 	RuntimeVersion string `json:"runtime_version"`
 	Platform       string `json:"platform"`
 	Harness        string `json:"harness"`
+	CorpusSHA256   string `json:"corpus_sha256"`
+	LockfileSHA256 string `json:"lockfile_sha256"`
 	OSRelease      string `json:"os_release"`
 	HarnessSHA256  string `json:"harness_sha256"`
 }
@@ -53,6 +55,7 @@ type observation struct {
 
 type document struct {
 	ObservedOn   string                 `json:"observed_on"`
+	SourceRev    string                 `json:"measurement_source_revision,omitempty"`
 	Environments map[string]environment `json:"environments"`
 	Observations []observation          `json:"observations"`
 }
@@ -62,12 +65,17 @@ const (
 	rejectControl = "speccheck-4"
 )
 
-var dateRE = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}$`)
+var (
+	dateRE     = regexp.MustCompile(`^\d{4}-\d{2}-\d{2}$`)
+	revisionRE = regexp.MustCompile(`^[0-9a-f]{40}$`)
+)
 
 func main() {
 	vectorsPath := flag.String("vectors", "", "path to the corpus vectors.json")
 	observedOn := flag.String("observed-on", "", "YYYY-MM-DD")
 	sourcePath := flag.String("source", "tools/measure-ed25519/main.go", "path to this source, hashed into the environment record")
+	lockfilePath := flag.String("lockfile", "../../pnpm-lock.yaml", "path to the workspace lockfile, hashed into the environment record")
+	sourceRevision := flag.String("source-revision", "", "full commit SHA whose sources were measured")
 	flag.Parse()
 
 	if *vectorsPath == "" {
@@ -94,6 +102,14 @@ func main() {
 		fail(fmt.Sprintf("read harness source: %v", err))
 	}
 
+	lockfile, err := os.ReadFile(*lockfilePath)
+	if err != nil {
+		fail(fmt.Sprintf("read lockfile: %v", err))
+	}
+	if *sourceRevision != "" && !revisionRE.MatchString(*sourceRevision) {
+		fail("--source-revision must be a full commit SHA")
+	}
+
 	envID := fmt.Sprintf("go-%s-%s", runtime.Version(), runtime.GOARCH)
 	env := environment{
 		Implementation: "go:crypto/ed25519",
@@ -102,6 +118,8 @@ func main() {
 		RuntimeVersion: runtime.Version(),
 		Platform:       fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH),
 		Harness:        "sdks/go/tools/measure-ed25519/main.go",
+		CorpusSHA256:   fmt.Sprintf("%x", sha256.Sum256(raw)),
+		LockfileSHA256: fmt.Sprintf("%x", sha256.Sum256(lockfile)),
 		OSRelease:      osRelease(),
 		HarnessSHA256:  fmt.Sprintf("%x", sha256.Sum256(source)),
 	}
@@ -121,6 +139,7 @@ func main() {
 
 	out, err := json.MarshalIndent(document{
 		ObservedOn:   *observedOn,
+		SourceRev:    *sourceRevision,
 		Environments: map[string]environment{envID: env},
 		Observations: observations,
 	}, "", "  ")

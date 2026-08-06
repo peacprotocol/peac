@@ -60,6 +60,10 @@ const observedOn = opt('--observed-on', new Date().toISOString().slice(0, 10));
 if (!/^\d{4}-\d{2}-\d{2}$/.test(observedOn)) {
   throw new Error(`--observed-on must be YYYY-MM-DD, got: ${observedOn}`);
 }
+const sourceRevision = opt('--source-revision', null);
+if (sourceRevision !== null && !/^[0-9a-f]{40}$/.test(sourceRevision)) {
+  throw new Error(`--source-revision must be a full commit SHA, got: ${sourceRevision}`);
+}
 
 const bundlePath = join(CRYPTO_ROOT, 'dist', 'index.mjs');
 if (!existsSync(bundlePath)) {
@@ -108,8 +112,25 @@ function requiredVersion(name) {
 const playwrightVersion = requiredVersion('playwright');
 const esbuildVersion = requiredVersion('esbuild');
 
+const sha256 = (buffer) => createHash('sha256').update(buffer).digest('hex');
 const corpus = JSON.parse(readFileSync(vectorsPath, 'utf8'));
-const harnessSha256 = createHash('sha256').update(readFileSync(SELF)).digest('hex');
+const harnessSha256 = sha256(readFileSync(SELF));
+const corpusSha256 = sha256(readFileSync(vectorsPath));
+const lockfileSha256 = sha256(readFileSync(join(REPO_ROOT, 'pnpm-lock.yaml')));
+// The wrapper surface measures built PEAC code, so the evidence names the exact artifact and the
+// exact production sources behind it.
+const measuredArtifactSha256 = sha256(readFileSync(bundlePath));
+const PRODUCTION_SOURCES = [
+  'packages/crypto/src/ed25519.ts',
+  'packages/crypto/src/internal/ed25519-admissibility.ts',
+];
+const productionSourceManifestSha256 = sha256(
+  Buffer.from(
+    PRODUCTION_SOURCES.map((rel) => `${rel} ${sha256(readFileSync(join(REPO_ROOT, rel)))}`).join(
+      '\n'
+    )
+  )
+);
 
 const bundled = await esbuild.build({
   stdin: {
@@ -124,6 +145,7 @@ const bundled = await esbuild.build({
   write: false,
 });
 const wrapperSource = bundled.outputFiles[0].text;
+const wrapperBundleSha256 = sha256(Buffer.from(wrapperSource));
 
 /**
  * Runs inside the page. Returns an outcome per vector for the raw primitive and the wrapper, or an
@@ -132,7 +154,6 @@ const wrapperSource = bundled.outputFiles[0].text;
 async function measureInPage(vectors) {
   // An empty message is a valid vector (RFC 8032 test 1) and ''.match returns null.
   const toBytes = (hex) => Uint8Array.from((hex.match(/../g) ?? []).map((b) => parseInt(b, 16)));
-  const INPUT_ERRORS = new Set(['DataError', 'OperationError']);
   const out = [];
 
   for (const v of vectors) {
@@ -140,15 +161,18 @@ async function measureInPage(vectors) {
     const msg = toBytes(v.message_hex);
     const sig = toBytes(v.signature_hex);
 
+    // Only a returned boolean is a cryptographic decision. OperationError is specified as an
+    // operation-specific failure, not a synonym for an invalid signature, so it aborts.
     let raw;
     try {
       const key = await crypto.subtle.importKey('raw', pub, { name: 'Ed25519' }, false, ['verify']);
       const ok = await crypto.subtle.verify('Ed25519', key, sig, msg);
       raw = typeof ok === 'boolean' ? (ok ? 'accept' : 'reject') : { error: 'non-boolean verify' };
     } catch (err) {
-      if (err && err.name === 'NotSupportedError') raw = 'unsupported';
-      else if (err && INPUT_ERRORS.has(err.name)) raw = 'reject';
-      else raw = { error: `raw ${v.id}: ${err && err.name}: ${err && err.message}` };
+      raw =
+        err && err.name === 'NotSupportedError'
+          ? 'unsupported'
+          : { error: `raw ${v.id}: ${err && err.name}: ${err && err.message}` };
     }
 
     let wrapped;
@@ -156,9 +180,10 @@ async function measureInPage(vectors) {
       const ok = await globalThis.__peacVerify(sig, msg, pub);
       wrapped = typeof ok === 'boolean' ? (ok ? 'accept' : 'reject') : { error: 'non-boolean' };
     } catch (err) {
-      // The wrapper throws a dedicated error when the runtime lacks the primitive.
+      // Exact structured error name only. Matching on message text would classify any unrelated
+      // failure whose wording happens to include a keyword.
       wrapped =
-        err && /Ed25519RuntimeError|unavailable/.test(`${err.name}${err.message}`)
+        err && err.name === 'Ed25519RuntimeError'
           ? 'unsupported'
           : { error: `wrapper ${v.id}: ${err && err.name}: ${err && err.message}` };
     }
@@ -166,6 +191,33 @@ async function measureInPage(vectors) {
     out.push({ vector_id: v.id, raw, wrapped });
   }
   return out;
+}
+
+/**
+ * Self-generated control for one browser: a non-empty message signed in the page, then the same
+ * signature with one bit flipped. Both surfaces must accept the first and reject the second, so a
+ * surface that returns a constant cannot look like a complete measurement. A non-empty message is
+ * used so that the zero-length-message divergence cannot affect the control.
+ */
+async function controlInPage() {
+  const message = new TextEncoder().encode('peac ed25519 browser control');
+  const pair = await crypto.subtle.generateKey({ name: 'Ed25519' }, true, ['sign', 'verify']);
+  const raw = new Uint8Array(await crypto.subtle.exportKey('raw', pair.publicKey));
+  const good = new Uint8Array(await crypto.subtle.sign('Ed25519', pair.privateKey, message));
+  const tampered = Uint8Array.from(good);
+  tampered[0] ^= 0x01;
+
+  const rawVerify = async (signature) => {
+    const key = await crypto.subtle.importKey('raw', raw, { name: 'Ed25519' }, false, ['verify']);
+    return crypto.subtle.verify('Ed25519', key, signature, message);
+  };
+
+  return {
+    raw_accept: await rawVerify(good),
+    raw_reject: await rawVerify(tampered),
+    wrapper_accept: await globalThis.__peacVerify(good, message, raw),
+    wrapper_reject: await globalThis.__peacVerify(tampered, message, raw),
+  };
 }
 
 // crypto.subtle exists only in a secure context, which about:blank is not. Loopback counts.
@@ -183,13 +235,31 @@ try {
   for (const name of ['chromium', 'firefox', 'webkit']) {
     const browser = await playwright[name].launch();
     const version = browser.version();
-    const page = await browser.newPage();
-    await page.goto(origin);
-    const secure = await page.evaluate(() => globalThis.isSecureContext && !!crypto?.subtle);
-    if (!secure) throw new Error(`${name}: SubtleCrypto is unavailable in a secure context`);
-    await page.addScriptTag({ content: wrapperSource });
-    const rows = await page.evaluate(measureInPage, corpus.vectors);
-    await browser.close();
+    let rows;
+    // Each browser closes even when navigation, injection, controls or measurement fail.
+    try {
+      const page = await browser.newPage();
+      await page.goto(origin);
+      const secure = await page.evaluate(() => globalThis.isSecureContext && !!crypto?.subtle);
+      if (!secure) throw new Error(`${name}: SubtleCrypto is unavailable in a secure context`);
+      await page.addScriptTag({ content: wrapperSource });
+
+      const control = await page.evaluate(controlInPage);
+      for (const [field, expected] of [
+        ['raw_accept', true],
+        ['raw_reject', false],
+        ['wrapper_accept', true],
+        ['wrapper_reject', false],
+      ]) {
+        if (control[field] !== expected) {
+          throw new Error(`${name}: control ${field} was ${control[field]}, expected ${expected}`);
+        }
+      }
+
+      rows = await page.evaluate(measureInPage, corpus.vectors);
+    } finally {
+      await browser.close();
+    }
 
     const base = {
       engine: name,
@@ -203,6 +273,8 @@ try {
       // The port is ephemeral; only the host determines secure-context status.
       secure_context_origin: 'http://127.0.0.1',
       harness_sha256: harnessSha256,
+      corpus_sha256: corpusSha256,
+      lockfile_sha256: lockfileSha256,
     };
     const rawId = `${name}-${version}-webcrypto`;
     const wrapId = `${name}-${version}-peac-wrapper`;
@@ -215,6 +287,9 @@ try {
       ...base,
       implementation: `${name}:peac-wrapper`,
       surface: 'peac-wrapper',
+      measured_artifact_sha256: measuredArtifactSha256,
+      wrapper_bundle_sha256: wrapperBundleSha256,
+      production_source_manifest_sha256: productionSourceManifestSha256,
     };
 
     for (const row of rows) {
@@ -246,5 +321,14 @@ if (accepted.length === 0 || accepted.some((o) => o.outcome !== 'accept')) {
 }
 
 process.stdout.write(
-  `${JSON.stringify({ observed_on: observedOn, environments, observations }, null, 2)}\n`
+  `${JSON.stringify(
+    {
+      observed_on: observedOn,
+      ...(sourceRevision ? { measurement_source_revision: sourceRevision } : {}),
+      environments,
+      observations,
+    },
+    null,
+    2
+  )}\n`
 );

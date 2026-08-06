@@ -31,6 +31,8 @@ function wellFormed(): Record<string, unknown> {
         platform: 'darwin/arm64',
         harness: 'packages/crypto/tests/tools/merge-ed25519-observations.mjs',
         harness_sha256: 'a'.repeat(64),
+        corpus_sha256: 'b'.repeat(64),
+        lockfile_sha256: 'c'.repeat(64),
       },
     },
     observations: corpus.vectors.map((v, index) => ({
@@ -40,6 +42,22 @@ function wellFormed(): Record<string, unknown> {
       outcome: index === 0 ? 'accept' : 'reject',
     })),
   };
+}
+
+/** Writes one document and passes its path to the merge twice. */
+function mergeSameFileTwice(doc: Record<string, unknown>): { status: number; output: string } {
+  const dir = mkdtempSync(join(tmpdir(), 'peac-merge-dup-'));
+  try {
+    const path = join(dir, 'input.json');
+    writeFileSync(path, JSON.stringify(doc, null, 2));
+    const run = spawnSync(process.execPath, [TOOL, path, path, '--out', join(dir, 'out.json')], {
+      cwd: REPO_ROOT,
+      encoding: 'utf8',
+    });
+    return { status: run.status ?? -1, output: `${run.stdout}${run.stderr}` };
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
 }
 
 function merge(documents: Record<string, unknown>[]): { status: number; output: string } {
@@ -67,11 +85,41 @@ describe('the observation merge refuses evidence it cannot stand behind', () => 
     expect(result.status, result.output).toBe(0);
   });
 
-  it('rejects conflicting outcomes for the same vector and environment', () => {
+  it('rejects an exact duplicate observation identity', () => {
+    // Including one measurement file twice must not silently produce the same matrix.
+    const doc = wellFormed();
+    const observations = doc.observations as { vector_id: string; environment_id: string }[];
+    observations.push({ ...observations[1] });
+    const result = merge([doc]);
+    expect(result.status).not.toBe(0);
+    expect(result.output).toMatch(/duplicate observation/);
+  });
+
+  it('rejects the same input file supplied twice', () => {
+    const doc = wellFormed();
+    const first = merge([doc]);
+    expect(first.status, first.output).toBe(0);
+    const twice = mergeSameFileTwice(doc);
+    expect(twice.status).not.toBe(0);
+    expect(twice.output).toMatch(/supplied more than once/);
+  });
+
+  it('rejects an identical duplicate environment definition', () => {
     const a = wellFormed();
     const b = wellFormed();
-    (b.observations as { outcome: string }[])[1].outcome = 'accept';
+    // Same id, same metadata: still two measurements of one environment.
+    (b.observations as unknown[]).length = 0;
     const result = merge([a, b]);
+    expect(result.status).not.toBe(0);
+    expect(result.output).toMatch(/defined twice with identical values/);
+  });
+
+  it('rejects conflicting outcomes for the same vector and environment', () => {
+    // Reachable within one document: a repeated environment id across documents is itself rejected.
+    const doc = wellFormed();
+    const observations = doc.observations as { outcome: string }[];
+    observations.push({ ...observations[1], outcome: 'accept' });
+    const result = merge([doc]);
     expect(result.status).not.toBe(0);
     expect(result.output).toMatch(/conflicting outcomes/);
   });
@@ -133,11 +181,15 @@ describe('the observation merge refuses evidence it cannot stand behind', () => 
     expect(result.output).toMatch(/missing harness_sha256/);
   });
 
-  it('rejects a malformed observation date', () => {
-    const doc = wellFormed();
-    doc.observed_on = 'August 2026';
-    const result = merge([doc]);
-    expect(result.status).not.toBe(0);
-    expect(result.output).toMatch(/observed_on/);
-  });
+  it.each(['August 2026', '2026-99-99', '2026-02-30', '2026-13-01', ''])(
+    'rejects the observation date %s',
+    (value) => {
+      // A shape check alone accepts 2026-99-99, so the value must be a real calendar date.
+      const doc = wellFormed();
+      doc.observed_on = value;
+      const result = merge([doc]);
+      expect(result.status).not.toBe(0);
+      expect(result.output).toMatch(/observed_on/);
+    }
+  );
 });

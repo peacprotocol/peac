@@ -8,7 +8,7 @@
   "additionalProperties": false,
   "properties": {
     "$schema": {
-      "type": "string"
+      "const": "./runtime-observations.schema.json"
     },
     "family": {
       "const": "ed25519-peac-profile"
@@ -31,7 +31,16 @@
       },
       "additionalProperties": {
         "type": "object",
-        "required": ["implementation", "version", "platform", "harness", "harness_sha256"],
+        "required": [
+          "implementation",
+          "version",
+          "platform",
+          "os_release",
+          "harness",
+          "harness_sha256",
+          "corpus_sha256",
+          "lockfile_sha256"
+        ],
         "properties": {
           "implementation": {
             "type": "string",
@@ -54,34 +63,111 @@
             "pattern": "^[0-9a-f]{64}$"
           },
           "runtime": {
-            "type": "string"
+            "type": "string",
+            "minLength": 1
           },
           "runtime_version": {
-            "type": "string"
+            "type": "string",
+            "minLength": 1
           },
           "v8": {
-            "type": "string"
+            "type": "string",
+            "minLength": 1
           },
           "openssl": {
-            "type": "string"
+            "type": "string",
+            "minLength": 1
           },
           "engine": {
-            "type": "string"
+            "type": "string",
+            "minLength": 1
           },
           "surface": {
             "enum": ["raw-primitive", "peac-wrapper"]
           },
           "secure_context_origin": {
-            "type": "string"
-          },
-          "harness": {
             "type": "string",
             "minLength": 1
           },
+          "harness": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^(?!/)(?!.*(^|/)\\.\\.(/|$))[A-Za-z0-9._/-]+$"
+          },
           "bundler_version": {
-            "type": "string"
+            "type": "string",
+            "minLength": 1
+          },
+          "corpus_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "lockfile_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "measured_artifact_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "wrapper_bundle_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "production_source_manifest_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
           }
-        }
+        },
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {
+              "required": ["runtime"]
+            },
+            "then": {
+              "required": ["runtime_version"]
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "runtime": {
+                  "const": "node"
+                }
+              },
+              "required": ["runtime"]
+            },
+            "then": {
+              "required": ["v8", "openssl"]
+            }
+          },
+          {
+            "if": {
+              "required": ["engine"]
+            },
+            "then": {
+              "required": ["surface", "secure_context_origin", "runtime_version", "bundler_version"]
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "surface": {
+                  "const": "peac-wrapper"
+                }
+              },
+              "required": ["surface"]
+            },
+            "then": {
+              "required": [
+                "measured_artifact_sha256",
+                "wrapper_bundle_sha256",
+                "production_source_manifest_sha256"
+              ]
+            }
+          }
+        ]
       }
     },
     "observations": {
@@ -105,6 +191,10 @@
           }
         }
       }
+    },
+    "measurement_source_revision": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
     }
   }
 }
