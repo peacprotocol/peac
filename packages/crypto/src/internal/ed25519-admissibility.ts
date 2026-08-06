@@ -1,21 +1,22 @@
 /**
  * Bounded Ed25519 point-encoding admissibility precheck.
  *
- * PEAC decides a small, explicitly enumerated set of encoding and low-order cases before handing a
- * verification to the runtime primitive, so the outcome does not depend on which primitive runs.
- * Runtimes are known to disagree here: WebCrypto Level 2 rejects invalid or small-order A and R
- * before applying the cofactorless equation and notes implementations have not behaved uniformly,
- * while RFC 8032 permits the cofactored equation, whose accepted set differs at these edges.
+ * Applies an enumerated set of encoding and low-order rejections to the public key A and to the
+ * signature component R before delegating to the runtime primitive, so that the verification
+ * decision is identical across runtimes. RFC 8032 permits the cofactored verification equation;
+ * Web Cryptography Level 2 specifies the cofactorless equation with prior rejection of invalid and
+ * small-order points. The two accept different sets at these edges.
  *
- * This is NOT complete point decoding, complete curve validation, complete prime-subgroup
- * membership testing, or complete mixed-order-point rejection. Remaining curve validity and the
- * signature equation stay with the runtime primitive.
+ * Scope: not complete point decoding, curve validation, prime-subgroup membership testing or
+ * general mixed-order rejection. Curve validity and the signature equation remain with the runtime
+ * primitive.
  *
  * Package-private: not exported from the package barrel and not part of the public API.
  *
- * Byte-level throughout. No hexadecimal conversion, no strings, no bigint, no curve arithmetic and
- * no allocation in the verification path: at most twenty fixed 32-byte comparisons, which is
- * insignificant beside an Ed25519 verification and far easier to audit than clever indexing.
+ * The predicate performs no byte copying, hexadecimal conversion, string handling, BigInt or curve
+ * arithmetic: at most twenty fixed 32-byte comparisons. Callers may pass a zero-copy view for R.
+ *
+ * @internal
  */
 
 const POINT_BYTES = 32;
@@ -79,14 +80,15 @@ const ED25519_TORSION_POINT_ENCODINGS = Uint8Array.from([
 ]);
 
 /**
- * Two canonical encodings of points of exact order 4L, retained by PEAC policy.
+ * Two canonical encodings of points of exact order 4L, rejected by PEAC profile policy since 0.16.3.
  *
- * These are valid curve points carrying a low-order component. They are NOT torsion points and are
- * NOT rejected by WebCrypto or required to be rejected by RFC 8032; PEAC has rejected them since
- * 0.16.3 and continues to, so that behaviour does not change under this fix.
+ * These are valid curve points carrying a low-order component; they are not torsion points. They
+ * are not rejected solely by the invalid and small-order admissibility rule of Web Cryptography
+ * Level 2, and RFC 8032 does not require rejecting every mixed-order point. Observed primitive
+ * outcomes are recorded as versioned empirical evidence in the conformance corpus.
  *
- * This bounded set is NOT a general mixed-order test. A finite table cannot reject every point
- * carrying both a prime-order and a low-order component.
+ * Not a general mixed-order test: a finite table cannot reject every point carrying both a
+ * prime-order and a low-order component.
  */
 const PEAC_PROFILE_MIXED_ORDER_REJECTIONS = Uint8Array.from([
   0xc7, 0x17, 0x6a, 0x70, 0x3d, 0x4d, 0xd8, 0x4f, 0xba, 0x3c, 0x0b, 0x76, 0x0d, 0x10, 0x67, 0x0f,

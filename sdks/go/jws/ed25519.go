@@ -33,12 +33,13 @@ func scalarFromSignature(signature []byte) *big.Int {
 // VerifyEd25519 verifies an Ed25519 signature under the PEAC Ed25519
 // verification profile.
 //
-// Profile = cofactorless Ed25519 verification plus admissibility checks over the
-// public inputs:
+// Profile = cofactorless Ed25519 verification plus bounded admissibility checks
+// over the public inputs, applied in order:
 //  1. length: public key is 32 bytes, signature is 64 bytes;
-//  2. reject small-order public keys (denylist above);
+//  2. bounded admissibility precheck on the public key A;
 //  3. reject non-reduced scalars S >= L (RFC 8032 malleability guard);
-//  4. cofactorless verification via crypto/ed25519.Verify.
+//  4. bounded admissibility precheck on the signature component R;
+//  5. cofactorless verification via crypto/ed25519.Verify.
 //
 // "RFC 8032 strict" is not a single predicate: libraries differ on small-order
 // points and cofactored-versus-cofactorless verification. Go's stdlib is
@@ -64,9 +65,8 @@ func VerifyEd25519(publicKey ed25519.PublicKey, message, signature []byte) error
 		return fmt.Errorf("non-canonical signature scalar (S >= L) rejected")
 	}
 
-	// The same bounded precheck on the signature's R component. Reached only after the 64-byte
-	// length check above, so this slice always exists. Its absence was the cause of the observed
-	// cross-runtime divergence: R was never subjected to the check that the public key already had.
+	// The same bounded precheck on the signature component R. Reached only after the 64-byte
+	// length check above, so this slice is always in range.
 	if reason := ed25519RejectionReason(ed25519PointFrom(signature[:32])); reason != ed25519NoRejection {
 		return fmt.Errorf("inadmissible signature R encoding rejected: %s", reason)
 	}

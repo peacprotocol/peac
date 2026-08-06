@@ -2,15 +2,15 @@ package jws
 
 // Bounded Ed25519 point-encoding admissibility precheck.
 //
-// PEAC decides a small, explicitly enumerated set of encoding and low-order cases before handing a
-// verification to the standard library, so the outcome does not depend on which primitive runs.
-// Runtimes are known to disagree here: WebCrypto Level 2 rejects invalid or small-order A and R
-// before applying the cofactorless equation and notes implementations have not behaved uniformly,
-// while RFC 8032 permits the cofactored equation, whose accepted set differs at these edges.
+// Applies an enumerated set of encoding and low-order rejections to the public key A and to the
+// signature component R before delegating to the standard library, so that the verification
+// decision is identical across runtimes. RFC 8032 permits the cofactored verification equation;
+// Web Cryptography Level 2 specifies the cofactorless equation with prior rejection of invalid and
+// small-order points. The two accept different sets at these edges.
 //
-// This is NOT complete point decoding, complete curve validation, complete prime-subgroup
-// membership testing, or complete mixed-order-point rejection. Remaining curve validity and the
-// signature equation stay with the standard library.
+// Scope: not complete point decoding, curve validation, prime-subgroup membership testing or
+// general mixed-order rejection. Curve validity and the signature equation remain with the standard
+// library.
 //
 // Implemented independently of the TypeScript verifier: the two share vectors and expected
 // outcomes, never code. Unexported; no new public API and no new dependency.
@@ -69,14 +69,15 @@ var ed25519TorsionPointEncodings = map[[ed25519PointBytes]byte]struct{}{
 }
 
 // peacProfileMixedOrderRejections holds two canonical encodings of points of exact order 4L,
-// retained by PEAC policy.
+// rejected by PEAC profile policy since 0.16.3.
 //
-// These are valid curve points carrying a low-order component. They are NOT torsion points and are
-// NOT rejected by WebCrypto or required to be rejected by RFC 8032; PEAC has rejected them since
-// 0.16.3 and continues to, so that behaviour does not change under this fix.
+// These are valid curve points carrying a low-order component; they are not torsion points. They
+// are not rejected solely by the invalid and small-order admissibility rule of Web Cryptography
+// Level 2, and RFC 8032 does not require rejecting every mixed-order point. Observed primitive
+// outcomes are recorded as versioned empirical evidence in the conformance corpus.
 //
-// This bounded set is NOT a general mixed-order test. A finite table cannot reject every point
-// carrying both a prime-order and a low-order component.
+// Not a general mixed-order test: a finite table cannot reject every point carrying both a
+// prime-order and a low-order component.
 var peacProfileMixedOrderRejections = map[[ed25519PointBytes]byte]struct{}{
 	{0xc7, 0x17, 0x6a, 0x70, 0x3d, 0x4d, 0xd8, 0x4f, 0xba, 0x3c, 0x0b, 0x76, 0x0d, 0x10, 0x67, 0x0f,
 		0x2a, 0x20, 0x53, 0xfa, 0x2c, 0x39, 0xcc, 0xc6, 0x4e, 0xc7, 0xfd, 0x77, 0x92, 0xac, 0x03, 0x05}: {},
