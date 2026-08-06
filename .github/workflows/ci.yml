@@ -754,6 +754,7 @@ jobs:
         tooling-gates,
         examples-apps,
         pack-smoke,
+        node-compat,
       ]
     if: always()
     runs-on: ubuntu-latest
@@ -768,6 +769,7 @@ jobs:
           echo "tooling-gates: ${{ needs.tooling-gates.result }}"
           echo "examples-apps: ${{ needs.examples-apps.result }}"
           echo "pack-smoke:    ${{ needs.pack-smoke.result }}"
+          echo "node-compat:   ${{ needs.node-compat.result }}"
 
           # workflow-lint: always required, must succeed
           if [[ "${{ needs.workflow-lint.result }}" != "success" ]]; then
@@ -817,6 +819,14 @@ jobs:
           # so without this the aggregate could stay green while the verifier never ran.
           if [[ "${{ needs.detect-changes.outputs.verifier_ci }}" == "true" && "${{ needs.examples-apps.result }}" != "success" ]]; then
             echo "FAIL: verifier-affecting paths changed but the verifier lane did not succeed (result: ${{ needs.examples-apps.result }})"; exit 1
+          fi
+
+          # node-compat: the runtime compatibility matrix. Membership in `needs` alone does
+          # not block anything, because this job runs with `if: always()` and decides per lane.
+          # The matrix is unconditional, so any result other than success means the supported
+          # runtimes were not actually verified on this head.
+          if [[ "${{ needs.node-compat.result }}" != "success" ]]; then
+            echo "FAIL: node-compat did not succeed (result: ${{ needs.node-compat.result }})"; exit 1
           fi
 
           # pack-smoke: optional (success or skipped OK, failure blocks)
@@ -894,16 +904,19 @@ jobs:
         include:
           # Three deliberately different selector kinds, not a uniform pinning rule:
           #   '22.13.0' exact -- supported floor, must equal engines.node
-          #   '24.18.1' exact -- primary release-validation runtime
+          #   '24'      major -- primary LTS line, FLOATING. Ed25519 admissibility changed
+          #                      within this line at 24.19.0, so an exact pin one patch behind
+          #                      would have reported compatibility the release baseline no
+          #                      longer had.
           #   '26'      major -- INTENTIONALLY FLOATING Current-line canary; reproducibility
           #                      comes from capturing the resolved `node --version` as an
           #                      artifact, not from an exact pin nobody automates.
           - node-version: '22.13.0' # blocking: declared engines.node minimum
             experimental: false
             check-latest: false
-          - node-version: '24.18.1' # blocking: primary + release-validation runtime
+          - node-version: '24' # blocking: primary LTS line (floating)
             experimental: false
-            check-latest: false
+            check-latest: true
           # Canary is INTENTIONALLY FLOATING within the major: no automation keeps an
           # exact pin fresh, and a forgotten exact pin stops being a Current canary.
           # The resolved version is captured below so the tested version is recorded.

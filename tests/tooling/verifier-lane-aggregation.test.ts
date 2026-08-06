@@ -65,6 +65,7 @@ function lanes(verifierCi: string, examplesApps: string): Record<string, string>
     'needs.tooling-gates.result': 'success',
     'needs.examples-apps.result': examplesApps,
     'needs.pack-smoke.result': 'success',
+    'needs.node-compat.result': 'success',
   };
 }
 
