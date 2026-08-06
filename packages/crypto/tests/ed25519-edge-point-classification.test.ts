@@ -46,24 +46,54 @@ const corpus: { entries: Entry[] } = JSON.parse(
  * Never scan a whole source file for hexadecimal literals: the same file legitimately contains the
  * group order L for the S >= L guard, and a file-wide scan reports it as a table member.
  */
+/** Byte literals of one declared table, read from its exact declaration body. */
+function bytesTable(source: string, declaration: RegExp): string[] {
+  const body = declaration.exec(source);
+  expect(body, `table not found in its expected declaration: ${declaration}`).not.toBeNull();
+  const bytes = [...body![1].matchAll(/0x([0-9a-f]{2})/g)].map((m) => m[1]);
+  expect(bytes.length % 32, 'a point table must be a whole number of 32-byte records').toBe(0);
+  const records: string[] = [];
+  for (let i = 0; i < bytes.length; i += 32) records.push(bytes.slice(i, i + 32).join(''));
+  return records;
+}
+
 function typescriptTable(): string[] {
-  const source = readFileSync(join(CRYPTO_ROOT, 'src', 'ed25519.ts'), 'utf8');
-  const body =
-    /ED25519_(?:SMALL_ORDER_PUBLIC_KEYS|REJECTED_POINT_ENCODINGS)[^=]*=\s*new Set\(\[([\s\S]*?)\]\)/.exec(
-      source
-    );
-  expect(body, 'the point-encoding table was not found in its expected declaration').not.toBeNull();
-  return [...body![1].matchAll(/'([0-9a-f]{64})'/g)].map((m) => m[1]);
+  const source = readFileSync(
+    join(CRYPTO_ROOT, 'src', 'internal', 'ed25519-admissibility.ts'),
+    'utf8'
+  );
+  return [
+    ...bytesTable(source, /ED25519_TORSION_POINT_ENCODINGS = Uint8Array\.from\(\[([\s\S]*?)\]\)/),
+    ...bytesTable(
+      source,
+      /PEAC_PROFILE_MIXED_ORDER_REJECTIONS = Uint8Array\.from\(\[([\s\S]*?)\]\)/
+    ),
+  ];
 }
 
 function goTable(): string[] {
-  const source = readFileSync(join(REPO_ROOT, 'sdks', 'go', 'jws', 'ed25519.go'), 'utf8');
-  const body =
-    /ed25519(?:SmallOrderPublicKeys|RejectedPointEncodings) = map\[string\]struct\{\}\{([\s\S]*?)\n\}/.exec(
-      source
-    );
-  expect(body, 'the point-encoding table was not found in its expected declaration').not.toBeNull();
-  return [...body![1].matchAll(/"([0-9a-fA-F]{64})"/g)].map((m) => m[1].toLowerCase());
+  const source = readFileSync(
+    join(REPO_ROOT, 'sdks', 'go', 'jws', 'ed25519_admissibility.go'),
+    'utf8'
+  );
+  // Go records are brace groups of byte literals; trailing zero bytes may be elided.
+  const records = (declaration: RegExp): string[] => {
+    const body = declaration.exec(source);
+    expect(body, `table not found in its expected declaration: ${declaration}`).not.toBeNull();
+    return [...body![1].matchAll(/\{([^{}]*)\}: \{\}/g)].map((m) => {
+      const bytes = [...m[1].matchAll(/0x([0-9a-f]{2})/g)].map((b) => b[1]);
+      while (bytes.length < 32) bytes.push('00');
+      return bytes.join('');
+    });
+  };
+  return [
+    ...records(
+      /ed25519TorsionPointEncodings = map\[\[ed25519PointBytes\]byte\]struct\{\}\{([\s\S]*?)\n\}/
+    ),
+    ...records(
+      /peacProfileMixedOrderRejections = map\[\[ed25519PointBytes\]byte\]struct\{\}\{([\s\S]*?)\n\}/
+    ),
+  ];
 }
 
 describe('every corpus entry is classified from first principles', () => {

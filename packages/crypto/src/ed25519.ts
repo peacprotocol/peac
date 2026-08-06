@@ -37,6 +37,8 @@ export const getPublicKey = ed.getPublicKeyAsync;
 /** Generate a cryptographically random 32-byte secret key (CSPRNG) */
 export const randomSecretKey = ed.utils.randomSecretKey;
 
+import { isRejectedEd25519PointEncoding } from './internal/ed25519-admissibility';
+
 const ED25519_PUBLIC_KEY_BYTES = 32;
 const ED25519_SIGNATURE_BYTES = 64;
 
@@ -53,39 +55,6 @@ const ED25519_GROUP_ORDER_L_LE = Uint8Array.from([
   0xed, 0xd3, 0xf5, 0x5c, 0x1a, 0x63, 0x12, 0x58, 0xd6, 0x9c, 0xf7, 0xa2, 0xde, 0xf9, 0xde, 0x14,
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10,
 ]);
-
-/**
- * Small-order public-key encodings rejected by the PEAC Ed25519 verification
- * profile. A public key with small order admits trivial/forgeable signatures
- * and is never produced by an honest signer.
- *
- * Provenance: this is a fixed, reviewed set of 11 small-order public-key
- * encodings (canonical and non-canonical encodings of low-order Ed25519
- * points). Only two of these encodings appear as public keys in the current
- * ed25519-peac-profile corpus; the remaining entries are included so the
- * profile rejects small-order public keys regardless of encoding. The list is
- * duplicated byte-for-byte in the Go reference verifier (sdks/go/jws/ed25519.go)
- * and is pinned by the shared corpus tests.
- */
-const ED25519_SMALL_ORDER_PUBLIC_KEYS: ReadonlySet<string> = new Set([
-  '0100000000000000000000000000000000000000000000000000000000000000',
-  '0000000000000000000000000000000000000000000000000000000000000000',
-  '0000000000000000000000000000000000000000000000000000000000000080',
-  'ecffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f',
-  'ecffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
-  '26e8958fc2b227b045c3f489f2ef98f0d5dfac05d3c63339b13802886d53fc05',
-  '26e8958fc2b227b045c3f489f2ef98f0d5dfac05d3c63339b13802886d53fc85',
-  'c7176a703d4dd84fba3c0b760d10670f2a2053fa2c39ccc64ec7fd7792ac0305',
-  'c7176a703d4dd84fba3c0b760d10670f2a2053fa2c39ccc64ec7fd7792ac0385',
-  'c7176a703d4dd84fba3c0b760d10670f2a2053fa2c39ccc64ec7fd7792ac037a',
-  'c7176a703d4dd84fba3c0b760d10670f2a2053fa2c39ccc64ec7fd7792ac03fa',
-]);
-
-function toHex(bytes: Uint8Array): string {
-  let s = '';
-  for (let i = 0; i < bytes.length; i++) s += bytes[i].toString(16).padStart(2, '0');
-  return s;
-}
 
 /**
  * True if the signature scalar S (signature bytes 32..64, little-endian) is
@@ -190,13 +159,20 @@ export async function verify(
   if (publicKey.length !== ED25519_PUBLIC_KEY_BYTES) return false;
   if (signature.length !== ED25519_SIGNATURE_BYTES) return false;
 
-  // 2. Reject small-order public keys.
-  if (ED25519_SMALL_ORDER_PUBLIC_KEYS.has(toHex(publicKey))) return false;
+  // 2. Bounded admissibility precheck on the public key. Expanded from the earlier small-order
+  //    table to also cover out-of-range encoded y and the invalid zero-x sign encodings, so the
+  //    decision no longer depends on which runtime primitive performs it.
+  if (isRejectedEd25519PointEncoding(publicKey)) return false;
 
   // 3. Reject non-reduced scalar S >= L (fixed-width little-endian byte
   // comparison; both operands are public signature bytes, an admissibility
   // guard, not secret-dependent key handling).
   if (scalarIsNonCanonical(signature)) return false;
+
+  // 4. The same bounded precheck on the signature's R component. Reached only after the 64-byte
+  //    length check above, so this view always exists. Its absence was the cause of the observed
+  //    cross-runtime divergence: R was never subjected to the check that A already had.
+  if (isRejectedEd25519PointEncoding(signature.subarray(0, ED25519_PUBLIC_KEY_BYTES))) return false;
 
   // 4. Cofactorless verification via Web Crypto (fails closed if unavailable).
   const subtle = subtleCrypto();

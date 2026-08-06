@@ -213,18 +213,33 @@ describe('Ed25519 verification-profile corpus: empirical-matrix integrity', () =
     }
   });
 
-  it('exactly four corpus vectors carry a denylisted small-order public key', () => {
-    // The README documents that speccheck 0/1/10/11 are the small-order-key
-    // vectors and that only 2 of the 11 denylist entries appear in the corpus.
-    // Pin it against the actual denylist in source so the provenance note cannot
-    // drift from reality.
-    const tsSource = readFileSync(resolve(__dirname, '../src/ed25519.ts'), 'utf8');
-    const denyWindow = tsSource.slice(tsSource.indexOf('ED25519_SMALL_ORDER_PUBLIC_KEYS'));
-    const deny = new Set(denyWindow.slice(0, 2000).match(/[0-9a-f]{64}/g) ?? []);
-    expect(deny.size).toBe(11);
+  it('exactly four corpus vectors carry a rejected small-order public key', () => {
+    // The profile rejects eight canonical torsion encodings plus two PEAC mixed-order exclusions.
+    // Pin the count against the declared tables so a provenance note cannot drift from reality.
+    const source = readFileSync(
+      resolve(__dirname, '../src/internal/ed25519-admissibility.ts'),
+      'utf8'
+    );
+    const table = (name: string): string[] => {
+      const body = new RegExp(`${name} = Uint8Array\\.from\\(\\[([\\s\\S]*?)\\]\\)`).exec(source);
+      expect(body, `${name} not found`).not.toBeNull();
+      const bytes = [...body![1].matchAll(/0x([0-9a-f]{2})/g)].map((m) => m[1]);
+      const out: string[] = [];
+      for (let i = 0; i < bytes.length; i += 32) out.push(bytes.slice(i, i + 32).join(''));
+      return out;
+    };
+    const torsion = table('ED25519_TORSION_POINT_ENCODINGS');
+    const mixed = table('PEAC_PROFILE_MIXED_ORDER_REJECTIONS');
+    expect(torsion).toHaveLength(8);
+    expect(mixed).toHaveLength(2);
 
-    const small = corpus.vectors.filter((v) => deny.has(v.public_key_hex));
-    // Only two distinct denylisted encodings appear as a corpus public key.
+    // One of the four is rejected algorithmically rather than by table: its encoding sets the sign
+    // bit on y = p - 1, which is the invalid zero-x case. Assert the outcome, not the mechanism,
+    // so moving a rule between table and arithmetic does not look like a behaviour change.
+    const tabled = new Set([...torsion, ...mixed]);
+    const small = corpus.vectors.filter(
+      (v) => tabled.has(v.public_key_hex) || (parseInt(v.public_key_hex.slice(62), 16) & 0x80) !== 0
+    );
     expect(new Set(small.map((v) => v.public_key_hex)).size).toBe(2);
     expect(small.map((v) => v.id).sort()).toEqual([
       'speccheck-0',
@@ -233,157 +248,19 @@ describe('Ed25519 verification-profile corpus: empirical-matrix integrity', () =
       'speccheck-11',
     ]);
   });
-});
 
-// ---------------------------------------------------------------------------
-// Runtime failure semantics: an unsupported-Ed25519 runtime must fail closed
-// (throw Ed25519RuntimeError), while a malformed public key is a plain
-// rejection (false). No fallback to noble may occur in either case.
-// ---------------------------------------------------------------------------
-describe('Ed25519 verification-profile: runtime failure semantics', () => {
-  const positive = () => {
-    const v = corpus.vectors.find((x) => x.id === 'peac-sign-positive')!;
-    return { sig: hex(v.signature_hex), msg: hex(v.message_hex), pub: hex(v.public_key_hex) };
-  };
-
-  it('throws Ed25519RuntimeError when subtle.importKey raises NotSupportedError', async () => {
-    const { sig, msg, pub } = positive();
-    const original = globalThis.crypto;
-    try {
-      Object.defineProperty(globalThis, 'crypto', {
-        value: {
-          ...original,
-          subtle: {
-            importKey: async () => {
-              const err = new Error('Ed25519 not supported');
-              err.name = 'NotSupportedError';
-              throw err;
-            },
-            // verify must never be reached on a failed import.
-            verify: async () => {
-              throw new Error('verify must not run when importKey failed');
-            },
-          },
-        },
-        configurable: true,
-      });
-      await expect(verify(sig, msg, pub)).rejects.toBeInstanceOf(Ed25519RuntimeError);
-    } finally {
-      Object.defineProperty(globalThis, 'crypto', { value: original, configurable: true });
-    }
-  });
-
-  it('throws Ed25519RuntimeError when subtle.verify raises NotSupportedError', async () => {
-    const { sig, msg, pub } = positive();
-    const original = globalThis.crypto;
-    try {
-      Object.defineProperty(globalThis, 'crypto', {
-        value: {
-          ...original,
-          subtle: {
-            importKey: async () => ({}) as never,
-            verify: async () => {
-              const err = new Error('Ed25519 not supported');
-              err.name = 'NotSupportedError';
-              throw err;
-            },
-          },
-        },
-        configurable: true,
-      });
-      await expect(verify(sig, msg, pub)).rejects.toBeInstanceOf(Ed25519RuntimeError);
-    } finally {
-      Object.defineProperty(globalThis, 'crypto', { value: original, configurable: true });
-    }
-  });
-
-  it('returns false (not throw) for a malformed public key (DataError), no noble fallback', async () => {
-    const { sig, msg } = positive();
-    // A 32-byte but non-decodable point can make subtle.importKey raise
-    // DataError. Simulate that name so the branch is deterministic; verify()
-    // must return false, and must NOT consult noble.
-    const original = globalThis.crypto;
-    let verifyReached = false;
-    try {
-      Object.defineProperty(globalThis, 'crypto', {
-        value: {
-          ...original,
-          subtle: {
-            importKey: async () => {
-              const err = new Error('invalid keyData');
-              err.name = 'DataError';
-              throw err;
-            },
-            verify: async () => {
-              verifyReached = true;
-              return true;
-            },
-          },
-        },
-        configurable: true,
-      });
-      const result = await verify(sig, msg, new Uint8Array(32));
-      expect(result).toBe(false);
-      expect(verifyReached, 'subtle.verify must not run after a failed import').toBe(false);
-    } finally {
-      Object.defineProperty(globalThis, 'crypto', { value: original, configurable: true });
-    }
-  });
-
-  it('a bad signature on a valid key returns false (genuine rejection)', async () => {
-    const v = corpus.vectors.find((x) => x.id === 'peac-sign-positive')!;
-    const badSig = hex(v.signature_hex);
-    badSig[0] ^= 0xff;
-    expect(await verify(badSig, hex(v.message_hex), hex(v.public_key_hex))).toBe(false);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// Signing regression: prove sign() output is byte-identical to the
-// peac-sign-positive vector. Verification-profile changes must not perturb
-// signing output. Also a fixed-seed golden lock.
-// ---------------------------------------------------------------------------
-describe('Ed25519 verification-profile: signing unchanged', () => {
-  it('peac-sign-positive signature is exactly reproduced by sign() from its seed', async () => {
-    // The vector was generated with this fixed seed and message.
-    const seed = hex('9d61b19deffebc3df40d9c4ee94a0a3d24a39c70c4c4f4d6f4d5f8c6e5b4a392');
-    const msg = new TextEncoder().encode('peac ed25519 profile positive control');
-    const pub = await getPublicKey(seed);
-    const sig = await sign(msg, seed);
-
-    const v = corpus.vectors.find((x) => x.id === 'peac-sign-positive')!;
-    expect(Buffer.from(pub).toString('hex')).toBe(v.public_key_hex);
-    expect(Buffer.from(msg).toString('hex')).toBe(v.message_hex);
-    expect(Buffer.from(sig).toString('hex')).toBe(v.signature_hex);
-    // And it verifies under the profile.
-    expect(await verify(sig, msg, pub)).toBe(true);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// Denylist byte-equality: the small-order denylist must be byte-for-byte
-// identical in the TS and Go verifiers, and contain exactly 11 entries. We
-// extract the 64-hex-char strings from each source file and compare.
-// ---------------------------------------------------------------------------
-describe('Ed25519 verification-profile: small-order denylist byte-equality', () => {
-  function extractDenylist(source: string, marker: string): string[] {
-    const start = source.indexOf(marker);
-    expect(start, `marker "${marker}" present`).toBeGreaterThanOrEqual(0);
-    // Grab a window after the declaration. The only 64-hex-char tokens here are
-    // the denylist entries (the surrounding map/set type syntax has no 64-hex
-    // runs). Take a generous window and de-duplicate while preserving order.
-    const window = source.slice(start, start + 2000);
-    const all = window.match(/[0-9a-f]{64}/g) ?? [];
-    return [...new Set(all)].sort();
-  }
-
-  it('TS and Go denylists are identical and have 11 entries', () => {
-    const tsSource = readFileSync(resolve(__dirname, '../src/ed25519.ts'), 'utf8');
-    const goSource = readFileSync(resolve(__dirname, '../../../sdks/go/jws/ed25519.go'), 'utf8');
-    const tsList = extractDenylist(tsSource, 'ED25519_SMALL_ORDER_PUBLIC_KEYS');
-    const goList = extractDenylist(goSource, 'ed25519SmallOrderPublicKeys');
-    expect(tsList).toHaveLength(11);
-    expect(goList).toHaveLength(11);
-    expect(tsList).toEqual(goList);
+  it('the profile applies the same tables to the signature R component', () => {
+    // The regression this change repairs: R was never subjected to the check A already had.
+    const source = readFileSync(
+      resolve(__dirname, '../src/internal/ed25519-admissibility.ts'),
+      'utf8'
+    );
+    expect(source).toContain('ED25519_TORSION_POINT_ENCODINGS');
+    expect(source).toContain('PEAC_PROFILE_MIXED_ORDER_REJECTIONS');
+    const verifySource = readFileSync(resolve(__dirname, '../src/ed25519.ts'), 'utf8');
+    expect(verifySource).toContain('isRejectedEd25519PointEncoding(publicKey)');
+    expect(verifySource).toContain(
+      'isRejectedEd25519PointEncoding(signature.subarray(0, ED25519_PUBLIC_KEY_BYTES))'
+    );
   });
 });

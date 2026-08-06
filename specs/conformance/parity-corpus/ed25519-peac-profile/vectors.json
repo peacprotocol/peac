@@ -1,7 +1,7 @@
 {
   "family": "ed25519-peac-profile",
-  "description": "Ed25519 verification edge vectors proving TypeScript (Web Crypto) and Go (crypto/ed25519) agree under the PEAC cofactorless verification profile.",
-  "version": "0.16.3",
+  "description": "Ed25519 verification edge vectors proving TypeScript (Web Crypto) and Go (crypto/ed25519) reach the same accept/reject decision under the PEAC Ed25519 verification profile. The profile applies a bounded admissibility precheck to BOTH the public key A and the signature component R before delegating remaining curve validity and the signature equation to the runtime primitive.",
+  "version": "0.17.0-dev",
   "status": "Informative",
   "vectors": [
     {
@@ -53,7 +53,10 @@
       "public_key_hex": "f7badec5b8abeaf699583992219b7b223f1df3fbbea919844e3f7c554a43dd43",
       "signature_hex": "c7176a703d4dd84fba3c0b760d10670f2a2053fa2c39ccc64ec7fd7792ac03fa8c4bd45aecaca5b24fb97bc10ac27ac8751a7dfe1baff8b953ec9f5833ca260e",
       "peac_expected": {
-        "accepted": true
+        "accepted": false,
+        "regression_reason": "small_order_R",
+        "profile_findings": ["peac_mixed_order_A", "small_order_R"],
+        "note": "Two independent findings. The compatibility regression this vector tracks is the missing R precheck: R is a canonical small-order encoding that the profile tabled for A but never applied to R. Separately, A is a canonical mixed-order point that the PEAC profile has rejected since 0.16.3. Implementation check order decides which is reported first; it does not decide which findings are true."
       },
       "empirical": {
         "noble_zip215": true,
@@ -61,7 +64,8 @@
         "curves_strict": true,
         "node_native": true,
         "webcrypto": true,
-        "peac_profile": true
+        "peac_profile": false,
+        "note": "Empirical columns record what each primitive does with the raw inputs, independently of the PEAC profile outcome above."
       }
     },
     {
