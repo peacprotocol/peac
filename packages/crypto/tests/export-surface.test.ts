@@ -8,7 +8,7 @@
  * its declared dependencies provisioned by symlink; this is not a package-manager installation, and
  * it is sufficient because what is under test is the export map and the declaration surface.
  */
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, afterAll, beforeAll } from 'vitest';
 import { execFileSync } from 'node:child_process';
 import { mkdtempSync, readFileSync, readdirSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -39,6 +39,10 @@ beforeAll(() => {
   execFileSync('mkdir', ['-p', extracted]);
   execFileSync('tar', ['-xzf', join(workspace, tarball!), '-C', extracted]);
 }, 180_000);
+
+afterAll(() => {
+  if (workspace) rmSync(workspace, { recursive: true, force: true });
+});
 
 const packageDir = (): string => join(extracted, 'package');
 
