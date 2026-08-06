@@ -872,11 +872,14 @@ jobs:
   #
   # Three-tier policy: Node 22 = blocking compatibility floor for
   # published packages; Node 24 = primary release-validation and
-  # maintainer runtime; Node 26 = non-blocking forward-compatibility
-  # canary (Current, not LTS). Node 25 was removed as EOL.
+  # maintainer runtime; Node 26 = blocking forward-compatibility lane
+  # (Current, NOT LTS). Node 25 was removed as EOL.
   #
-  # `experimental` drives job-level `continue-on-error` below so the
-  # Node 26 cell reports without blocking the required check.
+  # Node 26 became blocking once the Ed25519 admissibility profile stopped
+  # delegating low-order signature R to the runtime primitive. Before that
+  # the lane reported a genuine divergence no CI policy could fix, so it was
+  # advisory. It is an ADDITIONAL blocking lane, never a replacement for
+  # either LTS line.
   # ---------------------------------------------------------------------------
   node-compat:
     name: Node ${{ matrix.node-version }} (compat)
@@ -906,8 +909,8 @@ jobs:
           # The resolved version is captured below so the tested version is recorded.
           # check-latest: true so setup-node bypasses a possibly-stale runner
           # tool-cache hit for the floating major and always resolves newest.
-          - node-version: '26' # non-blocking: Current-line canary (floating)
-            experimental: true
+          - node-version: '26' # blocking: Current-line forward compatibility (floating)
+            experimental: false
             check-latest: true
     steps:
       - name: Checkout
