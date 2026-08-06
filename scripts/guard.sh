@@ -26,8 +26,11 @@ gg_wb() {
 }
 
 echo "== forbid dist imports =="
-# Allow dist imports in scripts/ (benchmarks run after build) and nightly workflow
+# Allow dist references in scripts/ (benchmarks run after build), in the conformance measurement
+# tools (they hash a build output as evidence and never import it; enforced by
+# packages/crypto/tests/harness-error-semantics.test.ts), and in the nightly workflow.
 if git grep -n "packages/.*/dist" -- ':!node_modules' ':!scripts/**' ':!archive/**' \
+  ':!packages/crypto/tests/tools/**' \
   | grep -vE '^(\.github/workflows/nightly\.yml)' | grep .; then
   bad=1
 else

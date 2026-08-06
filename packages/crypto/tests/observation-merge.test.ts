@@ -24,6 +24,7 @@ const corpus = JSON.parse(readFileSync(join(CORPUS_DIR, 'vectors.json'), 'utf8')
 function wellFormed(): Record<string, unknown> {
   return {
     observed_on: '2026-08-06',
+    measurement_source_revision: 'a'.repeat(40),
     environments: {
       'probe-1': {
         implementation: 'probe:primitive',
@@ -83,6 +84,40 @@ describe('the observation merge refuses evidence it cannot stand behind', () => 
   it('accepts a well-formed document', () => {
     const result = merge([wellFormed()]);
     expect(result.status, result.output).toBe(0);
+  });
+
+  it('rejects a missing source revision', () => {
+    const doc = wellFormed();
+    delete doc.measurement_source_revision;
+    const result = merge([doc]);
+    expect(result.status).not.toBe(0);
+    expect(result.output).toMatch(/measurement_source_revision/);
+  });
+
+  it.each(['not-a-sha', 'A'.repeat(40), 'a'.repeat(39), ''])(
+    'rejects the malformed source revision %s',
+    (value) => {
+      const doc = wellFormed();
+      doc.measurement_source_revision = value;
+      const result = merge([doc]);
+      expect(result.status).not.toBe(0);
+      expect(result.output).toMatch(/measurement_source_revision/);
+    }
+  );
+
+  it('rejects inputs naming different source revisions', () => {
+    const a = wellFormed();
+    const b = wellFormed();
+    // A distinct environment, so the merge reaches the revision check rather than failing earlier
+    // on a repeated environment id.
+    const envs = b.environments as Record<string, unknown>;
+    envs['probe-2'] = envs['probe-1'];
+    delete envs['probe-1'];
+    for (const o of b.observations as { environment_id: string }[]) o.environment_id = 'probe-2';
+    b.measurement_source_revision = 'b'.repeat(40);
+    const result = merge([a, b]);
+    expect(result.status).not.toBe(0);
+    expect(result.output).toMatch(/source revisions/);
   });
 
   it('rejects an exact duplicate observation identity', () => {

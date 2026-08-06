@@ -73,7 +73,14 @@ for (const input of inputs) {
   seenInputs.add(resolved);
 
   const doc = JSON.parse(readFileSync(resolved, 'utf8'));
-  if (doc.measurement_source_revision) sourceRevisions.add(doc.measurement_source_revision);
+  // Mandatory: evidence that does not name the revision it measured cannot be checked against it.
+  if (!/^[0-9a-f]{40}$/.test(doc.measurement_source_revision ?? '')) {
+    fail(
+      `${input}: measurement_source_revision is missing or malformed: ` +
+        `${doc.measurement_source_revision}`
+    );
+  }
+  sourceRevisions.add(doc.measurement_source_revision);
   if (!isCalendarDate(doc.observed_on)) {
     fail(`${input}: observed_on is missing, malformed or not a real date: ${doc.observed_on}`);
   }
@@ -147,8 +154,10 @@ if (!outcomes.has('accept') || !outcomes.has('reject')) {
 if (observedOn.size !== 1) {
   fail(`inputs were measured on different dates: ${[...observedOn].sort().join(', ')}`);
 }
-if (sourceRevisions.size > 1) {
-  fail(`inputs name different source revisions: ${[...sourceRevisions].sort().join(', ')}`);
+if (sourceRevisions.size !== 1) {
+  fail(
+    `inputs name ${sourceRevisions.size} source revisions: ${[...sourceRevisions].sort().join(', ')}`
+  );
 }
 
 const document = {
@@ -159,7 +168,7 @@ const document = {
     'Measured Ed25519 primitive decisions per implementation version. Evidence only: no ' +
     'conformance decision reads this file. The normative outcome is peac_expected in vectors.json.',
   observed_on: [...observedOn][0],
-  ...(sourceRevisions.size === 1 ? { measurement_source_revision: [...sourceRevisions][0] } : {}),
+  measurement_source_revision: [...sourceRevisions][0],
   environments,
   observations,
 };

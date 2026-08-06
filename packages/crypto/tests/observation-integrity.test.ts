@@ -7,9 +7,16 @@
  */
 import { describe, it, expect } from 'vitest';
 import Ajv2020 from 'ajv/dist/2020.js';
-import { createHash } from 'node:crypto';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
+import {
+  CORPUS_PATH,
+  LOCKFILE_PATH,
+  MEASURED_ARTIFACT_PATH,
+  PRODUCTION_SOURCES,
+  fileDigest,
+  productionSourceManifestDigest,
+} from './tools/evidence-provenance.mjs';
 
 const CRYPTO_ROOT = resolve(__dirname, '..');
 const REPO_ROOT = resolve(CRYPTO_ROOT, '..', '..');
@@ -21,6 +28,12 @@ interface Environment {
   platform: string;
   harness: string;
   harness_sha256: string;
+  corpus_sha256: string;
+  lockfile_sha256: string;
+  surface?: string;
+  measured_artifact_sha256?: string;
+  wrapper_bundle_sha256?: string;
+  production_source_manifest_sha256?: string;
   runtime_version?: string;
   bundler_version?: string;
 }
@@ -29,6 +42,7 @@ const document = JSON.parse(
   readFileSync(join(CORPUS_DIR, 'runtime-observations.json'), 'utf8')
 ) as {
   observed_on: string;
+  measurement_source_revision: string;
   environments: Record<string, Environment>;
   observations: { vector_id: string; environment_id: string; outcome: string }[];
 };
@@ -56,13 +70,18 @@ describe('the committed runtime observations', () => {
     expect(validate(broken)).toBe(false);
   });
 
+  it('records a source revision that is a single lowercase commit SHA', () => {
+    expect(document.measurement_source_revision, 'measurement_source_revision').toMatch(
+      /^[0-9a-f]{40}$/
+    );
+  });
+
   it('each environment names a harness whose current source hashes to the recorded digest', () => {
     const digests = new Map<string, string>();
     for (const [id, environment] of Object.entries(document.environments)) {
       expect(environment.harness, `${id} declares its harness`).toBeTruthy();
       if (!digests.has(environment.harness)) {
-        const source = readFileSync(join(REPO_ROOT, environment.harness));
-        digests.set(environment.harness, createHash('sha256').update(source).digest('hex'));
+        digests.set(environment.harness, fileDigest(REPO_ROOT, environment.harness));
       }
       expect(
         environment.harness_sha256,
@@ -70,6 +89,66 @@ describe('the committed runtime observations', () => {
       ).toBe(digests.get(environment.harness));
     }
     expect(digests.size, 'observations come from more than one harness').toBeGreaterThan(1);
+  });
+
+  // Recomputation, not shape validation. A well-formed but wrong digest passes the schema
+  // and would leave the evidence describing inputs that were never measured.
+  it('recomputes the corpus digest from the normative vectors', () => {
+    const expected = fileDigest(REPO_ROOT, CORPUS_PATH);
+    for (const [id, environment] of Object.entries(document.environments)) {
+      expect(environment.corpus_sha256, `${id}: corpus digest`).toBe(expected);
+    }
+  });
+
+  it('recomputes the lockfile digest', () => {
+    const expected = fileDigest(REPO_ROOT, LOCKFILE_PATH);
+    for (const [id, environment] of Object.entries(document.environments)) {
+      expect(environment.lockfile_sha256, `${id}: lockfile digest`).toBe(expected);
+    }
+  });
+
+  it('recomputes the production source manifest for every wrapper surface', () => {
+    const expected = productionSourceManifestDigest(REPO_ROOT, PRODUCTION_SOURCES);
+    const wrappers = Object.entries(document.environments).filter(
+      ([, e]) => e.surface === 'peac-wrapper'
+    );
+    expect(wrappers.length, 'wrapper environments are present').toBeGreaterThan(0);
+    for (const [id, environment] of wrappers) {
+      expect(environment.production_source_manifest_sha256, `${id}: source manifest`).toBe(
+        expected
+      );
+    }
+  });
+
+  it('recomputes the measured artifact digest when the package has been built', () => {
+    // Build-aware: the artifact exists only after a build, so its absence is reported rather than
+    // silently passing.
+    const artifact = join(REPO_ROOT, MEASURED_ARTIFACT_PATH);
+    const wrappers = Object.entries(document.environments).filter(
+      ([, e]) => e.surface === 'peac-wrapper'
+    );
+    if (!existsSync(artifact)) {
+      expect(
+        process.env.PEAC_REQUIRE_BUILT_ARTIFACT,
+        `${MEASURED_ARTIFACT_PATH} is absent; run the build before asserting the artifact digest`
+      ).toBeUndefined();
+      return;
+    }
+    const expected = fileDigest(REPO_ROOT, MEASURED_ARTIFACT_PATH);
+    for (const [id, environment] of wrappers) {
+      expect(environment.measured_artifact_sha256, `${id}: measured artifact`).toBe(expected);
+    }
+  });
+
+  it('does not claim to recompute the wrapper bundle', () => {
+    // The bundle is produced by the pinned external esbuild in the browser-evidence workflow, which
+    // ordinary unit CI does not run. The digest is recorded there and verified there, not here.
+    for (const [id, environment] of Object.entries(document.environments)) {
+      if (environment.surface !== 'peac-wrapper') continue;
+      expect(environment.wrapper_bundle_sha256, `${id}: bundle digest recorded`).toMatch(
+        /^[0-9a-f]{64}$/
+      );
+    }
   });
 
   it('records an exact version for every runtime and bundler it names', () => {

@@ -21,6 +21,13 @@ import { release } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import * as ed from '@noble/ed25519';
+import {
+  CORPUS_PATH,
+  LOCKFILE_PATH,
+  fileDigest,
+  resolveSourceRevision,
+  sha256,
+} from './evidence-provenance.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const SELF = fileURLToPath(import.meta.url);
@@ -46,11 +53,9 @@ const observedOn = opt('--observed-on', new Date().toISOString().slice(0, 10));
 if (!/^\d{4}-\d{2}-\d{2}$/.test(observedOn)) {
   throw new Error(`--observed-on must be YYYY-MM-DD, got: ${observedOn}`);
 }
-// The commit whose sources were measured. Recorded so evidence names the revision it describes.
-const sourceRevision = opt('--source-revision', null);
-if (sourceRevision !== null && !/^[0-9a-f]{40}$/.test(sourceRevision)) {
-  throw new Error(`--source-revision must be a full commit SHA, got: ${sourceRevision}`);
-}
+// Derived from Git, never taken on trust. A supplied value must equal the checked-out revision,
+// and a dirty worktree is refused outright.
+const sourceRevision = resolveSourceRevision(REPO_ROOT, opt('--source-revision', null));
 
 /** An unexpected condition. Never recorded as a measurement. */
 class HarnessError extends Error {}
@@ -65,7 +70,6 @@ ed.hashes.sha512 = (...messages) => {
   return Uint8Array.from(hash.digest());
 };
 
-const sha256 = (buffer) => createHash('sha256').update(buffer).digest('hex');
 const bytes = (hex) => Uint8Array.from(Buffer.from(hex, 'hex'));
 
 /** DER SubjectPublicKeyInfo prefix for a raw Ed25519 public key (RFC 8410). */
@@ -157,8 +161,8 @@ const nobleVersion = createRequire(join(CRYPTO_ROOT, 'package.json'))(
 const harnessSha256 = sha256(readFileSync(SELF));
 const HARNESS_PATH = 'packages/crypto/tests/tools/measure-ed25519-runtimes.mjs';
 // Bind the evidence to the inputs that determine it, not only to the harness.
-const corpusSha256 = sha256(readFileSync(vectorsPath));
-const lockfileSha256 = sha256(readFileSync(join(REPO_ROOT, 'pnpm-lock.yaml')));
+const corpusSha256 = fileDigest(REPO_ROOT, CORPUS_PATH);
+const lockfileSha256 = fileDigest(REPO_ROOT, LOCKFILE_PATH);
 const platform = `${process.platform}/${process.arch}`;
 
 const environments = {};
@@ -263,7 +267,7 @@ process.stdout.write(
   `${JSON.stringify(
     {
       observed_on: observedOn,
-      ...(sourceRevision ? { measurement_source_revision: sourceRevision } : {}),
+      measurement_source_revision: sourceRevision,
       environments,
       observations,
     },

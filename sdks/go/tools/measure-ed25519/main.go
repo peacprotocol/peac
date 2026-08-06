@@ -55,7 +55,7 @@ type observation struct {
 
 type document struct {
 	ObservedOn   string                 `json:"observed_on"`
-	SourceRev    string                 `json:"measurement_source_revision,omitempty"`
+	SourceRev    string                 `json:"measurement_source_revision"`
 	Environments map[string]environment `json:"environments"`
 	Observations []observation          `json:"observations"`
 }
@@ -75,7 +75,8 @@ func main() {
 	observedOn := flag.String("observed-on", "", "YYYY-MM-DD")
 	sourcePath := flag.String("source", "tools/measure-ed25519/main.go", "path to this source, hashed into the environment record")
 	lockfilePath := flag.String("lockfile", "../../pnpm-lock.yaml", "path to the workspace lockfile, hashed into the environment record")
-	sourceRevision := flag.String("source-revision", "", "full commit SHA whose sources were measured")
+	sourceRevision := flag.String("source-revision", "", "optional; must equal the checked-out revision")
+	repoRoot := flag.String("repo-root", "../..", "repository root, used to derive the source revision")
 	flag.Parse()
 
 	if *vectorsPath == "" {
@@ -106,9 +107,13 @@ func main() {
 	if err != nil {
 		fail(fmt.Sprintf("read lockfile: %v", err))
 	}
-	if *sourceRevision != "" && !revisionRE.MatchString(*sourceRevision) {
-		fail("--source-revision must be a full commit SHA")
+	// Derived from Git, never taken on trust, and refused outright on a dirty worktree: evidence
+	// must not name a commit that does not contain what ran.
+	derived := deriveSourceRevision(*repoRoot)
+	if *sourceRevision != "" && *sourceRevision != derived {
+		fail(fmt.Sprintf("--source-revision %s does not match the checked-out revision %s", *sourceRevision, derived))
 	}
+	*sourceRevision = derived
 
 	envID := fmt.Sprintf("go-%s-%s", runtime.Version(), runtime.GOARCH)
 	env := environment{
@@ -206,4 +211,24 @@ func osRelease() string {
 func fail(message string) {
 	fmt.Fprintf(os.Stderr, "measure-ed25519: %s\n", message)
 	os.Exit(1)
+}
+
+// deriveSourceRevision reads HEAD from Git and requires a clean worktree.
+func deriveSourceRevision(repoRoot string) string {
+	head, err := exec.Command("git", "-C", repoRoot, "rev-parse", "HEAD").Output()
+	if err != nil {
+		fail(fmt.Sprintf("cannot determine the source revision from Git: %v", err))
+	}
+	revision := string(bytes.TrimSpace(head))
+	if !revisionRE.MatchString(revision) {
+		fail(fmt.Sprintf("git rev-parse HEAD returned an unexpected value: %s", revision))
+	}
+	dirty, err := exec.Command("git", "-C", repoRoot, "status", "--porcelain=v2").Output()
+	if err != nil {
+		fail(fmt.Sprintf("cannot determine worktree cleanliness: %v", err))
+	}
+	if len(bytes.TrimSpace(dirty)) > 0 {
+		fail("refusing to measure a dirty worktree: evidence would name a commit that does not contain what ran")
+	}
+	return revision
 }

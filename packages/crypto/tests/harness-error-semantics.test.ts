@@ -9,7 +9,7 @@
  * that changes exactly that construct.
  */
 import { describe, it, expect } from 'vitest';
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
 const CRYPTO_ROOT = resolve(__dirname, '..');
@@ -82,11 +82,47 @@ describe('the browser harness matches capability errors exactly', () => {
   });
 
   it('checks a positive and a negative control on both surfaces', () => {
-    for (const control of ['raw_accept', 'raw_reject', 'wrapper_accept', 'wrapper_reject']) {
+    for (const control of [
+      'messages_differ',
+      'raw_accept',
+      'raw_reject',
+      'wrapper_accept',
+      'wrapper_reject',
+    ]) {
       expect(browserSource, `${control} is not asserted`).toContain(`'${control}'`);
     }
-    // The negative control must expect rejection; inverting it is a mutation.
     expect(browserSource).toMatch(/\['raw_reject', false\]/);
     expect(browserSource).toMatch(/\['wrapper_reject', false\]/);
+    expect(browserSource).toMatch(/\['messages_differ', true\]/);
+  });
+
+  it('the negative control changes the message, not the signature', () => {
+    // Mutating the signature could be rejected by the admissibility precheck, which would prove
+    // nothing about the delegated equation. Changing the message can only fail at that equation.
+    expect(browserSource).toContain('rawVerify(changed)');
+    expect(browserSource).toContain('__peacVerify(signature, changed, raw)');
+    // The key and signature must be the ones the positive control used.
+    expect(browserSource).toContain('rawVerify(original)');
+    expect(browserSource).toContain('__peacVerify(signature, original, raw)');
+    expect(browserSource).not.toMatch(/tampered\[0\] \^= 0x01/);
+  });
+});
+
+describe('the measurement tools reference the build output without importing it', () => {
+  // guard.sh exempts this directory from the dist rule because these tools hash a build artifact as
+  // evidence. That exemption must not become cover for an actual dist import.
+  const TOOLS = join(CRYPTO_ROOT, 'tests', 'tools');
+  const sources = readdirSync(TOOLS)
+    .filter((f) => f.endsWith('.mjs'))
+    .map((f) => [f, readFileSync(join(TOOLS, f), 'utf8')] as const);
+
+  it('reads more than one tool', () => {
+    expect(sources.length).toBeGreaterThan(1);
+  });
+
+  it.each(sources.map(([name]) => name))('%s does not import from dist', (name) => {
+    const source = sources.find(([f]) => f === name)![1];
+    expect(source).not.toMatch(/(?:import|require)\s*\(?\s*['"][^'"]*\/dist\//);
+    expect(source).not.toMatch(/from\s+['"][^'"]*\/dist\//);
   });
 });

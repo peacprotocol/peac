@@ -4,7 +4,14 @@
   "title": "Ed25519 profile runtime observations",
   "description": "Informative record of measured Ed25519 primitive decisions per implementation version. No conformance decision reads this file; peac_expected in vectors.json is normative.",
   "type": "object",
-  "required": ["family", "status", "observed_on", "environments", "observations"],
+  "required": [
+    "family",
+    "status",
+    "observed_on",
+    "measurement_source_revision",
+    "environments",
+    "observations"
+  ],
   "additionalProperties": false,
   "properties": {
     "$schema": {

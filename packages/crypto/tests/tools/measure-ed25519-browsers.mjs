@@ -21,12 +21,21 @@
  *
  * Writes a JSON document to stdout. Never mutates the corpus.
  */
-import { createHash } from 'node:crypto';
 import { createServer } from 'node:http';
 import { existsSync, readFileSync } from 'node:fs';
 import { release } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import {
+  CORPUS_PATH,
+  LOCKFILE_PATH,
+  MEASURED_ARTIFACT_PATH,
+  PRODUCTION_SOURCES,
+  fileDigest,
+  productionSourceManifestDigest,
+  resolveSourceRevision,
+  sha256,
+} from './evidence-provenance.mjs';
 
 const SELF = fileURLToPath(import.meta.url);
 const HERE = dirname(SELF);
@@ -60,10 +69,7 @@ const observedOn = opt('--observed-on', new Date().toISOString().slice(0, 10));
 if (!/^\d{4}-\d{2}-\d{2}$/.test(observedOn)) {
   throw new Error(`--observed-on must be YYYY-MM-DD, got: ${observedOn}`);
 }
-const sourceRevision = opt('--source-revision', null);
-if (sourceRevision !== null && !/^[0-9a-f]{40}$/.test(sourceRevision)) {
-  throw new Error(`--source-revision must be a full commit SHA, got: ${sourceRevision}`);
-}
+const sourceRevision = resolveSourceRevision(REPO_ROOT, opt('--source-revision', null));
 
 const bundlePath = join(CRYPTO_ROOT, 'dist', 'index.mjs');
 if (!existsSync(bundlePath)) {
@@ -112,24 +118,16 @@ function requiredVersion(name) {
 const playwrightVersion = requiredVersion('playwright');
 const esbuildVersion = requiredVersion('esbuild');
 
-const sha256 = (buffer) => createHash('sha256').update(buffer).digest('hex');
 const corpus = JSON.parse(readFileSync(vectorsPath, 'utf8'));
 const harnessSha256 = sha256(readFileSync(SELF));
-const corpusSha256 = sha256(readFileSync(vectorsPath));
-const lockfileSha256 = sha256(readFileSync(join(REPO_ROOT, 'pnpm-lock.yaml')));
-// The wrapper surface measures built PEAC code, so the evidence names the exact artifact and the
-// exact production sources behind it.
-const measuredArtifactSha256 = sha256(readFileSync(bundlePath));
-const PRODUCTION_SOURCES = [
-  'packages/crypto/src/ed25519.ts',
-  'packages/crypto/src/internal/ed25519-admissibility.ts',
-];
-const productionSourceManifestSha256 = sha256(
-  Buffer.from(
-    PRODUCTION_SOURCES.map((rel) => `${rel} ${sha256(readFileSync(join(REPO_ROOT, rel)))}`).join(
-      '\n'
-    )
-  )
+const corpusSha256 = fileDigest(REPO_ROOT, CORPUS_PATH);
+const lockfileSha256 = fileDigest(REPO_ROOT, LOCKFILE_PATH);
+// The wrapper surface measures built PEAC code, so the evidence names the exact artifact and
+// the exact production sources behind it, using the shared canonical algorithm.
+const measuredArtifactSha256 = fileDigest(REPO_ROOT, MEASURED_ARTIFACT_PATH);
+const productionSourceManifestSha256 = productionSourceManifestDigest(
+  REPO_ROOT,
+  PRODUCTION_SOURCES
 );
 
 const bundled = await esbuild.build({
@@ -200,23 +198,29 @@ async function measureInPage(vectors) {
  * used so that the zero-length-message divergence cannot affect the control.
  */
 async function controlInPage() {
-  const message = new TextEncoder().encode('peac ed25519 browser control');
+  const encoder = new TextEncoder();
+  const original = encoder.encode('peac ed25519 browser control');
+  // A different non-empty message, verified against the SAME key and signature. Mutating the
+  // signature instead could be rejected by the admissibility precheck, which would prove nothing
+  // about the delegated equation; changing the message can only fail at that equation.
+  const changed = encoder.encode('peac ed25519 browser control (changed)');
+
   const pair = await crypto.subtle.generateKey({ name: 'Ed25519' }, true, ['sign', 'verify']);
   const raw = new Uint8Array(await crypto.subtle.exportKey('raw', pair.publicKey));
-  const good = new Uint8Array(await crypto.subtle.sign('Ed25519', pair.privateKey, message));
-  const tampered = Uint8Array.from(good);
-  tampered[0] ^= 0x01;
+  const signature = new Uint8Array(await crypto.subtle.sign('Ed25519', pair.privateKey, original));
 
-  const rawVerify = async (signature) => {
+  const rawVerify = async (message) => {
     const key = await crypto.subtle.importKey('raw', raw, { name: 'Ed25519' }, false, ['verify']);
     return crypto.subtle.verify('Ed25519', key, signature, message);
   };
 
   return {
-    raw_accept: await rawVerify(good),
-    raw_reject: await rawVerify(tampered),
-    wrapper_accept: await globalThis.__peacVerify(good, message, raw),
-    wrapper_reject: await globalThis.__peacVerify(tampered, message, raw),
+    messages_differ: original.length !== changed.length ||
+      original.some((byte, i) => byte !== changed[i]),
+    raw_accept: await rawVerify(original),
+    raw_reject: await rawVerify(changed),
+    wrapper_accept: await globalThis.__peacVerify(signature, original, raw),
+    wrapper_reject: await globalThis.__peacVerify(signature, changed, raw),
   };
 }
 
@@ -246,6 +250,7 @@ try {
 
       const control = await page.evaluate(controlInPage);
       for (const [field, expected] of [
+        ['messages_differ', true],
         ['raw_accept', true],
         ['raw_reject', false],
         ['wrapper_accept', true],
@@ -324,7 +329,7 @@ process.stdout.write(
   `${JSON.stringify(
     {
       observed_on: observedOn,
-      ...(sourceRevision ? { measurement_source_revision: sourceRevision } : {}),
+      measurement_source_revision: sourceRevision,
       environments,
       observations,
     },
