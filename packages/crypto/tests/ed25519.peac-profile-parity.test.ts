@@ -8,9 +8,8 @@
  * must reach identical decisions.
  *
  * The asserted field is `peac_expected.accepted`: the TypeScript verifier
- * must reproduce it for every vector. The per-vector `empirical` block is
- * diagnostic provenance (how several libraries actually decide the vector)
- * and is not asserted here.
+ * must reproduce it for every vector. Measured runtime behaviour lives in the
+ * sibling runtime-observations.json and is evidence only.
  */
 
 import { readFileSync } from 'node:fs';
@@ -27,13 +26,13 @@ const CORPUS_PATH = resolve(
   '../../../specs/conformance/parity-corpus/ed25519-peac-profile/vectors.json'
 );
 
-interface Empirical {
-  noble_zip215: boolean;
-  noble_strict: boolean;
-  curves_strict: boolean;
-  node_native: boolean;
-  webcrypto: boolean;
-  peac_profile: boolean;
+interface Observation {
+  implementation: string;
+  version: string;
+  platform: string;
+  observed_at: string;
+  accepted: boolean | null;
+  unsupported?: boolean;
 }
 
 interface Vector {
@@ -43,18 +42,30 @@ interface Vector {
   message_hex: string;
   public_key_hex: string;
   signature_hex: string;
-  peac_expected: { accepted: boolean };
-  empirical: Empirical;
+  peac_expected: {
+    accepted: boolean;
+    regression_reason?: string;
+    profile_findings?: string[];
+  };
 }
 
 interface Corpus {
   family: string;
   description: string;
-  version: string;
+  corpus_schema_version: number;
+  profile_revision: string;
+  release_status: string;
+  status: string;
   vectors: Vector[];
 }
 
 const corpus: Corpus = JSON.parse(readFileSync(CORPUS_PATH, 'utf8'));
+
+const OBSERVATIONS_PATH = resolve(
+  __dirname,
+  '../../../specs/conformance/parity-corpus/ed25519-peac-profile/runtime-observations.json'
+);
+const evidence: ObservationDocument = JSON.parse(readFileSync(OBSERVATIONS_PATH, 'utf8'));
 
 function hex(s: string): Uint8Array {
   return Uint8Array.from(Buffer.from(s, 'hex'));
@@ -170,46 +181,133 @@ describe('Ed25519 verification-profile parity corpus (TypeScript side)', () => {
 });
 
 // ---------------------------------------------------------------------------
-// Empirical-matrix integrity: the diagnostic provenance in the corpus must not
-// silently rot. Assert it agrees with the asserted decision and pins the two
-// load-bearing facts (cofactored-only and small-order edge classes).
+// Empirical observations are evidence; peac_expected is the only normative
+// field. These tests keep the recorded evidence complete and keep the
+// load-bearing cross-implementation divergences visible.
 // ---------------------------------------------------------------------------
-describe('Ed25519 verification-profile corpus: empirical-matrix integrity', () => {
-  it('empirical.peac_profile equals peac_expected.accepted for every vector', () => {
-    for (const v of corpus.vectors) {
-      expect(v.empirical, `${v.id} has an empirical block`).toBeDefined();
-      expect(v.empirical.peac_profile, `${v.id}: empirical.peac_profile vs peac_expected`).toBe(
-        v.peac_expected.accepted
+describe('Ed25519 verification-profile corpus: runtime observations', () => {
+  const vector = (id: string): Vector => {
+    const found = corpus.vectors.find((x) => x.id === id);
+    expect(found, `corpus vector ${id}`).toBeDefined();
+    return found!;
+  };
+
+  const environmentsFor = (implementation: string): [string, Environment][] =>
+    Object.entries(evidence.environments).filter(([, e]) => e.implementation === implementation);
+
+  /** Recorded outcomes for one implementation, keyed by version. */
+  const outcomes = (id: string, implementation: string): Map<string, string> => {
+    const envs = environmentsFor(implementation);
+    expect(envs.length, `environments for ${implementation}`).toBeGreaterThan(0);
+    const result = new Map<string, string>();
+    for (const [environmentId, environment] of envs) {
+      const row = evidence.observations.find(
+        (o) => o.vector_id === id && o.environment_id === environmentId
       );
+      expect(row, `${id}: observation in ${environmentId}`).toBeDefined();
+      result.set(environment.version, row!.outcome);
+    }
+    return result;
+  };
+
+  const every = (id: string, implementation: string, expected: string): void => {
+    for (const [version, outcome] of outcomes(id, implementation)) {
+      expect(outcome, `${id}: ${implementation}@${version}`).toBe(expected);
+    }
+  };
+
+  it('is an informative artifact for this corpus', () => {
+    expect(evidence.family).toBe(corpus.family);
+    expect(evidence.status).toBe('Informative');
+    expect(corpus.status).toBe('Normative');
+    expect(evidence.observed_on).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+  });
+
+  it('carries no runtime measurement inside the normative corpus', () => {
+    for (const v of corpus.vectors) {
+      expect(v, v.id).not.toHaveProperty('empirical');
+      expect(v, v.id).not.toHaveProperty('empirical_observations');
     }
   });
 
-  it('cofactored-only vectors 4 and 5: noble_strict accepts, Go/Web Crypto reject, PEAC rejects', () => {
+  it('every observation resolves to a described environment, exactly once', () => {
+    const seen = new Set<string>();
+    for (const o of evidence.observations) {
+      expect(['accept', 'reject', 'unsupported'], o.vector_id).toContain(o.outcome);
+      expect(
+        corpus.vectors.some((v) => v.id === o.vector_id),
+        `unknown vector ${o.vector_id}`
+      ).toBe(true);
+      const environment = evidence.environments[o.environment_id];
+      expect(environment, `undefined environment ${o.environment_id}`).toBeDefined();
+      expect(environment.harness_sha256, o.environment_id).toMatch(/^[0-9a-f]{64}$/);
+      const identity = `${o.vector_id} ${o.environment_id}`;
+      expect(seen.has(identity), `duplicate observation ${identity}`).toBe(false);
+      seen.add(identity);
+    }
+    expect(evidence.observations.length).toBe(
+      corpus.vectors.length * Object.keys(evidence.environments).length
+    );
+  });
+
+  it('cofactored-only vectors 4 and 5: noble strict accepts, cofactorless rejects', () => {
     for (const id of ['speccheck-4', 'speccheck-5']) {
-      const e = corpus.vectors.find((x) => x.id === id)!.empirical;
-      expect(e.noble_strict, `${id}: noble {zip215:false} accepts`).toBe(true);
-      expect(e.node_native, `${id}: Go-equivalent native rejects`).toBe(false);
-      expect(e.webcrypto, `${id}: Web Crypto rejects`).toBe(false);
-      expect(e.peac_profile, `${id}: PEAC rejects`).toBe(false);
+      every(id, 'noble:strict', 'accept');
+      every(id, 'node:crypto', 'reject');
+      every(id, 'go:crypto/ed25519', 'reject');
+      expect(vector(id).peac_expected.accepted, `${id}: PEAC rejects`).toBe(false);
     }
   });
 
-  it('small-order vectors 0, 1, 11: Web Crypto accepts raw, PEAC rejects (denylist)', () => {
-    for (const id of ['speccheck-0', 'speccheck-1', 'speccheck-11']) {
-      const e = corpus.vectors.find((x) => x.id === id)!.empirical;
-      expect(e.webcrypto, `${id}: Web Crypto accepts raw`).toBe(true);
-      expect(e.peac_profile, `${id}: PEAC rejects via denylist`).toBe(false);
+  it('small-order vectors 0, 1, 2 and 11 decide differently across Node versions', () => {
+    for (const id of ['speccheck-0', 'speccheck-1', 'speccheck-2', 'speccheck-11']) {
+      for (const implementation of ['node:webcrypto', 'node:crypto']) {
+        const values = new Set(outcomes(id, implementation).values());
+        expect(values.size, `${id}: ${implementation} is version-dependent`).toBeGreaterThan(1);
+      }
+      expect(vector(id).peac_expected.accepted, `${id}: PEAC rejects on every version`).toBe(false);
     }
   });
 
-  it('canonical positives: every verifier column accepts', () => {
+  it('canonical positives are accepted by every measured non-browser implementation', () => {
     for (const id of ['rfc8032-vector-1', 'peac-sign-positive']) {
-      const e = corpus.vectors.find((x) => x.id === id)!.empirical;
-      expect(e.noble_zip215, `${id}: noble ZIP215`).toBe(true);
-      expect(e.noble_strict, `${id}: noble strict`).toBe(true);
-      expect(e.node_native, `${id}: native`).toBe(true);
-      expect(e.webcrypto, `${id}: Web Crypto`).toBe(true);
-      expect(e.peac_profile, `${id}: PEAC`).toBe(true);
+      for (const implementation of [
+        'noble:zip215',
+        'noble:strict',
+        'node:crypto',
+        'node:webcrypto',
+        'go:crypto/ed25519',
+      ]) {
+        every(id, implementation, 'accept');
+      }
+      expect(vector(id).peac_expected.accepted, `${id}: PEAC accepts`).toBe(true);
+    }
+  });
+
+  it('records the WebKit zero-length-message divergence rather than hiding it', () => {
+    // WebKit does not verify an Ed25519 signature over an empty message, including one it has just
+    // produced. rfc8032-vector-1 signs an empty message. Tracked separately from this profile.
+    every('rfc8032-vector-1', 'webkit:webcrypto', 'reject');
+    every('rfc8032-vector-1', 'webkit:peac-wrapper', 'reject');
+    every('rfc8032-vector-1', 'chromium:webcrypto', 'accept');
+    every('rfc8032-vector-1', 'firefox:webcrypto', 'accept');
+    every('peac-sign-positive', 'webkit:webcrypto', 'accept');
+  });
+
+  it('the PEAC wrapper matches peac_expected in every browser except that divergence', () => {
+    for (const [environmentId, environment] of Object.entries(evidence.environments)) {
+      if (environment.surface !== 'peac-wrapper') continue;
+      for (const v of corpus.vectors) {
+        if (v.id === 'rfc8032-vector-1' && environment.implementation.startsWith('webkit'))
+          continue;
+        const row = evidence.observations.find(
+          (o) => o.vector_id === v.id && o.environment_id === environmentId
+        );
+        expect(row, `${v.id} in ${environmentId}`).toBeDefined();
+        expect(row!.outcome, `${v.id}: ${environmentId}`).toBe(
+          v.peac_expected.accepted ? 'accept' : 'reject'
+        );
+      }
     }
   });
 
@@ -250,7 +348,7 @@ describe('Ed25519 verification-profile corpus: empirical-matrix integrity', () =
   });
 
   it('the profile applies the same tables to the signature R component', () => {
-    // The regression this change repairs: R was never subjected to the check A already had.
+    // Both tables must be applied to the R position, not to the public key alone.
     const source = readFileSync(
       resolve(__dirname, '../src/internal/ed25519-admissibility.ts'),
       'utf8'

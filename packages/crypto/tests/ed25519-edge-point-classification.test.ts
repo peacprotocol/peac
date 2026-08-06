@@ -1,13 +1,11 @@
 /**
  * Classification of the Ed25519 encodings at the edges of admissibility.
  *
- * The corpus records what each encoding IS, derived from RFC 8032 decoding and group arithmetic,
- * separately from what the PEAC profile DOES with it. Keeping the two apart matters: an encoding
- * can be a perfectly valid curve point and still be inadmissible under a bounded profile, and
- * conflating those invites removing a deliberate policy in the belief that it is a bug.
+ * The corpus records what each encoding is, derived from RFC 8032 decoding and group arithmetic,
+ * separately from what the PEAC profile does with it. The two are distinct: an encoding can be a
+ * valid curve point and still be inadmissible under a bounded profile.
  *
- * The classifier here is independent of the corpus generator, so agreement between them is
- * evidence rather than restatement.
+ * The classifier is independent of the corpus generator.
  */
 import { describe, it, expect } from 'vitest';
 import { execFileSync } from 'node:child_process';
@@ -41,12 +39,11 @@ const corpus: { entries: Entry[] } = JSON.parse(
 );
 
 /**
- * Extract a point table from its exact declaration body.
+ * Byte literals of one declared point table, read from its exact declaration body.
  *
- * Never scan a whole source file for hexadecimal literals: the same file legitimately contains the
- * group order L for the S >= L guard, and a file-wide scan reports it as a table member.
+ * Extraction is scoped to the declaration body. A file-wide scan for hexadecimal literals would
+ * also match the group order L, which both implementations declare for the S >= L guard.
  */
-/** Byte literals of one declared table, read from its exact declaration body. */
 function bytesTable(source: string, declaration: RegExp): string[] {
   const body = declaration.exec(source);
   expect(body, `table not found in its expected declaration: ${declaration}`).not.toBeNull();
@@ -153,8 +150,7 @@ describe('the corpus covers the subgroup structure it claims to', () => {
   });
 
   it('carries ordinary prime-subgroup controls that the profile must keep accepting', () => {
-    // Without these the corpus would prove only that inputs can be refused. A predicate that
-    // rejected everything would satisfy a rejection-only corpus.
+    // Positive controls: a predicate that rejected every input would pass a rejection-only corpus.
     const ordinary = corpus.entries.filter((e) => e.primary_class === 'canonical_prime_subgroup');
     expect(ordinary.length).toBeGreaterThanOrEqual(4);
     for (const entry of ordinary) {
@@ -167,7 +163,8 @@ describe('the corpus covers the subgroup structure it claims to', () => {
   });
 
   it('the identity is both a small-order point and a prime-subgroup member', () => {
-    // [L]O = O, so membership holds; it is nonetheless rejected. One field cannot carry both facts.
+    // [L]O = O, so prime-subgroup membership holds while the encoding is still rejected. The two
+    // facts are recorded in separate fields.
     const identity = corpus.entries.find((e) => e.exact_order === '1');
     expect(identity).toBeDefined();
     expect(identity!.primary_class).toBe('canonical_small_order');
@@ -177,8 +174,8 @@ describe('the corpus covers the subgroup structure it claims to', () => {
   });
 
   it('an off-curve encoding is delegated by the precheck and rejected by the runtime', () => {
-    // The bounded precheck cannot detect curve membership. Precheck action and profile result
-    // therefore differ, and the corpus must record that rather than blur it.
+    // The bounded precheck does not detect curve membership, so the precheck action and the
+    // profile result differ here and are recorded as separate fields.
     const offCurve = corpus.entries.filter((e) => e.primary_class === 'invalid_not_on_curve');
     expect(offCurve.length).toBeGreaterThanOrEqual(1);
     for (const entry of offCurve) {
@@ -220,7 +217,7 @@ describe('the two reference implementations declare the same table', () => {
     const groupOrderBigEndian = '1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed';
     expect(typescriptTable()).not.toContain(groupOrderBigEndian);
     expect(goTable()).not.toContain(groupOrderBigEndian);
-    // It is nonetheless present in the Go source, as the constant it actually is.
+    // L is present in the Go source as a declared constant, outside the table.
     const go = readFileSync(join(REPO_ROOT, 'sdks', 'go', 'jws', 'ed25519.go'), 'utf8');
     expect(go).toContain(groupOrderBigEndian);
     expect(go).toContain('ed25519GroupOrderL');
@@ -237,8 +234,8 @@ describe('the two reference implementations declare the same table', () => {
 
 describe('the historical baseline records the A versus R asymmetry', () => {
   it('a baseline-tabled encoding was rejected as A but delegated as R', () => {
-    // PEAC 0.16.3 applied its table to the public key only. Recording a single action per encoding
-    // would erase the asymmetry that this change exists to repair.
+    // PEAC 0.16.3 applied its table to the public key only, so the corpus records the baseline
+    // action for the A and R positions separately.
     const tabled = corpus.entries.filter((e) => e.baseline_0_16_3_table_membership);
     expect(tabled.length).toBeGreaterThan(0);
     for (const entry of tabled) {
@@ -255,8 +252,8 @@ describe('the historical baseline records the A versus R asymmetry', () => {
   });
 
   it("speccheck-2's R is the encoding that exhibits the asymmetry", () => {
-    // Its R is a small-order point that the baseline tabled, yet the baseline never applied the
-    // table to R. That gap is exactly why the runtimes disagree about this vector.
+    // Its R is a small-order point present in the baseline table, which the baseline applied to
+    // the public key position only.
     const speccheck2R = 'c7176a703d4dd84fba3c0b760d10670f2a2053fa2c39ccc64ec7fd7792ac03fa';
     const entry = corpus.entries.find((e) => e.encoding_hex === speccheck2R);
     expect(entry).toBeDefined();
@@ -290,7 +287,7 @@ describe('the corpus is verifiably regenerable', () => {
   };
 
   it('the committed fixture matches a fresh generation', () => {
-    // Providing --check is not enough: a verification nobody runs proves nothing.
+    // Runs --check rather than only asserting that the flag is accepted.
     expect(check()).toBe(0);
   }, 30_000);
 

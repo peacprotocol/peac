@@ -15,8 +15,8 @@ import (
 
 // ed25519ParityVector mirrors the hex-vector shape of the corpus at
 // specs/conformance/parity-corpus/ed25519-peac-profile/vectors.json. The
-// asserted field is PeacExpected.Accepted; the Empirical block is diagnostic
-// provenance and is not decoded here.
+// asserted field is PeacExpected.Accepted; empirical observations are evidence
+// and are not decoded here.
 type ed25519ParityVector struct {
 	ID           string `json:"id"`
 	Source       string `json:"source"`

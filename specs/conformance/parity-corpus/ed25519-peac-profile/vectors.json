@@ -1,8 +1,11 @@
 {
   "family": "ed25519-peac-profile",
   "description": "Ed25519 verification edge vectors proving TypeScript (Web Crypto) and Go (crypto/ed25519) reach the same accept/reject decision under the PEAC Ed25519 verification profile. The profile applies a bounded admissibility precheck to BOTH the public key A and the signature component R before delegating remaining curve validity and the signature equation to the runtime primitive.",
-  "version": "0.17.0-dev",
-  "status": "Informative",
+  "corpus_schema_version": 1,
+  "profile_revision": "2026-08-06",
+  "release_status": "unreleased",
+  "status": "Normative",
+  "note": "peac_expected is the only field a conformance decision reads. Measured runtime behaviour is informative and lives in runtime-observations.json.",
   "vectors": [
     {
       "id": "speccheck-0",
@@ -14,14 +17,6 @@
       "signature_hex": "c7176a703d4dd84fba3c0b760d10670f2a2053fa2c39ccc64ec7fd7792ac037a0000000000000000000000000000000000000000000000000000000000000000",
       "peac_expected": {
         "accepted": false
-      },
-      "empirical": {
-        "noble_zip215": true,
-        "noble_strict": false,
-        "curves_strict": false,
-        "node_native": true,
-        "webcrypto": true,
-        "peac_profile": false
       }
     },
     {
@@ -34,14 +29,6 @@
       "signature_hex": "f7badec5b8abeaf699583992219b7b223f1df3fbbea919844e3f7c554a43dd43a5bb704786be79fc476f91d3f3f89b03984d8068dcf1bb7dfc6637b45450ac04",
       "peac_expected": {
         "accepted": false
-      },
-      "empirical": {
-        "noble_zip215": true,
-        "noble_strict": false,
-        "curves_strict": false,
-        "node_native": true,
-        "webcrypto": true,
-        "peac_profile": false
       }
     },
     {
@@ -57,15 +44,6 @@
         "regression_reason": "small_order_R",
         "profile_findings": ["peac_mixed_order_A", "small_order_R"],
         "note": "Two independent findings. The compatibility regression this vector tracks is the missing R precheck: R is a canonical small-order encoding that the profile tabled for A but never applied to R. Separately, A is a canonical mixed-order point that the PEAC profile has rejected since 0.16.3. Implementation check order decides which is reported first; it does not decide which findings are true."
-      },
-      "empirical": {
-        "noble_zip215": true,
-        "noble_strict": true,
-        "curves_strict": true,
-        "node_native": true,
-        "webcrypto": true,
-        "peac_profile": false,
-        "note": "Empirical columns record what each primitive does with the raw inputs, independently of the PEAC profile outcome above."
       }
     },
     {
@@ -78,14 +56,6 @@
       "signature_hex": "9046a64750444938de19f227bb80485e92b83fdb4b6506c160484c016cc1852f87909e14428a7a1d62e9f22f3d3ad7802db02eb2e688b6c52fcd6648a98bd009",
       "peac_expected": {
         "accepted": true
-      },
-      "empirical": {
-        "noble_zip215": true,
-        "noble_strict": true,
-        "curves_strict": true,
-        "node_native": true,
-        "webcrypto": true,
-        "peac_profile": true
       }
     },
     {
@@ -98,14 +68,6 @@
       "signature_hex": "160a1cb0dc9c0258cd0a7d23e94d8fa878bcb1925f2c64246b2dee1796bed5125ec6bc982a269b723e0668e540911a9a6a58921d6925e434ab10aa7940551a09",
       "peac_expected": {
         "accepted": false
-      },
-      "empirical": {
-        "noble_zip215": true,
-        "noble_strict": true,
-        "curves_strict": true,
-        "node_native": false,
-        "webcrypto": false,
-        "peac_profile": false
       }
     },
     {
@@ -118,14 +80,6 @@
       "signature_hex": "21122a84e0b5fca4052f5b1235c80a537878b38f3142356b2c2384ebad4668b7e40bc836dac0f71076f9abe3a53f9c03c1ceeeddb658d0030494ace586687405",
       "peac_expected": {
         "accepted": false
-      },
-      "empirical": {
-        "noble_zip215": true,
-        "noble_strict": true,
-        "curves_strict": true,
-        "node_native": false,
-        "webcrypto": false,
-        "peac_profile": false
       }
     },
     {
@@ -138,14 +92,6 @@
       "signature_hex": "e96f66be976d82e60150baecff9906684aebb1ef181f67a7189ac78ea23b6c0e547f7690a0e2ddcd04d87dbc3490dc19b3b3052f7ff0538cb68afb369ba3a514",
       "peac_expected": {
         "accepted": false
-      },
-      "empirical": {
-        "noble_zip215": false,
-        "noble_strict": false,
-        "curves_strict": false,
-        "node_native": false,
-        "webcrypto": false,
-        "peac_profile": false
       }
     },
     {
@@ -158,14 +104,6 @@
       "signature_hex": "8ce5b96c8f26d0ab6c47958c9e68b937104cd36e13c33566acd2fe8d38aa19427e71f98a473474f2f13f06f97c20d58cc3f54b8bd0d272f42b695dd7e89a8c22",
       "peac_expected": {
         "accepted": false
-      },
-      "empirical": {
-        "noble_zip215": false,
-        "noble_strict": false,
-        "curves_strict": false,
-        "node_native": false,
-        "webcrypto": false,
-        "peac_profile": false
       }
     },
     {
@@ -178,14 +116,6 @@
       "signature_hex": "ecffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff03be9678ac102edcd92b0210bb34d7428d12ffc5df5f37e359941266a4e35f0f",
       "peac_expected": {
         "accepted": false
-      },
-      "empirical": {
-        "noble_zip215": true,
-        "noble_strict": false,
-        "curves_strict": false,
-        "node_native": false,
-        "webcrypto": false,
-        "peac_profile": false
       }
     },
     {
@@ -198,14 +128,6 @@
       "signature_hex": "ecffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffca8c5b64cd208982aa38d4936621a4775aa233aa0505711d8fdcfdaa943d4908",
       "peac_expected": {
         "accepted": false
-      },
-      "empirical": {
-        "noble_zip215": false,
-        "noble_strict": false,
-        "curves_strict": false,
-        "node_native": false,
-        "webcrypto": false,
-        "peac_profile": false
       }
     },
     {
@@ -218,14 +140,6 @@
       "signature_hex": "a9d55260f765261eb9b84e106f665e00b867287a761990d7135963ee0a7d59dca5bb704786be79fc476f91d3f3f89b03984d8068dcf1bb7dfc6637b45450ac04",
       "peac_expected": {
         "accepted": false
-      },
-      "empirical": {
-        "noble_zip215": true,
-        "noble_strict": false,
-        "curves_strict": false,
-        "node_native": false,
-        "webcrypto": false,
-        "peac_profile": false
       }
     },
     {
@@ -238,14 +152,6 @@
       "signature_hex": "a9d55260f765261eb9b84e106f665e00b867287a761990d7135963ee0a7d59dca5bb704786be79fc476f91d3f3f89b03984d8068dcf1bb7dfc6637b45450ac04",
       "peac_expected": {
         "accepted": false
-      },
-      "empirical": {
-        "noble_zip215": true,
-        "noble_strict": false,
-        "curves_strict": false,
-        "node_native": true,
-        "webcrypto": true,
-        "peac_profile": false
       }
     },
     {
@@ -257,14 +163,6 @@
       "signature_hex": "e5564300c360ac729086e2cc806e828a84877f1eb8e5d974d873e065224901555fb8821590a33bacc61e39701cf9b46bd25bf5f0595bbe24655141438e7a100b",
       "peac_expected": {
         "accepted": true
-      },
-      "empirical": {
-        "noble_zip215": true,
-        "noble_strict": true,
-        "curves_strict": true,
-        "node_native": true,
-        "webcrypto": true,
-        "peac_profile": true
       }
     },
     {
@@ -276,14 +174,6 @@
       "signature_hex": "263f7b8a5036a4b8f1168542fd7ff23159d4f1d58be5d44acf2fbb7c87243a51d194b790ea3dacdbaf1e1f69284c7f32a7b087b692b1f88ee5222cc60c86430d",
       "peac_expected": {
         "accepted": true
-      },
-      "empirical": {
-        "noble_zip215": true,
-        "noble_strict": true,
-        "curves_strict": true,
-        "node_native": true,
-        "webcrypto": true,
-        "peac_profile": true
       }
     }
   ]

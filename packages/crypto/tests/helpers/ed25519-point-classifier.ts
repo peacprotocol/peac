@@ -1,25 +1,20 @@
 /**
  * Test-only Ed25519 point classifier.
  *
- * Derives the mathematical classification of a 32-byte point encoding from RFC 8032, independently
- * of the corpus generator, so that agreement between the two is evidence rather than restatement.
+ * Derives the classification of a 32-byte point encoding from RFC 8032 decoding and group
+ * arithmetic, independently of the corpus generator. Uses BigInt arithmetic and is not part of the
+ * shipped package: nothing here is imported by src/.
  *
- * Deliberately NOT shipped: it uses bigint arithmetic and is far slower than the production
- * predicate, whose job is a bounded byte-level precheck. Nothing here is imported by src/.
+ * Field range, sign encoding and curve membership are reported as three separate facts. An encoding
+ * with y >= p is out of range; one with x = 0 and the sign bit set is in range but illegally
+ * signed; one with y < p may still be off the curve.
  *
- * Three decoding facts are reported separately rather than as one "canonical" flag, because field
- * range, sign encoding and curve membership are independent and any single flag mislabels a case:
- * an encoding with y >= p is out of range, one with x = 0 and the sign bit set is in range but
- * illegally signed, and one with y < p may still be off the curve.
- *
- * Order is reported exactly. The group order is 8L, and classification uses ORDERED predicates
- * rather than mutually exclusive ones:
- *   [8]P == O   tested first: an 8-torsion point, of exact order 1, 2, 4 or 8;
- *   [L]P == O   tested next: a prime-subgroup point, of exact order L;
- *   [tL]P == O  otherwise: a mixed-order point, of exact order 2L, 4L or 8L.
- * The predicates are not disjoint. The identity satisfies both [8]O == O and [L]O == O, so
- * small-order classification takes precedence and prime-subgroup membership is recorded
- * independently rather than inferred from the primary class.
+ * The group order is 8L. Classification applies ordered, non-disjoint predicates:
+ *   [8]P == O   an 8-torsion point, of exact order 1, 2, 4 or 8;
+ *   [L]P == O   a prime-subgroup point, of exact order L;
+ *   [tL]P == O  otherwise a mixed-order point, of exact order 2L, 4L or 8L.
+ * The identity satisfies both [8]O == O and [L]O == O, so small-order classification takes
+ * precedence and prime-subgroup membership is recorded as an independent field.
  */
 
 const P = 2n ** 255n - 19n;
@@ -47,7 +42,7 @@ function modPow(base: bigint, exponent: bigint): bigint {
   return result;
 }
 
-/** Fails closed: zero has no inverse, and silently returning zero would corrupt every result. */
+/** Zero has no modular inverse; returning zero would corrupt every dependent result. */
 function modInverse(a: bigint): bigint {
   const v = mod(a);
   if (v === 0n) throw new Error('modular inverse of zero');
@@ -99,7 +94,7 @@ export interface PointFacts {
   readonly primeSubgroupMember: boolean | null;
   /** 1 for prime-subgroup points, otherwise the order of the torsion component. */
   readonly torsionComponentOrder: number | null;
-  /** Exact order: '1', '2', '4', '8', 'L', '2L', '4L' or '8L'. Never a coarse label. */
+  /** Exact order: '1', '2', '4', '8', 'L', '2L', '4L' or '8L'. */
   readonly exactOrder: string | null;
 }
 

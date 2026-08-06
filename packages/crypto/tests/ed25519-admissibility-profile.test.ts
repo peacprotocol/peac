@@ -1,10 +1,9 @@
 /**
  * Behaviour of the bounded admissibility profile, exercised through the public verify() surface.
  *
- * Every case here is about a decision the profile makes before delegating to the runtime primitive,
- * so the outcome must be identical regardless of which primitive is underneath. The corpus is the
- * classified edge set plus ordinary signatures that must keep verifying: a precheck that rejects
- * everything would satisfy the first half alone.
+ * Each case covers a decision the profile makes before delegating to the runtime primitive, so the
+ * outcome is required to be identical regardless of which primitive is underneath. The corpus is
+ * the classified edge set together with ordinary signatures that must continue to verify.
  */
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
@@ -73,7 +72,7 @@ describe('inadmissible encodings are rejected in the public-key position', () =>
 });
 
 describe('inadmissible encodings are rejected in the signature R position', () => {
-  // The regression this change repairs: R previously bypassed the check A already had.
+  // The bounded precheck applies to the R position as well as to the public key.
   const validKey = bytes(parity.vectors.find((v) => v.id === 'rfc8032-vector-1')!.public_key_hex);
 
   it.each(TORSION.map((h) => [h.slice(0, 16), h] as const))('torsion %s', async (_l, hex) => {
@@ -116,6 +115,56 @@ describe('encoded-y boundaries are rejected in both positions and both sign vari
 
   it.each(cases)('%s is rejected as R', async (_label, y, signBit) => {
     expect(await ed25519Verify(signatureWithR(encode(y, signBit)), MESSAGE, validKey)).toBe(false);
+  });
+});
+
+describe('the precheck runs before the runtime primitive is touched', () => {
+  // Ordering is observable: with the runtime removed, an inadmissible encoding must still be a
+  // plain rejection. If the runtime were reached first, the same input would raise a capability
+  // error instead, turning a decided rejection into an exception the caller must handle.
+  const withoutSubtle = async (fn: () => Promise<void>): Promise<void> => {
+    const original = globalThis.crypto;
+    try {
+      Object.defineProperty(globalThis, 'crypto', {
+        value: { ...original, subtle: undefined },
+        configurable: true,
+      });
+      await fn();
+    } finally {
+      Object.defineProperty(globalThis, 'crypto', { value: original, configurable: true });
+    }
+  };
+
+  it('an inadmissible public key is rejected without the runtime', async () => {
+    await withoutSubtle(async () => {
+      expect(await ed25519Verify(new Uint8Array(64), MESSAGE, bytes(TORSION[0]))).toBe(false);
+    });
+  });
+
+  it('an inadmissible R is rejected without the runtime', async () => {
+    const validKey = bytes(parity.vectors.find((v) => v.id === 'rfc8032-vector-1')!.public_key_hex);
+    await withoutSubtle(async () => {
+      expect(await ed25519Verify(signatureWithR(TORSION[0]), MESSAGE, validKey)).toBe(false);
+    });
+  });
+
+  it('a non-reduced scalar is rejected without the runtime', async () => {
+    const validKey = bytes(parity.vectors.find((v) => v.id === 'rfc8032-vector-1')!.public_key_hex);
+    const signature = signatureWithR(ORDINARY[0]);
+    signature.fill(0xff, 32);
+    await withoutSubtle(async () => {
+      expect(await ed25519Verify(signature, MESSAGE, validKey)).toBe(false);
+    });
+  });
+
+  it('an admissible input still reaches the runtime and fails closed there', async () => {
+    // Without this the assertions above would also pass if verify() rejected everything early.
+    const v = parity.vectors.find((x) => x.id === 'peac-sign-positive')!;
+    await withoutSubtle(async () => {
+      await expect(
+        ed25519Verify(bytes(v.signature_hex), bytes(v.message_hex), bytes(v.public_key_hex))
+      ).rejects.toThrow();
+    });
   });
 });
 
@@ -194,9 +243,9 @@ describe('the S >= L malleability guard is unchanged', () => {
 });
 
 describe('the precheck rejects for the intended reason, not incidentally', () => {
-  // Outcome alone is confounded: the runtime primitive also rejects most of these, so verify()
-  // returns false whether or not PEAC decided. Asserting the reason proves the profile is what
-  // made the decision, and that torsion is not being confused with the PEAC mixed-order rule.
+  // The runtime primitive rejects most of these inputs as well, so a false result from verify()
+  // does not identify which rule decided. These cases assert the rejection reason, which separates
+  // a torsion rejection from the PEAC mixed-order rule.
   const FIELD_PRIME = 2n ** 255n - 19n;
   const encode = (y: bigint, signBit: 0 | 1): Uint8Array => {
     const buffer = new Uint8Array(32);
@@ -257,8 +306,8 @@ describe('the precheck rejects for the intended reason, not incidentally', () =>
 
 describe('the production encoded-y comparator agrees with a bigint oracle', () => {
   it('over several thousand deterministic inputs', () => {
-    // Exercises the PRODUCTION byte comparator, not the test classifier: byte-order and sign-mask
-    // errors are the most likely defect here and would not show up in fixed vectors alone.
+    // Exercises the production byte comparator rather than the test classifier, covering byte-order
+    // and sign-mask handling over a range of inputs that fixed vectors do not reach.
     const FIELD_PRIME = 2n ** 255n - 19n;
     // Deterministic walk, so any failure is reproducible.
     let seed = 0x9e3779b97f4a7c15n;

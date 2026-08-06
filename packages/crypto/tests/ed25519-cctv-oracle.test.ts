@@ -1,17 +1,15 @@
 /**
  * External mathematical oracle for the point classifier.
  *
- * The corpus generator and the classifier are structurally independent, but both implement the same
- * custom Edwards arithmetic, so they can agree on a shared misconception. This test checks the
- * classifier against an outside authority instead.
+ * The corpus generator and the classifier are structurally independent but implement the same
+ * Edwards arithmetic, so agreement between them does not establish correctness. This test checks
+ * the classifier against an external authority.
  *
- * C2SP CCTV flags each vector independently, and crucially distinguishes:
+ * C2SP CCTV flags each vector independently and distinguishes:
  *   low_order_X            the point itself has small order;
- *   low_order_component_X  the point carries a low-order component, i.e. it is MIXED order.
+ *   low_order_component_X  the point carries a low-order component, i.e. it is mixed order.
  *
- * That distinction is exactly what a blocklist cannot express in general, and exactly what an
- * order-search bounded at eight additions cannot detect. Vendored test-only under BSD-3-Clause;
- * nothing is fetched at test time.
+ * Vendored test-only under BSD-3-Clause; nothing is fetched at test time.
  */
 import { describe, it, expect } from 'vitest';
 import { execFileSync } from 'node:child_process';
@@ -45,8 +43,8 @@ const sha256 = (path: string): string =>
 /**
  * What the upstream flags mathematically imply for a position.
  *
- * CCTV flags are not PEAC classes, so this states the implication rather than pretending upstream
- * supplies our taxonomy. Where the implication is narrow, the assertion is narrow.
+ * CCTV flags are not PEAC classes. Each flag is mapped to the classification it implies, and where
+ * the implication is narrow the assertion is correspondingly narrow.
  */
 function expectedFrom(flags: string[], position: 'A' | 'R'): string[] {
   if (flags.includes(`non_canonical_${position}`)) {
@@ -64,8 +62,7 @@ function expectedFrom(flags: string[], position: 'A' | 'R'): string[] {
 
 describe('PEAC classification agrees with the mathematical implications of CCTV flags', () => {
   it('the committed bytes match the integrity manifest', () => {
-    // Recomputed from the files themselves. A hash field that is only shape-checked proves nothing:
-    // a stale or invented value would pass.
+    // Recomputed from the files themselves, so a stale or incorrect manifest value fails here.
     expect(sha256(SUBSET_PATH)).toBe(manifest.subset_sha256);
     expect(sha256(join(EXTERNAL, 'ed25519-cctv-LICENSE.txt'))).toBe(manifest.license_sha256);
   });
@@ -80,7 +77,7 @@ describe('PEAC classification agrees with the mathematical implications of CCTV 
     expect(manifest.upstream_source_sha256).toMatch(/^[0-9a-f]{64}$/);
     expect(manifest.selection_algorithm_version).toBe('1');
     expect(corpus.license).toBe('BSD-3-Clause');
-    // A derived subset, never described as an upstream copy. The licence file alone is exact.
+    // The vendored corpus is a derived subset; only the licence file is an exact upstream copy.
     expect(corpus.form).toContain('DERIVED SUBSET');
     expect(readFileSync(join(EXTERNAL, 'ed25519-cctv-LICENSE.txt'), 'utf8')).toContain('Copyright');
   });
@@ -94,8 +91,7 @@ describe('PEAC classification agrees with the mathematical implications of CCTV 
   });
 
   it('contains exactly one unflagged ordinary control, which is all the source has', () => {
-    // The pinned upstream file has exactly one vector with no flags. Promising two would be a
-    // cardinality the source cannot supply.
+    // The pinned upstream file contains exactly one vector with no flags.
     expect(corpus.vectors.filter((v) => v.flags.length === 0)).toHaveLength(1);
   });
 

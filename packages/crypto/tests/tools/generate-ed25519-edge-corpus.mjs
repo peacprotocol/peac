@@ -5,7 +5,7 @@
  * Every candidate is decoded per RFC 8032 section 5.1.3 and, when it decodes, placed in the
  * subgroup structure of edwards25519 by computing [8]P and [L]P.
  *
- * The corpus keeps four things apart that are easy to conflate and expensive to confuse:
+ * The corpus records four distinct facts per encoding:
  *   classification  what the encoding mathematically IS;
  *   precheck action what the bounded PEAC precheck DOES with it;
  *   mechanism       WHERE that decision is enforced;
