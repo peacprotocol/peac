@@ -1,9 +1,8 @@
 /**
  * Guards on the shared evidence-provenance module.
  *
- * These exercise the module directly rather than through a harness, because the properties that
- * matter are refusals: a dirty worktree, a supplied revision that disagrees with the checkout, and
- * paths that leave the repository.
+ * Covers the module's refusals: a dirty worktree, a supplied revision that disagrees with the
+ * checkout, and paths that leave the repository.
  */
 import { describe, it, expect } from 'vitest';
 import { execFileSync } from 'node:child_process';
@@ -24,7 +23,7 @@ import {
 
 const REPO_ROOT = resolve(__dirname, '..', '..', '..');
 
-/** A throwaway repository, so the dirty-worktree refusal can be exercised without touching ours. */
+/** A throwaway repository in which the dirty-worktree refusal can be exercised. */
 function scratchRepo(): string {
   const dir = mkdtempSync(join(tmpdir(), 'peac-provenance-'));
   const git = (...args: string[]) => execFileSync('git', ['-C', dir, ...args], { stdio: 'pipe' });
@@ -103,8 +102,6 @@ describe('the production source manifest is deterministic and closed', () => {
   });
 
   it('changes when any covered source changes', () => {
-    // Recomputed over a set with one file swapped: the digest must differ, so a stale manifest
-    // cannot describe modified production sources.
     const base = productionSourceManifestDigest(REPO_ROOT, PRODUCTION_SOURCES);
     const altered = productionSourceManifestDigest(REPO_ROOT, [
       PRODUCTION_SOURCES[0],

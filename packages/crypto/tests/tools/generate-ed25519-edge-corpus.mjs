@@ -16,9 +16,8 @@
  *   node generate-ed25519-edge-corpus.mjs --check              compare against the committed fixture
  *   node generate-ed25519-edge-corpus.mjs --check --fixture P  compare against the file at P
  *
- * The --fixture override exists so a negative control can verify against a disposable copy. Tests
- * must never mutate the tracked fixture: parallel workers would read it mid-corruption, and an
- * abrupt exit would leave the worktree dirty.
+ * The --fixture override lets a negative control verify against a disposable copy. Tests must not
+ * mutate the tracked fixture: parallel workers read it concurrently.
  *
  * Not shipped. The production predicate is a bounded byte-level precheck with no curve arithmetic.
  */
@@ -35,9 +34,7 @@ const DEFAULT_FIXTURE = join(FIXTURES, 'ed25519-edge-point-encodings.json');
 /**
  * Fixture path, overridable with --fixture.
  *
- * The override exists so a negative control can verify against a disposable copy. Tests must never
- * mutate the tracked fixture: parallel workers would read it mid-corruption, and an abrupt exit
- * would leave the worktree dirty.
+ * Overridable for negative controls; tests must not mutate the tracked fixture.
  */
 function resolveFixturePath(argv) {
   const at = argv.indexOf('--fixture');
@@ -96,9 +93,8 @@ function multiply(n, point) {
 /**
  * RFC 8032 5.1.3 decoding, reporting each condition separately.
  *
- * There is deliberately no single "canonical" boolean: field-range validity, sign-encoding
- * validity and curve membership are three independent facts, and collapsing them into one flag
- * mislabels at least one case however the flag is defined.
+ * Field-range validity, sign-encoding validity and curve membership are reported as three
+ * independent facts; no single "canonical" boolean is defined.
  */
 function decode(hex) {
   if (!/^[0-9a-f]{64}$/.test(hex)) throw new Error(`not 64 lowercase hex characters: ${hex}`);

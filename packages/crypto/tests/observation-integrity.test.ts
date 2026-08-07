@@ -1,9 +1,8 @@
 /**
  * Integrity of the committed runtime-observation artifact.
  *
- * Validates it against its own schema, and binds every environment to the exact harness source that
- * produced it. Without the second check a harness could be edited after measurement and the
- * committed evidence would silently describe a program that no longer exists.
+ * Validates it against its own schema and recomputes every recorded provenance digest, so the
+ * evidence stays bound to the inputs it names.
  */
 import { describe, it, expect } from 'vitest';
 import Ajv2020 from 'ajv/dist/2020.js';
@@ -62,7 +61,6 @@ describe('the committed runtime observations', () => {
   });
 
   it('the schema rejects a document it should not accept', () => {
-    // A schema that accepts everything would make the assertion above meaningless.
     const ajv = new Ajv2020({ allErrors: true, strict: false });
     const validate = ajv.compile(schema);
     const broken = structuredClone(document);
@@ -91,8 +89,7 @@ describe('the committed runtime observations', () => {
     expect(digests.size, 'observations come from more than one harness').toBeGreaterThan(1);
   });
 
-  // Recomputation, not shape validation. A well-formed but wrong digest passes the schema
-  // and would leave the evidence describing inputs that were never measured.
+  // Recomputed, not shape-checked: a well-formed but wrong digest passes the schema.
   it('recomputes the corpus digest from the normative vectors', () => {
     const expected = fileDigest(REPO_ROOT, CORPUS_PATH);
     for (const [id, environment] of Object.entries(document.environments)) {
@@ -121,8 +118,7 @@ describe('the committed runtime observations', () => {
   });
 
   it('recomputes the measured artifact digest when the package has been built', () => {
-    // Build-aware: the artifact exists only after a build, so its absence is reported rather than
-    // silently passing.
+    // The artifact exists only after a build; its absence is reported rather than passing.
     const artifact = join(REPO_ROOT, MEASURED_ARTIFACT_PATH);
     const wrappers = Object.entries(document.environments).filter(
       ([, e]) => e.surface === 'peac-wrapper'
@@ -141,8 +137,7 @@ describe('the committed runtime observations', () => {
   });
 
   it('does not claim to recompute the wrapper bundle', () => {
-    // The bundle is produced by the pinned external esbuild in the browser-evidence workflow, which
-    // ordinary unit CI does not run. The digest is recorded there and verified there, not here.
+    // Produced and verified in the browser-evidence workflow, which ordinary unit CI does not run.
     for (const [id, environment] of Object.entries(document.environments)) {
       if (environment.surface !== 'peac-wrapper') continue;
       expect(environment.wrapper_bundle_sha256, `${id}: bundle digest recorded`).toMatch(
@@ -257,8 +252,7 @@ describe('the schema rejects what it must', () => {
 });
 
 describe('the observation date is a real calendar date', () => {
-  // A pattern alone accepts 2026-99-99; JSON Schema date formats are optional in AJV without a
-  // formats package, so this is checked programmatically.
+  // A pattern alone accepts 2026-99-99, so validity is checked programmatically.
   it('parses back to itself', () => {
     const [year, month, day] = document.observed_on.split('-').map(Number);
     const parsed = new Date(Date.UTC(year, month - 1, day));

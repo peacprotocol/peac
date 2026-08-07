@@ -44,7 +44,7 @@ const fail = (message) => {
   process.exit(1);
 };
 
-/** A shape check accepts 2026-99-99, so the value must also round-trip as a real UTC date. */
+/** The value must round-trip as a real UTC date, not merely match the shape. */
 function isCalendarDate(value) {
   if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
   const [year, month, day] = value.split('-').map(Number);
@@ -67,13 +67,11 @@ const sourceRevisions = new Set();
 const seenInputs = new Set();
 
 for (const input of inputs) {
-  // Passing one file twice cannot produce a larger or more convincing matrix.
   const resolved = resolve(input);
   if (seenInputs.has(resolved)) fail(`input supplied more than once: ${resolved}`);
   seenInputs.add(resolved);
 
   const doc = JSON.parse(readFileSync(resolved, 'utf8'));
-  // Mandatory: evidence that does not name the revision it measured cannot be checked against it.
   if (!/^[0-9a-f]{40}$/.test(doc.measurement_source_revision ?? '')) {
     fail(
       `${input}: measurement_source_revision is missing or malformed: ` +
@@ -100,8 +98,7 @@ for (const input of inputs) {
     }
     const existing = environments[id];
     if (existing) {
-      // An identical redefinition is still a duplicate: it means one environment was measured
-      // twice, and silently keeping either copy hides that.
+      // An identical redefinition still means one environment was measured twice.
       fail(
         JSON.stringify(existing) === JSON.stringify(env)
           ? `environment ${id} is defined twice with identical values`
@@ -119,7 +116,7 @@ for (const input of inputs) {
     const identity = `${o.vector_id} ${o.environment_id}`;
     const prior = byIdentity.get(identity);
     if (prior) {
-      // An identical repeat is still two measurements of one cell; keeping either copy hides that.
+      // An identical repeat still means one cell was measured twice.
       fail(
         prior.outcome === o.outcome
           ? `duplicate observation for ${o.vector_id} in ${o.environment_id}`
@@ -133,7 +130,7 @@ for (const input of inputs) {
 const environmentIds = Object.keys(environments).sort();
 if (environmentIds.length === 0) fail('no environments were merged');
 
-// Every environment must cover every vector, so a partial run cannot look like a complete matrix.
+// Every environment covers every vector.
 for (const environmentId of environmentIds) {
   const missing = [...vectorIds].filter((v) => !byIdentity.has(`${v} ${environmentId}`));
   if (missing.length > 0) fail(`${environmentId} is missing vectors: ${missing.join(', ')}`);
@@ -149,8 +146,7 @@ if (!outcomes.has('accept') || !outcomes.has('reject')) {
   fail(`merged set has no ${!outcomes.has('accept') ? 'accepted' : 'rejected'} observation`);
 }
 
-// This artifact is one snapshot. Merging runs measured on different days would produce a document
-// whose single date is true of only part of it.
+// The artifact is one snapshot and carries one date.
 if (observedOn.size !== 1) {
   fail(`inputs were measured on different dates: ${[...observedOn].sort().join(', ')}`);
 }

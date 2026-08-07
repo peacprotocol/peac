@@ -107,8 +107,7 @@ func main() {
 	if err != nil {
 		fail(fmt.Sprintf("read lockfile: %v", err))
 	}
-	// Derived from Git, never taken on trust, and refused outright on a dirty worktree: evidence
-	// must not name a commit that does not contain what ran.
+	// Derived from Git; a dirty worktree is refused.
 	derived := deriveSourceRevision(*repoRoot)
 	if *sourceRevision != "" && *sourceRevision != derived {
 		fail(fmt.Sprintf("--source-revision %s does not match the checked-out revision %s", *sourceRevision, derived))
@@ -138,7 +137,7 @@ func main() {
 		})
 	}
 
-	// Controls: a run that accepts nothing, or rejects nothing, has measured nothing meaningful.
+	// Controls: one accepted and one rejected vector must be present.
 	assertOutcome(observations, acceptControl, "accept")
 	assertOutcome(observations, rejectControl, "reject")
 
@@ -154,7 +153,7 @@ func main() {
 	fmt.Println(string(out))
 }
 
-// measure returns accept or reject. Malformed committed input is a harness fault, not a rejection.
+// measure returns accept or reject. Malformed committed input aborts.
 func measure(v vector) string {
 	pub, err := hex.DecodeString(v.PublicKeyHex)
 	if err != nil {
@@ -228,7 +227,7 @@ func deriveSourceRevision(repoRoot string) string {
 		fail(fmt.Sprintf("cannot determine worktree cleanliness: %v", err))
 	}
 	if len(bytes.TrimSpace(dirty)) > 0 {
-		fail("refusing to measure a dirty worktree: evidence would name a commit that does not contain what ran")
+		fail("refusing to measure a dirty worktree")
 	}
 	return revision
 }

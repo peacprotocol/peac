@@ -1,7 +1,6 @@
 /**
- * The bounded-admissibility internals are a package-private test seam. This proves they are not
- * reachable from the published package, rather than relying on an `@internal` annotation, which is
- * documentation and does not itself restrict resolution.
+ * The bounded-admissibility internals are a package-private test seam. `@internal` is
+ * documentation and does not restrict resolution, so reachability is tested directly.
  *
  * Packs the real tarball and inspects what it ships, so the assertions describe the artifact a
  * consumer receives. Resolution is exercised from a synthetic consumer with the packed package and
@@ -81,7 +80,7 @@ describe('published export surface', () => {
       const source = readIfPresent(entry);
       if (source === null) continue;
       for (const symbol of ['ed25519PointRejectionReason', 'isRejectedEd25519PointEncoding']) {
-        // The implementation is bundled; what must not appear is an export binding for it.
+        // The implementation is bundled; no export binding may name it.
         expect(
           new RegExp(`export\\s*\\{[^}]*\\b${symbol}\\b`).test(source) ||
             new RegExp(`exports\\.${symbol}\\s*=`).test(source),
@@ -146,8 +145,7 @@ describe('a consumer of the packed package cannot reach the internals', () => {
     }
   });
 
-  // Without this, every import below could fail for the wrong reason and each assertion would
-  // pass on an unresolved module rather than on an absent symbol.
+  // Establishes that resolution works, so a later assertion cannot pass on an unresolved module.
   it('resolves the packed package and its documented API', () => {
     const probe = inConsumer(
       `import * as m from '@peac/crypto';
@@ -175,8 +173,8 @@ describe('a consumer of the packed package cannot reach the internals', () => {
   ] as const)('%s (esm=%s) does not provide the internals', (specifier, esm) => {
     const result = inConsumer(found(specifier, esm), esm);
     if (!result.ok) {
-      // An unresolvable specifier is the strongest form of unreachable, but it must fail because
-      // the export map refuses it, not because the package itself is missing.
+      // Unresolvable is acceptable only when the export map refuses it, not when the package is
+      // missing.
       expect(result.output, `${specifier} failed for an unexpected reason`).toMatch(
         /ERR_PACKAGE_PATH_NOT_EXPORTED|ERR_MODULE_NOT_FOUND|Cannot find module/
       );

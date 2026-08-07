@@ -193,9 +193,9 @@ async function measureInPage(vectors) {
 
 /**
  * Self-generated control for one browser: a non-empty message signed in the page, then the same
- * signature with one bit flipped. Both surfaces must accept the first and reject the second, so a
- * surface that returns a constant cannot look like a complete measurement. A non-empty message is
- * used so that the zero-length-message divergence cannot affect the control.
+ * key and signature verified against a different message. Both surfaces must accept the original
+ * and reject the changed message. The message is non-empty so the zero-length-message divergence
+ * does not affect the control.
  */
 async function controlInPage() {
   const encoder = new TextEncoder();
@@ -215,8 +215,8 @@ async function controlInPage() {
   };
 
   return {
-    messages_differ: original.length !== changed.length ||
-      original.some((byte, i) => byte !== changed[i]),
+    messages_differ:
+      original.length !== changed.length || original.some((byte, i) => byte !== changed[i]),
     raw_accept: await rawVerify(original),
     raw_reject: await rawVerify(changed),
     wrapper_accept: await globalThis.__peacVerify(signature, original, raw),

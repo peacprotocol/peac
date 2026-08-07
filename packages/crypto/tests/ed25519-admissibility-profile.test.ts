@@ -121,9 +121,8 @@ describe('encoded-y boundaries are rejected in both positions and both sign vari
 });
 
 describe('the documented guarantee stays bounded', () => {
-  // The profile decides an enumerated set and delegates everything else, so it cannot promise that
-  // every Ed25519 input decides identically on every runtime. That claim was published once and
-  // must not return.
+  // The profile decides an enumerated set and delegates the rest, so it cannot promise that every
+  // Ed25519 input decides identically on every runtime.
   const sources = [
     join(CRYPTO_ROOT, 'src', 'internal', 'ed25519-admissibility.ts'),
     join(CRYPTO_ROOT, 'src', 'ed25519.ts'),
@@ -155,9 +154,8 @@ describe('the documented guarantee stays bounded', () => {
 });
 
 describe('the precheck runs before the runtime primitive is touched', () => {
-  // Ordering is observable: with the runtime removed, an inadmissible encoding must still be a
-  // plain rejection. If the runtime were reached first, the same input would raise a capability
-  // error instead, turning a decided rejection into an exception the caller must handle.
+  // With the runtime removed, an inadmissible encoding must still be a plain rejection. Reaching
+  // the runtime first would raise a capability error instead.
   const withoutSubtle = async (fn: () => Promise<void>): Promise<void> => {
     const original = globalThis.crypto;
     try {
@@ -194,7 +192,6 @@ describe('the precheck runs before the runtime primitive is touched', () => {
   });
 
   it('an admissible input still reaches the runtime and fails closed there', async () => {
-    // Without this the assertions above would also pass if verify() rejected everything early.
     const v = parity.vectors.find((x) => x.id === 'peac-sign-positive')!;
     await withoutSubtle(async () => {
       await expect(

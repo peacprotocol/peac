@@ -318,10 +318,8 @@ describe('the historical baseline cannot be derived from live production source'
   );
 
   it('the generator reads the pinned snapshot, never the live implementation', () => {
-    // While the live table still equals the baseline, reading either yields the same answer, so a
-    // value comparison cannot tell them apart. That stops being true the moment production changes,
-    // which is exactly when a silent redefinition of "baseline" would matter. Assert the source
-    // structurally instead.
+    // A value comparison cannot distinguish the pinned snapshot from the live table while they
+    // are equal, so the source is asserted structurally.
     expect(GENERATOR_SOURCE).toContain('ed25519-baseline-0.16.3.json');
     expect(GENERATOR_SOURCE).not.toContain("'src', 'ed25519.ts'");
     expect(GENERATOR_SOURCE).not.toContain('src/ed25519.ts');

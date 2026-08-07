@@ -556,14 +556,9 @@ jobs:
   # release. Required gating stays on the LTS lanes (Lane 3b: Node 22
   # compatibility floor + Node 24 LTS primary runtime).
   #
-  # RUNTIME SELECTOR POLICY (three deliberately different kinds):
-  #   '22.13.0' exact  -- the supported floor; must equal engines.node
-  #   '24.18.1' exact  -- the primary release-validation runtime
-  #   '26'      MAJOR  -- INTENTIONALLY FLOATING within the Current major
-  # The canary floats deliberately: no automation refreshes an exact canary pin,
-  # and a stale exact pin no longer tracks the Current line. Reproducibility comes
-  # instead from recording the RESOLVED `node --version` as a build artifact, so
-  # every run documents the exact runtime it tested.
+  # Runtime selectors: '22.13.0' exact (supported floor, equals engines.node);
+  # '24' and '26' floating majors with check-latest. Floating lanes record the
+  # resolved `node --version` as a build artifact.
   # ---------------------------------------------------------------------------
   protocol-rollback-path-matrix-current-node:
     name: Protocol Rollback-Path Matrix (Node 26 Current, advisory)
@@ -880,16 +875,9 @@ jobs:
   # ---------------------------------------------------------------------------
   # Node.js compatibility matrix.
   #
-  # Three-tier policy: Node 22 = blocking compatibility floor for
-  # published packages; Node 24 = primary release-validation and
-  # maintainer runtime; Node 26 = blocking forward-compatibility lane
-  # (Current, NOT LTS). Node 25 was removed as EOL.
-  #
-  # Node 26 became blocking once the Ed25519 admissibility profile stopped
-  # delegating low-order signature R to the runtime primitive. Before that
-  # the lane reported a genuine divergence no CI policy could fix, so it was
-  # advisory. It is an ADDITIONAL blocking lane, never a replacement for
-  # either LTS line.
+  # Policy: Node 22.13.0 = supported floor; Node 24 = floating LTS
+  # compatibility lane; Node 26 = floating forward-compatibility lane.
+  # All cells block through the required aggregate.
   # ---------------------------------------------------------------------------
   node-compat:
     name: Node ${{ matrix.node-version }} (compat)
@@ -902,26 +890,16 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # Three deliberately different selector kinds, not a uniform pinning rule:
-          #   '22.13.0' exact -- supported floor, must equal engines.node
-          #   '24'      major -- primary LTS line, FLOATING. Ed25519 admissibility changed
-          #                      within this line at 24.19.0, so an exact pin one patch behind
-          #                      would have reported compatibility the release baseline no
-          #                      longer had.
-          #   '26'      major -- INTENTIONALLY FLOATING Current-line canary; reproducibility
-          #                      comes from capturing the resolved `node --version` as an
-          #                      artifact, not from an exact pin nobody automates.
+          #   '22.13.0' exact -- supported floor; must equal engines.node
+          #   '24'      major -- floating LTS compatibility lane
+          #   '26'      major -- floating forward-compatibility lane
+          # Floating lanes use check-latest and record the resolved version.
           - node-version: '22.13.0' # blocking: declared engines.node minimum
             experimental: false
             check-latest: false
           - node-version: '24' # blocking: primary LTS line (floating)
             experimental: false
             check-latest: true
-          # Canary is INTENTIONALLY FLOATING within the major: no automation keeps an
-          # exact pin fresh, and a forgotten exact pin stops being a Current canary.
-          # The resolved version is captured below so the tested version is recorded.
-          # check-latest: true so setup-node bypasses a possibly-stale runner
-          # tool-cache hit for the floating major and always resolves newest.
           - node-version: '26' # blocking: Current-line forward compatibility (floating)
             experimental: false
             check-latest: true

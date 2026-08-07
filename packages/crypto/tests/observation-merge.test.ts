@@ -1,9 +1,8 @@
 /**
  * Negative tests for the runtime-observation merge step.
  *
- * The merge is the only path by which a measurement becomes committed evidence, so each invariant
- * is exercised with input that violates it. A positive control runs first: if a well-formed
- * document did not merge, every rejection below would pass for the wrong reason.
+ * Each invariant is exercised with input that violates it. A positive control runs first, so a
+ * rejection cannot pass because the document was malformed for another reason.
  */
 import { describe, it, expect } from 'vitest';
 import { spawnSync } from 'node:child_process';
@@ -39,7 +38,7 @@ function wellFormed(): Record<string, unknown> {
     observations: corpus.vectors.map((v, index) => ({
       vector_id: v.id,
       environment_id: 'probe-1',
-      // At least one accept and one reject, which the merge step requires.
+      // The merge requires at least one accepted and one rejected observation.
       outcome: index === 0 ? 'accept' : 'reject',
     })),
   };
@@ -108,8 +107,7 @@ describe('the observation merge refuses evidence it cannot stand behind', () => 
   it('rejects inputs naming different source revisions', () => {
     const a = wellFormed();
     const b = wellFormed();
-    // A distinct environment, so the merge reaches the revision check rather than failing earlier
-    // on a repeated environment id.
+    // A distinct environment id, so the revision check is reached.
     const envs = b.environments as Record<string, unknown>;
     envs['probe-2'] = envs['probe-1'];
     delete envs['probe-1'];
@@ -121,7 +119,6 @@ describe('the observation merge refuses evidence it cannot stand behind', () => 
   });
 
   it('rejects an exact duplicate observation identity', () => {
-    // Including one measurement file twice must not silently produce the same matrix.
     const doc = wellFormed();
     const observations = doc.observations as { vector_id: string; environment_id: string }[];
     observations.push({ ...observations[1] });
@@ -150,7 +147,7 @@ describe('the observation merge refuses evidence it cannot stand behind', () => 
   });
 
   it('rejects conflicting outcomes for the same vector and environment', () => {
-    // Reachable within one document: a repeated environment id across documents is itself rejected.
+    // Reachable within one document; a repeated environment id across documents is rejected first.
     const doc = wellFormed();
     const observations = doc.observations as { outcome: string }[];
     observations.push({ ...observations[1], outcome: 'accept' });

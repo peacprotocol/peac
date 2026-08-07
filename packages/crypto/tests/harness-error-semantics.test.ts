@@ -1,12 +1,11 @@
 /**
  * Error semantics of the measurement harnesses.
  *
- * A harness that converts a runtime failure into `reject` fabricates cryptographic evidence, which
- * is the defect that once produced seventeen invented rejections. These assertions are structural:
- * they read the harness sources and require that only a returned boolean decides, that capability
- * errors are matched exactly, and that a browser is released on failure. Structural checks are used
- * because the classification is inline in a standalone script; each rule is paired with a mutation
- * that changes exactly that construct.
+ * A harness that converts a runtime failure into `reject` records evidence that was never
+ * measured. These assertions read the harness sources and require that only a returned boolean
+ * decides an outcome, that capability errors are matched by exact name, and that a browser is
+ * released on failure. The classification is inline in a standalone script, so the checks are
+ * structural.
  */
 import { describe, it, expect } from 'vitest';
 import { readdirSync, readFileSync } from 'node:fs';
@@ -30,12 +29,11 @@ const NEVER_REJECTION = [
 
 describe('the Node harness never converts a failure into a rejection', () => {
   it.each(NEVER_REJECTION)('does not classify %s', (name) => {
-    // Measured across every pinned Node version: no corpus vector raises an exception, so any
-    // mapping from an error to `reject` is unreachable except when something is wrong.
+    // No corpus vector raises an exception on any pinned Node version.
     const mentions = nodeSource.split(name).length - 1;
     const asRejection = new RegExp(`${name}[^\\n]*return 'reject'`);
     expect(asRejection.test(nodeSource), `${name} is mapped to a rejection`).toBe(false);
-    // A mention inside the explanatory comment is expected; a branch is not.
+    // One mention in the module comment is expected; a branch is not.
     expect(mentions).toBeLessThanOrEqual(1);
   });
 
@@ -65,7 +63,6 @@ describe('the Node harness never converts a failure into a rejection', () => {
 describe('the browser harness matches capability errors exactly', () => {
   it('uses a structured error name, not a message substring', () => {
     expect(browserSource).toContain("err.name === 'Ed25519RuntimeError'");
-    // A substring match would classify any unrelated failure whose wording contains the word.
     expect(browserSource).not.toMatch(/test\(`\$\{err\.name\}\$\{err\.message\}`\)/);
     expect(browserSource).not.toMatch(/\/Ed25519RuntimeError\|unavailable\//);
   });
@@ -77,7 +74,6 @@ describe('the browser harness matches capability errors exactly', () => {
   });
 
   it('releases each browser through a finally block', () => {
-    // Without this a failure during navigation, injection, controls or measurement leaks a process.
     expect(browserSource).toMatch(/\}\s*finally\s*\{\s*await browser\.close\(\);\s*\}/);
   });
 
@@ -97,11 +93,10 @@ describe('the browser harness matches capability errors exactly', () => {
   });
 
   it('the negative control changes the message, not the signature', () => {
-    // Mutating the signature could be rejected by the admissibility precheck, which would prove
-    // nothing about the delegated equation. Changing the message can only fail at that equation.
+    // A changed message can only fail at the delegated equation; a mutated signature could be
+    // rejected by the admissibility precheck.
     expect(browserSource).toContain('rawVerify(changed)');
     expect(browserSource).toContain('__peacVerify(signature, changed, raw)');
-    // The key and signature must be the ones the positive control used.
     expect(browserSource).toContain('rawVerify(original)');
     expect(browserSource).toContain('__peacVerify(signature, original, raw)');
     expect(browserSource).not.toMatch(/tampered\[0\] \^= 0x01/);
@@ -109,8 +104,8 @@ describe('the browser harness matches capability errors exactly', () => {
 });
 
 describe('the measurement tools reference the build output without importing it', () => {
-  // guard.sh exempts this directory from the dist rule because these tools hash a build artifact as
-  // evidence. That exemption must not become cover for an actual dist import.
+  // guard.sh exempts this directory from the dist rule: these tools hash a build artifact and do
+  // not import one.
   const TOOLS = join(CRYPTO_ROOT, 'tests', 'tools');
   const sources = readdirSync(TOOLS)
     .filter((f) => f.endsWith('.mjs'))

@@ -1,15 +1,14 @@
 /**
  * The supported Node lines must all block a merge, transitively.
  *
- * Two distinct failure modes are asserted, because either alone gives false assurance:
+ * Two failure modes are asserted:
  *
- *   1. a lane that reports failure but is not a protected context, so a red result is visible
- *      yet merge-able. Only `Build, Lint, Test` is protected, so every other lane blocks only
- *      by being in its `needs` AND having its result inspected;
- *   2. a lane exempted with `continue-on-error`, which reports success even when it failed.
+ *   1. a lane that reports failure but is not a protected context. Only `Build, Lint, Test` is
+ *      protected, so other lanes block only by being in its `needs` and having their result
+ *      inspected;
+ *   2. a lane exempted with `continue-on-error`, which reports success when it failed.
  *
- * Parsed as YAML rather than matched as text: the matrix deliberately mixes exact and floating
- * selectors, and substring matching over that is brittle in both directions.
+ * Parsed as YAML rather than matched as text: the matrix mixes exact and floating selectors.
  */
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
@@ -47,8 +46,7 @@ describe('the Node compatibility matrix is well formed', () => {
   });
 
   it('pins the declared engines floor exactly', () => {
-    // An exact pin here is the point: this lane is the compatibility floor, and it must equal
-    // what the package claims to support.
+    // This lane is the compatibility floor and must equal the declared engines range.
     const floor = lanes.find((l) => String(l['node-version']).startsWith('22'));
     expect(floor).toBeDefined();
     expect(floor!['node-version']).toBe('22.13.0');
@@ -57,8 +55,7 @@ describe('the Node compatibility matrix is well formed', () => {
   });
 
   it('floats the primary LTS line and resolves newest', () => {
-    // Ed25519 admissibility changed within the 24 line at 24.19.0. An exact pin one patch behind
-    // would have reported compatibility the release baseline no longer had.
+    // Ed25519 admissibility changed within the 24 line at 24.19.0, so the lane floats.
     const primary = lanes.find((l) => String(l['node-version']).startsWith('24'));
     expect(primary).toBeDefined();
     expect(String(primary!['node-version'])).toBe('24');
@@ -66,8 +63,7 @@ describe('the Node compatibility matrix is well formed', () => {
   });
 
   it('keeps the Current line a floating major that resolves newest', () => {
-    // A forgotten exact pin stops being a Current canary; reproducibility comes from recording
-    // the resolved version, which the job does below.
+    // Reproducibility comes from recording the resolved version, asserted below.
     const current = lanes.find((l) => String(l['node-version']) === '26');
     expect(current).toBeDefined();
     expect(current!['check-latest']).toBe(true);
@@ -89,13 +85,13 @@ describe('the Node compatibility matrix is well formed', () => {
 
 describe('the matrix is transitively required by the protected context', () => {
   it('the aggregate depends on node-compat', () => {
-    // Only "Build, Lint, Test" is protected, so the matrix gates merges through this dependency.
+    // "Build, Lint, Test" is the protected context; the matrix gates merges through it.
     expect(aggregate.needs).toContain('node-compat');
   });
 
   it('the aggregate fails unless node-compat succeeded', () => {
-    // `needs` membership alone blocks nothing under `if: always()`. The result must be inspected,
-    // and skipped must not pass: the matrix is unconditional, so a skip means it did not run.
+    // `needs` membership alone blocks nothing under `if: always()`. The matrix is unconditional,
+    // so a skipped result means it did not run and must not pass.
     const evaluate = (aggregate.steps ?? []).map((s) => s.run ?? '').join('\n');
     expect(evaluate).toMatch(/needs\.node-compat\.result.*!=.*["']success["'][\s\S]{0,200}exit 1/);
   });

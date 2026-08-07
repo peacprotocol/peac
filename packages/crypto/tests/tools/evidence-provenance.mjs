@@ -1,11 +1,9 @@
 /**
  * Canonical evidence provenance for the Ed25519 runtime observations.
  *
- * One implementation, used by both the measurement tools and the integrity checks. Two
- * implementations of the same digest rule would create a parity problem of their own: the check
- * could agree with a wrong measurement.
+ * One implementation, shared by the measurement tools and the integrity checks.
  *
- * Every digest here is over unmodified file bytes. Paths are repository-relative and normalized.
+ * Every digest is over unmodified file bytes. Paths are repository-relative and normalized.
  */
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
@@ -24,8 +22,7 @@ export const MEASURED_ARTIFACT_PATH = 'packages/crypto/dist/index.mjs';
 /**
  * Production sources whose bytes determine the PEAC verification decision being measured.
  *
- * Sorted and fixed. Broadening or narrowing this set changes what the evidence attests to, so it is
- * declared here once rather than derived at each call site.
+ * Sorted and fixed: this set defines what the evidence attests to.
  */
 export const PRODUCTION_SOURCES = Object.freeze([
   'packages/crypto/src/ed25519.ts',
@@ -62,7 +59,7 @@ export const fileDigest = (repoRoot, relativePath) =>
 
 /**
  * Digest over the production sources: one `path digest` line per file, sorted by path, joined by
- * newlines. Duplicate paths are rejected so the set cannot be silently inflated.
+ * newlines. Duplicate paths are rejected.
  */
 export function productionSourceManifestDigest(repoRoot, sources = PRODUCTION_SOURCES) {
   const paths = [...sources].sort();
@@ -74,10 +71,8 @@ export function productionSourceManifestDigest(repoRoot, sources = PRODUCTION_SO
 }
 
 /**
- * The commit whose sources are being measured, derived from Git rather than accepted from a caller.
- *
- * Requires a clean worktree: measuring a dirty checkout would attribute the result to a commit that
- * does not contain what ran.
+ * The commit whose sources are being measured, derived from Git rather than accepted from a
+ * caller. Requires a clean worktree.
  */
 export function deriveSourceRevision(repoRoot) {
   const git = (args) =>
@@ -96,8 +91,7 @@ export function deriveSourceRevision(repoRoot) {
   const dirty = git(['status', '--porcelain=v2']);
   if (dirty.length > 0) {
     throw new Error(
-      'refusing to measure a dirty worktree: evidence would name a commit that does not contain ' +
-        `what ran.\n${dirty.split('\n').slice(0, 10).join('\n')}`
+      `refusing to measure a dirty worktree.\n${dirty.split('\n').slice(0, 10).join('\n')}`
     );
   }
   return revision;
@@ -105,7 +99,7 @@ export function deriveSourceRevision(repoRoot) {
 
 /**
  * Resolves the revision to record. A supplied value is permitted only when it equals the derived
- * one, so a caller cannot label evidence with a commit it did not measure.
+ * one.
  */
 export function resolveSourceRevision(repoRoot, supplied) {
   const derived = deriveSourceRevision(repoRoot);

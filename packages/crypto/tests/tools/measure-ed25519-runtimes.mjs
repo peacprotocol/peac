@@ -5,9 +5,8 @@
  * Records what each primitive decided for every corpus vector, independently of the PEAC profile.
  * Observations are informative evidence; peac_expected in vectors.json remains normative.
  *
- * Outcomes are exactly accept, reject or unsupported. An unexpected error aborts the run: a
- * misconfigured primitive rejects everything, and recording that as `reject` would fabricate
- * evidence.
+ * Outcomes are exactly accept, reject or unsupported. An unexpected error aborts the run rather
+ * than being recorded as a rejection.
  *
  * Usage:
  *   node measure-ed25519-runtimes.mjs [--vectors <path>] [--observed-on YYYY-MM-DD]
@@ -63,7 +62,7 @@ const abort = (context, err) => {
   throw new HarnessError(`${context}: ${err?.name ?? 'Error'}: ${err?.message ?? String(err)}`);
 };
 
-// noble does not bundle a hash; the package under test uses it only for signing.
+// noble does not bundle a hash. The package under test uses it only for signing.
 ed.hashes.sha512 = (...messages) => {
   const hash = createHash('sha512');
   for (const message of messages) hash.update(message);
@@ -75,11 +74,9 @@ const bytes = (hex) => Uint8Array.from(Buffer.from(hex, 'hex'));
 /** DER SubjectPublicKeyInfo prefix for a raw Ed25519 public key (RFC 8410). */
 const SPKI_PREFIX = Buffer.from('302a300506032b6570032100', 'hex');
 
-// Measured on Node 22.13.0, 22.23.2, 24.18.0, 24.19.0, 26.4.0, 26.5.0, 26.6.0 and 26.7.0: no
-// corpus vector raises an exception on either path. Only a returned boolean is a cryptographic
-// decision. OperationError in particular is specified as "the operation failed for an
-// operation-specific reason" and is not a synonym for an invalid signature, so it aborts rather
-// than being recorded as a rejection.
+// No corpus vector raises an exception on either path across the pinned Node versions. Only a
+// returned boolean is a decision. OperationError is specified as an operation-specific failure,
+// not an invalid signature, so it aborts.
 
 async function nodeWebCrypto(vector) {
   const subtle = webcrypto?.subtle;
@@ -131,9 +128,8 @@ function nodeCrypto(vector) {
 }
 
 function noble(vector, zip215) {
-  // Measured against the pinned noble version, every corpus vector returns a boolean and none
-  // throws. noble throws only for wrong-length input, which the corpus cannot contain and which
-  // would be a harness fault. Any throw therefore aborts rather than being read as a rejection.
+  // Against the pinned noble version every corpus vector returns a boolean; noble throws only for
+  // wrong-length input, which the corpus does not contain. Any throw aborts.
   let result;
   try {
     result = ed.verify(
