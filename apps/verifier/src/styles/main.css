@@ -371,6 +371,32 @@ section[aria-label='What verification proves'] h3:nth-of-type(2) + ul li::before
   color: var(--fg-subtle);
 }
 
+/* Footer: canonical project links. */
+
+footer {
+  margin-top: 2.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+}
+
+footer nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+footer a {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--fg-muted);
+  text-decoration: none;
+}
+
+footer a:hover {
+  color: var(--fg);
+  text-decoration: underline;
+}
+
 /* Visually hidden but exposed to assistive technology: the polite status announcer. */
 .sr-status {
   position: absolute;

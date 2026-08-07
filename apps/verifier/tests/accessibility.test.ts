@@ -85,6 +85,21 @@ describe('landmark and heading structure', () => {
   });
 });
 
+describe('footer', () => {
+  it('links to the project site and source with safe external attributes', async () => {
+    const root = await mount(async () => accepted);
+    const footers = root.querySelectorAll('footer');
+    expect(footers).toHaveLength(1);
+    const links = footers[0].querySelectorAll('a');
+    const hrefs = links.map((a) => a.href);
+    expect(hrefs).toContain('https://peacprotocol.org');
+    expect(hrefs).toContain('https://github.com/peacprotocol/peac');
+    for (const a of links) {
+      expect(a.getAttribute('aria-label')).toMatch(/opens in a new tab/i);
+    }
+  });
+});
+
 describe('control names and descriptions', () => {
   it('associates every textarea with a label and a description', async () => {
     const root = await mount(async () => accepted);

@@ -98,6 +98,25 @@ export async function initApp(root: HTMLElement): Promise<void> {
   }
   main.appendChild(guidance);
 
+  // Footer: canonical project links. Sibling of main so it is the page contentinfo landmark.
+  const footer = document.createElement('footer');
+  const nav = document.createElement('nav');
+  nav.setAttribute('aria-label', 'PEAC Protocol');
+  for (const [text, href] of [
+    ['PEAC Protocol', 'https://peacprotocol.org'],
+    ['Source', 'https://github.com/peacprotocol/peac'],
+  ] as const) {
+    const a = document.createElement('a');
+    a.href = href;
+    a.textContent = text;
+    a.rel = 'noopener noreferrer';
+    a.target = '_blank';
+    a.setAttribute('aria-label', `${text} (opens in a new tab)`);
+    nav.appendChild(a);
+  }
+  footer.appendChild(nav);
+  root.appendChild(footer);
+
   let verifier: LocalVerifier;
   try {
     verifier = await initializeLocalVerifier({ verifierBuild: verifierBuildFromEnvironment() });
