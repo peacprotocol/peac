@@ -30,18 +30,19 @@ pnpm --filter @peac/app-verifier build
   expectations are claim constraints, not trust anchors.
 - Reports are deterministic and unsigned; identical inputs produce identical assessments.
 
-## Browser support
+## Browser support and validation
 
-| Tier                            | Coverage                                                                       |
-| ------------------------------- | ------------------------------------------------------------------------------ |
-| Continuously tested engines     | Current Chromium, Firefox and WebKit via the browser matrix below              |
-| Release-smoke tested            | Chrome Stable and Safari Stable before a release; Edge Stable as a light smoke |
-| Mobile-smoke tested             | Mobile Safari and Mobile Chrome emulation profiles                             |
-| Other Chromium-derived browsers | Expected to work; not individually certified                                   |
+| Category                        | Coverage                                                            |
+| ------------------------------- | ------------------------------------------------------------------- |
+| Automated compatibility matrix  | Chromium, Firefox and WebKit against the production build           |
+| Release validation requirement  | Chrome Stable, Safari Stable and Edge Stable                        |
+| Mobile compatibility matrix     | Mobile Safari and Mobile Chrome emulation                           |
+| Other Chromium-derived browsers | Expected to work from the shared engine; not individually validated |
 
-WebCrypto is a secure-context API: serve the application over HTTPS (or localhost during
-development). A runtime without WebCrypto Ed25519 receives a capability message and a disabled
-verify control rather than a verification failure.
+WebCrypto is a secure-context API: production deployments use HTTPS; loopback origins serve
+local development and testing, where user agents treat them as trustworthy. A runtime without
+WebCrypto Ed25519 receives a capability message and a disabled verify control rather than a
+verification failure. Application console errors fail the matrix.
 
 ## Browser matrix
 

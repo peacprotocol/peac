@@ -2,16 +2,17 @@
  * Browser matrix for the built verifier application.
  *
  * Drives the production build through Chromium, Firefox and WebKit, plus mobile emulation
- * profiles, and asserts per engine: the verification flow contract, deterministic results,
- * input-snapshot binding, the capability error path, zero network requests caused by
- * verification, zero persistence (localStorage, sessionStorage, IndexedDB, CacheStorage,
- * service workers), and no console errors. The served bundles are also scanned for dynamic
- * code evaluation, which the application must not contain.
+ * profiles, and asserts per engine: the verification flow contract, deterministic report
+ * output, input-snapshot behavior under asynchronous reads, the file-input path, the
+ * capability error path, zero network requests caused by verification, zero persistence
+ * attempts and zero residual persistence (localStorage, sessionStorage, IndexedDB,
+ * CacheStorage, service workers), and no application console errors. The served bundles are
+ * scanned for dynamic code evaluation, which the application must not contain.
  *
  * Playwright is never a repository dependency. Provide an external installation:
  *
  *   mkdir -p /tmp/peac-browser-deps && cd /tmp/peac-browser-deps
- *   pnpm init && pnpm add playwright
+ *   pnpm init && pnpm add playwright@<exact-stable>
  *   pnpm exec playwright install chromium firefox webkit
  *
  * Usage:
@@ -22,13 +23,13 @@
  * Fixtures are issued per run with the real issuing API; no key material is committed.
  */
 import { createServer } from 'node:http';
-import { existsSync, readFileSync, readdirSync } from 'node:fs';
-import { dirname, extname, join, normalize, resolve } from 'node:path';
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
+import { dirname, extname, join, normalize, relative, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const SELF = fileURLToPath(import.meta.url);
 const APP_ROOT = resolve(dirname(SELF), '..', '..');
-const DIST = join(APP_ROOT, 'dist');
+const DIST = resolve(APP_ROOT, 'dist');
 
 const args = process.argv.slice(2);
 const opt = (name, fallback) => {
@@ -45,7 +46,7 @@ const skipMobile = args.includes('--skip-mobile');
 const SETUP =
   'external Playwright installation required:\n' +
   '  mkdir -p /tmp/peac-browser-deps && cd /tmp/peac-browser-deps\n' +
-  '  pnpm init && pnpm add playwright\n' +
+  '  pnpm init && pnpm add playwright@<exact-stable>\n' +
   '  pnpm exec playwright install chromium firefox webkit\n' +
   'then pass --deps /tmp/peac-browser-deps';
 
@@ -56,23 +57,28 @@ if (!existsSync(join(DIST, 'index.html'))) {
 }
 
 let playwright;
+let playwrightVersion = 'unknown';
 try {
   const specifier = depsRoot
     ? pathToFileURL(join(resolve(depsRoot), 'node_modules', 'playwright', 'index.js')).href
     : 'playwright';
   const pw = await import(specifier);
   playwright = pw.default ?? pw;
+  const manifest = depsRoot
+    ? join(resolve(depsRoot), 'node_modules', 'playwright', 'package.json')
+    : fileURLToPath(import.meta.resolve('playwright/package.json'));
+  playwrightVersion = JSON.parse(readFileSync(manifest, 'utf8')).version;
 } catch (err) {
   console.error(`run-browser-matrix: ${err.message}\n\n${SETUP}`);
   process.exit(2);
 }
+console.log(`playwright ${playwrightVersion} on node ${process.version}`);
 
-const { generateKeypair, base64urlEncode, computeJwkThumbprint } = await import('@peac/crypto');
+const { generateKeypair, base64urlEncode, base64urlDecode, computeJwkThumbprint } =
+  await import('@peac/crypto');
 const { issue } = await import('@peac/protocol');
 
 // The application must not evaluate dynamic code; verified against the exact bundles served.
-// Automation tooling injects its own evaluated scripts, so console messages reporting a blocked
-// eval are excluded from the console-error assertion only because of this scan.
 function scanBundles() {
   const problems = [];
   const assets = join(DIST, 'assets');
@@ -84,7 +90,14 @@ function scanBundles() {
   }
   return problems;
 }
-const AUTOMATION_CONSOLE_PATTERN = /blocked a JavaScript eval/;
+
+// Firefox reports Playwright's own injected evaluation as a page CSP violation. The bundle scan
+// above proves the application ships no dynamic code, so exactly this diagnostic, in Firefox
+// only, is classified as an automation diagnostic; every other console error fails the run.
+const FIREFOX_AUTOMATION_DIAGNOSTIC =
+  /Content-Security-Policy.*blocked a JavaScript eval.*script-src/;
+
+const LIMITS = { record: 64 * 1024, key: 128 * 1024, context: 8 * 1024 };
 
 async function makeFixtures() {
   const kid = 'browser-matrix-k1';
@@ -123,20 +136,29 @@ async function makeFixtures() {
     x: otherJwk.x,
   });
 
+  // Tamper by flipping one decoded payload byte and re-encoding, keeping the signature, so the
+  // signed bytes provably change.
   const segments = issued.jws.split('.');
-  const payload = segments[1];
-  const flipped = payload.slice(0, -1) + (payload.at(-1) === 'A' ? 'B' : 'A');
+  const payloadBytes = base64urlDecode(segments[1]);
+  const tamperedBytes = Uint8Array.from(payloadBytes);
+  tamperedBytes[0] ^= 0x01;
+  if (Buffer.from(payloadBytes).equals(Buffer.from(tamperedBytes))) {
+    throw new Error('tamper fixture failed to change the signed bytes');
+  }
+  const tampered = [segments[0], base64urlEncode(tamperedBytes), segments[2]].join('.');
 
   return {
     record: issued.jws,
     unicodeRecord: unicodeIssued.jws,
-    tampered: [segments[0], flipped, segments[2]].join('.'),
-    oversizedRecord: 'a'.repeat(64 * 1024 + 1),
+    tampered,
     bareJwk: JSON.stringify(jwk),
     jwks: JSON.stringify({ keys: [otherJwk, jwk] }),
     unicodeJwks: JSON.stringify({ keys: [otherJwk, unicodeJwk] }),
     wrongKey: JSON.stringify(otherJwk),
     malformedKey: '{ not json',
+    oversizedRecord: 'a'.repeat(LIMITS.record + 1),
+    oversizedKey: 'a'.repeat(LIMITS.key + 1),
+    oversizedContext: 'a'.repeat(LIMITS.context + 1),
     trustMatch: JSON.stringify({
       contextVersion: '1',
       trust: { trustedJwkThumbprints: [thumbprint] },
@@ -168,6 +190,14 @@ function flows(f) {
     { id: 'malformed-record', record: 'not-a-compact-jws', key: f.bareJwk, heading: REJECT },
     { id: 'malformed-key', record: f.record, key: f.malformedKey, heading: REJECT },
     { id: 'oversized-record', record: f.oversizedRecord, key: f.bareJwk, heading: REJECT },
+    { id: 'oversized-key', record: f.record, key: f.oversizedKey, heading: REJECT },
+    {
+      id: 'oversized-context',
+      record: f.record,
+      key: f.bareJwk,
+      context: f.oversizedContext,
+      heading: REJECT,
+    },
     {
       id: 'trusted-key-mismatch',
       record: f.record,
@@ -192,8 +222,9 @@ const MIME = {
 function serveDist() {
   const server = createServer((req, res) => {
     const path = normalize(new URL(req.url, 'http://127.0.0.1').pathname).replace(/^\/+/, '');
-    const file = join(DIST, path === '' ? 'index.html' : path);
-    if (!file.startsWith(DIST) || !existsSync(file)) {
+    const file = resolve(DIST, path === '' ? 'index.html' : path);
+    const contained = !relative(DIST, file).startsWith('..');
+    if (!contained || !existsSync(file) || !statSync(file).isFile()) {
       res.writeHead(404).end();
       return;
     }
@@ -206,6 +237,32 @@ function serveDist() {
     });
   });
 }
+
+// Counts persistence ATTEMPTS from before application code runs; the observers never mutate the
+// surfaces they watch.
+const PERSISTENCE_OBSERVER = () => {
+  const counts = {
+    storageWrites: 0,
+    indexedDbOpens: 0,
+    cacheOpens: 0,
+    serviceWorkerRegistrations: 0,
+  };
+  Object.defineProperty(globalThis, '__peacPersistenceAttempts', { value: counts });
+  const wrap = (object, method, key) => {
+    if (!object || typeof object[method] !== 'function') return;
+    const original = object[method];
+    object[method] = function (...a) {
+      counts[key] += 1;
+      return original.apply(this, a);
+    };
+  };
+  wrap(Storage.prototype, 'setItem', 'storageWrites');
+  wrap(globalThis.indexedDB, 'open', 'indexedDbOpens');
+  if (globalThis.caches) wrap(globalThis.caches, 'open', 'cacheOpens');
+  if (navigator.serviceWorker) {
+    wrap(navigator.serviceWorker, 'register', 'serviceWorkerRegistrations');
+  }
+};
 
 async function runFlow(page, flow) {
   await page.fill('#record', '');
@@ -224,21 +281,93 @@ async function runFlow(page, flow) {
   };
 }
 
-async function assessmentText(page) {
-  return page.locator('section dl').first().textContent();
+async function reportJson(page) {
+  const pre = page.locator('section pre').first();
+  await pre.waitFor({ state: 'visible', timeout: 15000 });
+  return pre.textContent();
 }
 
-async function runSession(page, fixtures, origin, flowIds) {
+// Identical inputs must produce a byte-identical report, including its hash. The evaluation
+// time is a declared report input, so equality is asserted on a pair of runs that share it.
+async function checkDeterministicReport(page, flow, problems) {
+  for (let attempt = 0; attempt < 6; attempt++) {
+    await runFlow(page, flow);
+    const first = await reportJson(page);
+    await runFlow(page, flow);
+    const second = await reportJson(page);
+    const a = JSON.parse(first);
+    const b = JSON.parse(second);
+    if (a.evaluationTimeUnixSeconds !== b.evaluationTimeUnixSeconds) continue;
+    if (first !== second) {
+      problems.push('determinism: identical inputs and evaluation time produced different reports');
+    }
+    if (!a.reportSha256 || a.reportSha256 !== b.reportSha256) {
+      problems.push('determinism: report hashes differ for identical inputs');
+    }
+    for (const key of Object.keys(a)) {
+      if (/userAgent|platform|locale|path|random/i.test(key)) {
+        problems.push(`determinism: environment-shaped field "${key}" in the report core`);
+      }
+    }
+    return;
+  }
+  problems.push('determinism: could not obtain two runs sharing an evaluation second');
+}
+
+// A pending asynchronous file read must not replace newer manual input.
+async function checkReadSupersession(page, fixtures, problems) {
+  const fileInput = page.locator('input[type=file]').first();
+  await fileInput.setInputFiles({
+    name: 'record.jws',
+    mimeType: 'application/jose',
+    buffer: Buffer.from(fixtures.tampered),
+  });
+  await page.fill('#record', fixtures.record);
+  await page.waitForTimeout(250);
+  const value = await page.inputValue('#record');
+  if (value !== fixtures.record) {
+    problems.push('supersession: an asynchronous file read replaced newer manual input');
+  }
+}
+
+// The file controls must feed the same verification path as pasted input.
+async function checkFileInput(page, fixtures, problems) {
+  await page.fill('#record', '');
+  await page.fill('#key', '');
+  await page.fill('#context', '');
+  await page
+    .locator('input[type=file]')
+    .first()
+    .setInputFiles({
+      name: 'record.jws',
+      mimeType: 'application/jose',
+      buffer: Buffer.from(fixtures.record),
+    });
+  await page.fill('#key', fixtures.bareJwk);
+  await page.waitForSelector('button:enabled', { timeout: 15000 });
+  await page.click('button:has-text("Verify")');
+  const heading = page.locator('section h2').first();
+  await heading.waitFor({ state: 'visible', timeout: 15000 });
+  const text = await heading.textContent();
+  if (text !== ACCEPT) problems.push(`file-input: expected "${ACCEPT}", saw "${text}"`);
+}
+
+async function runSession(engineName, page, fixtures, origin, flowIds) {
   const problems = [];
   const consoleErrors = [];
+  let automationDiagnostics = 0;
   page.on('pageerror', (err) => consoleErrors.push(String(err)));
   page.on('console', (m) => {
-    if (m.type() === 'error' && !AUTOMATION_CONSOLE_PATTERN.test(m.text())) {
-      consoleErrors.push(m.text());
+    if (m.type() !== 'error') return;
+    if (engineName === 'firefox' && FIREFOX_AUTOMATION_DIAGNOSTIC.test(m.text())) {
+      automationDiagnostics += 1;
+      return;
     }
+    consoleErrors.push(m.text());
   });
   const requests = [];
   page.on('request', (r) => requests.push(r.url()));
+  await page.addInitScript(PERSISTENCE_OBSERVER);
 
   await page.goto(`${origin}/`, { waitUntil: 'networkidle' });
   const requestsAfterLoad = requests.length;
@@ -259,19 +388,15 @@ async function runSession(page, fixtures, origin, flowIds) {
   }
 
   if (!flowIds) {
-    // Determinism: identical inputs render an identical assessment.
-    const first = flows(fixtures)[0];
-    await runFlow(page, first);
-    const a = await assessmentText(page);
-    await runFlow(page, first);
-    const b = await assessmentText(page);
-    if (a !== b) problems.push('determinism: two identical runs rendered different assessments');
+    await checkDeterministicReport(page, flows(fixtures)[0], problems);
 
-    // Input-snapshot binding: editing an input clears the displayed result.
-    await page.fill('#record', first.record + ' ');
+    await page.fill('#record', fixtures.record + ' ');
     const headings = await page.locator('section h2').count();
     if (headings !== 0)
       problems.push('input-snapshot: an edited input left a stale result visible');
+
+    await checkReadSupersession(page, fixtures, problems);
+    await checkFileInput(page, fixtures, problems);
   }
 
   if (requests.length !== requestsAfterLoad) {
@@ -281,6 +406,10 @@ async function runSession(page, fixtures, origin, flowIds) {
     );
   }
 
+  const attempts = await page.evaluate(() => globalThis.__peacPersistenceAttempts);
+  for (const [surface, count] of Object.entries(attempts ?? {})) {
+    if (count !== 0) problems.push(`persistence attempt: ${surface} = ${count}`);
+  }
   const persistence = await page.evaluate(async () => ({
     localStorage: window.localStorage.length,
     sessionStorage: window.sessionStorage.length,
@@ -293,7 +422,7 @@ async function runSession(page, fixtures, origin, flowIds) {
     if (count !== 0) problems.push(`persistence: ${surface} holds ${count} entr(ies)`);
   }
   for (const message of consoleErrors) problems.push(`console error: ${message}`);
-  return problems;
+  return { problems, automationDiagnostics };
 }
 
 // A runtime without WebCrypto Ed25519 must present a capability message, not a cryptic failure.
@@ -344,13 +473,18 @@ try {
     }
     const browser = await playwright[name].launch();
     const context = await browser.newContext();
-    const problems = await runSession(await context.newPage(), fixtures, origin);
-    problems.push(...(await runCapabilityCheck(browser, origin)));
+    const session = await runSession(name, await context.newPage(), fixtures, origin);
+    const problems = [...session.problems, ...(await runCapabilityCheck(browser, origin))];
+    const version = browser.version();
     await browser.close();
+    const diag = session.automationDiagnostics
+      ? `, ${session.automationDiagnostics} automation diagnostic(s) classified`
+      : '';
     report(
       name,
       problems,
-      `${flows(fixtures).length} flows + determinism + snapshot + capability, no network, no persistence`
+      `${version}; ${flows(fixtures).length} flows + report determinism + snapshot + ` +
+        `supersession + file input + capability; no network, no persistence attempts${diag}`
     );
   }
 
@@ -367,9 +501,15 @@ try {
       }
       const browser = await playwright[m.engine].launch();
       const context = await browser.newContext({ ...device });
-      const problems = await runSession(await context.newPage(), fixtures, origin, MOBILE_FLOW_IDS);
+      const session = await runSession(
+        m.engine,
+        await context.newPage(),
+        fixtures,
+        origin,
+        MOBILE_FLOW_IDS
+      );
       await browser.close();
-      report(m.label, problems, `${MOBILE_FLOW_IDS.join(', ')}`);
+      report(m.label, session.problems, MOBILE_FLOW_IDS.join(', '));
     }
   }
 } finally {
