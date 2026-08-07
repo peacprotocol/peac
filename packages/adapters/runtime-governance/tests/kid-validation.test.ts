@@ -8,8 +8,8 @@
  * so a divergence between the two fails here. A behavioural suite confirms option validation
  * rejects at the adapter boundary, in UTF-8 bytes, what UTF-16 code-unit counting used to admit.
  *
- * Every kid is built from explicit escape sequences, so its byte width does not depend on how this
- * file happens to be encoded on disk.
+ * Non-ASCII and control-character literals are expressed with explicit escapes so their intended
+ * code points do not depend on source-file rendering or encoding.
  */
 import { describe, it, expect, beforeAll } from 'vitest';
 import { generateKeypair } from '@peac/protocol';

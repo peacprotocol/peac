@@ -5,9 +5,9 @@
  *
  * Adapter-private. The authoritative implementation lives in `@peac/crypto` (`src/kid.ts`) and is
  * not part of its public surface, so the rule is restated here and a behavioural parity test holds
- * the two implementations identical. The bound is measured in UTF-8 bytes, not UTF-16 code units:
- * 256 code units of astral code points serialize to 1024 bytes, and only the byte count agrees
- * across independent implementations.
+ * the two implementations identical. The bound is measured in UTF-8 bytes rather than UTF-16 code
+ * units: 256 UTF-16 code units consisting of supplementary-plane characters serialize to 512 UTF-8
+ * bytes. A serialized-byte bound is portable across implementations.
  */
 
 /** Maximum `kid` length, measured as UTF-8 bytes of the string's serialization. */
@@ -29,8 +29,9 @@ export function isWellFormedUnicode(s: string): boolean {
 }
 
 /**
- * UTF-8 byte length of a well-formed string. Throws on malformed UTF-16 rather than returning a
- * number, so a caller cannot accept a string on length grounds when it cannot be encoded at all.
+ * UTF-8 byte length of a well-formed string. Throws on malformed UTF-16 so callers cannot silently
+ * replace an unpaired surrogate with U+FFFD during UTF-8 encoding and thereby change the supplied
+ * identifier.
  */
 export function utf8ByteLength(s: string): number {
   let n = 0;
