@@ -471,6 +471,31 @@ async function runObserverControl(browser, origin) {
   return recorded ? [] : ['csp-observer: no violation recorded for a deliberate blocked eval'];
 }
 
+// A fixed instant so the report's evaluation-time input is identical across engines. The UI reads
+// the wall clock at verification time, so the clock is pinned before load.
+const PARITY_CLOCK_MS = 1_700_000_000_000;
+const PARITY_FLOWS = ['accept-bare-jwk', 'tamper', 'trusted-key-mismatch'];
+
+// Collects the rendered report for each parity flow under a pinned clock. Identical record, key,
+// context and evaluation time must yield a byte-identical report in every engine. Each flow runs
+// on a fresh page so the report panel cannot carry a prior flow's render, and the report element
+// is awaited before it is read.
+async function collectParityReports(browser, origin, fixtures) {
+  const byFlow = {};
+  for (const flow of flows(fixtures).filter((f) => PARITY_FLOWS.includes(f.id))) {
+    const context = await browser.newContext();
+    const page = await context.newPage();
+    await page.clock.install({ time: PARITY_CLOCK_MS });
+    await page.goto(`${origin}/`, { waitUntil: 'networkidle' });
+    await runFlow(page, flow);
+    const report = page.locator('section pre').first();
+    await report.waitFor({ state: 'visible', timeout: 15000 });
+    byFlow[flow.id] = await report.textContent();
+    await context.close();
+  }
+  return byFlow;
+}
+
 // A runtime without WebCrypto Ed25519 must present a capability message, not a cryptic failure.
 async function runCapabilityCheck(browser, origin) {
   const context = await browser.newContext();
@@ -546,6 +571,36 @@ try {
       `${version}; ${flows(fixtures).length} flows + report determinism + snapshot + ` +
         `supersession + file input + capability + CSP-observer control; no network, no persistence, ` +
         `no application CSP unsafe-eval violation`
+    );
+  }
+
+  // Cross-engine report parity: the same inputs and pinned evaluation time must produce a
+  // byte-identical report, including its hash, in every desktop engine.
+  const parityEngines = engines.filter((n) => playwright[n]);
+  if (parityEngines.length > 1) {
+    const perEngine = {};
+    for (const name of parityEngines) {
+      const browser = await playwright[name].launch();
+      perEngine[name] = await collectParityReports(browser, origin, fixtures);
+      await browser.close();
+    }
+    const problems = [];
+    for (const flowId of PARITY_FLOWS) {
+      const reports = parityEngines.map((n) => perEngine[n][flowId]);
+      if (new Set(reports).size !== 1) {
+        problems.push(`${flowId}: report differs across engines`);
+        continue;
+      }
+      const hash = JSON.parse(reports[0]).reportSha256;
+      const hashes = reports.map((r) => JSON.parse(r).reportSha256);
+      if (!hash || new Set(hashes).size !== 1) {
+        problems.push(`${flowId}: reportSha256 differs across engines`);
+      }
+    }
+    report(
+      'cross-engine-parity',
+      problems,
+      `${parityEngines.join(', ')} x ${PARITY_FLOWS.join(', ')}`
     );
   }
 

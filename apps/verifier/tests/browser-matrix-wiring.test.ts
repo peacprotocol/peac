@@ -62,14 +62,22 @@ describe('the browser matrix CI lane', () => {
     }
   });
 
-  it('activates on verifier-affecting paths and is required by the aggregate', () => {
+  it('activates on verifier-reachable paths and is required by the aggregate', () => {
     const job = CI.slice(CI.indexOf('browser-matrix:'), CI.indexOf('\n  ci:'));
-    expect(job).toContain("needs.detect-changes.outputs.verifier_ci == 'true'");
+    for (const output of ['verifier_ci', 'core', 'root_config']) {
+      expect(job, `matrix activates on ${output}`).toContain(
+        `needs.detect-changes.outputs.${output} == 'true'`
+      );
+    }
     const aggregate = CI.slice(CI.indexOf('\n  ci:'));
     expect(aggregate).toContain('browser-matrix,');
     expect(aggregate).toContain('needs.browser-matrix.result');
-    expect(aggregate).toMatch(
-      /verifier_ci }}" == "true" && "\$\{\{ needs\.browser-matrix\.result }}" != "success"/
-    );
+    // The aggregate requires the matrix to have succeeded when any verifier-reachable path changed.
+    for (const output of ['verifier_ci', 'core', 'root_config']) {
+      expect(aggregate, `aggregate requires the matrix on ${output}`).toContain(
+        `needs.detect-changes.outputs.${output} }}" == "true"`
+      );
+    }
+    expect(aggregate).toContain('needs.browser-matrix.result }}" != "success"');
   });
 });
