@@ -6,7 +6,6 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { mkdtempSync, mkdirSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-expect-error plain module without type declarations
 import { loadAssets, respond } from './browser/static-assets.mjs';
 

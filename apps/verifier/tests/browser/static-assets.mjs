@@ -7,7 +7,7 @@
  * and malformed URL encoding fails closed as a 404.
  */
 import { createServer } from 'node:http';
-import { lstatSync, readFileSync, readdirSync } from 'node:fs';
+import { closeSync, constants, fstatSync, openSync, readFileSync, readdirSync } from 'node:fs';
 import { extname, join } from 'node:path';
 
 const MIME = {
@@ -20,24 +20,36 @@ const MIME = {
 };
 
 /**
- * Reads a directory tree into a Map of URL path to { body, type }. Throws on symbolic links and
- * ignores anything that is not a regular file or directory.
+ * Reads a directory tree into a Map of URL path to { body, type }. Symbolic links are rejected
+ * atomically by opening with O_NOFOLLOW, and each file's type check and read share one
+ * descriptor, so no check-then-use gap exists.
  */
 export function loadAssets(root) {
   const assets = new Map();
   const walk = (dir, prefix) => {
     for (const entry of readdirSync(dir, { withFileTypes: true })) {
       const absolute = join(dir, entry.name);
-      if (entry.isSymbolicLink() || lstatSync(absolute).isSymbolicLink()) {
-        throw new Error(`refusing symbolic link: ${prefix}${entry.name}`);
-      }
       if (entry.isDirectory()) {
         walk(absolute, `${prefix}${entry.name}/`);
-      } else if (entry.isFile()) {
+        continue;
+      }
+      let fd;
+      try {
+        fd = openSync(absolute, constants.O_RDONLY | constants.O_NOFOLLOW);
+      } catch (err) {
+        if (err.code === 'ELOOP' || err.code === 'EMLINK') {
+          throw new Error(`refusing symbolic link: ${prefix}${entry.name}`);
+        }
+        throw err;
+      }
+      try {
+        if (!fstatSync(fd).isFile()) continue;
         assets.set(`/${prefix}${entry.name}`, {
-          body: readFileSync(absolute),
+          body: readFileSync(fd),
           type: MIME[extname(entry.name)] ?? 'application/octet-stream',
         });
+      } finally {
+        closeSync(fd);
       }
     }
   };
