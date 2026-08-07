@@ -7,7 +7,7 @@
  */
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { readFileSync, realpathSync, statSync } from 'node:fs';
+import { closeSync, fstatSync, openSync, readFileSync, realpathSync } from 'node:fs';
 import { isAbsolute, join, normalize, relative, resolve } from 'node:path';
 
 /** Repository-relative path of the normative corpus. */
@@ -50,8 +50,14 @@ export function readRepositoryFile(repoRoot, relativePath) {
   if (relative(rootReal, real).startsWith('..')) {
     throw new Error(`path resolves outside the repository: ${relativePath}`);
   }
-  if (!statSync(real).isFile()) throw new Error(`not a regular file: ${relativePath}`);
-  return readFileSync(real);
+  // One descriptor for the type check and the read, so the file cannot change between them.
+  const fd = openSync(real, 'r');
+  try {
+    if (!fstatSync(fd).isFile()) throw new Error(`not a regular file: ${relativePath}`);
+    return readFileSync(fd);
+  } finally {
+    closeSync(fd);
+  }
 }
 
 export const fileDigest = (repoRoot, relativePath) =>

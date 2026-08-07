@@ -211,7 +211,8 @@ describe('the precheck delegates what it cannot decide', () => {
     );
   });
 
-  it('an ordinary prime-subgroup key is not rejected by the precheck', async () => {
+  it('an ordinary prime-subgroup key is not rejected by the precheck', { timeout: 30_000 }, () => {
+    // BigInt scalar multiplication per encoding exceeds the default timeout on slower runners.
     for (const hex of ORDINARY) {
       expect(classifyPointEncoding(hex).classification).toBe('canonical_prime_subgroup');
     }
