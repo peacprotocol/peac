@@ -94,6 +94,10 @@ function goTable(): string[] {
 }
 
 describe('every corpus entry is classified from first principles', () => {
+  // Classification runs first-principles group arithmetic (repeated scalar multiplication) in
+  // pure JavaScript. The mixed-order entries are the most expensive, and under parallel CI load
+  // a single case can exceed the generic five-second default, so this family carries the same
+  // explicit budget as the regenerability tests below.
   it.each(corpus.entries.map((e) => [e.encoding_hex.slice(0, 16), e] as const))(
     '%s',
     (_label, entry) => {
@@ -105,7 +109,8 @@ describe('every corpus entry is classified from first principles', () => {
       expect(facts.primeSubgroupMember).toBe(entry.prime_subgroup_member);
       expect(facts.torsionComponentOrder).toBe(entry.torsion_component_order);
       expect(facts.exactOrder).toBe(entry.exact_order);
-    }
+    },
+    30_000
   );
 });
 
