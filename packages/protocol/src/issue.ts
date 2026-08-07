@@ -420,7 +420,7 @@ export interface IssueWire02Options {
   /** Ed25519 private key (32 bytes) */
   privateKey: Uint8Array;
 
-  /** Key ID (max 256 chars per JOSE hardening rules) */
+  /** Key ID: non-empty, well-formed Unicode, at most 256 UTF-8 bytes (a PEAC constraint; RFC 7515 leaves kid structure unspecified) */
   kid: string;
 
   /**
