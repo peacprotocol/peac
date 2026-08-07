@@ -13,8 +13,12 @@ import {
   LOCKFILE_PATH,
   MEASURED_ARTIFACT_PATH,
   PRODUCTION_SOURCES,
+  fileAtRevision,
   fileDigest,
+  observationDependencyProblems,
   productionSourceManifestDigest,
+  readRepositoryFile,
+  sha256,
 } from './tools/evidence-provenance.mjs';
 
 const CRYPTO_ROOT = resolve(__dirname, '..');
@@ -97,11 +101,37 @@ describe('the committed runtime observations', () => {
     }
   });
 
-  it('recomputes the lockfile digest', () => {
-    const expected = fileDigest(REPO_ROOT, LOCKFILE_PATH);
-    for (const [id, environment] of Object.entries(document.environments)) {
-      expect(environment.lockfile_sha256, `${id}: lockfile digest`).toBe(expected);
+  // The lockfile digest is provenance of the measurement event; current-tree applicability is
+  // bound to the measurement-relevant dependencies, not to the whole lockfile.
+  it('records one well-formed lockfile digest across all environments', () => {
+    const digests = new Set(
+      Object.values(document.environments).map((environment) => environment.lockfile_sha256)
+    );
+    expect([...digests], 'all environments were measured from one lockfile').toHaveLength(1);
+    expect([...digests][0]).toMatch(/^[0-9a-f]{64}$/);
+  });
+
+  it('the recorded lockfile digest matches the lockfile at the measurement revision', () => {
+    const revision = document.measurement_source_revision;
+    const historical = fileAtRevision(REPO_ROOT, revision, LOCKFILE_PATH);
+    if (historical === null) {
+      // Shallow clones and source archives cannot resolve the recorded revision.
+      expect(
+        process.env.PEAC_REQUIRE_PROVENANCE_HISTORY,
+        `revision ${revision} is not resolvable here; audit the lockfile digest from a full-history checkout`
+      ).toBeUndefined();
+      return;
     }
+    const expected = sha256(historical);
+    for (const [id, environment] of Object.entries(document.environments)) {
+      expect(environment.lockfile_sha256, `${id}: lockfile digest at ${revision}`).toBe(expected);
+    }
+  });
+
+  it('the current lockfile resolves every measurement dependency to its measured version', () => {
+    const lockfile = readRepositoryFile(REPO_ROOT, LOCKFILE_PATH).toString('utf8');
+    const problems = observationDependencyProblems(document.environments, lockfile);
+    expect(problems, 'measurement-relevant dependencies match the lockfile').toEqual([]);
   });
 
   it('recomputes the production source manifest for every wrapper surface', () => {

@@ -29,6 +29,15 @@ export const PRODUCTION_SOURCES = Object.freeze([
   'packages/crypto/src/internal/ed25519-admissibility.ts',
 ]);
 
+/**
+ * Lockfile-resolved dependencies that participate in a measured surface. Browser engines and
+ * runners are installed outside the workspace, Node and Go are toolchains, and the PEAC wrapper
+ * is bound by its artifact and source-manifest digests; none of those bind through the lockfile.
+ */
+export const MEASUREMENT_DEPENDENCIES = Object.freeze([
+  Object.freeze({ package: '@noble/ed25519', implementationPrefix: 'noble:' }),
+]);
+
 export const sha256 = (buffer) => createHash('sha256').update(buffer).digest('hex');
 
 /**
@@ -101,6 +110,97 @@ export function deriveSourceRevision(repoRoot) {
     );
   }
   return revision;
+}
+
+/**
+ * Distinct versions a pnpm lockfile resolves for a package, sorted. Reads the packages-section
+ * keys in their slash, bare and quoted forms, ignoring peer suffixes. An unrecognized format
+ * yields an empty result, which callers must treat as a failure.
+ */
+export function lockfileResolvedVersions(lockfileText, packageName) {
+  if (typeof lockfileText !== 'string' || lockfileText.length === 0) {
+    throw new Error('lockfile text is required');
+  }
+  if (typeof packageName !== 'string' || packageName.length === 0) {
+    throw new Error('a package name is required');
+  }
+  const escaped = packageName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const key = new RegExp(`^  ['"]?/?${escaped}@([0-9][^:('"]*)`, 'gm');
+  const versions = new Set();
+  for (const match of lockfileText.matchAll(key)) {
+    versions.add(match[1]);
+  }
+  return [...versions].sort();
+}
+
+/**
+ * Applicability of recorded observation environments to a lockfile: every measurement-relevant
+ * dependency must resolve to exactly its measured version. Returns problems; empty means
+ * applicable. The recorded lockfile digest is provenance of the measurement event and is not
+ * compared against the current lockfile.
+ */
+export function observationDependencyProblems(environments, lockfileText) {
+  const problems = [];
+  for (const dependency of MEASUREMENT_DEPENDENCIES) {
+    const measured = Object.entries(environments).filter(
+      ([, environment]) =>
+        typeof environment.implementation === 'string' &&
+        environment.implementation.startsWith(dependency.implementationPrefix)
+    );
+    if (measured.length === 0) {
+      problems.push(`${dependency.package}: no measured environment records it`);
+      continue;
+    }
+    const recorded = new Set(measured.map(([, environment]) => environment.version));
+    if (recorded.size !== 1) {
+      problems.push(
+        `${dependency.package}: environments record ${recorded.size} distinct versions: ${[...recorded].sort().join(', ')}`
+      );
+      continue;
+    }
+    const [measuredVersion] = recorded;
+    const resolved = lockfileResolvedVersions(lockfileText, dependency.package);
+    if (resolved.length === 0) {
+      problems.push(`${dependency.package}: the lockfile resolves no version`);
+    } else if (resolved.length > 1) {
+      problems.push(
+        `${dependency.package}: the lockfile resolves multiple versions: ${resolved.join(', ')}`
+      );
+    } else if (resolved[0] !== measuredVersion) {
+      problems.push(
+        `${dependency.package}: measured ${measuredVersion}, the lockfile resolves ${resolved[0]}`
+      );
+    }
+  }
+  return problems;
+}
+
+/**
+ * Bytes of a repository-relative path at a revision, or null when the revision's objects are
+ * not present locally. Nothing is fetched.
+ */
+export function fileAtRevision(repoRoot, revision, relativePath) {
+  if (typeof revision !== 'string' || !/^[0-9a-f]{40}$/.test(revision)) {
+    throw new Error(`a full lowercase commit SHA is required: ${revision}`);
+  }
+  if (typeof relativePath !== 'string' || relativePath.length === 0 || isAbsolute(relativePath)) {
+    throw new Error(`a repository-relative path is required: ${relativePath}`);
+  }
+  const normalized = normalize(relativePath);
+  if (normalized.startsWith('..') || normalized.split('/').includes('..')) {
+    throw new Error(`path escapes the repository: ${relativePath}`);
+  }
+  const spec = `${revision}:${normalized}`;
+  const options = { cwd: resolve(repoRoot), stdio: ['ignore', 'pipe', 'pipe'] };
+  try {
+    execFileSync('git', ['cat-file', '-e', spec], options);
+  } catch {
+    return null;
+  }
+  return execFileSync('git', ['cat-file', 'blob', spec], {
+    ...options,
+    maxBuffer: 256 * 1024 * 1024,
+  });
 }
 
 /**
