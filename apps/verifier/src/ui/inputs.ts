@@ -46,10 +46,13 @@ function field(
   const ta = document.createElement('textarea');
   ta.id = id;
   ta.rows = 6;
+  ta.setAttribute('aria-describedby', `${id}-hint`);
   const p = document.createElement('p');
+  p.id = `${id}-hint`;
   p.textContent = hint;
   const file = document.createElement('input');
   file.type = 'file';
+  file.setAttribute('aria-label', `Load ${label} from a file`);
   shared.register(ta);
   shared.register(file);
 
