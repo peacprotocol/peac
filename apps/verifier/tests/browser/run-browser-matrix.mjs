@@ -78,7 +78,10 @@ const { generateKeypair, base64urlEncode, base64urlDecode, computeJwkThumbprint 
   await import('@peac/crypto');
 const { issue } = await import('@peac/protocol');
 
-// The application must not evaluate dynamic code; verified against the exact bundles served.
+// Static scan of the served bundles. eval() and new Function() are forbidden outright. A bare
+// Function() constructor is reported unless it is the one recognised dependency capability probe,
+// which application-wide jitless configuration leaves unexecuted -- the runtime instrumentation
+// below is what proves it never runs.
 function scanBundles() {
   const problems = [];
   const assets = join(DIST, 'assets');
@@ -87,15 +90,17 @@ function scanBundles() {
     const text = readFileSync(join(assets, name), 'utf8');
     if (/\beval\s*\(/.test(text)) problems.push(`${name}: contains eval()`);
     if (/new Function/.test(text)) problems.push(`${name}: contains new Function`);
+    const re = /(^|[^\w.$])Function\s*\(/g;
+    let m;
+    while ((m = re.exec(text)) !== null) {
+      const at = m.index + m[1].length;
+      const context = text.slice(Math.max(0, at - 90), at + 12);
+      const known = /Cloudflare/.test(context) && /Function\s*\(\s*(``|''|"")\s*\)/.test(context);
+      if (!known) problems.push(`${name}: unrecognised Function() constructor`);
+    }
   }
   return problems;
 }
-
-// Firefox reports Playwright's own injected evaluation as a page CSP violation. The bundle scan
-// above proves the application ships no dynamic code, so exactly this diagnostic, in Firefox
-// only, is classified as an automation diagnostic; every other console error fails the run.
-const FIREFOX_AUTOMATION_DIAGNOSTIC =
-  /Content-Security-Policy.*blocked a JavaScript eval.*script-src/;
 
 const LIMITS = { record: 64 * 1024, key: 128 * 1024, context: 8 * 1024 };
 
@@ -212,6 +217,23 @@ const MOBILE_FLOW_IDS = ['accept-bare-jwk', 'tamper'];
 
 // Counts persistence ATTEMPTS from before application code runs; the observers never mutate the
 // surfaces they watch.
+// Records Content-Security-Policy violations, installed before application code runs. Under the
+// shipped policy (script-src 'self', no unsafe-eval) any dynamic code the application executes is
+// refused and raises a violation, so a clean record proves the application constructs and runs no
+// dynamic code under policy. Automation-injected evaluation is delivered out of band and does not
+// raise a page violation, so this signal is not polluted by the test harness.
+const DYNAMIC_CODE_OBSERVER = () => {
+  const violations = [];
+  Object.defineProperty(globalThis, '__peacCspViolations', { value: violations });
+  document.addEventListener('securitypolicyviolation', (e) => {
+    violations.push({
+      directive: e.violatedDirective,
+      source: e.sourceFile,
+      blocked: e.blockedURI,
+    });
+  });
+};
+
 const PERSISTENCE_OBSERVER = () => {
   const counts = {
     storageWrites: 0,
@@ -353,22 +375,17 @@ async function checkFileInput(page, fixtures, problems) {
   if (text !== ACCEPT) problems.push(`file-input: expected "${ACCEPT}", saw "${text}"`);
 }
 
-async function runSession(engineName, page, fixtures, origin, flowIds) {
+async function runSession(page, fixtures, origin, flowIds) {
   const problems = [];
   const consoleErrors = [];
-  let automationDiagnostics = 0;
   page.on('pageerror', (err) => consoleErrors.push(String(err)));
   page.on('console', (m) => {
-    if (m.type() !== 'error') return;
-    if (engineName === 'firefox' && FIREFOX_AUTOMATION_DIAGNOSTIC.test(m.text())) {
-      automationDiagnostics += 1;
-      return;
-    }
-    consoleErrors.push(m.text());
+    if (m.type() === 'error') consoleErrors.push(m.text());
   });
   const requests = [];
   page.on('request', (r) => requests.push(r.url()));
   await page.addInitScript(PERSISTENCE_OBSERVER);
+  await page.addInitScript(DYNAMIC_CODE_OBSERVER);
 
   await page.goto(`${origin}/`, { waitUntil: 'networkidle' });
   const requestsAfterLoad = requests.length;
@@ -422,8 +439,12 @@ async function runSession(engineName, page, fixtures, origin, flowIds) {
   for (const [surface, count] of Object.entries(persistence)) {
     if (count !== 0) problems.push(`persistence: ${surface} holds ${count} entr(ies)`);
   }
+  const cspViolations = await page.evaluate(() => globalThis.__peacCspViolations ?? []);
+  for (const v of cspViolations) {
+    problems.push(`CSP violation: ${v.directive} (${v.blocked ?? v.source ?? 'inline'})`);
+  }
   for (const message of consoleErrors) problems.push(`console error: ${message}`);
-  return { problems, automationDiagnostics };
+  return { problems };
 }
 
 // A runtime without WebCrypto Ed25519 must present a capability message, not a cryptic failure.
@@ -479,18 +500,15 @@ try {
     }
     const browser = await playwright[name].launch();
     const context = await browser.newContext();
-    const session = await runSession(name, await context.newPage(), fixtures, origin);
+    const session = await runSession(await context.newPage(), fixtures, origin);
     const problems = [...session.problems, ...(await runCapabilityCheck(browser, origin))];
     const version = browser.version();
     await browser.close();
-    const diag = session.automationDiagnostics
-      ? `, ${session.automationDiagnostics} automation diagnostic(s) classified`
-      : '';
     report(
       name,
       problems,
       `${version}; ${flows(fixtures).length} flows + report determinism + snapshot + ` +
-        `supersession + file input + capability; no network, no persistence attempts${diag}`
+        `supersession + file input + capability; no network, no persistence, no dynamic code, no CSP violation`
     );
   }
 
@@ -507,13 +525,7 @@ try {
       }
       const browser = await playwright[m.engine].launch();
       const context = await browser.newContext({ ...device });
-      const session = await runSession(
-        m.engine,
-        await context.newPage(),
-        fixtures,
-        origin,
-        MOBILE_FLOW_IDS
-      );
+      const session = await runSession(await context.newPage(), fixtures, origin, MOBILE_FLOW_IDS);
       await browser.close();
       report(m.label, session.problems, MOBILE_FLOW_IDS.join(', '));
     }

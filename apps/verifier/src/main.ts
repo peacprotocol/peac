@@ -12,6 +12,7 @@
  * operator nothing, and "nothing happened" is the one outcome a verifier must never produce
  * silently.
  */
+import './lib/schema-runtime.js';
 import { initApp } from './ui/app.js';
 
 function fatal(message: string): void {

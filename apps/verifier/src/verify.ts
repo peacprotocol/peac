@@ -7,6 +7,7 @@
  * verifier uses internally, so it provided no independent assurance while doubling the work and
  * adding a reconciliation matrix and misleading inconsistency semantics.
  */
+import './lib/schema-runtime.js';
 import { sha256Hex } from '@peac/crypto';
 import { verifyLocal as verifyLocalImpl } from '@peac/protocol/verify-local';
 import { VerifierError, isVerifierError, DIAGNOSTIC } from './lib/errors.js';
