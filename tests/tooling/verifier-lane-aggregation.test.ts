@@ -49,8 +49,12 @@ function evaluate(values: Record<string, string>): number {
   }
 }
 
-/** All lanes passing, with the verifier activation flag and lane result under test. */
-function lanes(verifierCi: string, examplesApps: string): Record<string, string> {
+/** All lanes passing, with the verifier activation flag and lane results under test. */
+function lanes(
+  verifierCi: string,
+  examplesApps: string,
+  browserMatrix = examplesApps
+): Record<string, string> {
   return {
     'needs.detect-changes.outputs.verifier_ci': verifierCi,
     // Unrelated activation outputs, held at values that keep the other rules satisfied so each
@@ -65,6 +69,7 @@ function lanes(verifierCi: string, examplesApps: string): Record<string, string>
     'needs.examples-apps.result': examplesApps,
     'needs.pack-smoke.result': 'success',
     'needs.node-compat.result': 'success',
+    'needs.browser-matrix.result': browserMatrix,
   };
 }
 
@@ -90,5 +95,27 @@ describe('a verifier lane that did not run cannot pass the aggregate', () => {
   it('verifier paths unchanged and the lane failed: still rejected', () => {
     // The pre-existing generic failure handling must survive the added rule.
     expect(evaluate(lanes('false', 'failure'))).not.toBe(0);
+  });
+});
+
+describe('a browser matrix that did not run cannot pass the aggregate', () => {
+  it('verifier paths changed and the matrix succeeded: accepted', () => {
+    expect(evaluate(lanes('true', 'success', 'success'))).toBe(0);
+  });
+
+  it('verifier paths changed and the matrix was SKIPPED: rejected', () => {
+    expect(evaluate(lanes('true', 'success', 'skipped'))).not.toBe(0);
+  });
+
+  it('verifier paths changed and the matrix failed: rejected', () => {
+    expect(evaluate(lanes('true', 'success', 'failure'))).not.toBe(0);
+  });
+
+  it('verifier paths unchanged and the matrix was skipped: allowed', () => {
+    expect(evaluate(lanes('false', 'success', 'skipped'))).toBe(0);
+  });
+
+  it('verifier paths unchanged and the matrix failed: still rejected', () => {
+    expect(evaluate(lanes('false', 'success', 'failure'))).not.toBe(0);
   });
 });

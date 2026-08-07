@@ -9,11 +9,15 @@
  * Memoized: the probe runs ONCE. Concurrent initialization shares the in-flight promise.
  */
 
-// RFC 8032 section 7.1, TEST 1 (empty message).
-const RFC8032_VECTOR1_PUBLIC_KEY =
-  'd75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a';
-const RFC8032_VECTOR1_SIGNATURE =
-  'e5564300c360ac729086e2cc806e828a84877f1eb8e5d974d873e065224901555fb8821590a33bacc61e39701cf9b46bd25bf5f0595bbe24655141438e7a100b';
+// RFC 8032 section 7.1, TEST 2 (one-byte message 0x72). Deliberately NOT the empty-message
+// TEST 1: zero-length Ed25519 verification is not portable across the supported WebCrypto
+// runtimes measured for this profile, and a PEAC JWS signing input is never empty, so an
+// empty-message probe would misreport a capable runtime as unsupported.
+const RFC8032_VECTOR2_PUBLIC_KEY =
+  '3d4017c3e843895a92b70aa74d1b7ebc9c982ccf2ec4968cc0cd55f12af4660c';
+const RFC8032_VECTOR2_SIGNATURE =
+  '92a009a9f0d4cab8720e820b5f642540a2b27b5416503f8fb3762223ebdb69da085ac1e43e15996e458f3613d0f11d8c387b2eaeb4302aeeb00d291612bb0c00';
+const RFC8032_VECTOR2_MESSAGE = '72';
 
 function hexToBytes(hex: string): Uint8Array {
   const out = new Uint8Array(hex.length / 2);
@@ -29,7 +33,7 @@ async function probe(): Promise<boolean> {
   try {
     const key = await subtle.importKey(
       'raw',
-      hexToBytes(RFC8032_VECTOR1_PUBLIC_KEY) as BufferSource,
+      hexToBytes(RFC8032_VECTOR2_PUBLIC_KEY) as BufferSource,
       { name: 'Ed25519' },
       false,
       ['verify']
@@ -37,8 +41,8 @@ async function probe(): Promise<boolean> {
     return await subtle.verify(
       { name: 'Ed25519' },
       key,
-      hexToBytes(RFC8032_VECTOR1_SIGNATURE) as BufferSource,
-      new Uint8Array(0) as BufferSource
+      hexToBytes(RFC8032_VECTOR2_SIGNATURE) as BufferSource,
+      hexToBytes(RFC8032_VECTOR2_MESSAGE) as BufferSource
     );
   } catch {
     // NotSupportedError, or any failure verifying the known-good vector, means this runtime cannot

@@ -737,6 +737,39 @@ jobs:
   # Audit Gate (Windows), node-compat, and scope-guard remain separate checks
   # and are intentionally evaluated outside this aggregator.
   # ---------------------------------------------------------------------------
+  browser-matrix:
+    name: Verifier Browser Matrix
+    needs: detect-changes
+    if: >-
+      needs.detect-changes.outputs.verifier_ci == 'true' ||
+      github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./.github/actions/setup-env
+
+      - name: Build packages
+        run: pnpm build
+
+      - name: Build verifier
+        run: pnpm --filter @peac/app-verifier build
+
+      # Playwright is never a repository dependency; an exact release is installed into an
+      # isolated directory for this job only.
+      - name: Install browser tooling (isolated)
+        run: |
+          DEPS="$RUNNER_TEMP/browser-deps"
+          mkdir -p "$DEPS"
+          cd "$DEPS"
+          pnpm init > /dev/null
+          pnpm add playwright@1.62.1
+          pnpm exec playwright install --with-deps chromium firefox webkit
+
+      - name: Browser matrix
+        run: node apps/verifier/tests/browser/run-browser-matrix.mjs --deps "$RUNNER_TEMP/browser-deps"
+
   ci:
     name: Build, Lint, Test
     needs:
@@ -750,6 +783,7 @@ jobs:
         examples-apps,
         pack-smoke,
         node-compat,
+        browser-matrix,
       ]
     if: always()
     runs-on: ubuntu-latest
@@ -765,6 +799,7 @@ jobs:
           echo "examples-apps: ${{ needs.examples-apps.result }}"
           echo "pack-smoke:    ${{ needs.pack-smoke.result }}"
           echo "node-compat:   ${{ needs.node-compat.result }}"
+          echo "browser-matrix: ${{ needs.browser-matrix.result }}"
 
           # workflow-lint: always required, must succeed
           if [[ "${{ needs.workflow-lint.result }}" != "success" ]]; then
@@ -814,6 +849,15 @@ jobs:
           # so without this the aggregate could stay green while the verifier never ran.
           if [[ "${{ needs.detect-changes.outputs.verifier_ci }}" == "true" && "${{ needs.examples-apps.result }}" != "success" ]]; then
             echo "FAIL: verifier-affecting paths changed but the verifier lane did not succeed (result: ${{ needs.examples-apps.result }})"; exit 1
+          fi
+
+          # browser-matrix: same activation rule as the verifier lane. A failure always blocks;
+          # when verifier-affecting paths changed the matrix must have actually succeeded.
+          if [[ "${{ needs.browser-matrix.result }}" == "failure" || "${{ needs.browser-matrix.result }}" == "cancelled" ]]; then
+            echo "FAIL: browser-matrix failed"; exit 1
+          fi
+          if [[ "${{ needs.detect-changes.outputs.verifier_ci }}" == "true" && "${{ needs.browser-matrix.result }}" != "success" ]]; then
+            echo "FAIL: verifier-affecting paths changed but the browser matrix did not succeed (result: ${{ needs.browser-matrix.result }})"; exit 1
           fi
 
           # node-compat: the runtime compatibility matrix. Membership in `needs` alone does

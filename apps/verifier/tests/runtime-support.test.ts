@@ -22,6 +22,17 @@ describe('ed25519WebCryptoSupported', () => {
     expect(await ed25519WebCryptoSupported()).toBe(true);
   });
 
+  it('probes with a non-empty message', async () => {
+    // Zero-length Ed25519 verification is not portable across the supported WebCrypto runtimes
+    // measured for this profile, and a PEAC JWS signing input is never empty.
+    const spy = vi.spyOn(globalThis.crypto.subtle, 'verify');
+    resetRuntimeProbeForTests();
+    await ed25519WebCryptoSupported();
+    expect(spy).toHaveBeenCalled();
+    const message = spy.mock.calls[0][3] as ArrayBufferView;
+    expect(message.byteLength).toBeGreaterThan(0);
+  });
+
   it('is memoized: the probe runs once even under concurrent initialization', async () => {
     resetRuntimeProbeForTests();
     const spy = vi.spyOn(globalThis.crypto.subtle, 'verify');
