@@ -1,0 +1,171 @@
+/**
+ * Bounded Ed25519 point-encoding admissibility precheck.
+ *
+ * Applies an enumerated set of encoding and low-order rejections to the public key A and to the
+ * signature component R before delegating to the runtime primitive. PEAC decides the enumerated
+ * admissibility cases before delegation, removing the observed divergence for those cases. Inputs
+ * outside this bounded set remain subject to the delegated primitive's point decoding and
+ * verification semantics. RFC 8032 permits the cofactored verification equation; Web Cryptography
+ * Level 2 specifies the cofactorless equation with prior rejection of invalid and small-order
+ * points. The two accept different sets at these edges.
+ *
+ * Scope: not complete point decoding, curve validation, prime-subgroup membership testing or
+ * general mixed-order rejection. Curve validity and the signature equation remain with the runtime
+ * primitive.
+ *
+ * Package-private: not exported from the package barrel and not part of the public API.
+ *
+ * The predicate performs no byte copying, hexadecimal conversion, string handling, BigInt or curve
+ * arithmetic: at most twenty fixed 32-byte comparisons. Callers may pass a zero-copy view for R.
+ *
+ * @internal
+ */
+
+const POINT_BYTES = 32;
+const SIGN_BIT = 0x80;
+const LOW_SEVEN_BITS = 0x7f;
+
+/** Field prime p = 2^255 - 19, little-endian. */
+const FIELD_PRIME_LE = Uint8Array.from([
+  0xed, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+  0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x7f,
+]);
+
+/**
+ * Encoded y = 1 and y = p - 1, little-endian, sign bit cleared.
+ *
+ * x is zero exactly when y^2 = 1, that is y = 1 or y = p - 1. A set sign bit is then a decoding
+ * failure under RFC 8032 section 5.1.3, because zero has no negative encoding. Enumerating both
+ * values makes that rule finite and checkable without recovering x.
+ */
+const ENCODED_Y_ONE = Uint8Array.from([
+  0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+]);
+const ENCODED_Y_P_MINUS_ONE = Uint8Array.from([
+  0xec, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+  0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x7f,
+]);
+
+/**
+ * The eight canonical encodings of Ed25519 points of small order: the identity, the point of order
+ * two, both points of order four and all four points of order eight. Together these are exactly the
+ * 8-torsion subgroup, so this table is COMPLETE for canonically encoded small-order points.
+ *
+ * Flattened into one buffer: eight 32-byte records at offsets 0, 32, ... 224.
+ */
+const ED25519_TORSION_POINT_ENCODINGS = Uint8Array.from([
+  // order 1 (identity)
+  0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  // order 2
+  0xec, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+  0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x7f,
+  // order 4
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  // order 4
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80,
+  // order 8
+  0x26, 0xe8, 0x95, 0x8f, 0xc2, 0xb2, 0x27, 0xb0, 0x45, 0xc3, 0xf4, 0x89, 0xf2, 0xef, 0x98, 0xf0,
+  0xd5, 0xdf, 0xac, 0x05, 0xd3, 0xc6, 0x33, 0x39, 0xb1, 0x38, 0x02, 0x88, 0x6d, 0x53, 0xfc, 0x05,
+  // order 8
+  0x26, 0xe8, 0x95, 0x8f, 0xc2, 0xb2, 0x27, 0xb0, 0x45, 0xc3, 0xf4, 0x89, 0xf2, 0xef, 0x98, 0xf0,
+  0xd5, 0xdf, 0xac, 0x05, 0xd3, 0xc6, 0x33, 0x39, 0xb1, 0x38, 0x02, 0x88, 0x6d, 0x53, 0xfc, 0x85,
+  // order 8
+  0xc7, 0x17, 0x6a, 0x70, 0x3d, 0x4d, 0xd8, 0x4f, 0xba, 0x3c, 0x0b, 0x76, 0x0d, 0x10, 0x67, 0x0f,
+  0x2a, 0x20, 0x53, 0xfa, 0x2c, 0x39, 0xcc, 0xc6, 0x4e, 0xc7, 0xfd, 0x77, 0x92, 0xac, 0x03, 0x7a,
+  // order 8
+  0xc7, 0x17, 0x6a, 0x70, 0x3d, 0x4d, 0xd8, 0x4f, 0xba, 0x3c, 0x0b, 0x76, 0x0d, 0x10, 0x67, 0x0f,
+  0x2a, 0x20, 0x53, 0xfa, 0x2c, 0x39, 0xcc, 0xc6, 0x4e, 0xc7, 0xfd, 0x77, 0x92, 0xac, 0x03, 0xfa,
+]);
+
+/**
+ * Two canonical encodings of points of exact order 4L, rejected by PEAC profile policy since 0.16.3.
+ *
+ * These are valid curve points carrying a low-order component; they are not torsion points. They
+ * are not rejected solely by the invalid and small-order admissibility rule of Web Cryptography
+ * Level 2, and RFC 8032 does not require rejecting every mixed-order point. Observed primitive
+ * outcomes are recorded as versioned empirical evidence in the conformance corpus.
+ *
+ * Not a general mixed-order test: a finite table cannot reject every point carrying both a
+ * prime-order and a low-order component.
+ */
+const PEAC_PROFILE_MIXED_ORDER_REJECTIONS = Uint8Array.from([
+  0xc7, 0x17, 0x6a, 0x70, 0x3d, 0x4d, 0xd8, 0x4f, 0xba, 0x3c, 0x0b, 0x76, 0x0d, 0x10, 0x67, 0x0f,
+  0x2a, 0x20, 0x53, 0xfa, 0x2c, 0x39, 0xcc, 0xc6, 0x4e, 0xc7, 0xfd, 0x77, 0x92, 0xac, 0x03, 0x05,
+  0xc7, 0x17, 0x6a, 0x70, 0x3d, 0x4d, 0xd8, 0x4f, 0xba, 0x3c, 0x0b, 0x76, 0x0d, 0x10, 0x67, 0x0f,
+  0x2a, 0x20, 0x53, 0xfa, 0x2c, 0x39, 0xcc, 0xc6, 0x4e, 0xc7, 0xfd, 0x77, 0x92, 0xac, 0x03, 0x85,
+]);
+
+/** Why a point encoding is inadmissible, or null when the runtime should decide. */
+export type Ed25519PointRejectionReason =
+  | 'encoded_y_out_of_range'
+  | 'invalid_x_zero_sign'
+  | 'torsion_point'
+  | 'peac_mixed_order_profile';
+
+/** Encoded y, with the sign bit masked away, is greater than or equal to the field prime. */
+function encodedYGreaterThanOrEqualToPrime(encoding: Uint8Array): boolean {
+  for (let i = POINT_BYTES - 1; i >= 0; i--) {
+    const y = i === POINT_BYTES - 1 ? encoding[i] & LOW_SEVEN_BITS : encoding[i];
+    const p = FIELD_PRIME_LE[i];
+    if (y !== p) return y > p;
+  }
+  // Equal to p exactly, which is out of range: y must be strictly less than p.
+  return true;
+}
+
+/** Encoded y equals the target, ignoring the sign bit. */
+function encodedYEquals(encoding: Uint8Array, target: Uint8Array): boolean {
+  for (let i = 0; i < POINT_BYTES - 1; i++) {
+    if (encoding[i] !== target[i]) return false;
+  }
+  return (encoding[POINT_BYTES - 1] & LOW_SEVEN_BITS) === target[POINT_BYTES - 1];
+}
+
+/** Exact match against one 32-byte record in a flattened table. */
+function matchesRecord(encoding: Uint8Array, table: Uint8Array, offset: number): boolean {
+  for (let i = 0; i < POINT_BYTES; i++) {
+    if (encoding[i] !== table[offset + i]) return false;
+  }
+  return true;
+}
+
+function inTable(encoding: Uint8Array, table: Uint8Array): boolean {
+  for (let offset = 0; offset < table.length; offset += POINT_BYTES) {
+    if (matchesRecord(encoding, table, offset)) return true;
+  }
+  return false;
+}
+
+/**
+ * Classify a 32-byte point encoding under the bounded PEAC profile.
+ *
+ * The caller validates length before calling: this decides point admissibility, not container
+ * shape. Returns null when PEAC expresses no opinion and the runtime primitive decides.
+ */
+export function ed25519PointRejectionReason(
+  encoding: Uint8Array
+): Ed25519PointRejectionReason | null {
+  if (encodedYGreaterThanOrEqualToPrime(encoding)) return 'encoded_y_out_of_range';
+
+  if ((encoding[POINT_BYTES - 1] & SIGN_BIT) !== 0) {
+    if (
+      encodedYEquals(encoding, ENCODED_Y_ONE) ||
+      encodedYEquals(encoding, ENCODED_Y_P_MINUS_ONE)
+    ) {
+      return 'invalid_x_zero_sign';
+    }
+  }
+
+  if (inTable(encoding, ED25519_TORSION_POINT_ENCODINGS)) return 'torsion_point';
+  if (inTable(encoding, PEAC_PROFILE_MIXED_ORDER_REJECTIONS)) return 'peac_mixed_order_profile';
+  return null;
+}
+
+/** True when the bounded profile rejects this encoding outright. */
+export function isRejectedEd25519PointEncoding(encoding: Uint8Array): boolean {
+  return ed25519PointRejectionReason(encoding) !== null;
+}

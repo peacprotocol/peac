@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
-	"regexp"
 	"runtime"
 	"strings"
 	"testing"
@@ -16,8 +15,8 @@ import (
 
 // ed25519ParityVector mirrors the hex-vector shape of the corpus at
 // specs/conformance/parity-corpus/ed25519-peac-profile/vectors.json. The
-// asserted field is PeacExpected.Accepted; the Empirical block is diagnostic
-// provenance and is not decoded here.
+// asserted field is PeacExpected.Accepted; empirical observations are evidence
+// and are not decoded here.
 type ed25519ParityVector struct {
 	ID           string `json:"id"`
 	Source       string `json:"source"`
@@ -192,26 +191,53 @@ func TestEd25519PeacProfileRoundTrip(t *testing.T) {
 // TestEd25519PeacProfileDenylistCount pins the Go small-order denylist size at
 // 11. The TypeScript side asserts byte-for-byte equality with this list; this
 // independent count guards against an accidental Go-only edit.
-func TestEd25519PeacProfileDenylistCount(t *testing.T) {
+func TestEd25519PeacProfileRejectionTables(t *testing.T) {
 	_, thisFile, _, ok := runtime.Caller(0)
 	if !ok {
 		t.Fatal("runtime.Caller failed")
 	}
-	src := filepath.Join(filepath.Dir(thisFile), "jws", "ed25519.go")
+	src := filepath.Join(filepath.Dir(thisFile), "jws", "ed25519_admissibility.go")
 	data, err := os.ReadFile(src)
 	if err != nil {
 		t.Fatalf("read %s: %v", src, err)
 	}
-	idx := strings.Index(string(data), "ed25519SmallOrderPublicKeys")
-	if idx < 0 {
-		t.Fatal("denylist marker not found in jws/ed25519.go")
+	source := string(data)
+
+	// Count 32-byte records in each declared table. Records elide trailing zero bytes, so count
+	// brace groups rather than byte literals.
+	countRecords := func(marker string) int {
+		idx := strings.Index(source, marker)
+		if idx < 0 {
+			t.Fatalf("table marker %q not found in jws/ed25519_admissibility.go", marker)
+		}
+		window := source[idx:]
+		if end := strings.Index(window, "\n}\n"); end >= 0 {
+			window = window[:end]
+		}
+		return strings.Count(window, "}: {}")
 	}
-	window := string(data)[idx:]
-	if len(window) > 2000 {
-		window = window[:2000]
+
+	if got := countRecords("var ed25519TorsionPointEncodings"); got != 8 {
+		t.Fatalf("torsion table has %d entries, want the complete 8-torsion subgroup", got)
 	}
-	count := len(regexp.MustCompile(`[0-9a-f]{64}`).FindAllString(window, -1))
-	if count != 11 {
-		t.Fatalf("Go small-order denylist has %d entries, want 11", count)
+	if got := countRecords("var peacProfileMixedOrderRejections"); got != 2 {
+		t.Fatalf("PEAC mixed-order table has %d entries, want 2", got)
 	}
+
+	// The group order is a scalar for the S >= L guard and must never appear in a point table.
+	if !strings.Contains(string(mustRead(t, filepath.Join(filepath.Dir(thisFile), "jws", "ed25519.go"))), "ed25519GroupOrderL") {
+		t.Fatal("the group-order scalar constant is missing from jws/ed25519.go")
+	}
+	if strings.Contains(source, "ed25519GroupOrderL") {
+		t.Fatal("the group-order scalar must not appear in the point-table file")
+	}
+}
+
+func mustRead(t *testing.T, path string) []byte {
+	t.Helper()
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("read %s: %v", path, err)
+	}
+	return data
 }

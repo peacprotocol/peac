@@ -3,6 +3,8 @@
  */
 
 import { describe, it, expect } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { sign, verify, decode, generateKeypair } from '../src/jws';
 import { CryptoError, isFormatError } from '../src/errors';
 import { WIRE_01_JWS_TYP, PEAC_ALG } from '@peac/kernel';
@@ -301,5 +303,20 @@ describe('CryptoError codes', () => {
     expect(error).toBeInstanceOf(CryptoError);
     expect(error).toBeInstanceOf(Error);
     expect(error.name).toBe('CryptoError');
+  });
+});
+
+describe('the JWS signing input is never zero length', () => {
+  // A zero-length Ed25519 message is rejected by at least one shipping browser primitive. This
+  // records why no record-verification path can reach that case: the signing input is always the
+  // protected header, a separator, and the payload.
+  it('always contains the protected header and a separator', () => {
+    const source = readFileSync(resolve(__dirname, '../src/jws.ts'), 'utf8');
+    expect(source).toContain('const signingInput = `${headerB64}.${payloadB64}`;');
+  });
+
+  it('a compact JWS cannot present an empty protected header segment', async () => {
+    // Verification requires three segments and a decodable header, so headerB64 is never empty.
+    await expect(verify('.e30.c2ln', new Uint8Array(32))).rejects.toThrow();
   });
 });

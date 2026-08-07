@@ -1,0 +1,598 @@
+{
+  "corpus": "ed25519-edge-point-encodings",
+  "version": "2",
+  "description": "Ed25519 point encodings at the edges of admissibility, together with ordinary inputs the profile must continue to accept. Mathematical fields state what an encoding IS, derived from RFC 8032 decoding and group arithmetic. The precheck-action fields state what the bounded PEAC precheck DOES, the mechanism field states WHERE it is enforced, and expected_profile_result states what the complete verifier returns. Those differ: an off-curve encoding is delegated by the precheck and rejected by the runtime primitive. Regenerate with tests/tools/generate-ed25519-edge-corpus.mjs.",
+  "entries": [
+    {
+      "encoding_hex": "0000000000000000000000000000000000000000000000000000000000000000",
+      "encoded_y_in_range": true,
+      "sign_encoding_valid": true,
+      "decodes_to_curve_point": true,
+      "primary_class": "canonical_small_order",
+      "prime_subgroup_member": false,
+      "torsion_component_order": 4,
+      "exact_order": "4",
+      "baseline_0_16_3_table_membership": true,
+      "baseline_0_16_3_precheck": {
+        "public_key_A": "reject",
+        "signature_R": "delegate"
+      },
+      "target_precheck": {
+        "public_key_A": "reject",
+        "signature_R": "reject"
+      },
+      "target_enforcement_mechanism": "torsion_table",
+      "expected_profile_result": "reject",
+      "provenance": [
+        "peac 0.16.3 pinned baseline table",
+        "nodejs/node#64026"
+      ]
+    },
+    {
+      "encoding_hex": "0000000000000000000000000000000000000000000000000000000000000080",
+      "encoded_y_in_range": true,
+      "sign_encoding_valid": true,
+      "decodes_to_curve_point": true,
+      "primary_class": "canonical_small_order",
+      "prime_subgroup_member": false,
+      "torsion_component_order": 4,
+      "exact_order": "4",
+      "baseline_0_16_3_table_membership": true,
+      "baseline_0_16_3_precheck": {
+        "public_key_A": "reject",
+        "signature_R": "delegate"
+      },
+      "target_precheck": {
+        "public_key_A": "reject",
+        "signature_R": "reject"
+      },
+      "target_enforcement_mechanism": "torsion_table",
+      "expected_profile_result": "reject",
+      "provenance": [
+        "peac 0.16.3 pinned baseline table",
+        "nodejs/node#64026"
+      ]
+    },
+    {
+      "encoding_hex": "0100000000000000000000000000000000000000000000000000000000000000",
+      "encoded_y_in_range": true,
+      "sign_encoding_valid": true,
+      "decodes_to_curve_point": true,
+      "primary_class": "canonical_small_order",
+      "prime_subgroup_member": true,
+      "torsion_component_order": 1,
+      "exact_order": "1",
+      "baseline_0_16_3_table_membership": true,
+      "baseline_0_16_3_precheck": {
+        "public_key_A": "reject",
+        "signature_R": "delegate"
+      },
+      "target_precheck": {
+        "public_key_A": "reject",
+        "signature_R": "reject"
+      },
+      "target_enforcement_mechanism": "torsion_table",
+      "expected_profile_result": "reject",
+      "provenance": [
+        "peac 0.16.3 pinned baseline table",
+        "nodejs/node#64026"
+      ]
+    },
+    {
+      "encoding_hex": "0100000000000000000000000000000000000000000000000000000000000080",
+      "encoded_y_in_range": true,
+      "sign_encoding_valid": false,
+      "decodes_to_curve_point": false,
+      "primary_class": "invalid_x_zero_sign_set",
+      "prime_subgroup_member": null,
+      "torsion_component_order": null,
+      "exact_order": null,
+      "baseline_0_16_3_table_membership": false,
+      "baseline_0_16_3_precheck": {
+        "public_key_A": "delegate",
+        "signature_R": "delegate"
+      },
+      "target_precheck": {
+        "public_key_A": "reject",
+        "signature_R": "reject"
+      },
+      "target_enforcement_mechanism": "x_zero_sign_check",
+      "expected_profile_result": "reject",
+      "provenance": [
+        "nodejs/node#64026"
+      ]
+    },
+    {
+      "encoding_hex": "0200000000000000000000000000000000000000000000000000000000000000",
+      "encoded_y_in_range": true,
+      "sign_encoding_valid": true,
+      "decodes_to_curve_point": false,
+      "primary_class": "invalid_not_on_curve",
+      "prime_subgroup_member": null,
+      "torsion_component_order": null,
+      "exact_order": null,
+      "baseline_0_16_3_table_membership": false,
+      "baseline_0_16_3_precheck": {
+        "public_key_A": "delegate",
+        "signature_R": "delegate"
+      },
+      "target_precheck": {
+        "public_key_A": "delegate",
+        "signature_R": "delegate"
+      },
+      "target_enforcement_mechanism": "runtime_primitive",
+      "expected_profile_result": "reject",
+      "provenance": [
+        "smallest y < p that is not on the curve (y = 2)"
+      ]
+    },
+    {
+      "encoding_hex": "0200000000000000000000000000000000000000000000000000000000000080",
+      "encoded_y_in_range": true,
+      "sign_encoding_valid": true,
+      "decodes_to_curve_point": false,
+      "primary_class": "invalid_not_on_curve",
+      "prime_subgroup_member": null,
+      "torsion_component_order": null,
+      "exact_order": null,
+      "baseline_0_16_3_table_membership": false,
+      "baseline_0_16_3_precheck": {
+        "public_key_A": "delegate",
+        "signature_R": "delegate"
+      },
+      "target_precheck": {
+        "public_key_A": "delegate",
+        "signature_R": "delegate"
+      },
+      "target_enforcement_mechanism": "runtime_primitive",
+      "expected_profile_result": "reject",
+      "provenance": [
+        "smallest y < p that is not on the curve (y = 2), sign bit 1"
+      ]
+    },
+    {
+      "encoding_hex": "263f7b8a5036a4b8f1168542fd7ff23159d4f1d58be5d44acf2fbb7c87243a51",
+      "encoded_y_in_range": true,
+      "sign_encoding_valid": true,
+      "decodes_to_curve_point": true,
+      "primary_class": "canonical_prime_subgroup",
+      "prime_subgroup_member": true,
+      "torsion_component_order": 1,
+      "exact_order": "L",
+      "baseline_0_16_3_table_membership": false,
+      "baseline_0_16_3_precheck": {
+        "public_key_A": "delegate",
+        "signature_R": "delegate"
+      },
+      "target_precheck": {
+        "public_key_A": "delegate",
+        "signature_R": "delegate"
+      },
+      "target_enforcement_mechanism": "runtime_primitive",
+      "expected_profile_result": "accept_when_signature_valid",
+      "provenance": [
+        "signature R, PEAC sign() from fixed seed"
+      ]
+    },
+    {
+      "encoding_hex": "26e8958fc2b227b045c3f489f2ef98f0d5dfac05d3c63339b13802886d53fc05",
+      "encoded_y_in_range": true,
+      "sign_encoding_valid": true,
+      "decodes_to_curve_point": true,
+      "primary_class": "canonical_small_order",
+      "prime_subgroup_member": false,
+      "torsion_component_order": 8,
+      "exact_order": "8",
+      "baseline_0_16_3_table_membership": true,
+      "baseline_0_16_3_precheck": {
+        "public_key_A": "reject",
+        "signature_R": "delegate"
+      },
+      "target_precheck": {
+        "public_key_A": "reject",
+        "signature_R": "reject"
+      },
+      "target_enforcement_mechanism": "torsion_table",
+      "expected_profile_result": "reject",
+      "provenance": [
+        "peac 0.16.3 pinned baseline table",
+        "nodejs/node#64026"
+      ]
+    },
+    {
+      "encoding_hex": "26e8958fc2b227b045c3f489f2ef98f0d5dfac05d3c63339b13802886d53fc85",
+      "encoded_y_in_range": true,
+      "sign_encoding_valid": true,
+      "decodes_to_curve_point": true,
+      "primary_class": "canonical_small_order",
+      "prime_subgroup_member": false,
+      "torsion_component_order": 8,
+      "exact_order": "8",
+      "baseline_0_16_3_table_membership": true,
+      "baseline_0_16_3_precheck": {
+        "public_key_A": "reject",
+        "signature_R": "delegate"
+      },
+      "target_precheck": {
+        "public_key_A": "reject",
+        "signature_R": "reject"
+      },
+      "target_enforcement_mechanism": "torsion_table",
+      "expected_profile_result": "reject",
+      "provenance": [
+        "peac 0.16.3 pinned baseline table",
+        "nodejs/node#64026"
+      ]
+    },
+    {
+      "encoding_hex": "b25b6433618d8979cb2c29a6658ecf4d423f05a19f1368ee7862669379773b33",
+      "encoded_y_in_range": true,
+      "sign_encoding_valid": true,
+      "decodes_to_curve_point": true,
+      "primary_class": "canonical_prime_subgroup",
+      "prime_subgroup_member": true,
+      "torsion_component_order": 1,
+      "exact_order": "L",
+      "baseline_0_16_3_table_membership": false,
+      "baseline_0_16_3_precheck": {
+        "public_key_A": "delegate",
+        "signature_R": "delegate"
+      },
+      "target_precheck": {
+        "public_key_A": "delegate",
+        "signature_R": "delegate"
+      },
+      "target_enforcement_mechanism": "runtime_primitive",
+      "expected_profile_result": "accept_when_signature_valid",
+      "provenance": [
+        "public key, PEAC sign() from fixed seed"
+      ]
+    },
+    {
+      "encoding_hex": "c7176a703d4dd84fba3c0b760d10670f2a2053fa2c39ccc64ec7fd7792ac0305",
+      "encoded_y_in_range": true,
+      "sign_encoding_valid": true,
+      "decodes_to_curve_point": true,
+      "primary_class": "canonical_mixed_order",
+      "prime_subgroup_member": false,
+      "torsion_component_order": 4,
+      "exact_order": "4L",
+      "baseline_0_16_3_table_membership": true,
+      "baseline_0_16_3_precheck": {
+        "public_key_A": "reject",
+        "signature_R": "delegate"
+      },
+      "target_precheck": {
+        "public_key_A": "reject",
+        "signature_R": "reject"
+      },
+      "target_enforcement_mechanism": "mixed_order_profile_table",
+      "expected_profile_result": "reject",
+      "provenance": [
+        "peac 0.16.3 pinned baseline table"
+      ]
+    },
+    {
+      "encoding_hex": "c7176a703d4dd84fba3c0b760d10670f2a2053fa2c39ccc64ec7fd7792ac037a",
+      "encoded_y_in_range": true,
+      "sign_encoding_valid": true,
+      "decodes_to_curve_point": true,
+      "primary_class": "canonical_small_order",
+      "prime_subgroup_member": false,
+      "torsion_component_order": 8,
+      "exact_order": "8",
+      "baseline_0_16_3_table_membership": true,
+      "baseline_0_16_3_precheck": {
+        "public_key_A": "reject",
+        "signature_R": "delegate"
+      },
+      "target_precheck": {
+        "public_key_A": "reject",
+        "signature_R": "reject"
+      },
+      "target_enforcement_mechanism": "torsion_table",
+      "expected_profile_result": "reject",
+      "provenance": [
+        "peac 0.16.3 pinned baseline table",
+        "nodejs/node#64026"
+      ]
+    },
+    {
+      "encoding_hex": "c7176a703d4dd84fba3c0b760d10670f2a2053fa2c39ccc64ec7fd7792ac0385",
+      "encoded_y_in_range": true,
+      "sign_encoding_valid": true,
+      "decodes_to_curve_point": true,
+      "primary_class": "canonical_mixed_order",
+      "prime_subgroup_member": false,
+      "torsion_component_order": 4,
+      "exact_order": "4L",
+      "baseline_0_16_3_table_membership": true,
+      "baseline_0_16_3_precheck": {
+        "public_key_A": "reject",
+        "signature_R": "delegate"
+      },
+      "target_precheck": {
+        "public_key_A": "reject",
+        "signature_R": "reject"
+      },
+      "target_enforcement_mechanism": "mixed_order_profile_table",
+      "expected_profile_result": "reject",
+      "provenance": [
+        "peac 0.16.3 pinned baseline table"
+      ]
+    },
+    {
+      "encoding_hex": "c7176a703d4dd84fba3c0b760d10670f2a2053fa2c39ccc64ec7fd7792ac03fa",
+      "encoded_y_in_range": true,
+      "sign_encoding_valid": true,
+      "decodes_to_curve_point": true,
+      "primary_class": "canonical_small_order",
+      "prime_subgroup_member": false,
+      "torsion_component_order": 8,
+      "exact_order": "8",
+      "baseline_0_16_3_table_membership": true,
+      "baseline_0_16_3_precheck": {
+        "public_key_A": "reject",
+        "signature_R": "delegate"
+      },
+      "target_precheck": {
+        "public_key_A": "reject",
+        "signature_R": "reject"
+      },
+      "target_enforcement_mechanism": "torsion_table",
+      "expected_profile_result": "reject",
+      "provenance": [
+        "peac 0.16.3 pinned baseline table",
+        "nodejs/node#64026"
+      ]
+    },
+    {
+      "encoding_hex": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+      "encoded_y_in_range": true,
+      "sign_encoding_valid": true,
+      "decodes_to_curve_point": true,
+      "primary_class": "canonical_prime_subgroup",
+      "prime_subgroup_member": true,
+      "torsion_component_order": 1,
+      "exact_order": "L",
+      "baseline_0_16_3_table_membership": false,
+      "baseline_0_16_3_precheck": {
+        "public_key_A": "delegate",
+        "signature_R": "delegate"
+      },
+      "target_precheck": {
+        "public_key_A": "delegate",
+        "signature_R": "delegate"
+      },
+      "target_enforcement_mechanism": "runtime_primitive",
+      "expected_profile_result": "accept_when_signature_valid",
+      "provenance": [
+        "public key, RFC 8032 Section 7.1 Test 1"
+      ]
+    },
+    {
+      "encoding_hex": "e5564300c360ac729086e2cc806e828a84877f1eb8e5d974d873e06522490155",
+      "encoded_y_in_range": true,
+      "sign_encoding_valid": true,
+      "decodes_to_curve_point": true,
+      "primary_class": "canonical_prime_subgroup",
+      "prime_subgroup_member": true,
+      "torsion_component_order": 1,
+      "exact_order": "L",
+      "baseline_0_16_3_table_membership": false,
+      "baseline_0_16_3_precheck": {
+        "public_key_A": "delegate",
+        "signature_R": "delegate"
+      },
+      "target_precheck": {
+        "public_key_A": "delegate",
+        "signature_R": "delegate"
+      },
+      "target_enforcement_mechanism": "runtime_primitive",
+      "expected_profile_result": "accept_when_signature_valid",
+      "provenance": [
+        "signature R, RFC 8032 Section 7.1 Test 1"
+      ]
+    },
+    {
+      "encoding_hex": "ecffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f",
+      "encoded_y_in_range": true,
+      "sign_encoding_valid": true,
+      "decodes_to_curve_point": true,
+      "primary_class": "canonical_small_order",
+      "prime_subgroup_member": false,
+      "torsion_component_order": 2,
+      "exact_order": "2",
+      "baseline_0_16_3_table_membership": true,
+      "baseline_0_16_3_precheck": {
+        "public_key_A": "reject",
+        "signature_R": "delegate"
+      },
+      "target_precheck": {
+        "public_key_A": "reject",
+        "signature_R": "reject"
+      },
+      "target_enforcement_mechanism": "torsion_table",
+      "expected_profile_result": "reject",
+      "provenance": [
+        "peac 0.16.3 pinned baseline table",
+        "nodejs/node#64026",
+        "encoded y = p - 1, sign bit 0"
+      ]
+    },
+    {
+      "encoding_hex": "ecffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "encoded_y_in_range": true,
+      "sign_encoding_valid": false,
+      "decodes_to_curve_point": false,
+      "primary_class": "invalid_x_zero_sign_set",
+      "prime_subgroup_member": null,
+      "torsion_component_order": null,
+      "exact_order": null,
+      "baseline_0_16_3_table_membership": true,
+      "baseline_0_16_3_precheck": {
+        "public_key_A": "reject",
+        "signature_R": "delegate"
+      },
+      "target_precheck": {
+        "public_key_A": "reject",
+        "signature_R": "reject"
+      },
+      "target_enforcement_mechanism": "x_zero_sign_check",
+      "expected_profile_result": "reject",
+      "provenance": [
+        "peac 0.16.3 pinned baseline table",
+        "nodejs/node#64026",
+        "encoded y = p - 1, sign bit 1"
+      ]
+    },
+    {
+      "encoding_hex": "edffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f",
+      "encoded_y_in_range": false,
+      "sign_encoding_valid": null,
+      "decodes_to_curve_point": false,
+      "primary_class": "invalid_y_out_of_range",
+      "prime_subgroup_member": null,
+      "torsion_component_order": null,
+      "exact_order": null,
+      "baseline_0_16_3_table_membership": false,
+      "baseline_0_16_3_precheck": {
+        "public_key_A": "delegate",
+        "signature_R": "delegate"
+      },
+      "target_precheck": {
+        "public_key_A": "reject",
+        "signature_R": "reject"
+      },
+      "target_enforcement_mechanism": "encoded_y_range_check",
+      "expected_profile_result": "reject",
+      "provenance": [
+        "nodejs/node#64026",
+        "encoded y = p, sign bit 0"
+      ]
+    },
+    {
+      "encoding_hex": "edffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "encoded_y_in_range": false,
+      "sign_encoding_valid": null,
+      "decodes_to_curve_point": false,
+      "primary_class": "invalid_y_out_of_range",
+      "prime_subgroup_member": null,
+      "torsion_component_order": null,
+      "exact_order": null,
+      "baseline_0_16_3_table_membership": false,
+      "baseline_0_16_3_precheck": {
+        "public_key_A": "delegate",
+        "signature_R": "delegate"
+      },
+      "target_precheck": {
+        "public_key_A": "reject",
+        "signature_R": "reject"
+      },
+      "target_enforcement_mechanism": "encoded_y_range_check",
+      "expected_profile_result": "reject",
+      "provenance": [
+        "nodejs/node#64026",
+        "encoded y = p, sign bit 1"
+      ]
+    },
+    {
+      "encoding_hex": "eeffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f",
+      "encoded_y_in_range": false,
+      "sign_encoding_valid": null,
+      "decodes_to_curve_point": false,
+      "primary_class": "invalid_y_out_of_range",
+      "prime_subgroup_member": null,
+      "torsion_component_order": null,
+      "exact_order": null,
+      "baseline_0_16_3_table_membership": false,
+      "baseline_0_16_3_precheck": {
+        "public_key_A": "delegate",
+        "signature_R": "delegate"
+      },
+      "target_precheck": {
+        "public_key_A": "reject",
+        "signature_R": "reject"
+      },
+      "target_enforcement_mechanism": "encoded_y_range_check",
+      "expected_profile_result": "reject",
+      "provenance": [
+        "nodejs/node#64026",
+        "encoded y = p + 1, sign bit 0"
+      ]
+    },
+    {
+      "encoding_hex": "eeffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "encoded_y_in_range": false,
+      "sign_encoding_valid": null,
+      "decodes_to_curve_point": false,
+      "primary_class": "invalid_y_out_of_range",
+      "prime_subgroup_member": null,
+      "torsion_component_order": null,
+      "exact_order": null,
+      "baseline_0_16_3_table_membership": false,
+      "baseline_0_16_3_precheck": {
+        "public_key_A": "delegate",
+        "signature_R": "delegate"
+      },
+      "target_precheck": {
+        "public_key_A": "reject",
+        "signature_R": "reject"
+      },
+      "target_enforcement_mechanism": "encoded_y_range_check",
+      "expected_profile_result": "reject",
+      "provenance": [
+        "nodejs/node#64026",
+        "encoded y = p + 1, sign bit 1"
+      ]
+    },
+    {
+      "encoding_hex": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f",
+      "encoded_y_in_range": false,
+      "sign_encoding_valid": null,
+      "decodes_to_curve_point": false,
+      "primary_class": "invalid_y_out_of_range",
+      "prime_subgroup_member": null,
+      "torsion_component_order": null,
+      "exact_order": null,
+      "baseline_0_16_3_table_membership": false,
+      "baseline_0_16_3_precheck": {
+        "public_key_A": "delegate",
+        "signature_R": "delegate"
+      },
+      "target_precheck": {
+        "public_key_A": "reject",
+        "signature_R": "reject"
+      },
+      "target_enforcement_mechanism": "encoded_y_range_check",
+      "expected_profile_result": "reject",
+      "provenance": [
+        "maximum 255-bit encoded y, sign bit 0"
+      ]
+    },
+    {
+      "encoding_hex": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "encoded_y_in_range": false,
+      "sign_encoding_valid": null,
+      "decodes_to_curve_point": false,
+      "primary_class": "invalid_y_out_of_range",
+      "prime_subgroup_member": null,
+      "torsion_component_order": null,
+      "exact_order": null,
+      "baseline_0_16_3_table_membership": false,
+      "baseline_0_16_3_precheck": {
+        "public_key_A": "delegate",
+        "signature_R": "delegate"
+      },
+      "target_precheck": {
+        "public_key_A": "reject",
+        "signature_R": "reject"
+      },
+      "target_enforcement_mechanism": "encoded_y_range_check",
+      "expected_profile_result": "reject",
+      "provenance": [
+        "maximum 255-bit encoded y, sign bit 1"
+      ]
+    }
+  ]
+}

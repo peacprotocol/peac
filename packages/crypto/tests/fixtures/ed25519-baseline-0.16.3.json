@@ -1,0 +1,33 @@
+{
+  "baseline": "ed25519-point-table-0.16.3",
+  "description": "Immutable snapshot of the Ed25519 point-encoding tables as they existed at the v0.16.3 release tag. Recorded so later changes to the live implementation cannot redefine or erase what the historical baseline was. Extracted from the tagged commit, never from working files. Do not edit: this records history, not intent.",
+  "source_tag": "v0.16.3",
+  "source_commit": "230f4a1844bf69aa64127afa722523f91a83bea9",
+  "typescript_table": [
+    "0000000000000000000000000000000000000000000000000000000000000000",
+    "0000000000000000000000000000000000000000000000000000000000000080",
+    "0100000000000000000000000000000000000000000000000000000000000000",
+    "26e8958fc2b227b045c3f489f2ef98f0d5dfac05d3c63339b13802886d53fc05",
+    "26e8958fc2b227b045c3f489f2ef98f0d5dfac05d3c63339b13802886d53fc85",
+    "c7176a703d4dd84fba3c0b760d10670f2a2053fa2c39ccc64ec7fd7792ac0305",
+    "c7176a703d4dd84fba3c0b760d10670f2a2053fa2c39ccc64ec7fd7792ac037a",
+    "c7176a703d4dd84fba3c0b760d10670f2a2053fa2c39ccc64ec7fd7792ac0385",
+    "c7176a703d4dd84fba3c0b760d10670f2a2053fa2c39ccc64ec7fd7792ac03fa",
+    "ecffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f",
+    "ecffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+  ],
+  "go_table": [
+    "0000000000000000000000000000000000000000000000000000000000000000",
+    "0000000000000000000000000000000000000000000000000000000000000080",
+    "0100000000000000000000000000000000000000000000000000000000000000",
+    "26e8958fc2b227b045c3f489f2ef98f0d5dfac05d3c63339b13802886d53fc05",
+    "26e8958fc2b227b045c3f489f2ef98f0d5dfac05d3c63339b13802886d53fc85",
+    "c7176a703d4dd84fba3c0b760d10670f2a2053fa2c39ccc64ec7fd7792ac0305",
+    "c7176a703d4dd84fba3c0b760d10670f2a2053fa2c39ccc64ec7fd7792ac037a",
+    "c7176a703d4dd84fba3c0b760d10670f2a2053fa2c39ccc64ec7fd7792ac0385",
+    "c7176a703d4dd84fba3c0b760d10670f2a2053fa2c39ccc64ec7fd7792ac03fa",
+    "ecffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f",
+    "ecffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+  ],
+  "tables_identical": true
+}

@@ -28,6 +28,8 @@
 // where signAsync appears unused in the testkit entry point.
 import * as ed from '@noble/ed25519';
 
+import { isRejectedEd25519PointEncoding } from './internal/ed25519-admissibility';
+
 /** Sign a message with Ed25519 (async, Web Crypto backed) */
 export const sign = ed.signAsync;
 
@@ -53,39 +55,6 @@ const ED25519_GROUP_ORDER_L_LE = Uint8Array.from([
   0xed, 0xd3, 0xf5, 0x5c, 0x1a, 0x63, 0x12, 0x58, 0xd6, 0x9c, 0xf7, 0xa2, 0xde, 0xf9, 0xde, 0x14,
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10,
 ]);
-
-/**
- * Small-order public-key encodings rejected by the PEAC Ed25519 verification
- * profile. A public key with small order admits trivial/forgeable signatures
- * and is never produced by an honest signer.
- *
- * Provenance: this is a fixed, reviewed set of 11 small-order public-key
- * encodings (canonical and non-canonical encodings of low-order Ed25519
- * points). Only two of these encodings appear as public keys in the current
- * ed25519-peac-profile corpus; the remaining entries are included so the
- * profile rejects small-order public keys regardless of encoding. The list is
- * duplicated byte-for-byte in the Go reference verifier (sdks/go/jws/ed25519.go)
- * and is pinned by the shared corpus tests.
- */
-const ED25519_SMALL_ORDER_PUBLIC_KEYS: ReadonlySet<string> = new Set([
-  '0100000000000000000000000000000000000000000000000000000000000000',
-  '0000000000000000000000000000000000000000000000000000000000000000',
-  '0000000000000000000000000000000000000000000000000000000000000080',
-  'ecffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f',
-  'ecffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
-  '26e8958fc2b227b045c3f489f2ef98f0d5dfac05d3c63339b13802886d53fc05',
-  '26e8958fc2b227b045c3f489f2ef98f0d5dfac05d3c63339b13802886d53fc85',
-  'c7176a703d4dd84fba3c0b760d10670f2a2053fa2c39ccc64ec7fd7792ac0305',
-  'c7176a703d4dd84fba3c0b760d10670f2a2053fa2c39ccc64ec7fd7792ac0385',
-  'c7176a703d4dd84fba3c0b760d10670f2a2053fa2c39ccc64ec7fd7792ac037a',
-  'c7176a703d4dd84fba3c0b760d10670f2a2053fa2c39ccc64ec7fd7792ac03fa',
-]);
-
-function toHex(bytes: Uint8Array): string {
-  let s = '';
-  for (let i = 0; i < bytes.length; i++) s += bytes[i].toString(16).padStart(2, '0');
-  return s;
-}
 
 /**
  * True if the signature scalar S (signature bytes 32..64, little-endian) is
@@ -159,27 +128,28 @@ function isUnsupportedEd25519Runtime(err: unknown): boolean {
 /**
  * Verify an Ed25519 signature under the PEAC Ed25519 verification profile.
  *
- * Profile = cofactorless Ed25519 verification (Web Crypto) plus admissibility
- * checks over the public inputs:
- *   1. length: public key is 32 bytes, signature is 64 bytes;
- *   2. reject small-order public keys (fixed denylist above);
- *   3. reject non-reduced scalars S >= L (RFC 8032 malleability guard);
- *   4. cofactorless signature verification via crypto.subtle.verify(Ed25519).
+ * Profile order, identical in the Go reference verifier:
+ *   1. validate public-key and signature lengths;
+ *   2. bounded admissibility precheck on the public key A;
+ *   3. reject a non-reduced scalar S >= L (the RFC 8032 malleability guard);
+ *   4. bounded admissibility precheck on the signature component R;
+ *   5. delegate remaining curve validity and the signature equation to the runtime primitive.
  *
- * Rationale: "RFC 8032 strict" is not a single predicate -- libraries differ on
- * small-order points and cofactored-versus-cofactorless verification. The Go
- * reference verifier (crypto/ed25519) is cofactorless; @noble/ed25519 is
- * cofactored on some edge inputs even with { zip215: false }. Web Crypto is
- * cofactorless and matches Go, and the admissibility checks above make the two
- * implementations accept and reject the same signatures across the
- * ed25519-speccheck corpus (specs/conformance/parity-corpus/ed25519-peac-profile/).
+ * Steps 2 and 4 are the SAME bounded precheck applied to two different inputs. It rejects encoded
+ * y >= p, the two x = 0 encodings whose sign bit is set, the eight canonical torsion encodings and
+ * two canonical order-4L encodings retained by PEAC policy. It performs neither complete point
+ * decoding, complete curve validation, prime-subgroup membership testing, nor complete mixed-order
+ * rejection.
  *
- * Verify-only: signing output is unchanged, so every signature produced by
- * sign() remains valid; only malformed or edge encodings are rejected.
+ * Rationale: runtimes disagree at these edges. Web Cryptography Level 2 rejects invalid or
+ * small-order A and R before applying the cofactorless equation and notes implementations have not
+ * behaved uniformly; RFC 8032 permits the cofactored equation, whose accepted set differs here.
+ * Deciding the enumerated cases in PEAC makes the outcome independent of the primitive underneath.
  *
- * Fails closed: if the runtime lacks Web Crypto Ed25519, this throws
- * Ed25519RuntimeError. It never falls back to a different verification path,
- * which would silently change the verification predicate.
+ * Verify-only: signing output is unchanged, so every signature produced by sign() remains valid.
+ *
+ * Fails closed: if the runtime lacks Web Crypto Ed25519 this throws Ed25519RuntimeError. It never
+ * falls back to a different verification path, which would silently change the predicate.
  */
 export async function verify(
   signature: Uint8Array,
@@ -190,15 +160,19 @@ export async function verify(
   if (publicKey.length !== ED25519_PUBLIC_KEY_BYTES) return false;
   if (signature.length !== ED25519_SIGNATURE_BYTES) return false;
 
-  // 2. Reject small-order public keys.
-  if (ED25519_SMALL_ORDER_PUBLIC_KEYS.has(toHex(publicKey))) return false;
+  // 2. Bounded admissibility precheck on the public key.
+  if (isRejectedEd25519PointEncoding(publicKey)) return false;
 
   // 3. Reject non-reduced scalar S >= L (fixed-width little-endian byte
   // comparison; both operands are public signature bytes, an admissibility
   // guard, not secret-dependent key handling).
   if (scalarIsNonCanonical(signature)) return false;
 
-  // 4. Cofactorless verification via Web Crypto (fails closed if unavailable).
+  // 4. The same bounded precheck on the signature component R. Reached only after the 64-byte
+  //    length check above, so this zero-copy view is always in range.
+  if (isRejectedEd25519PointEncoding(signature.subarray(0, ED25519_PUBLIC_KEY_BYTES))) return false;
+
+  // 5. Cofactorless verification via Web Crypto (fails closed if unavailable).
   const subtle = subtleCrypto();
   let key: Awaited<ReturnType<Subtle['importKey']>>;
   try {

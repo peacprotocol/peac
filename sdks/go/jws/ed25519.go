@@ -2,7 +2,6 @@ package jws
 
 import (
 	"crypto/ed25519"
-	"encoding/hex"
 	"fmt"
 	"math/big"
 )
@@ -20,32 +19,6 @@ type Ed25519PublicKey struct {
 var ed25519GroupOrderL, _ = new(big.Int).SetString(
 	"1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed", 16)
 
-// ed25519SmallOrderPublicKeys lists the small-order public-key encodings
-// rejected by the PEAC Ed25519 verification profile. A public key with small
-// order admits trivial/forgeable signatures and is never produced by an honest
-// signer.
-//
-// Provenance: this is a fixed, reviewed set of 11 small-order public-key
-// encodings (canonical and non-canonical encodings of low-order Ed25519
-// points). Only two of these encodings appear as public keys in the current
-// ed25519-peac-profile corpus; the remaining entries are included so the
-// profile rejects small-order public keys regardless of encoding. The list is
-// duplicated byte-for-byte from the TypeScript reference verifier
-// (packages/crypto/src/ed25519.ts) and is pinned by the shared corpus tests.
-var ed25519SmallOrderPublicKeys = map[string]struct{}{
-	"0100000000000000000000000000000000000000000000000000000000000000": {},
-	"0000000000000000000000000000000000000000000000000000000000000000": {},
-	"0000000000000000000000000000000000000000000000000000000000000080": {},
-	"ecffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f": {},
-	"ecffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff": {},
-	"26e8958fc2b227b045c3f489f2ef98f0d5dfac05d3c63339b13802886d53fc05": {},
-	"26e8958fc2b227b045c3f489f2ef98f0d5dfac05d3c63339b13802886d53fc85": {},
-	"c7176a703d4dd84fba3c0b760d10670f2a2053fa2c39ccc64ec7fd7792ac0305": {},
-	"c7176a703d4dd84fba3c0b760d10670f2a2053fa2c39ccc64ec7fd7792ac0385": {},
-	"c7176a703d4dd84fba3c0b760d10670f2a2053fa2c39ccc64ec7fd7792ac037a": {},
-	"c7176a703d4dd84fba3c0b760d10670f2a2053fa2c39ccc64ec7fd7792ac03fa": {},
-}
-
 // scalarFromSignature reads the signature scalar S (bytes 32..64,
 // little-endian) as a big.Int.
 func scalarFromSignature(signature []byte) *big.Int {
@@ -60,12 +33,13 @@ func scalarFromSignature(signature []byte) *big.Int {
 // VerifyEd25519 verifies an Ed25519 signature under the PEAC Ed25519
 // verification profile.
 //
-// Profile = cofactorless Ed25519 verification plus admissibility checks over the
-// public inputs:
+// Profile = cofactorless Ed25519 verification plus bounded admissibility checks
+// over the public inputs, applied in order:
 //  1. length: public key is 32 bytes, signature is 64 bytes;
-//  2. reject small-order public keys (denylist above);
+//  2. bounded admissibility precheck on the public key A;
 //  3. reject non-reduced scalars S >= L (RFC 8032 malleability guard);
-//  4. cofactorless verification via crypto/ed25519.Verify.
+//  4. bounded admissibility precheck on the signature component R;
+//  5. cofactorless verification via crypto/ed25519.Verify.
 //
 // "RFC 8032 strict" is not a single predicate: libraries differ on small-order
 // points and cofactored-versus-cofactorless verification. Go's stdlib is
@@ -83,12 +57,18 @@ func VerifyEd25519(publicKey ed25519.PublicKey, message, signature []byte) error
 		return fmt.Errorf("invalid signature size: expected %d, got %d", ed25519.SignatureSize, len(signature))
 	}
 
-	if _, smallOrder := ed25519SmallOrderPublicKeys[hex.EncodeToString(publicKey)]; smallOrder {
-		return fmt.Errorf("small-order public key rejected")
+	if reason := ed25519RejectionReason(ed25519PointFrom(publicKey)); reason != ed25519NoRejection {
+		return fmt.Errorf("inadmissible public key encoding rejected: %s", reason)
 	}
 
 	if scalarFromSignature(signature).Cmp(ed25519GroupOrderL) >= 0 {
 		return fmt.Errorf("non-canonical signature scalar (S >= L) rejected")
+	}
+
+	// The same bounded precheck on the signature component R. Reached only after the 64-byte
+	// length check above, so this slice is always in range.
+	if reason := ed25519RejectionReason(ed25519PointFrom(signature[:32])); reason != ed25519NoRejection {
+		return fmt.Errorf("inadmissible signature R encoding rejected: %s", reason)
 	}
 
 	if !ed25519.Verify(publicKey, message, signature) {

@@ -6,8 +6,7 @@
  * from the lane having passed.
  *
  * These tests extract the aggregate's decision script from the workflow and execute it under bash
- * with substituted lane results, so they observe the decision rather than asserting that some text
- * is present. A rule that is merely spelled correctly is not a rule that behaves correctly.
+ * with substituted lane results, observing the decision itself.
  */
 import { describe, it, expect } from 'vitest';
 import { execFileSync } from 'node:child_process';
@@ -65,6 +64,7 @@ function lanes(verifierCi: string, examplesApps: string): Record<string, string>
     'needs.tooling-gates.result': 'success',
     'needs.examples-apps.result': examplesApps,
     'needs.pack-smoke.result': 'success',
+    'needs.node-compat.result': 'success',
   };
 }
 
