@@ -10,9 +10,9 @@
  */
 
 // RFC 8032 section 7.1, TEST 2 (one-byte message 0x72). Deliberately NOT the empty-message
-// TEST 1: at least one WebCrypto implementation rejects Ed25519 verification of zero-length
-// messages while verifying every non-empty message correctly, and a PEAC signing input is never
-// empty, so an empty-message probe would misreport a capable runtime as unsupported.
+// TEST 1: zero-length Ed25519 verification is not portable across the supported WebCrypto
+// runtimes measured for this profile, and a PEAC JWS signing input is never empty, so an
+// empty-message probe would misreport a capable runtime as unsupported.
 const RFC8032_VECTOR2_PUBLIC_KEY =
   '3d4017c3e843895a92b70aa74d1b7ebc9c982ccf2ec4968cc0cd55f12af4660c';
 const RFC8032_VECTOR2_SIGNATURE =

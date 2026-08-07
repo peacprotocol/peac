@@ -28,7 +28,7 @@ pnpm --filter @peac/app-verifier build
   constraints; claims are shown only on success.
 - A supplied trusted JWK thumbprint is the only trust anchor. Issuer, key id and record type
   expectations are claim constraints, not trust anchors.
-- Reports are deterministic and unsigned; identical inputs produce identical assessments.
+- Reports are deterministic and unsigned; identical verification inputs and evaluation time produce byte-identical reports.
 
 ## Browser support and validation
 

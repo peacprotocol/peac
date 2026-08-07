@@ -23,8 +23,8 @@ describe('ed25519WebCryptoSupported', () => {
   });
 
   it('probes with a non-empty message', async () => {
-    // A PEAC signing input is never empty, and at least one WebCrypto implementation rejects
-    // Ed25519 verification of zero-length messages while verifying non-empty messages correctly.
+    // Zero-length Ed25519 verification is not portable across the supported WebCrypto runtimes
+    // measured for this profile, and a PEAC JWS signing input is never empty.
     const spy = vi.spyOn(globalThis.crypto.subtle, 'verify');
     resetRuntimeProbeForTests();
     await ed25519WebCryptoSupported();
