@@ -1,8 +1,10 @@
 /**
- * The canonical `kid` rule.
+ * The PEAC `kid` rule.
  *
  * A `kid` is a non-empty, well-formed Unicode string whose UTF-8 serialization is at most
- * MAX_KID_UTF8_BYTES bytes.
+ * MAX_KID_UTF8_BYTES bytes. RFC 7515 defines `kid` only as an optional case-sensitive string
+ * with unspecified structure; the bound and well-formedness requirements are PEAC
+ * application-level constraints.
  *
  * The bound is in UTF-8 bytes because that is what bounds the serialized protected header: 256
  * UTF-16 code units of astral code points serialize to 1024 bytes. It is also the only unit on which
@@ -70,7 +72,7 @@ export function utf8ByteLength(s: string): number {
 }
 
 /**
- * The complete canonical `kid` rule: a non-empty, well-formed Unicode string whose UTF-8
+ * The complete PEAC `kid` rule: a non-empty, well-formed Unicode string whose UTF-8
  * serialization is at most `MAX_KID_UTF8_BYTES` bytes.
  */
 export function isValidKid(kid: unknown): kid is string {

@@ -9,6 +9,7 @@
  */
 
 import { z } from 'zod';
+import { MAX_KID_UTF8_BYTES, isValidKid } from './internal/kid';
 
 /**
  * Revocation reasons: RFC 5280 CRLReason subset relevant to receipt signing keys.
@@ -27,8 +28,10 @@ export type RevocationReason = (typeof REVOCATION_REASONS)[number];
  */
 export const RevokedKeyEntrySchema = z
   .object({
-    /** Key ID that was revoked */
-    kid: z.string().min(1).max(256),
+    /** Key ID that was revoked; same domain as PEAC JWS kid validation */
+    kid: z.string().refine(isValidKid, {
+      message: `kid must be a non-empty well-formed Unicode string of at most ${MAX_KID_UTF8_BYTES} UTF-8 bytes`,
+    }),
     /** ISO 8601 timestamp of revocation */
     revoked_at: z.string().datetime(),
     /** Revocation reason (optional, RFC 5280 CRLReason subset) */
