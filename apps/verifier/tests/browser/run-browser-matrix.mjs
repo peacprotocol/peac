@@ -82,9 +82,13 @@ const { issue } = await import('@peac/protocol');
 // Function() constructor is reported unless it is the one recognised dependency capability probe,
 // which application-wide jitless configuration leaves unexecuted -- the runtime instrumentation
 // below is what proves it never runs.
+const CAPABILITY_PROBE =
+  /includes\(\s*(["'`])Cloudflare\1\s*\)[^]{0,60}?Function\s*\(\s*(``|''|"")\s*\)/;
+
 function scanBundles() {
   const problems = [];
   const assets = join(DIST, 'assets');
+  let knownProbes = 0;
   for (const name of readdirSync(assets)) {
     if (!name.endsWith('.js')) continue;
     const text = readFileSync(join(assets, name), 'utf8');
@@ -94,11 +98,12 @@ function scanBundles() {
     let m;
     while ((m = re.exec(text)) !== null) {
       const at = m.index + m[1].length;
-      const context = text.slice(Math.max(0, at - 90), at + 12);
-      const known = /Cloudflare/.test(context) && /Function\s*\(\s*(``|''|"")\s*\)/.test(context);
-      if (!known) problems.push(`${name}: unrecognised Function() constructor`);
+      const context = text.slice(Math.max(0, at - 90), at + 20);
+      if (CAPABILITY_PROBE.test(context)) knownProbes += 1;
+      else problems.push(`${name}: unrecognised Function() constructor`);
     }
   }
+  if (knownProbes > 1) problems.push(`more than one recognised capability probe (${knownProbes})`);
   return problems;
 }
 
@@ -447,6 +452,25 @@ async function runSession(page, fixtures, origin, flowIds) {
   return { problems };
 }
 
+// Proves the CSP-violation observer is functional in this engine before the observation is used
+// as evidence: on a disposable page under the shipped policy, a deliberate blocked eval must be
+// recorded. A silent zero from a non-functional observer is thereby ruled out.
+async function runObserverControl(browser, origin) {
+  const context = await browser.newContext();
+  const page = await context.newPage();
+  await page.addInitScript(DYNAMIC_CODE_OBSERVER);
+  await page.goto(`${origin}/`, { waitUntil: 'networkidle' });
+  // A same-origin script (subject to the page CSP, unlike automation-injected evaluation) whose
+  // Function() call is refused. addScriptTag rejects when the script errors, which is expected.
+  await page.addScriptTag({ url: `${origin}/csp-observer-control.js` }).catch(() => undefined);
+  await page.waitForTimeout(200);
+  const recorded = await page.evaluate(() =>
+    (globalThis.__peacCspViolations ?? []).some((v) => /script-src/.test(v.directive))
+  );
+  await context.close();
+  return recorded ? [] : ['csp-observer: no violation recorded for a deliberate blocked eval'];
+}
+
 // A runtime without WebCrypto Ed25519 must present a capability message, not a cryptic failure.
 async function runCapabilityCheck(browser, origin) {
   const context = await browser.newContext();
@@ -479,6 +503,13 @@ if (!assets.has('/index.html')) {
   console.error('run-browser-matrix: the build output has no index.html');
   process.exit(2);
 }
+// A same-origin control script for the CSP-observer negative control. Loaded via <script src>, it
+// is permitted by script-src 'self' and runs subject to the page policy; its Function() call is
+// refused, which must raise a violation the observer records.
+assets.set('/csp-observer-control.js', {
+  body: Buffer.from('try{Function("return 1")()}catch(e){}'),
+  type: 'text/javascript; charset=utf-8',
+});
 const { server, origin } = await serveAssets(assets);
 let failed = false;
 const report = (name, problems, detail) => {
@@ -500,15 +531,21 @@ try {
     }
     const browser = await playwright[name].launch();
     const context = await browser.newContext();
+    const observerControl = await runObserverControl(browser, origin);
     const session = await runSession(await context.newPage(), fixtures, origin);
-    const problems = [...session.problems, ...(await runCapabilityCheck(browser, origin))];
+    const problems = [
+      ...observerControl,
+      ...session.problems,
+      ...(await runCapabilityCheck(browser, origin)),
+    ];
     const version = browser.version();
     await browser.close();
     report(
       name,
       problems,
       `${version}; ${flows(fixtures).length} flows + report determinism + snapshot + ` +
-        `supersession + file input + capability; no network, no persistence, no dynamic code, no CSP violation`
+        `supersession + file input + capability + CSP-observer control; no network, no persistence, ` +
+        `no application CSP unsafe-eval violation`
     );
   }
 

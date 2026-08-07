@@ -8,7 +8,8 @@
  * interpreted validator and performs no dynamic code construction.
  *
  * The probe fires at schema construction, so this must run before any schema is built. It is
- * imported for its side effect as the first import of every application and test entry point.
+ * imported for its side effect ahead of the application graph and ahead of the verification
+ * orchestrator's schema-producing dependencies.
  */
 import { config } from 'zod';
 

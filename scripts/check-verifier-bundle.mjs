@@ -64,20 +64,24 @@ function bareFunctionConstructors(text) {
   let m;
   while ((m = re.exec(text)) !== null) {
     const at = m.index + m[1].length;
-    hits.push(text.slice(Math.max(0, at - 90), at + 12));
+    hits.push(text.slice(Math.max(0, at - 90), at + 20));
   }
   return hits;
 }
 
 /**
- * A bare constructor is the dependency's Ed25519-unrelated capability probe: a memoized check that
- * builds an empty function to learn whether the environment permits dynamic evaluation. It is
- * gated off at runtime (validator compilation is disabled application-wide) and never executes
- * under the shipped policy, which the browser matrix proves by instrumentation. It is recognised
- * by its own guard and its empty argument, so any other dynamic-code construction still fails.
+ * The one recognised bare constructor is the schema dependency's capability probe: a guarded check
+ * that builds an empty function to learn whether the environment permits dynamic evaluation. It is
+ * disabled before schema construction and never executes under the shipped policy, which the
+ * browser matrix proves by instrumentation. Recognition requires the probe's own environment guard
+ * immediately before an empty-argument constructor, so an unrelated constructor is not excused by a
+ * distant occurrence of the guard word. Any other bare constructor still fails.
  */
+const CAPABILITY_PROBE =
+  /includes\(\s*(["'`])Cloudflare\1\s*\)[^]{0,60}?Function\s*\(\s*(``|''|"")\s*\)/;
+
 function isKnownCapabilityProbe(context) {
-  return /Cloudflare/.test(context) && /Function\s*\(\s*(``|''|"")\s*\)/.test(context);
+  return CAPABILITY_PROBE.test(context);
 }
 
 function selfTest() {
@@ -115,6 +119,19 @@ function selfTest() {
     console.error('  SELF-TEST FAIL: capability probe not recognised');
     failed++;
   } else console.log('  ok  capability probe recognised (allowed, unexecuted)');
+  // A distant occurrence of the guard word must not excuse an unrelated constructor.
+  const distant = 'const ua="Cloudflare";' + 'x'.repeat(120) + 'const y=Function("return 1");';
+  if (bareFunctionConstructors(distant).some(isKnownCapabilityProbe)) {
+    console.error('  SELF-TEST FAIL: distant guard word excused an unrelated constructor');
+    failed++;
+  } else console.log('  ok  distant guard word does not excuse an unrelated constructor');
+  // Two recognised probes must fail the aggregate check.
+  const twoProbes = probe + ';' + probe;
+  const recognised = bareFunctionConstructors(twoProbes).filter(isKnownCapabilityProbe).length;
+  if (recognised <= 1) {
+    console.error('  SELF-TEST FAIL: two probes not both recognised for the >1 guard');
+    failed++;
+  } else console.log('  ok  more than one recognised probe is detectable (fails the aggregate)');
   const clean =
     'const n=document.createElement("p");n.textContent=x;await crypto.subtle.digest("SHA-256",b);';
   const bad = FORBIDDEN.filter((f) => f.re.test(clean));
@@ -169,6 +186,11 @@ for (const f of js) {
     else violations.push(`${relative(ROOT, f)}: unrecognised Function() constructor`);
   }
 }
+// Zero recognised probes is fine (a future dependency may drop it); one is today's known
+// artifact; more than one is unexpected and must be investigated.
+if (knownProbeCount > 1) {
+  violations.push(`more than one recognised capability probe (${knownProbeCount}); investigate`);
+}
 
 // The emitted HTML must carry the closed CSP.
 const html = assets.filter((f) => f.endsWith('.html'));
@@ -195,8 +217,9 @@ console.log(
     'no forbidden pattern in the emitted output (Node builtin, browser-external stub, network, ' +
     'storage, service-worker, HTML-injection, eval or new Function); ' +
     probeNote +
-    'no other dynamic-code construction. This is a static scan; the browser matrix observes at ' +
-    'runtime that no dynamic code executes and no policy violation is raised. Framing protection ' +
-    '(frame-ancestors, X-Frame-Options) is not expressible in the emitted HTML and remains a ' +
-    'response-header requirement at the serving origin.'
+    'no other bare Function() constructor. Direct eval(), new Function() and bare Function(...) ' +
+    'forms are covered by this static scan; the shipped CSP disallows unsafe evaluation, and the ' +
+    'browser matrix observes at runtime that the application raises no CSP unsafe-eval violation. ' +
+    'Framing protection (frame-ancestors, X-Frame-Options) is not expressible in the emitted HTML ' +
+    'and remains a response-header requirement at the serving origin.'
 );

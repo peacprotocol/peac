@@ -32,9 +32,10 @@ describe('validator compilation is disabled before schemas load', () => {
     }
   });
 
-  it('sets jitless on the same zod instance the app parses with', async () => {
-    // Configure, then confirm a freshly constructed object schema performs no dynamic-code
-    // construction on parse: instrument the Function constructor and require zero calls.
+  it('leaves construct and parse free of dynamic-code construction once configured', async () => {
+    // With the runtime module loaded, a freshly constructed object schema builds and parses
+    // without any Function-constructor call. The integrated application graph is covered by the
+    // browser matrix; this pins the mechanism on the verifier's own Zod import.
     await import('../src/lib/schema-runtime.js');
     const { z } = await import('zod');
     const RealFunction = globalThis.Function;
