@@ -33,12 +33,14 @@ export function renderResults(result: BrowserVerificationResult, container: HTML
   container.replaceChildren();
 
   if ('capability' in result) {
+    container.className = 'result--capability';
     container.appendChild(el('h2', 'This browser cannot verify'));
     container.appendChild(el('p', result.message));
     return;
   }
 
   if (result.ok) {
+    container.className = 'result--ok';
     container.appendChild(el('h2', 'Verification succeeded'));
     container.appendChild(el('p', MODE_COPY[result.mode]));
     container.appendChild(el('p', `Mode: ${result.mode}`));
@@ -63,6 +65,7 @@ export function renderResults(result: BrowserVerificationResult, container: HTML
   }
 
   // Failure: code and a neutral message only. No claims, no stack, no raw key, no echoed record.
+  container.className = 'result--fail';
   container.appendChild(el('h2', 'Verification failed'));
   container.appendChild(el('p', result.message));
   const d = el('dl');

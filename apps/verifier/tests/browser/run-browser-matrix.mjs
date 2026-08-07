@@ -282,16 +282,16 @@ async function runFlow(page, flow) {
   if (flow.context) await page.fill('#context', flow.context);
   await page.waitForSelector('button:enabled', { timeout: 15000 });
   await page.click('button:has-text("Verify")');
-  const heading = page.locator('section h2').first();
+  const heading = page.locator('section[aria-label="Verification result"] h2').first();
   await heading.waitFor({ state: 'visible', timeout: 15000 });
   return {
     heading: await heading.textContent(),
-    body: await page.locator('section').first().textContent(),
+    body: await page.locator('section[aria-label="Verification result"]').first().textContent(),
   };
 }
 
 async function reportJson(page) {
-  const pre = page.locator('section pre').first();
+  const pre = page.locator('section[aria-label="Verification report"] pre').first();
   await pre.waitFor({ state: 'visible', timeout: 15000 });
   return pre.textContent();
 }
@@ -360,7 +360,7 @@ async function checkReadSupersession(page, fixtures, problems) {
   if (value !== fixtures.record) {
     problems.push('supersession: a superseded file read replaced newer manual input');
   }
-  const stale = await page.locator('section h2').count();
+  const stale = await page.locator('section[aria-label="Verification result"] h2').count();
   if (stale !== 0) problems.push('supersession: a superseded read produced a result');
   await page
     .waitForSelector('button:enabled', { timeout: 5000 })
@@ -384,7 +384,7 @@ async function checkFileInput(page, fixtures, problems) {
   await page.fill('#key', fixtures.bareJwk);
   await page.waitForSelector('button:enabled', { timeout: 15000 });
   await page.click('button:has-text("Verify")');
-  const heading = page.locator('section h2').first();
+  const heading = page.locator('section[aria-label="Verification result"] h2').first();
   await heading.waitFor({ state: 'visible', timeout: 15000 });
   const text = await heading.textContent();
   if (text !== ACCEPT) problems.push(`file-input: expected "${ACCEPT}", saw "${text}"`);
@@ -424,7 +424,7 @@ async function runSession(page, fixtures, origin, flowIds) {
     await checkDeterministicReport(page, flows(fixtures)[0], problems);
 
     await page.fill('#record', fixtures.record + ' ');
-    const headings = await page.locator('section h2').count();
+    const headings = await page.locator('section[aria-label="Verification result"] h2').count();
     if (headings !== 0)
       problems.push('input-snapshot: an edited input left a stale result visible');
 
@@ -510,7 +510,7 @@ async function collectParityReports(browser, origin, fixtures) {
     await page.clock.setFixedTime(fixtures.parityEvaluationTime);
     await page.goto(`${origin}/`, { waitUntil: 'networkidle' });
     await runFlow(page, flowById[scenario.flowId]);
-    const report = page.locator('section pre').first();
+    const report = page.locator('section[aria-label="Verification report"] pre').first();
     await report.waitFor({ state: 'visible', timeout: 15000 });
     byFlow[scenario.flowId] = await report.textContent();
     await context.close();

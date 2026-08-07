@@ -33,16 +33,25 @@ export interface MiniNode {
   getAttribute(name: string): string | undefined;
   querySelector(sel: string): MiniNode | undefined;
   querySelectorAll(sel: string): MiniNode[];
+  setAttribute(name: string, value: string): void;
+  tabIndex?: number;
+  className?: string;
+  focus(): void;
 }
 
 function node(tagName: string): MiniNode {
   const listeners = new Map<string, Array<() => void>>();
+  const attrs = new Map<string, string>();
   const self: MiniNode = {
     tagName,
     textContent: '',
     value: '',
     disabled: false,
     childNodes: [],
+    setAttribute(name, value) {
+      attrs.set(name, value);
+    },
+    focus() {},
     appendChild(n) {
       self.childNodes.push(n);
       return n;
@@ -66,6 +75,7 @@ function node(tagName: string): MiniNode {
       if (name === 'download') return self.download;
       if (name === 'id') return self.id;
       if (name === 'type') return self.type;
+      if (attrs.has(name)) return attrs.get(name);
       throw new Error(`mini-dom: unsupported attribute ${name}`);
     },
     querySelector(sel) {
