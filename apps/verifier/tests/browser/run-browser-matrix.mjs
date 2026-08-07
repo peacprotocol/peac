@@ -23,7 +23,7 @@
  * Fixtures are issued per run with the real issuing API; no key material is committed.
  */
 import { createServer } from 'node:http';
-import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
+import { closeSync, existsSync, fstatSync, openSync, readFileSync, readdirSync } from 'node:fs';
 import { dirname, extname, join, normalize, relative, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -223,13 +223,28 @@ function serveDist() {
   const server = createServer((req, res) => {
     const path = normalize(new URL(req.url, 'http://127.0.0.1').pathname).replace(/^\/+/, '');
     const file = resolve(DIST, path === '' ? 'index.html' : path);
-    const contained = !relative(DIST, file).startsWith('..');
-    if (!contained || !existsSync(file) || !statSync(file).isFile()) {
+    if (relative(DIST, file).startsWith('..')) {
       res.writeHead(404).end();
       return;
     }
-    res.writeHead(200, { 'content-type': MIME[extname(file)] ?? 'application/octet-stream' });
-    res.end(readFileSync(file));
+    // One descriptor for the type check and the read, so the file cannot change between them.
+    let fd;
+    try {
+      fd = openSync(file, 'r');
+    } catch {
+      res.writeHead(404).end();
+      return;
+    }
+    try {
+      if (!fstatSync(fd).isFile()) {
+        res.writeHead(404).end();
+        return;
+      }
+      res.writeHead(200, { 'content-type': MIME[extname(file)] ?? 'application/octet-stream' });
+      res.end(readFileSync(fd));
+    } finally {
+      closeSync(fd);
+    }
   });
   return new Promise((resolveServer) => {
     server.listen(0, '127.0.0.1', () => {
