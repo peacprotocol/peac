@@ -1,4 +1,11 @@
-/* PEAC Receipt Verifier -- Minimal vanilla CSS */
+/*
+ * Local record verifier styling.
+ *
+ * Visual language follows peacprotocol.org: a neutral monochrome base with an emerald accent for
+ * verified state, generous whitespace, subtle card shadows and rounded corners. Fonts use the same
+ * system fallback stacks the site declares for Inter and JetBrains Mono; no font is fetched or
+ * bundled, so the page stays within its no-network content-security policy.
+ */
 
 *,
 *::before,
@@ -9,338 +16,376 @@
 }
 
 :root {
+  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+
   --bg: #fafafa;
-  --fg: #1a1a1a;
-  --border: #ddd;
-  --accent: #2563eb;
-  --valid: #16a34a;
-  --invalid: #dc2626;
-  --warn: #ca8a04;
-  --mono: 'SF Mono', 'Cascadia Code', 'Fira Code', monospace;
+  --surface: #ffffff;
+  --code-bg: #171717;
+  --code-fg: #d4d4d4;
+
+  --fg: #171717;
+  --fg-muted: #525252;
+  --fg-subtle: #737373;
+
+  --border: #e5e5e5;
+  --border-strong: #d4d4d4;
+
+  --accent: #047857;
+  --accent-strong: #065f46;
+  --accent-bg: #ecfdf5;
+  --accent-border: #a7f3d0;
+
+  --danger: #b91c1c;
+  --danger-bg: #fef2f2;
+  --danger-border: #fecaca;
+
+  --focus: #a3a3a3;
+
+  --radius-lg: 12px;
+  --radius-md: 8px;
+  --radius-sm: 6px;
+
+  --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.04);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
-  font-family:
-    system-ui,
-    -apple-system,
-    sans-serif;
+  font-family: var(--font-sans);
   background: var(--bg);
   color: var(--fg);
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 2rem 1rem;
   line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-header {
-  margin-bottom: 2rem;
+#app {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 2.5rem 1.25rem 4rem;
 }
 
-header h1 {
-  font-size: 1.5rem;
-  font-weight: 600;
-}
-
-header p {
-  color: #666;
-  font-size: 0.875rem;
-}
-
-/* Tabs */
-.tabs {
+main {
   display: flex;
-  gap: 0;
-  border-bottom: 2px solid var(--border);
-  margin-bottom: 1.5rem;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
-.tab {
-  padding: 0.5rem 1.5rem;
-  border: none;
-  background: none;
-  cursor: pointer;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #666;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -2px;
+/* Header */
+
+h1 {
+  font-size: clamp(1.6rem, 4vw, 2rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
 }
 
-.tab.active {
-  color: var(--accent);
-  border-bottom-color: var(--accent);
+h1 + p {
+  margin-top: 0.5rem;
+  color: var(--fg-muted);
+  font-size: 1rem;
+  max-width: 60ch;
 }
 
-.tab-content {
+/* Input group and result panels share a card surface. */
+
+[role='group'],
+section[aria-label='Verification result']:not(:empty),
+section[aria-label='Verification report']:not(:empty),
+section[aria-label='What verification proves'] {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: 1.5rem;
+}
+
+/* Empty result and report panels take no space until they hold an outcome. */
+section[aria-label='Verification result']:empty,
+section[aria-label='Verification report']:empty {
   display: none;
 }
 
-.tab-content.active {
-  display: block;
+[role='group'] {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
 }
 
-/* Paste + Verify */
+[role='group'] > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
 label {
-  display: block;
-  font-weight: 500;
-  font-size: 0.875rem;
-  margin-bottom: 0.25rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--fg);
 }
 
-textarea,
-input[type='url'] {
+textarea {
   width: 100%;
-  padding: 0.75rem;
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  font-family: var(--mono);
-  font-size: 0.8125rem;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--fg);
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  padding: 0.7rem 0.8rem;
   resize: vertical;
-  margin-bottom: 0.75rem;
+  min-height: 6.5rem;
 }
+
+textarea:focus-visible {
+  outline: none;
+  border-color: var(--fg-subtle);
+  box-shadow: 0 0 0 3px rgb(115 115 115 / 0.18);
+}
+
+input[type='file'] {
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  color: var(--fg-muted);
+}
+
+input[type='file']::file-selector-button {
+  font-family: inherit;
+  font-size: 0.85rem;
+  color: var(--fg);
+  background: #f5f5f5;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  padding: 0.4rem 0.75rem;
+  margin-right: 0.75rem;
+  cursor: pointer;
+}
+
+input[type='file']::file-selector-button:hover {
+  background: #ededed;
+}
+
+/* Field hint text. */
+[role='group'] > div > p {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--fg-subtle);
+}
+
+/* Primary action */
 
 button {
-  padding: 0.5rem 1.25rem;
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  background: var(--accent);
-  color: white;
+  align-self: flex-start;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #ffffff;
+  background: var(--fg);
+  border: 1px solid var(--fg);
+  border-radius: var(--radius-md);
+  padding: 0.6rem 1.5rem;
   cursor: pointer;
-  font-size: 0.875rem;
-  font-weight: 500;
+  transition:
+    background-color 0.15s ease,
+    transform 0.1s ease;
 }
 
-button:hover {
-  opacity: 0.9;
+button:hover:not(:disabled) {
+  background: #262626;
+}
+
+button:active:not(:disabled) {
+  transform: scale(0.98);
 }
 
 button:disabled {
-  opacity: 0.5;
+  opacity: 0.45;
   cursor: not-allowed;
 }
 
-#verify-btn {
-  margin-bottom: 1.5rem;
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
 }
 
-/* File upload */
-.drop-zone {
-  border: 2px dashed var(--border);
-  border-radius: 4px;
-  padding: 1.5rem;
-  text-align: center;
-  margin-bottom: 1.5rem;
-  transition: border-color 0.2s;
+/* Result panel */
+
+section[aria-label='Verification result'] {
+  border-left: 4px solid var(--border-strong);
 }
 
-.drop-zone.drag-over {
-  border-color: var(--accent);
-  background: #f0f5ff;
+section[aria-label='Verification result'].result--ok {
+  border-left-color: var(--accent);
+  background: linear-gradient(0deg, var(--surface), var(--surface)), var(--accent-bg);
 }
 
-.drop-zone p {
-  color: #666;
-  font-size: 0.875rem;
-  margin-bottom: 0.5rem;
+section[aria-label='Verification result'].result--fail {
+  border-left-color: var(--danger);
 }
 
-/* Results */
-.result {
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 1rem;
-  margin-top: 1rem;
-}
-
-.result.valid {
-  border-color: var(--valid);
-}
-
-.result.invalid {
-  border-color: var(--invalid);
-}
-
-.result.error {
-  border-color: var(--invalid);
-}
-
-.result.no-key {
-  border-color: var(--warn);
-}
-
-.result-status {
+section[aria-label='Verification result'] h2 {
+  font-size: 1.25rem;
   font-weight: 700;
-  font-size: 1.125rem;
-  margin-bottom: 0.25rem;
+  letter-spacing: -0.01em;
 }
 
-.valid .result-status {
-  color: var(--valid);
-}
-.invalid .result-status,
-.error .result-status {
-  color: var(--invalid);
-}
-.no-key .result-status {
-  color: var(--warn);
+section[aria-label='Verification result'].result--ok h2 {
+  color: var(--accent-strong);
 }
 
-.result-message {
-  font-size: 0.875rem;
-  color: #444;
-  margin-bottom: 0.5rem;
+section[aria-label='Verification result'].result--fail h2 {
+  color: var(--danger);
 }
 
-.result-kid {
-  font-size: 0.75rem;
-  color: #666;
-  font-family: var(--mono);
-  margin-bottom: 0.75rem;
-}
-
-/* Claims table */
-.claims-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.8125rem;
-}
-
-.claims-table th,
-.claims-table td {
-  padding: 0.375rem 0.5rem;
-  text-align: left;
-  border-bottom: 1px solid var(--border);
-}
-
-.claims-table th {
-  font-weight: 600;
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  color: #666;
-}
-
-.claim-label {
-  font-weight: 500;
-  white-space: nowrap;
-  width: 120px;
-}
-
-.claim-value {
-  font-family: var(--mono);
-  word-break: break-all;
-}
-
-.claim-value.json {
-  white-space: pre-wrap;
-}
-
-/* Trust config */
-.trust-actions {
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-}
-
-.trust-actions button {
-  font-size: 0.8125rem;
-}
-
-#load-sandbox {
-  background: var(--accent);
-}
-
-#load-local {
-  background: white;
-  color: var(--fg);
-  font-size: 0.75rem;
-}
-
-#add-manual {
-  background: white;
-  color: var(--fg);
-}
-
-.trust-message {
-  font-size: 0.875rem;
-  padding: 0.5rem 0.75rem;
-  border-radius: 4px;
-  margin-bottom: 0.75rem;
-}
-
-.trust-message:empty {
-  display: none;
-}
-
-.trust-message.error {
-  background: #fef2f2;
-  color: var(--invalid);
-  border: 1px solid #fecaca;
-}
-
-.trust-message.success {
-  background: #f0fdf4;
-  color: var(--valid);
-  border: 1px solid #bbf7d0;
-}
-
-.empty {
-  color: #666;
-  font-size: 0.875rem;
-  font-style: italic;
-}
-
-.issuer-list {
-  list-style: none;
-}
-
-.issuer-item {
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 0.75rem;
-  margin-bottom: 0.5rem;
-}
-
-.issuer-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.remove-btn {
-  background: white;
-  color: var(--invalid);
-  border-color: var(--invalid);
-  font-size: 0.75rem;
-  padding: 0.25rem 0.5rem;
-}
-
-.key-list {
-  list-style: none;
+section[aria-label='Verification result'] > p {
   margin-top: 0.5rem;
-  font-family: var(--mono);
-  font-size: 0.75rem;
-  color: #666;
+  color: var(--fg-muted);
+  font-size: 0.92rem;
 }
 
-.manual-form {
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 1rem;
+section[aria-label='Verification result'] h3 {
+  margin-top: 1.25rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+/* Assessment and claim rows. */
+dl {
+  margin-top: 0.75rem;
+  display: grid;
+  grid-template-columns: minmax(9rem, auto) 1fr;
+  gap: 0.35rem 1rem;
+  font-size: 0.88rem;
+}
+
+dt {
+  color: var(--fg-subtle);
+  font-weight: 500;
+}
+
+dd {
+  color: var(--fg);
+  font-family: var(--font-mono);
+  font-size: 0.83rem;
+  word-break: break-word;
+}
+
+/* Report panel */
+
+section[aria-label='Verification report'] h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+section[aria-label='Verification report'] > p {
+  margin-top: 0.5rem;
+  color: var(--fg-muted);
+  font-size: 0.85rem;
+  max-width: 62ch;
+}
+
+pre {
   margin-top: 1rem;
+  background: var(--code-bg);
+  color: var(--code-fg);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  line-height: 1.55;
 }
 
-.manual-form h3 {
-  font-size: 0.875rem;
-  margin-bottom: 0.75rem;
+section[aria-label='Verification report'] a {
+  display: inline-block;
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--fg);
+  text-decoration: none;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  padding: 0.5rem 1.1rem;
 }
 
-/* Responsive */
-@media (max-width: 600px) {
-  body {
-    padding: 1rem 0.5rem;
-  }
+section[aria-label='Verification report'] a:hover {
+  background: #f5f5f5;
+  border-color: var(--fg-subtle);
+}
 
-  .tabs {
-    overflow-x: auto;
+/* Guidance: what verification does and does not establish. */
+
+section[aria-label='What verification proves'] {
+  background: #fbfbfa;
+}
+
+section[aria-label='What verification proves'] h2 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+section[aria-label='What verification proves'] h3 {
+  margin-top: 1.1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--fg-muted);
+}
+
+section[aria-label='What verification proves'] ul {
+  margin-top: 0.5rem;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+section[aria-label='What verification proves'] li {
+  position: relative;
+  padding-left: 1.6rem;
+  font-size: 0.9rem;
+  color: var(--fg);
+}
+
+section[aria-label='What verification proves'] li::before {
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-weight: 700;
+}
+
+/* First list establishes; second does not. Marker plus wording, never colour alone. */
+section[aria-label='What verification proves'] h3:nth-of-type(1) + ul li::before {
+  content: '\2713';
+  color: var(--accent);
+}
+
+section[aria-label='What verification proves'] h3:nth-of-type(2) + ul li::before {
+  content: '\2013';
+  color: var(--fg-subtle);
+}
+
+/* Visually hidden but exposed to assistive technology: the polite status announcer. */
+.sr-status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
   }
 }
