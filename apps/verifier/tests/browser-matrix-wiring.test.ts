@@ -75,6 +75,9 @@ describe('the browser matrix CI lane', () => {
     };
     const required = {
       'apps/verifier/**': 'verifier_ci',
+      'scripts/check-browser-verifier-boundary.mjs': 'verifier_ci',
+      'scripts/check-verifier-bundle.mjs': 'verifier_ci',
+      '.github/workflows/ci.yml': 'verifier_ci',
       '.github/actions/setup-env/**': 'verifier_ci',
       'packages/kernel/**': 'core',
       'packages/schema/**': 'core',
@@ -82,6 +85,8 @@ describe('the browser matrix CI lane', () => {
       'packages/protocol/**': 'core',
       'package.json': 'root_config',
       'pnpm-lock.yaml': 'root_config',
+      'tsconfig*.json': 'root_config',
+      'vitest*.config.*': 'root_config',
     };
     for (const [path, filter] of Object.entries(required)) {
       expect(filterBlock(filter), `${path} in ${filter}`).toContain(`'${path}'`);
@@ -90,6 +95,17 @@ describe('the browser matrix CI lane', () => {
     for (const filter of ['verifier_ci', 'core', 'root_config']) {
       expect(filterBlock(filter)).not.toContain("'docs/**'");
     }
+  });
+
+  it('runs the release engine contract of Chromium, Firefox and WebKit explicitly', () => {
+    const job = CI.slice(CI.indexOf('browser-matrix:'), CI.indexOf('\n  ci:'));
+    expect(job).toContain('--engines chromium,firefox,webkit');
+  });
+
+  it('requires the browser matrix on the main branch as well as on verifier-reachable paths', () => {
+    const aggregate = CI.slice(CI.indexOf('\n  ci:'));
+    expect(aggregate).toContain('github.ref }}" == "refs/heads/main"');
+    expect(aggregate).toContain('BROWSER_REQUIRED');
   });
 
   it('activates on verifier-reachable paths and is required by the aggregate', () => {

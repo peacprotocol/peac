@@ -742,8 +742,8 @@ jobs:
     name: Verifier Browser Matrix
     needs: detect-changes
     # The verifier bundles kernel/schema/crypto/protocol and is built with the root toolchain, so
-    # a change to any of those can alter its browser behaviour. Activation therefore matches the
-    # verifier unit lane: verifier-owned paths, core, or root build/test configuration.
+    # verifier-owned paths, core packages, root build/config changes, and the main branch all run
+    # browser validation. The required aggregate enforces the same condition.
     if: >-
       needs.detect-changes.outputs.verifier_ci == 'true' ||
       needs.detect-changes.outputs.core == 'true' ||
@@ -774,7 +774,7 @@ jobs:
           pnpm exec playwright install --with-deps chromium firefox webkit
 
       - name: Browser matrix
-        run: node apps/verifier/tests/browser/run-browser-matrix.mjs --deps "$RUNNER_TEMP/browser-deps"
+        run: node apps/verifier/tests/browser/run-browser-matrix.mjs --deps "$RUNNER_TEMP/browser-deps" --engines chromium,firefox,webkit
 
   ci:
     name: Build, Lint, Test
@@ -857,14 +857,19 @@ jobs:
             echo "FAIL: verifier-affecting paths changed but the verifier lane did not succeed (result: ${{ needs.examples-apps.result }})"; exit 1
           fi
 
-          # browser-matrix: a failure or cancellation always blocks; when a verifier-reachable
-          # path changed (verifier-owned, core, or root config) the matrix must have actually
-          # succeeded, since a skipped job reports success to its dependents.
+          # browser-matrix: the required condition mirrors the job's own activation so enforcement
+          # cannot drift from when the job runs. A failure or cancellation always blocks; when the
+          # matrix was required it must have succeeded, since a skipped job reports success to its
+          # dependents.
+          BROWSER_REQUIRED=false
+          if [[ "${{ github.ref }}" == "refs/heads/main" || "${{ needs.detect-changes.outputs.verifier_ci }}" == "true" || "${{ needs.detect-changes.outputs.core }}" == "true" || "${{ needs.detect-changes.outputs.root_config }}" == "true" ]]; then
+            BROWSER_REQUIRED=true
+          fi
           if [[ "${{ needs.browser-matrix.result }}" == "failure" || "${{ needs.browser-matrix.result }}" == "cancelled" ]]; then
             echo "FAIL: browser-matrix failed"; exit 1
           fi
-          if [[ ( "${{ needs.detect-changes.outputs.verifier_ci }}" == "true" || "${{ needs.detect-changes.outputs.core }}" == "true" || "${{ needs.detect-changes.outputs.root_config }}" == "true" ) && "${{ needs.browser-matrix.result }}" != "success" ]]; then
-            echo "FAIL: a verifier-reachable path changed but the browser matrix did not succeed (result: ${{ needs.browser-matrix.result }})"; exit 1
+          if [[ "$BROWSER_REQUIRED" == "true" && "${{ needs.browser-matrix.result }}" != "success" ]]; then
+            echo "FAIL: browser validation was required but the matrix did not succeed (result: ${{ needs.browser-matrix.result }})"; exit 1
           fi
 
           # node-compat: the runtime compatibility matrix. Membership in `needs` alone does

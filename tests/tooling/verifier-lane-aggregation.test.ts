@@ -53,6 +53,7 @@ interface LaneOptions {
   verifierCi?: string;
   core?: string;
   rootConfig?: string;
+  ref?: string;
   examplesApps?: string;
   browserMatrix?: string;
 }
@@ -61,6 +62,8 @@ interface LaneOptions {
 function lanes(opts: LaneOptions = {}): Record<string, string> {
   const examplesApps = opts.examplesApps ?? 'success';
   return {
+    // A pull-request ref by default, so main-branch activation is only exercised when requested.
+    'github.ref': opts.ref ?? 'refs/pull/1/merge',
     'needs.detect-changes.outputs.verifier_ci': opts.verifierCi ?? 'false',
     'needs.detect-changes.outputs.core': opts.core ?? 'false',
     'needs.detect-changes.outputs.root_config': opts.rootConfig ?? 'false',
@@ -167,6 +170,14 @@ describe('the browser-matrix state table is exhaustive over result values', () =
       }
     });
   }
+
+  it('required on the main branch: success passes, skipped/failure/cancelled fail', () => {
+    const onMain = { ref: 'refs/heads/main' };
+    expect(evaluate(lanes({ ...onMain, browserMatrix: 'success' }))).toBe(0);
+    for (const result of ['skipped', 'failure', 'cancelled']) {
+      expect(evaluate(lanes({ ...onMain, browserMatrix: result })), result).not.toBe(0);
+    }
+  });
 
   it('not required: success and skipped pass, failure and cancelled fail', () => {
     expect(evaluate(lanes({ browserMatrix: 'success' }))).toBe(0);

@@ -158,15 +158,17 @@ async function makeFixtures() {
   }
   const tampered = [segments[0], segments[1], base64urlEncode(tamperedSig)].join('.');
 
-  // The record's issued-at is the real issuance instant. Parity pins the evaluation time to it so
-  // the record is within its validity window and every engine reports the same evaluation second.
+  // Parity pins the evaluation time one second after the record's issued-at, so it is
+  // unambiguously after issuance and identical across engines, without testing the temporal
+  // boundary itself.
   const iat = JSON.parse(new TextDecoder().decode(base64urlDecode(segments[1]))).iat;
   if (!Number.isInteger(iat)) throw new Error('fixture record has no integer iat');
+  const parityEvaluationSecond = iat + 1;
 
   return {
     record: issued.jws,
-    parityEvaluationSecond: iat,
-    parityEvaluationTime: new Date(iat * 1000),
+    parityEvaluationSecond,
+    parityEvaluationTime: new Date(parityEvaluationSecond * 1000),
     unicodeRecord: unicodeIssued.jws,
     tampered,
     bareJwk: JSON.stringify(jwk),
