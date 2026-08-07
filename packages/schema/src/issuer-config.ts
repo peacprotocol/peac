@@ -28,7 +28,7 @@ export type RevocationReason = (typeof REVOCATION_REASONS)[number];
  */
 export const RevokedKeyEntrySchema = z
   .object({
-    /** Key ID that was revoked; same domain as canonical JWS kid validation */
+    /** Key ID that was revoked; same domain as PEAC JWS kid validation */
     kid: z.string().refine(isValidKid, {
       message: `kid must be a non-empty well-formed Unicode string of at most ${MAX_KID_UTF8_BYTES} UTF-8 bytes`,
     }),

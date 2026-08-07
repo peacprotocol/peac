@@ -1,10 +1,12 @@
 /**
- * Revoked-key `kid` semantics: the issuer-config schema accepts exactly the canonical JWS `kid`
- * domain (non-empty, well-formed Unicode, at most 256 UTF-8 bytes).
+ * Revoked-key `kid` semantics: the issuer-config schema accepts exactly the PEAC JWS `kid`
+ * domain (non-empty, well-formed Unicode, at most 256 UTF-8 bytes). RFC 7515 leaves the
+ * structure of `kid` unspecified; these constraints are PEAC application-level requirements.
  *
- * The parity suite runs the same vectors through the schema-private predicate and the canonical
- * `@peac/crypto` implementation (imported by source path: the schema package cannot depend on a
- * higher layer), so a divergence in either implementation fails here.
+ * The parity suite runs the same vectors through the schema-private predicate, the public
+ * `RevokedKeyEntrySchema` surface, and the `@peac/crypto` implementation (imported by source
+ * path: the schema package cannot depend on a higher layer), so a divergence at any of the
+ * three fails here.
  */
 import { describe, it, expect } from 'vitest';
 import { RevokedKeyEntrySchema } from '../src/issuer-config';
@@ -34,7 +36,7 @@ function kidOfBytes(n: number, width: 1 | 2 | 3 | 4): string {
 
 const entry = (kid: string) => ({ kid, revoked_at: '2026-02-28T12:00:00Z' });
 
-describe('revoked-key kid accepts the canonical JWS domain', () => {
+describe('revoked-key kid accepts the PEAC JWS domain', () => {
   it.each([1, 2, 3, 4] as const)('accepts 255 and 256 bytes of %i-byte code points', (width) => {
     for (const n of [255, 256]) {
       const kid = kidOfBytes(n, width);
@@ -49,11 +51,12 @@ describe('revoked-key kid accepts the canonical JWS domain', () => {
     expect(RevokedKeyEntrySchema.safeParse(entry(kid)).success).toBe(false);
   });
 
-  it('rejects what string-length counting used to accept', () => {
-    // 200 astral code points: 200 UTF-16 length pairs under the old max(256), 800 UTF-8 bytes.
-    const kid = '\u{1F600}'.repeat(200);
-    expect(kid.length).toBeLessThanOrEqual(256 + 256);
-    expect(encoder.encode(kid).length).toBe(800);
+  it('rejects what UTF-16 code-unit counting used to accept', () => {
+    // 65 astral code points: 130 UTF-16 code units, inside the former max(256); 260 UTF-8
+    // bytes, outside the byte bound.
+    const kid = '\u{1F600}'.repeat(65);
+    expect(kid.length).toBe(130);
+    expect(encoder.encode(kid).length).toBe(260);
     expect(RevokedKeyEntrySchema.safeParse(entry(kid)).success).toBe(false);
   });
 
@@ -80,10 +83,23 @@ describe('revoked-key kid accepts the canonical JWS domain', () => {
   });
 });
 
-describe('parity with the canonical crypto implementation', () => {
+describe('parity with the crypto implementation', () => {
   const vectors: string[] = [
     'key-2026-01',
     'a',
+    'Key',
+    'key',
+    '\u00e9', // NFC e-acute
+    'e\u0301', // NFD e-acute; 3 bytes, not normalized to the 2-byte NFC form
+    '  padded  ',
+    ' ',
+    '\u0000',
+    'a\u0000b',
+    '\u0007',
+    '\t\n',
+    '\u043a\u043b\u044e\u0447',
+    '\u200b',
+    '\ufeff',
     kidOfBytes(255, 1),
     kidOfBytes(256, 1),
     kidOfBytes(257, 1),
@@ -119,6 +135,28 @@ describe('parity with the canonical crypto implementation', () => {
         cryptoIsValidKid(v)
       );
     }
+  });
+
+  // Binds the public schema surface, not only the private predicate, so removing or altering
+  // the schema integration cannot leave parity green.
+  it('the RevokedKeyEntrySchema surface matches crypto for every vector', () => {
+    for (const v of vectors) {
+      expect(
+        RevokedKeyEntrySchema.safeParse(entry(v)).success,
+        `RevokedKeyEntrySchema ${JSON.stringify(v).slice(0, 40)}`
+      ).toBe(cryptoIsValidKid(v));
+    }
+  });
+
+  it('applies no normalization, trimming, case folding or character-class policy', () => {
+    // Accepted exactly as supplied; the two Unicode forms stay distinct values.
+    for (const v of ['Key', 'key', '\u00e9', 'e\u0301', '  padded  ', 'a\u0000b', '\u200b']) {
+      expect(RevokedKeyEntrySchema.safeParse(entry(v)).success, JSON.stringify(v)).toBe(true);
+      const parsed = RevokedKeyEntrySchema.parse(entry(v));
+      expect(parsed.kid, `unmodified ${JSON.stringify(v)}`).toBe(v);
+    }
+    expect(utf8ByteLength('\u00e9')).toBe(2);
+    expect(utf8ByteLength('e\u0301')).toBe(3);
   });
 
   it('computes identical byte lengths for well-formed vectors', () => {

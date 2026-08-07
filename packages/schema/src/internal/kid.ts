@@ -1,10 +1,11 @@
 /**
- * The canonical `kid` rule: a non-empty, well-formed Unicode string whose UTF-8 serialization is
- * at most MAX_KID_UTF8_BYTES bytes.
+ * The PEAC `kid` rule: a non-empty, well-formed Unicode string whose UTF-8 serialization is at
+ * most MAX_KID_UTF8_BYTES bytes. RFC 7515 leaves the structure of `kid` unspecified; the bound
+ * and well-formedness requirements are PEAC application-level constraints.
  *
- * Schema-private. The canonical implementation lives in `@peac/crypto` (`src/kid.ts`), which this
- * package cannot import without inverting the package layering, so the rule is restated here and
- * a behavioural parity test holds the two implementations identical.
+ * Schema-private. The authoritative implementation lives in `@peac/crypto` (`src/kid.ts`), which
+ * this package cannot import without inverting the package layering, so the rule is restated here
+ * and a behavioural parity test holds the two implementations identical.
  */
 
 /** Maximum `kid` length, measured as UTF-8 bytes of the string's serialization. */
@@ -49,7 +50,7 @@ export function utf8ByteLength(s: string): number {
   return n;
 }
 
-/** The complete canonical `kid` rule. */
+/** The complete PEAC `kid` rule. */
 export function isValidKid(kid: unknown): kid is string {
   if (typeof kid !== 'string' || kid.length === 0) return false;
   if (!isWellFormedUnicode(kid)) return false;
