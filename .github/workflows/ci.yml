@@ -140,7 +140,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: Install actionlint (pinned v1.7.11 with checksum)
+      - name: Install actionlint (pinned v1.7.12 with checksum)
         run: |
           ACTIONLINT_VERSION="1.7.12"
           ACTIONLINT_CHECKSUM="8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8"
@@ -770,7 +770,7 @@ jobs:
           mkdir -p "$DEPS"
           cd "$DEPS"
           pnpm init > /dev/null
-          pnpm add playwright@1.62.1
+          pnpm add --save-exact playwright@1.62.1
           pnpm exec playwright install --with-deps chromium firefox webkit
 
       - name: Browser matrix

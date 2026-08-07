@@ -153,3 +153,25 @@ describe('core and root-config changes also require the browser matrix', () => {
     expect(evaluate(lanes({ browserMatrix: 'skipped' }))).toBe(0);
   });
 });
+
+// GitHub exposes needs.<job>.result as exactly success | failure | cancelled | skipped. The full
+// state table: when required, only success passes; when not required, success and skipped pass.
+describe('the browser-matrix state table is exhaustive over result values', () => {
+  for (const activator of ['verifier_ci', 'core', 'root_config']) {
+    const key =
+      activator === 'verifier_ci' ? 'verifierCi' : activator === 'core' ? 'core' : 'rootConfig';
+    it(`required via ${activator}: success passes, skipped/failure/cancelled fail`, () => {
+      expect(evaluate(lanes({ [key]: 'true', browserMatrix: 'success' }))).toBe(0);
+      for (const result of ['skipped', 'failure', 'cancelled']) {
+        expect(evaluate(lanes({ [key]: 'true', browserMatrix: result })), result).not.toBe(0);
+      }
+    });
+  }
+
+  it('not required: success and skipped pass, failure and cancelled fail', () => {
+    expect(evaluate(lanes({ browserMatrix: 'success' }))).toBe(0);
+    expect(evaluate(lanes({ browserMatrix: 'skipped' }))).toBe(0);
+    expect(evaluate(lanes({ browserMatrix: 'failure' }))).not.toBe(0);
+    expect(evaluate(lanes({ browserMatrix: 'cancelled' }))).not.toBe(0);
+  });
+});

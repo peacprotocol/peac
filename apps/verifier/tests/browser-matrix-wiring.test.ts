@@ -54,11 +54,41 @@ describe('the browser matrix CI lane', () => {
     expect(CI).toContain('run-browser-matrix.mjs --deps');
   });
 
-  it('pins an exact stable Playwright release', () => {
+  it('pins an exact stable Playwright release recorded exactly in the ephemeral manifest', () => {
     const pins = [...CI.matchAll(/playwright@(\S+)/g)].map((m) => m[1]);
     expect(pins.length).toBeGreaterThan(0);
     for (const pin of pins) {
       expect(pin, 'exact release, no range or pre-release tag').toMatch(/^\d+\.\d+\.\d+$/);
+    }
+    expect(CI).toContain('pnpm add --save-exact playwright@');
+  });
+
+  it('routes every verifier-reachable path to the matrix and leaves docs unaffected', () => {
+    // The change filters that the matrix activation reads. Losing any pattern would silently
+    // reopen the coverage hole this lane closes.
+    const filterBlock = (name) => {
+      const start = CI.indexOf(`\n            ${name}:\n`);
+      expect(start, `${name} filter present`).toBeGreaterThan(-1);
+      // End at the next sibling filter key (12-space indent, a word, a colon), not a deeper entry.
+      const next = CI.slice(start + 1).search(/\n {12}\w+:\n/);
+      return CI.slice(start, next === -1 ? undefined : start + 1 + next);
+    };
+    const required = {
+      'apps/verifier/**': 'verifier_ci',
+      '.github/actions/setup-env/**': 'verifier_ci',
+      'packages/kernel/**': 'core',
+      'packages/schema/**': 'core',
+      'packages/crypto/**': 'core',
+      'packages/protocol/**': 'core',
+      'package.json': 'root_config',
+      'pnpm-lock.yaml': 'root_config',
+    };
+    for (const [path, filter] of Object.entries(required)) {
+      expect(filterBlock(filter), `${path} in ${filter}`).toContain(`'${path}'`);
+    }
+    // Documentation is in none of the three matrix-activating filters.
+    for (const filter of ['verifier_ci', 'core', 'root_config']) {
+      expect(filterBlock(filter)).not.toContain("'docs/**'");
     }
   });
 
