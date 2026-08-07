@@ -22,10 +22,10 @@
  *
  * Fixtures are issued per run with the real issuing API; no key material is committed.
  */
-import { createServer } from 'node:http';
-import { closeSync, existsSync, fstatSync, openSync, readFileSync, readdirSync } from 'node:fs';
-import { dirname, extname, join, normalize, relative, resolve } from 'node:path';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { loadAssets, serveAssets } from './static-assets.mjs';
 
 const SELF = fileURLToPath(import.meta.url);
 const APP_ROOT = resolve(dirname(SELF), '..', '..');
@@ -210,49 +210,6 @@ function flows(f) {
 }
 const MOBILE_FLOW_IDS = ['accept-bare-jwk', 'tamper'];
 
-const MIME = {
-  '.html': 'text/html; charset=utf-8',
-  '.js': 'text/javascript; charset=utf-8',
-  '.mjs': 'text/javascript; charset=utf-8',
-  '.css': 'text/css; charset=utf-8',
-  '.svg': 'image/svg+xml',
-  '.json': 'application/json',
-};
-
-function serveDist() {
-  const server = createServer((req, res) => {
-    const path = normalize(new URL(req.url, 'http://127.0.0.1').pathname).replace(/^\/+/, '');
-    const file = resolve(DIST, path === '' ? 'index.html' : path);
-    if (relative(DIST, file).startsWith('..')) {
-      res.writeHead(404).end();
-      return;
-    }
-    // One descriptor for the type check and the read, so the file cannot change between them.
-    let fd;
-    try {
-      fd = openSync(file, 'r');
-    } catch {
-      res.writeHead(404).end();
-      return;
-    }
-    try {
-      if (!fstatSync(fd).isFile()) {
-        res.writeHead(404).end();
-        return;
-      }
-      res.writeHead(200, { 'content-type': MIME[extname(file)] ?? 'application/octet-stream' });
-      res.end(readFileSync(fd));
-    } finally {
-      closeSync(fd);
-    }
-  });
-  return new Promise((resolveServer) => {
-    server.listen(0, '127.0.0.1', () => {
-      resolveServer({ server, origin: `http://127.0.0.1:${server.address().port}` });
-    });
-  });
-}
-
 // Counts persistence ATTEMPTS from before application code runs; the observers never mutate the
 // surfaces they watch.
 const PERSISTENCE_OBSERVER = () => {
@@ -329,20 +286,49 @@ async function checkDeterministicReport(page, flow, problems) {
   problems.push('determinism: could not obtain two runs sharing an evaluation second');
 }
 
-// A pending asynchronous file read must not replace newer manual input.
+// A pending asynchronous file read must not replace newer manual input. The first read is held
+// open by a test-only wrapper so the race is exercised deterministically, then released.
 async function checkReadSupersession(page, fixtures, problems) {
-  const fileInput = page.locator('input[type=file]').first();
-  await fileInput.setInputFiles({
-    name: 'record.jws',
-    mimeType: 'application/jose',
-    buffer: Buffer.from(fixtures.tampered),
+  await page.evaluate(() => {
+    const original = File.prototype.arrayBuffer;
+    let intercepted = false;
+    File.prototype.arrayBuffer = function (...a) {
+      const result = original.apply(this, a);
+      if (intercepted) return result;
+      intercepted = true;
+      return new Promise((release) => {
+        globalThis.__releaseHeldRead = () => release(result);
+      });
+    };
+    globalThis.__restoreArrayBuffer = () => {
+      File.prototype.arrayBuffer = original;
+    };
   });
+  await page
+    .locator('input[type=file]')
+    .first()
+    .setInputFiles({
+      name: 'record.jws',
+      mimeType: 'application/jose',
+      buffer: Buffer.from(fixtures.tampered),
+    });
+  const pendingDisabled = await page.locator('button:disabled').count();
+  if (pendingDisabled === 0) {
+    problems.push('supersession: a pending file read left verification enabled');
+  }
   await page.fill('#record', fixtures.record);
-  await page.waitForTimeout(250);
+  await page.evaluate(() => globalThis.__releaseHeldRead());
+  await page.waitForTimeout(100);
   const value = await page.inputValue('#record');
   if (value !== fixtures.record) {
-    problems.push('supersession: an asynchronous file read replaced newer manual input');
+    problems.push('supersession: a superseded file read replaced newer manual input');
   }
+  const stale = await page.locator('section h2').count();
+  if (stale !== 0) problems.push('supersession: a superseded read produced a result');
+  await page
+    .waitForSelector('button:enabled', { timeout: 5000 })
+    .catch(() => problems.push('supersession: controls did not recover'));
+  await page.evaluate(() => globalThis.__restoreArrayBuffer());
 }
 
 // The file controls must feed the same verification path as pasted input.
@@ -467,7 +453,12 @@ if (bundleProblems.length > 0) {
 }
 
 const fixtures = await makeFixtures();
-const { server, origin } = await serveDist();
+const assets = loadAssets(DIST);
+if (!assets.has('/index.html')) {
+  console.error('run-browser-matrix: the build output has no index.html');
+  process.exit(2);
+}
+const { server, origin } = await serveAssets(assets);
 let failed = false;
 const report = (name, problems, detail) => {
   if (problems.length === 0) {
