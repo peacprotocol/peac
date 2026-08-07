@@ -103,7 +103,7 @@ export async function initApp(root: HTMLElement): Promise<void> {
   const nav = document.createElement('nav');
   nav.setAttribute('aria-label', 'PEAC Protocol');
   for (const [text, href] of [
-    ['PEAC Protocol', 'https://peacprotocol.org'],
+    ['PEAC Protocol', 'https://www.peacprotocol.org/'],
     ['Source', 'https://github.com/peacprotocol/peac'],
   ] as const) {
     const a = document.createElement('a');

@@ -92,7 +92,7 @@ describe('footer', () => {
     expect(footers).toHaveLength(1);
     const links = footers[0].querySelectorAll('a');
     const hrefs = links.map((a) => a.href);
-    expect(hrefs).toContain('https://peacprotocol.org');
+    expect(hrefs).toContain('https://www.peacprotocol.org/');
     expect(hrefs).toContain('https://github.com/peacprotocol/peac');
     for (const a of links) {
       expect(a.getAttribute('aria-label')).toMatch(/opens in a new tab/i);
