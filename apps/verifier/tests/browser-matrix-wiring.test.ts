@@ -66,7 +66,7 @@ describe('the browser matrix CI lane', () => {
   it('routes every verifier-reachable path to the matrix and leaves docs unaffected', () => {
     // The change filters that the matrix activation reads. Losing any pattern would silently
     // reopen the coverage hole this lane closes.
-    const filterBlock = (name) => {
+    const filterBlock = (name: string) => {
       const start = CI.indexOf(`\n            ${name}:\n`);
       expect(start, `${name} filter present`).toBeGreaterThan(-1);
       // End at the next sibling filter key (12-space indent, a word, a colon), not a deeper entry.
