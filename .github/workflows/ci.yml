@@ -68,6 +68,7 @@ jobs:
               - 'scripts/check-browser-verifier-boundary.mjs'
               - 'scripts/check-verifier-bundle.mjs'
               - '.github/workflows/ci.yml'
+              - '.github/actions/setup-env/**'
               - 'tests/tooling/verifier-ci-coverage.test.ts'
             published:
               - 'packages/*/package.json'
@@ -139,10 +140,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: Install actionlint (pinned v1.7.11 with checksum)
+      - name: Install actionlint (pinned v1.7.12 with checksum)
         run: |
-          ACTIONLINT_VERSION="1.7.11"
-          ACTIONLINT_CHECKSUM="900919a84f2229bac68ca9cd4103ea297abc35e9689ebb842c6e34a3d1b01b0a"
+          ACTIONLINT_VERSION="1.7.12"
+          ACTIONLINT_CHECKSUM="8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8"
           curl -fsSL "https://github.com/rhysd/actionlint/releases/download/v${ACTIONLINT_VERSION}/actionlint_${ACTIONLINT_VERSION}_linux_amd64.tar.gz" -o /tmp/actionlint.tar.gz
           echo "${ACTIONLINT_CHECKSUM}  /tmp/actionlint.tar.gz" | sha256sum -c -
           tar xzf /tmp/actionlint.tar.gz -C /tmp actionlint
@@ -740,8 +741,13 @@ jobs:
   browser-matrix:
     name: Verifier Browser Matrix
     needs: detect-changes
+    # The verifier bundles kernel/schema/crypto/protocol and is built with the root toolchain, so
+    # verifier-owned paths, core packages, root build/config changes, and the main branch all run
+    # browser validation. The required aggregate enforces the same condition.
     if: >-
       needs.detect-changes.outputs.verifier_ci == 'true' ||
+      needs.detect-changes.outputs.core == 'true' ||
+      needs.detect-changes.outputs.root_config == 'true' ||
       github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 25
@@ -764,11 +770,11 @@ jobs:
           mkdir -p "$DEPS"
           cd "$DEPS"
           pnpm init > /dev/null
-          pnpm add playwright@1.62.1
+          pnpm add --save-exact playwright@1.62.1
           pnpm exec playwright install --with-deps chromium firefox webkit
 
       - name: Browser matrix
-        run: node apps/verifier/tests/browser/run-browser-matrix.mjs --deps "$RUNNER_TEMP/browser-deps"
+        run: node apps/verifier/tests/browser/run-browser-matrix.mjs --deps "$RUNNER_TEMP/browser-deps" --engines chromium,firefox,webkit
 
   ci:
     name: Build, Lint, Test
@@ -851,13 +857,19 @@ jobs:
             echo "FAIL: verifier-affecting paths changed but the verifier lane did not succeed (result: ${{ needs.examples-apps.result }})"; exit 1
           fi
 
-          # browser-matrix: same activation rule as the verifier lane. A failure always blocks;
-          # when verifier-affecting paths changed the matrix must have actually succeeded.
+          # browser-matrix: the required condition mirrors the job's own activation so enforcement
+          # cannot drift from when the job runs. A failure or cancellation always blocks; when the
+          # matrix was required it must have succeeded, since a skipped job reports success to its
+          # dependents.
+          BROWSER_REQUIRED=false
+          if [[ "${{ github.ref }}" == "refs/heads/main" || "${{ needs.detect-changes.outputs.verifier_ci }}" == "true" || "${{ needs.detect-changes.outputs.core }}" == "true" || "${{ needs.detect-changes.outputs.root_config }}" == "true" ]]; then
+            BROWSER_REQUIRED=true
+          fi
           if [[ "${{ needs.browser-matrix.result }}" == "failure" || "${{ needs.browser-matrix.result }}" == "cancelled" ]]; then
             echo "FAIL: browser-matrix failed"; exit 1
           fi
-          if [[ "${{ needs.detect-changes.outputs.verifier_ci }}" == "true" && "${{ needs.browser-matrix.result }}" != "success" ]]; then
-            echo "FAIL: verifier-affecting paths changed but the browser matrix did not succeed (result: ${{ needs.browser-matrix.result }})"; exit 1
+          if [[ "$BROWSER_REQUIRED" == "true" && "${{ needs.browser-matrix.result }}" != "success" ]]; then
+            echo "FAIL: browser validation was required but the matrix did not succeed (result: ${{ needs.browser-matrix.result }})"; exit 1
           fi
 
           # node-compat: the runtime compatibility matrix. Membership in `needs` alone does

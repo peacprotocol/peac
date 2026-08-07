@@ -146,19 +146,29 @@ async function makeFixtures() {
     x: otherJwk.x,
   });
 
-  // Tamper by flipping one decoded payload byte and re-encoding, keeping the signature, so the
-  // signed bytes provably change.
+  // Tamper by flipping one signature byte, leaving the header and payload well-formed and exactly
+  // as signed, so the record reaches signature verification and fails there (rather than a
+  // structural or I-JSON failure before it). The signature bytes provably change.
   const segments = issued.jws.split('.');
-  const payloadBytes = base64urlDecode(segments[1]);
-  const tamperedBytes = Uint8Array.from(payloadBytes);
-  tamperedBytes[0] ^= 0x01;
-  if (Buffer.from(payloadBytes).equals(Buffer.from(tamperedBytes))) {
-    throw new Error('tamper fixture failed to change the signed bytes');
+  const sigBytes = base64urlDecode(segments[2]);
+  const tamperedSig = Uint8Array.from(sigBytes);
+  tamperedSig[0] ^= 0x01;
+  if (Buffer.from(sigBytes).equals(Buffer.from(tamperedSig))) {
+    throw new Error('tamper fixture failed to change the signature bytes');
   }
-  const tampered = [segments[0], base64urlEncode(tamperedBytes), segments[2]].join('.');
+  const tampered = [segments[0], segments[1], base64urlEncode(tamperedSig)].join('.');
+
+  // Parity pins the evaluation time one second after the record's issued-at, so it is
+  // unambiguously after issuance and identical across engines, without testing the temporal
+  // boundary itself.
+  const iat = JSON.parse(new TextDecoder().decode(base64urlDecode(segments[1]))).iat;
+  if (!Number.isInteger(iat)) throw new Error('fixture record has no integer iat');
+  const parityEvaluationSecond = iat + 1;
 
   return {
     record: issued.jws,
+    parityEvaluationSecond,
+    parityEvaluationTime: new Date(parityEvaluationSecond * 1000),
     unicodeRecord: unicodeIssued.jws,
     tampered,
     bareJwk: JSON.stringify(jwk),
@@ -471,6 +481,43 @@ async function runObserverControl(browser, origin) {
   return recorded ? [] : ['csp-observer: no violation recorded for a deliberate blocked eval'];
 }
 
+// Expected semantics per scenario, so parity proves "same correct report", not merely "same
+// bytes": three engines can be identically wrong. Codes and stages are the verifier's own.
+const PARITY_SCENARIOS = [
+  { flowId: 'accept-bare-jwk', outcome: 'accepted' },
+  {
+    flowId: 'tamper',
+    outcome: 'rejected',
+    failureStage: 'signature',
+    failureCode: 'E_INVALID_SIGNATURE',
+  },
+  {
+    flowId: 'trusted-key-mismatch',
+    outcome: 'rejected',
+    failureStage: 'trusted_key',
+    failureCode: 'E_VERIFIER_TRUSTED_KEY_MISMATCH',
+  },
+];
+
+// Collects the rendered report for each parity scenario under a pinned evaluation time, on a fresh
+// context and page per scenario. The report element is awaited before it is read.
+async function collectParityReports(browser, origin, fixtures) {
+  const byFlow = {};
+  const flowById = Object.fromEntries(flows(fixtures).map((f) => [f.id, f]));
+  for (const scenario of PARITY_SCENARIOS) {
+    const context = await browser.newContext();
+    const page = await context.newPage();
+    await page.clock.setFixedTime(fixtures.parityEvaluationTime);
+    await page.goto(`${origin}/`, { waitUntil: 'networkidle' });
+    await runFlow(page, flowById[scenario.flowId]);
+    const report = page.locator('section pre').first();
+    await report.waitFor({ state: 'visible', timeout: 15000 });
+    byFlow[scenario.flowId] = await report.textContent();
+    await context.close();
+  }
+  return byFlow;
+}
+
 // A runtime without WebCrypto Ed25519 must present a capability message, not a cryptic failure.
 async function runCapabilityCheck(browser, origin) {
   const context = await browser.newContext();
@@ -546,6 +593,64 @@ try {
       `${version}; ${flows(fixtures).length} flows + report determinism + snapshot + ` +
         `supersession + file input + capability + CSP-observer control; no network, no persistence, ` +
         `no application CSP unsafe-eval violation`
+    );
+  }
+
+  // Cross-engine report parity: the same inputs and pinned evaluation time must produce a
+  // byte-identical report, including its hash, in every desktop engine.
+  const parityEngines = engines.filter((n) => playwright[n]);
+  if (parityEngines.length > 1) {
+    const perEngine = {};
+    for (const name of parityEngines) {
+      const browser = await playwright[name].launch();
+      perEngine[name] = await collectParityReports(browser, origin, fixtures);
+      await browser.close();
+    }
+    const problems = [];
+    const firstEngine = parityEngines[0];
+    for (const scenario of PARITY_SCENARIOS) {
+      const reports = parityEngines.map((n) => perEngine[n][scenario.flowId]);
+      // Semantics first: prove the report says what it should before comparing engines, so
+      // identically-wrong output cannot satisfy parity.
+      const parsed = JSON.parse(reports[0]);
+      if (parsed.outcome !== scenario.outcome) {
+        problems.push(
+          `${scenario.flowId}: outcome ${parsed.outcome}, expected ${scenario.outcome}`
+        );
+      }
+      if (parsed.failureStage !== scenario.failureStage) {
+        problems.push(
+          `${scenario.flowId}: stage ${parsed.failureStage}, expected ${scenario.failureStage}`
+        );
+      }
+      if (parsed.failureCode !== scenario.failureCode) {
+        problems.push(
+          `${scenario.flowId}: code ${parsed.failureCode}, expected ${scenario.failureCode}`
+        );
+      }
+      if (parsed.evaluationTimeUnixSeconds !== fixtures.parityEvaluationSecond) {
+        problems.push(
+          `${scenario.flowId}: evaluation time not pinned to ${fixtures.parityEvaluationSecond}`
+        );
+      }
+      if (!parsed.reportSha256) problems.push(`${scenario.flowId}: reportSha256 absent`);
+      // Then engine equality: exact bytes and hash, unmodified.
+      if (new Set(reports).size !== 1) {
+        problems.push(`${scenario.flowId}: report differs across engines`);
+      }
+      if (new Set(reports.map((r) => JSON.parse(r).reportSha256)).size !== 1) {
+        problems.push(`${scenario.flowId}: reportSha256 differs across engines`);
+      }
+    }
+    // The three scenarios must not collapse to one report, or a shared-wrong-output bug would pass.
+    const distinct = new Set(PARITY_SCENARIOS.map((s) => perEngine[firstEngine][s.flowId]));
+    if (distinct.size !== PARITY_SCENARIOS.length) {
+      problems.push('parity scenarios produced fewer than three distinct reports');
+    }
+    report(
+      'cross-engine-parity',
+      problems,
+      `${parityEngines.join(', ')} x ${PARITY_SCENARIOS.map((s) => s.flowId).join(', ')}`
     );
   }
 
