@@ -9,11 +9,10 @@ import (
 	"strings"
 )
 
-// ErrMissingKid is returned by ValidateHeader when the header has no kid. It is
-// exported so a protocol-layer caller can classify a Wire 0.2 missing-kid failure
-// distinctly (as E_JWS_MISSING_KID) without changing this generic, typ-agnostic
-// layer. Accept and reject behavior is unchanged; this only makes the reason
-// inspectable via errors.Is.
+// ErrMissingKid identifies a protected header with a missing or empty kid. It is
+// exported so a caller can classify this reason via errors.Is without changing this
+// generic, typ-agnostic layer; any protocol error-code mapping is owned by the
+// protocol layer.
 var ErrMissingKid = errors.New("missing key ID (kid) in header")
 
 // Header represents a JWS header.
@@ -97,10 +96,11 @@ func ValidateHeader(header Header) error {
 	return nil
 }
 
-// IsWire02Typ reports whether typ identifies the PEAC Wire 0.2 profile. It is the
-// single decision point so no alternate accepted spelling can bypass the Wire 0.2
-// header rules; Go accepts only the compact form.
-func IsWire02Typ(typ string) bool {
+// isWire02IssuerTyp reports whether typ is the Wire 0.2 form a PEAC issuer is
+// allowed to emit, which is the compact form only. It is the single decision point
+// for issuer-side kid enforcement so no alternate spelling can bypass it. It is
+// deliberately issuer-scoped and does not describe every typ a verifier accepts.
+func isWire02IssuerTyp(typ string) bool {
 	return typ == InteractionRecordTyp
 }
 

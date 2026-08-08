@@ -83,12 +83,12 @@ func (k *SigningKey) Sign(payload []byte) (string, error) {
 
 // SignWithType creates a JWS compact serialization with a custom type header. It
 // signs the caller-supplied payload bytes as raw JWS and does not assert those
-// bytes are a valid PEAC Interaction Record. When the selected typ identifies the
-// Wire 0.2 profile, the kid it emits must satisfy the Wire 0.2 kid rule, so a
-// direct caller cannot mint a record the verifier rejects; other typ values are
-// left as raw construction.
+// bytes are a valid PEAC Interaction Record. When typ selects the Wire 0.2 issuer
+// profile, the emitted kid is validated so direct callers cannot bypass the Wire
+// 0.2 kid constraint; the payload bytes remain caller-controlled at this layer, and
+// other typ values are left as raw construction.
 func (k *SigningKey) SignWithType(payload []byte, typ string) (string, error) {
-	if IsWire02Typ(typ) {
+	if isWire02IssuerTyp(typ) {
 		if err := kid.Validate(k.keyID); err != nil {
 			return "", fmt.Errorf("wire 0.2 kid invalid: %w", err)
 		}

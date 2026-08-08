@@ -1,5 +1,12 @@
 // Package kid validates the PEAC Wire 0.2 JWS key identifier (kid) against the
 // profile shared by issuance and verification, so both sides apply one rule.
+//
+// The rule composes three layers: the base JWS kid semantics (RFC 7515 §4.1.4: an
+// optional, case-sensitive string of unspecified structure), the PEAC Wire 0.2 kid
+// profile (required, non-empty, at most 256 UTF-8 bytes), and I-JSON protected-header
+// admission (RFC 7493: a JSON string must be well-formed UTF-8 with no surrogates or
+// Unicode noncharacters). This validator preserves the kid exactly; it does not trim,
+// case-fold, or normalize.
 package kid
 
 import (
@@ -19,10 +26,7 @@ const MaxUTF8Bytes = 256
 // own error surface. At the verifier the raw I-JSON gate runs on the header bytes
 // first, so ErrInvalidUTF8 and ErrNoncharacter are unreachable there and only
 // ErrEmpty and ErrTooLong can fire; at issuance there is no such gate, so this
-// predicate is the sole check and all four are reachable. TypeScript enforces the
-// same accept/reject decision, catching the UTF-8 and noncharacter classes through
-// its header I-JSON gate rather than a kid rule, so the decision matches across
-// languages even though the issuance error surface differs.
+// predicate is the sole check and all four are reachable.
 var (
 	ErrEmpty        = errors.New("kid is empty")
 	ErrInvalidUTF8  = errors.New("kid is not valid UTF-8")

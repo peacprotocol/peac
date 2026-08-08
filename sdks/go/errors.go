@@ -32,7 +32,9 @@ const (
 
 	// ErrCodeInvalidKeyID indicates the authoritative key ID does not satisfy the
 	// Wire 0.2 kid rule (non-empty, valid UTF-8, no Unicode noncharacters, at most
-	// 256 UTF-8 bytes), so a record signed with it would be rejected by the verifier.
+	// 256 UTF-8 bytes). It is rejected before header serialization to prevent either
+	// silent UTF-8 replacement (encoding/json substitutes U+FFFD for invalid bytes)
+	// or emission of a header that VerifyLocal would reject.
 	ErrCodeInvalidKeyID = "INVALID_KEY_ID"
 
 	// ErrCodeInvalidUTF8 indicates a caller-controlled claim string is not valid

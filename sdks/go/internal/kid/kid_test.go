@@ -47,6 +47,30 @@ func TestValidate_Rejects(t *testing.T) {
 	}
 }
 
+// The profile preserves the kid: it does not case-fold, trim, Unicode-normalize, or
+// restrict to ASCII, and it permits NUL, BOM, and zero-width characters (none are
+// noncharacters). These inputs must be accepted so the rule invents no restriction
+// beyond well-formed UTF-8, no noncharacters, and the byte bound.
+func TestValidate_NoNormalizationOrInventedRestrictions(t *testing.T) {
+	accepted := map[string]string{
+		"mixed case preserved":   "Key-1",
+		"leading/trailing space": "  key  ",
+		"precomposed acute":      "cl\u00e9",
+		"decomposed acute":       "cle\u0301",
+		"zero-width space":       "k\u200bk",
+		"byte order mark":        "k\ufeff",
+		"NUL":                    "k\x00k",
+		"non-ASCII CJK":          "\u4e2d\u6587",
+	}
+	for name, k := range accepted {
+		t.Run(name, func(t *testing.T) {
+			if err := Validate(k); err != nil {
+				t.Fatalf("Validate(%s) = %v, want nil (no invented restriction)", name, err)
+			}
+		})
+	}
+}
+
 // The byte bound is exact at 256: 256 accepted, 257 rejected, for ASCII and for
 // supplementary-plane code points (four bytes each).
 func TestValidate_ByteBoundaryIsExact(t *testing.T) {

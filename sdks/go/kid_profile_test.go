@@ -166,3 +166,123 @@ func TestKidNoncharacterMatchesIJSONGate(t *testing.T) {
 		}
 	}
 }
+
+// craftRawHeaderJWS builds a compact JWS whose protected-header segment is exactly
+// the supplied raw bytes, so a test can place malformed UTF-8 in the header that
+// json.Marshal would otherwise repair.
+func craftRawHeaderJWS(t *testing.T, headerBytes []byte) string {
+	t.Helper()
+	return jws.Encode(headerBytes) + "." + jws.Encode([]byte(`{"a":"b"}`)) + "." + jws.Encode([]byte("sig"))
+}
+
+// The root and jws packages each declare the Wire 0.2 issuer typ constant; they must
+// not drift apart.
+func TestInteractionRecordTypConstantsAgree(t *testing.T) {
+	if InteractionRecordTyp != jws.InteractionRecordTyp {
+		t.Fatalf("typ constants differ: peac=%q jws=%q", InteractionRecordTyp, jws.InteractionRecordTyp)
+	}
+}
+
+// A malformed-UTF-8 kid in the raw protected header is rejected by the raw I-JSON
+// gate as an I-JSON string error and is not remapped to the kid class. Built from raw
+// bytes because json.Marshal would repair the invalid byte to U+FFFD first.
+func TestVerifyLocal_MalformedUTF8KidIsIJSONError(t *testing.T) {
+	raw := []byte("{\"alg\":\"EdDSA\",\"typ\":\"interaction-record+jwt\",\"kid\":\"k\xff\"}")
+	vr := VerifyLocal(craftRawHeaderJWS(t, raw), VerifyLocalOptions{PublicKey: make([]byte, 32)})
+	if vr.ErrorCode != "E_IJSON_INVALID_STRING" {
+		t.Fatalf("code = %q, want E_IJSON_INVALID_STRING (%s)", vr.ErrorCode, vr.ErrorMessage)
+	}
+}
+
+// Both an absent kid and an explicitly empty kid produce E_JWS_MISSING_KID.
+func TestVerifyLocal_ExplicitEmptyKidIsMissingKid(t *testing.T) {
+	j := craftWire02JWS(t, map[string]any{"alg": "EdDSA", "typ": InteractionRecordTyp, "kid": ""})
+	vr := VerifyLocal(j, VerifyLocalOptions{PublicKey: make([]byte, 32)})
+	if vr.ErrorCode != "E_JWS_MISSING_KID" {
+		t.Fatalf("code = %q, want E_JWS_MISSING_KID (%s)", vr.ErrorCode, vr.ErrorMessage)
+	}
+}
+
+// The bound is UTF-8 bytes, not code points or Go string length: 64 four-byte
+// supplementary-plane code points (256 bytes) issue and verify with the kid preserved
+// exactly, while 65 (260 bytes) fail issuance and, crafted externally, classify as
+// E_JWS_MISSING_KID.
+func TestKidByteBoundary_EndToEnd(t *testing.T) {
+	kid256 := strings.Repeat("\U0001F600", 64)
+	kid260 := strings.Repeat("\U0001F600", 65)
+	opts := func(k *jws.SigningKey) IssueOptions {
+		return IssueOptions{Iss: "https://example.com", Kind: KindEvidence, Type: "org.peacprotocol/test", SigningKey: k}
+	}
+
+	t.Run("256-byte astral key ID issues and verifies with kid preserved", func(t *testing.T) {
+		k, err := jws.GenerateSigningKey(kid256)
+		if err != nil {
+			t.Fatalf("generate key: %v", err)
+		}
+		result, err := Issue(opts(k))
+		if err != nil {
+			t.Fatalf("issue: %v", err)
+		}
+		vr := VerifyLocal(result.JWS, VerifyLocalOptions{PublicKey: k.PublicKey()})
+		if !vr.Valid {
+			t.Fatalf("verify: %s %s", vr.ErrorCode, vr.ErrorMessage)
+		}
+		if vr.Kid != kid256 {
+			t.Fatalf("kid not preserved exactly")
+		}
+	})
+
+	t.Run("260-byte astral key ID fails issuance as INVALID_KEY_ID", func(t *testing.T) {
+		k, err := jws.GenerateSigningKey(kid260)
+		if err != nil {
+			t.Fatalf("generate key: %v", err)
+		}
+		_, err = Issue(opts(k))
+		ie := requireIssueError(t, err)
+		if ie.Code != ErrCodeInvalidKeyID {
+			t.Fatalf("code = %q, want %q", ie.Code, ErrCodeInvalidKeyID)
+		}
+	})
+
+	t.Run("externally crafted 260-byte astral kid is E_JWS_MISSING_KID", func(t *testing.T) {
+		j := craftWire02JWS(t, map[string]any{"alg": "EdDSA", "typ": InteractionRecordTyp, "kid": kid260})
+		vr := VerifyLocal(j, VerifyLocalOptions{PublicKey: make([]byte, 32)})
+		if vr.ErrorCode != "E_JWS_MISSING_KID" {
+			t.Fatalf("code = %q, want E_JWS_MISSING_KID (%s)", vr.ErrorCode, vr.ErrorMessage)
+		}
+	})
+}
+
+// Issuance and direct Wire 0.2 signing refuse an authoritative key ID with invalid
+// UTF-8 or a Unicode noncharacter, while a legacy typ is not subject to the rule.
+func TestKidWiring_InvalidUTF8AndNoncharacter(t *testing.T) {
+	badKeyIDs := map[string]string{
+		"invalid UTF-8": "k\xff",
+		"noncharacter":  "k\ufdd0",
+	}
+	for name, keyID := range badKeyIDs {
+		t.Run("Issue refuses "+name, func(t *testing.T) {
+			k, err := jws.GenerateSigningKey(keyID)
+			if err != nil {
+				t.Fatalf("generate key: %v", err)
+			}
+			_, err = Issue(IssueOptions{Iss: "https://example.com", Kind: KindEvidence, Type: "org.peacprotocol/test", SigningKey: k})
+			ie := requireIssueError(t, err)
+			if ie.Code != ErrCodeInvalidKeyID {
+				t.Fatalf("code = %q, want %q", ie.Code, ErrCodeInvalidKeyID)
+			}
+		})
+		t.Run("SignWithType(Wire 0.2) refuses "+name, func(t *testing.T) {
+			k, err := jws.GenerateSigningKey(keyID)
+			if err != nil {
+				t.Fatalf("generate key: %v", err)
+			}
+			if _, err := k.SignWithType([]byte(`{"a":"b"}`), InteractionRecordTyp); err == nil {
+				t.Fatalf("SignWithType(Wire 0.2) with %s key ID should refuse emission", name)
+			}
+			if _, err := k.SignWithType([]byte(`{"a":"b"}`), jws.LegacyReceiptTyp); err != nil {
+				t.Fatalf("legacy typ should not enforce the Wire 0.2 kid rule (%s): %v", name, err)
+			}
+		})
+	}
+}
