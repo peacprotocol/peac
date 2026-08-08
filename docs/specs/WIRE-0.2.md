@@ -463,6 +463,7 @@ Presence of any of the following MUST cause a hard error:
 
 - `kid` MUST be present and non-empty. Absent or empty `kid` produces `E_JWS_MISSING_KID`.
 - `kid` MUST NOT exceed 256 UTF-8 bytes (DoS safety). Oversized `kid` also produces `E_JWS_MISSING_KID`.
+- As a protected-header string, `kid` is subject to the raw I-JSON gate (Section 10.6): a `kid` carrying invalid UTF-8, an unpaired surrogate, or a Unicode noncharacter is rejected there as `E_IJSON_INVALID_STRING`. This spec does not restate those Unicode rules; Section 10.6 is normative for them.
 
 ### 10.4 JWS Size Cap
 

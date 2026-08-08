@@ -217,10 +217,18 @@
         "claims": {
           "peac_version": "0.2",
           "kind": "evidence",
-          "type": "org.peacprotocol/payment",
+          "type": "org.peacprotocol/access-decision",
           "iss": "https://api.example.com",
           "iat": 1709500000,
-          "jti": "jose-boundary-001"
+          "jti": "jose-boundary-001",
+          "pillars": ["access"],
+          "extensions": {
+            "org.peacprotocol/access": {
+              "resource": "https://api.example.com/v1/documents/123",
+              "action": "read",
+              "decision": "allow"
+            }
+          }
         }
       },
       "expected": {
@@ -340,10 +348,18 @@
         "claims": {
           "peac_version": "0.2",
           "kind": "evidence",
-          "type": "org.peacprotocol/payment",
+          "type": "org.peacprotocol/access-decision",
           "iss": "https://api.example.com",
           "iat": 1709500000,
-          "jti": "jose-boundary-002"
+          "jti": "jose-boundary-002",
+          "pillars": ["access"],
+          "extensions": {
+            "org.peacprotocol/access": {
+              "resource": "https://api.example.com/v1/documents/123",
+              "action": "read",
+              "decision": "allow"
+            }
+          }
         }
       },
       "expected": {

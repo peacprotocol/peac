@@ -278,6 +278,60 @@ describe('Wire 0.2 Conformance: invalid JWS security fixtures', () => {
 });
 
 // ---------------------------------------------------------------------------
+// Nested jose/conformance.json: JWS security fixtures (accept and reject)
+// ---------------------------------------------------------------------------
+
+describe('Wire 0.2 Conformance: jose/conformance.json JWS security fixtures', () => {
+  const file = loadWire02Fixtures('jose/conformance.json');
+  const jwsFixtures = file.fixtures.filter((f) => f.type === 'jws-security');
+
+  for (const fixture of jwsFixtures) {
+    const expectsAccept = fixture.expected.valid === true;
+    const title = expectsAccept
+      ? `${fixture.name}: verifyLocal accepts`
+      : `${fixture.name}: verifyLocal rejects with ${fixture.expected.error_code}`;
+
+    it(title, async () => {
+      const overrides = fixture.input.header_overrides ?? {};
+      let claims = fixture.input.claims;
+
+      const baseHeader: Record<string, unknown> = {
+        typ: 'interaction-record+jwt',
+        alg: 'EdDSA',
+        kid: testKid,
+      };
+      for (const [key, value] of Object.entries(overrides)) {
+        if (value === null) {
+          delete baseHeader[key];
+        } else {
+          baseHeader[key] = value;
+        }
+      }
+
+      // The size-cap fixture asks for a JWS larger than a byte threshold: pad a claim
+      // so the compact token exceeds it. The cap is checked on the raw bytes before
+      // any parsing, so the padding value does not need to be otherwise valid.
+      const sizeThreshold = fixture.input.jws_size_exceeds_bytes;
+      if (typeof sizeThreshold === 'number') {
+        claims = { ...claims, _pad: 'x'.repeat(sizeThreshold) };
+      }
+
+      const jws = await signRawJWS(baseHeader, claims, privateKey);
+      const result = await verifyLocal(jws, publicKey);
+
+      if (expectsAccept) {
+        expect(result.valid).toBe(true);
+      } else {
+        expect(result.valid).toBe(false);
+        if (!result.valid) {
+          expect(result.code).toBe(fixture.expected.error_code);
+        }
+      }
+    });
+  }
+});
+
+// ---------------------------------------------------------------------------
 // Invalid: coherence fixtures
 // ---------------------------------------------------------------------------
 
