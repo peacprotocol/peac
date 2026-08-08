@@ -14,25 +14,22 @@ import (
 //
 //   - Invalid UTF-8 in a Go string is silently replaced with U+FFFD by encoding/json. U+FFFD is a
 //     valid character, so a post-marshal scan cannot recover the original invalidity. This class
-//     MUST be detected before json.Marshal runs, on the Go values themselves. That is the sole job
+//     must be detected before json.Marshal runs, on the Go values themselves. That is the sole job
 //     of the pre-marshal walk below.
 //   - Unicode noncharacters and out-of-range numbers survive marshaling as valid UTF-8 / literal
-//     digits, so they are caught after marshaling by assertIJSON over the exact signed bytes. The
-//     pre-marshal walk deliberately does not re-implement that logic.
+//     digits, so they are caught after marshaling by the raw JSON admission gate over the exact
+//     signed bytes. The pre-marshal walk deliberately does not re-implement that logic.
 //
 // The walk covers every caller-controlled string reachable in the marshaled payload: the typed
 // top-level fields (including the generated or caller-supplied rid), the pillar list, the optional
 // actor and policy blocks, and every string value and string member name inside the extension map.
 
-// maxClaimGraphNodes bounds the extension-map traversal so the walk terminates on any input,
-// independent of whether evidence.ValidateValue (which enforces its own node and depth bounds) ran
-// first. It matches the evidence validator's default node ceiling.
-const maxClaimGraphNodes = 100000
-
 // validateClaimUTF8 rejects any caller-controlled claim string that is not valid UTF-8, before the
 // claims are marshaled and signed. It operates on the built claims struct so a caller-supplied
 // receipt-ID generator or actor/policy/extension value cannot introduce bytes it does not see.
-func validateClaimUTF8(claims *InteractionRecordClaims) error {
+// maxNodes bounds the extension traversal; callers pass the same effective evidence node ceiling
+// used for extension validation so the walk does not impose a second, unrelated limit.
+func validateClaimUTF8(claims *InteractionRecordClaims, maxNodes int) error {
 	typed := []struct {
 		field string
 		value string
@@ -79,7 +76,7 @@ func validateClaimUTF8(claims *InteractionRecordClaims) error {
 		}
 	}
 	if claims.Ext != nil {
-		if err := validateExtUTF8(claims.Ext); err != nil {
+		if err := validateExtUTF8(claims.Ext, maxNodes); err != nil {
 			return err
 		}
 	}
@@ -99,10 +96,10 @@ func checkClaimStringUTF8(s, field string) error {
 }
 
 // validateExtUTF8 walks the extension graph and rejects any string value or member name that is not
-// valid UTF-8. The traversal is iterative and self-bounded: it carries its own node ceiling and
+// valid UTF-8. The traversal is iterative and self-bounded: it honors the supplied node ceiling and
 // fails closed on any value type outside the JSON builtins, so it terminates and cannot panic even
 // if it is ever reached without evidence.ValidateValue having constrained the graph first.
-func validateExtUTF8(ext map[string]any) error {
+func validateExtUTF8(ext map[string]any, maxNodes int) error {
 	type frame struct {
 		value any
 		path  string
@@ -114,10 +111,10 @@ func validateExtUTF8(ext map[string]any) error {
 		stack = stack[:len(stack)-1]
 
 		nodes++
-		if nodes > maxClaimGraphNodes {
+		if nodes > maxNodes {
 			return &IssueError{
 				Code:    ErrCodeInvalidType,
-				Message: fmt.Sprintf("extension graph exceeds %d nodes", maxClaimGraphNodes),
+				Message: fmt.Sprintf("extension graph exceeds %d nodes", maxNodes),
 				Field:   "Extensions",
 			}
 		}

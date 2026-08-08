@@ -2,6 +2,7 @@ package peac
 
 import (
 	"testing"
+	"time"
 )
 
 // A record the issuer accepts must be admitted by the same SDK's verifier. Non-ASCII but
@@ -58,9 +59,27 @@ func TestIssue_RejectsInvalidUTF8(t *testing.T) {
 		{"sub", "sub", func(o *IssueOptions) { o.Sub = "https://sub.example.com/" + badByte }},
 		{"type", "type", func(o *IssueOptions) { o.Type = "org.peacprotocol/" + badByte }},
 		{"actor.id", "actor.id", func(o *IssueOptions) { o.Actor = &ActorBinding{ID: "urn:actor:" + badByte} }},
+		{"actor.role", "actor.role", func(o *IssueOptions) {
+			o.Actor = &ActorBinding{ID: "urn:actor:ok", Role: badByte}
+		}},
+		{"actor.proof_types[0]", "actor.proof_types[0]", func(o *IssueOptions) {
+			o.Actor = &ActorBinding{ID: "urn:actor:ok", ProofTypes: []string{badByte}}
+		}},
 		{"policy.digest", "policy.digest", func(o *IssueOptions) { o.Policy = &PolicyBlock{Digest: badByte} }},
+		{"policy.uri", "policy.uri", func(o *IssueOptions) {
+			o.Policy = &PolicyBlock{Digest: "sha-256:ok", URI: badByte}
+		}},
+		{"policy.version", "policy.version", func(o *IssueOptions) {
+			o.Policy = &PolicyBlock{Digest: "sha-256:ok", Version: badByte}
+		}},
 		{"ext value", "ext.k", func(o *IssueOptions) { o.Extensions = map[string]any{"k": badByte} }},
 		{"ext member name", "ext (member name)", func(o *IssueOptions) { o.Extensions = map[string]any{badByte: "v"} }},
+		{"nested ext value", "ext.outer.inner", func(o *IssueOptions) {
+			o.Extensions = map[string]any{"outer": map[string]any{"inner": badByte}}
+		}},
+		{"nested ext member name", "ext.outer (member name)", func(o *IssueOptions) {
+			o.Extensions = map[string]any{"outer": map[string]any{badByte: "v"}}
+		}},
 		{"rid via custom generator", "rid", func(o *IssueOptions) { o.IDGen = NewFixedIDGenerator("rid-" + badByte) }},
 	}
 
@@ -80,10 +99,12 @@ func TestIssue_RejectsInvalidUTF8(t *testing.T) {
 	}
 }
 
-// Classes that survive marshaling as valid JSON (Unicode noncharacters and numbers whose magnitude
-// exceeds the safe range) are rejected by the post-marshal I-JSON gate, the same gate the verifier
-// applies. Without it the issuer could emit a payload its own VerifyLocal rejects.
-func TestIssue_RejectsNonIJSONPayload(t *testing.T) {
+// Classes that survive marshaling as valid JSON (Unicode noncharacters, which RFC 7493 forbids, and
+// numbers outside the safe numeric range, which PEAC's stricter admission rule rejects) fail the
+// PEAC raw JSON admission profile gate, the same gate the verifier applies. Without it the issuer
+// could emit a payload its own VerifyLocal rejects. The injectable clock and exp cases show a
+// generated numeric input reaching the gate, the numeric analogue of the custom rid generator.
+func TestIssue_RejectsInvalidJSONProfile(t *testing.T) {
 	key := testSigningKey(t)
 	base := func() IssueOptions {
 		return IssueOptions{
@@ -111,6 +132,9 @@ func TestIssue_RejectsNonIJSONPayload(t *testing.T) {
 		{"exp int64 above the safe range", func(o *IssueOptions) {
 			o.Exp = int64(1) << 60
 		}},
+		{"iat above the safe range via a custom clock", func(o *IssueOptions) {
+			o.Clock = FixedClock{Time: time.Unix(int64(1)<<60, 0)}
+		}},
 	}
 
 	for _, tc := range cases {
@@ -119,8 +143,8 @@ func TestIssue_RejectsNonIJSONPayload(t *testing.T) {
 			tc.mutate(&opts)
 			_, err := Issue(opts)
 			ie := requireIssueError(t, err)
-			if ie.Code != ErrCodeNonIJSONPayload {
-				t.Fatalf("code = %q, want %q (msg: %s)", ie.Code, ErrCodeNonIJSONPayload, ie.Message)
+			if ie.Code != ErrCodeInvalidJSONProfile {
+				t.Fatalf("code = %q, want %q (msg: %s)", ie.Code, ErrCodeInvalidJSONProfile, ie.Message)
 			}
 		})
 	}
@@ -147,7 +171,23 @@ func TestIssue_InvalidUTF8NeverEmitsMutatedRecord(t *testing.T) {
 // evidence.ValidateValue rejects such types first; this exercises the walk's own defensive branch
 // directly so it cannot be silently skipped.
 func TestValidateExtUTF8_FailsClosedOnUnexpectedType(t *testing.T) {
-	err := validateExtUTF8(map[string]any{"x": 42}) // Go int, not a JSON builtin
+	err := validateExtUTF8(map[string]any{"x": 42}, 100000) // Go int, not a JSON builtin
+	ie := requireIssueError(t, err)
+	if ie.Code != ErrCodeInvalidType {
+		t.Fatalf("code = %q, want %q", ie.Code, ErrCodeInvalidType)
+	}
+}
+
+// The walk honors the node ceiling it is given rather than an internal default, so a caller that
+// raises EvidenceLimits.MaxTotalNodes is not silently capped by a second constant.
+func TestValidateExtUTF8_HonorsSuppliedNodeLimit(t *testing.T) {
+	ext := map[string]any{"a": "x", "b": "y", "c": "z"} // root map plus three entries
+
+	if err := validateExtUTF8(ext, 100000); err != nil {
+		t.Fatalf("a generous limit should accept a small valid graph: %v", err)
+	}
+
+	err := validateExtUTF8(ext, 1) // one node allowed; the graph has more
 	ie := requireIssueError(t, err)
 	if ie.Code != ErrCodeInvalidType {
 		t.Fatalf("code = %q, want %q", ie.Code, ErrCodeInvalidType)

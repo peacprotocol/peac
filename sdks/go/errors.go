@@ -30,8 +30,12 @@ const (
 	// replace the invalid bytes with U+FFFD and sign a mutated identifier.
 	ErrCodeInvalidUTF8 = "INVALID_UTF8"
 
-	// ErrCodeNonIJSONPayload indicates the marshaled claims payload violates the
-	// raw-bytes I-JSON (RFC 7493) gate the verifier applies. The underlying
-	// canonical code (E_IJSON_*) is preserved in the message.
-	ErrCodeNonIJSONPayload = "NON_IJSON_PAYLOAD"
+	// ErrCodeInvalidJSONProfile indicates the marshaled claims payload failed the
+	// PEAC raw JSON admission profile the verifier applies. That profile combines
+	// RFC 7493 requirements (UTF-8, no surrogates or noncharacters, unique member
+	// names) with PEAC's stricter safe-numeric-range rule, which rejects numbers
+	// whose magnitude exceeds 2^53-1 (RFC 7493 treats that bound as SHOULD-NOT, not
+	// a MUST). The underlying canonical code (E_IJSON_* / E_INVALID_FORMAT) is
+	// preserved in the message.
+	ErrCodeInvalidJSONProfile = "INVALID_JSON_PROFILE"
 )
