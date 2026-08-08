@@ -11,6 +11,7 @@
  */
 
 import { issue } from '@peac/protocol';
+import { isValidKid } from './internal/kid.js';
 import { EXTENSION_NAMESPACE } from './constants.js';
 import { FAMILY_REGISTRY } from './families.js';
 import { FAMILY_BUILDERS } from './builders.js';
@@ -26,8 +27,10 @@ function validateIssueOptions(options: IssueOptions): void {
   if (!(options.privateKey instanceof Uint8Array) || options.privateKey.length !== 32) {
     throw new Error('privateKey must be a 32-byte Uint8Array');
   }
-  if (typeof options.kid !== 'string' || options.kid.length === 0 || options.kid.length > 256) {
-    throw new Error('kid must be a non-empty string (max 256 chars)');
+  if (!isValidKid(options.kid)) {
+    throw new Error(
+      'kid must be a non-empty, well-formed Unicode string of at most 256 UTF-8 bytes'
+    );
   }
   if (typeof options.issuer !== 'string' || options.issuer.length === 0) {
     throw new Error('issuer must be a non-empty string');
