@@ -25,6 +25,16 @@ const (
 	ErrCodeSignFailed    = "SIGN_FAILED"
 	ErrCodeIDGenFailed   = "ID_GEN_FAILED"
 
+	// ErrCodeKeyIDMismatch indicates IssueOptions.Kid was set to a non-empty value
+	// that differs from the signing key's own key ID. The signing key's ID is
+	// authoritative; a conflicting Kid is rejected rather than silently ignored.
+	ErrCodeKeyIDMismatch = "KEY_ID_MISMATCH"
+
+	// ErrCodeInvalidKeyID indicates the authoritative key ID does not satisfy the
+	// Wire 0.2 kid rule (non-empty, valid UTF-8, no Unicode noncharacters, at most
+	// 256 UTF-8 bytes), so a record signed with it would be rejected by the verifier.
+	ErrCodeInvalidKeyID = "INVALID_KEY_ID"
+
 	// ErrCodeInvalidUTF8 indicates a caller-controlled claim string is not valid
 	// UTF-8. It is detected before json.Marshal, which would otherwise silently
 	// replace the invalid bytes with U+FFFD and sign a mutated identifier.

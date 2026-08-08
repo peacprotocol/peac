@@ -4,9 +4,17 @@ package jws
 import (
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 )
+
+// ErrMissingKid is returned by ValidateHeader when the header has no kid. It is
+// exported so a protocol-layer caller can classify a Wire 0.2 missing-kid failure
+// distinctly (as E_JWS_MISSING_KID) without changing this generic, typ-agnostic
+// layer. Accept and reject behavior is unchanged; this only makes the reason
+// inspectable via errors.Is.
+var ErrMissingKid = errors.New("missing key ID (kid) in header")
 
 // Header represents a JWS header.
 type Header struct {
@@ -83,10 +91,17 @@ func ValidateHeader(header Header) error {
 	}
 
 	if header.KeyID == "" {
-		return fmt.Errorf("missing key ID (kid) in header")
+		return ErrMissingKid
 	}
 
 	return nil
+}
+
+// IsWire02Typ reports whether typ identifies the PEAC Wire 0.2 profile. It is the
+// single decision point so no alternate accepted spelling can bypass the Wire 0.2
+// header rules; Go accepts only the compact form.
+func IsWire02Typ(typ string) bool {
+	return typ == InteractionRecordTyp
 }
 
 // Encode encodes data as base64url without padding.

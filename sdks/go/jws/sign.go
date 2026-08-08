@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+
+	"github.com/peacprotocol/peac/sdks/go/internal/kid"
 )
 
 // InteractionRecordTyp is the JWS typ for the current stable Interaction Record format.
@@ -74,13 +76,24 @@ func (k *SigningKey) PublicKey() ed25519.PublicKey {
 }
 
 // Sign creates a JWS compact serialization for the given payload.
-// The typ header is set to DefaultReceiptTyp ("peac-receipt/0.1").
+// The typ header is set to DefaultReceiptTyp ("interaction-record+jwt").
 func (k *SigningKey) Sign(payload []byte) (string, error) {
 	return k.SignWithType(payload, DefaultReceiptTyp)
 }
 
-// SignWithType creates a JWS compact serialization with a custom type header.
+// SignWithType creates a JWS compact serialization with a custom type header. It
+// signs the caller-supplied payload bytes as raw JWS and does not assert those
+// bytes are a valid PEAC Interaction Record. When the selected typ identifies the
+// Wire 0.2 profile, the kid it emits must satisfy the Wire 0.2 kid rule, so a
+// direct caller cannot mint a record the verifier rejects; other typ values are
+// left as raw construction.
 func (k *SigningKey) SignWithType(payload []byte, typ string) (string, error) {
+	if IsWire02Typ(typ) {
+		if err := kid.Validate(k.keyID); err != nil {
+			return "", fmt.Errorf("wire 0.2 kid invalid: %w", err)
+		}
+	}
+
 	header := Header{
 		Algorithm: "EdDSA",
 		Type:      typ,
