@@ -90,6 +90,10 @@ type VerificationWarning struct {
 	Pointer string `json:"pointer,omitempty"`
 }
 
+// maxKidUTF8Bytes is the Wire 0.2 JOSE hardening bound on kid length (WIRE02-JOSE-008): a kid MUST
+// NOT exceed 256 UTF-8 bytes. RFC 7515 leaves kid structure unspecified; this is a PEAC constraint.
+const maxKidUTF8Bytes = 256
+
 // VerifyLocal verifies a signed interaction record locally with a provided public key.
 //
 // Enforces the current stable Interaction Record format (interaction-record+jwt)
@@ -278,6 +282,17 @@ func checkJOSEHardening(headerRaw []byte) error {
 	// Reject zip
 	if _, ok := raw["zip"]; ok {
 		return fmt.Errorf("JOSE hardening: zip header is not allowed")
+	}
+
+	// Reject kid exceeding the PEAC bound (WIRE02-JOSE-008). The bound is 256 UTF-8 bytes of the
+	// decoded kid; len on a Go string counts bytes, which is exactly that unit. Raw-header I-JSON
+	// validity (no surrogates or noncharacters) is already enforced upstream, so the decoded string
+	// is well-formed here. kid presence and non-emptiness stay in jws.ValidateHeader.
+	if kidRaw, ok := raw["kid"]; ok {
+		var kid string
+		if err := json.Unmarshal(kidRaw, &kid); err == nil && len(kid) > maxKidUTF8Bytes {
+			return fmt.Errorf("JOSE hardening: kid exceeds %d UTF-8 bytes", maxKidUTF8Bytes)
+		}
 	}
 
 	return nil

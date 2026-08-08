@@ -1,6 +1,8 @@
 package peac
 
 import (
+	"encoding/json"
+	"strings"
 	"testing"
 	"time"
 
@@ -192,6 +194,45 @@ func TestVerifyLocal_JOSEHardening(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			err := checkJOSEHardening([]byte(tc.header))
+			if (err != nil) != tc.wantErr {
+				t.Errorf("checkJOSEHardening() err = %v, wantErr %v", err, tc.wantErr)
+			}
+		})
+	}
+}
+
+func TestVerifyLocal_JOSEHardening_KidByteBound(t *testing.T) {
+	// WIRE02-JOSE-008: kid MUST NOT exceed 256 UTF-8 bytes. The bound is measured in UTF-8 bytes,
+	// not characters or UTF-16 code units, so ASCII fixtures alone cannot prove it. Each kid is
+	// built from escape sequences via json.Marshal, so the header bytes stay ASCII.
+	mkHeader := func(kid string) string {
+		b, err := json.Marshal(map[string]any{
+			"alg": "EdDSA",
+			"kid": kid,
+			"typ": "interaction-record+jwt",
+		})
+		if err != nil {
+			t.Fatalf("marshal header: %v", err)
+		}
+		return string(b)
+	}
+	astral := "\U0001F600" // one supplementary-plane code point: 2 UTF-16 code units, 4 UTF-8 bytes
+	tests := []struct {
+		name    string
+		kid     string
+		wantErr bool
+	}{
+		{"256 UTF-8 bytes (ascii)", strings.Repeat("a", 256), false},
+		{"257 UTF-8 bytes (ascii)", strings.Repeat("a", 257), true},
+		{"256 UTF-8 bytes (astral)", strings.Repeat(astral, 64), false},
+		{"512 UTF-8 bytes, 256 UTF-16 units (astral)", strings.Repeat(astral, 128), true},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			if got := len(tc.kid); (got > maxKidUTF8Bytes) != tc.wantErr {
+				t.Fatalf("fixture kid is %d UTF-8 bytes, inconsistent with wantErr=%v", got, tc.wantErr)
+			}
+			err := checkJOSEHardening([]byte(mkHeader(tc.kid)))
 			if (err != nil) != tc.wantErr {
 				t.Errorf("checkJOSEHardening() err = %v, wantErr %v", err, tc.wantErr)
 			}
