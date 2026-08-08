@@ -4,7 +4,7 @@
  */
 
 import { uuidv7 } from 'uuidv7';
-import { sign } from '@peac/crypto';
+import { sign, CryptoError } from '@peac/crypto';
 import { defaultCodec } from './_internal/record-core/codec/jws-jwt.js';
 import { runBoundedValidatorShadow } from './_internal/record-core/bounded-validator.js';
 import { runBoundedValidationGate } from './_internal/record-core/validation-gate.js';
@@ -138,7 +138,7 @@ export interface IssueWire01Options {
   /** Ed25519 private key (32 bytes) */
   privateKey: Uint8Array;
 
-  /** Key ID (ISO 8601 timestamp) */
+  /** Key ID; non-empty, well-formed Unicode, at most 256 UTF-8 bytes */
   kid: string;
 
   /** Telemetry hook (optional, fire-and-forget) */
@@ -171,6 +171,40 @@ export class IssueError extends Error {
     this.name = 'IssueError';
     this.peacError = peacError;
   }
+}
+
+/**
+ * Protocol code for a crypto signing failure at the issuance boundary.
+ *
+ * The signer enforces the I-JSON gate (RFC 7493) and the kid rule on the exact bytes it signs, so a
+ * claim value that passed schema validation but is not I-JSON, an out-of-range number, or an invalid
+ * kid is rejected there rather than emitted. These are the crypto codes reachable when serializing a
+ * well-formed claims object, mapped to the same protocol code the verifier reports for the identical
+ * raw bytes, so issuance and verification classify the failure the same way. A well-formed claims
+ * object cannot produce duplicate member names, but the mapping is complete for robustness. Any other
+ * crypto code (for example an invalid key length) falls back to the generic validation code; the
+ * original CryptoError is always retained as the cause.
+ */
+const CRYPTO_ISSUANCE_CODE_MAP: Record<string, string> = {
+  CRYPTO_JWS_MISSING_KID: 'E_JWS_MISSING_KID',
+  CRYPTO_IJSON_INVALID_STRING: 'E_IJSON_INVALID_STRING',
+  CRYPTO_IJSON_NUMBER_OUT_OF_RANGE: 'E_IJSON_NUMBER_OUT_OF_RANGE',
+  CRYPTO_IJSON_DUPLICATE_MEMBER_NAME: 'E_IJSON_DUPLICATE_MEMBER_NAME',
+};
+
+function issueErrorFromCryptoError(err: CryptoError): IssueError {
+  const code = CRYPTO_ISSUANCE_CODE_MAP[err.code] ?? 'E_INVALID_FORMAT';
+  const issueError = new IssueError({
+    code,
+    category: 'validation',
+    severity: 'error',
+    retryable: false,
+    http_status: 400,
+    details: { message: err.message },
+  } as PEACError);
+  // Retain the exact crypto classification for diagnostics without widening the public code surface.
+  (issueError as { cause?: unknown }).cause = err;
+  return issueError;
 }
 
 /**
@@ -560,8 +594,19 @@ export async function issueWire02(options: IssueWire02Options): Promise<IssueRes
   // Sign with Wire 0.2 via the internal codec boundary (always sets
   // typ: 'interaction-record+jwt'). Default codec is a pure pass-through
   // to @peac/crypto.signWire02; serialized output is byte-identical to
-  // the prior release.
-  const jws = await defaultCodec.encode(claims, options.privateKey, options.kid);
+  // the prior release. The signer enforces the raw-bytes I-JSON gate and
+  // the kid rule; present any such failure through the same structured
+  // IssueError surface as every other issuance failure rather than leaking
+  // a raw crypto error from this public API.
+  let jws: string;
+  try {
+    jws = await defaultCodec.encode(claims, options.privateKey, options.kid);
+  } catch (err) {
+    if (err instanceof CryptoError) {
+      throw issueErrorFromCryptoError(err);
+    }
+    throw err;
+  }
 
   // Shadow scheduling fires only on the rollback branch where the
   // bounded validator is genuinely a comparison path; under the
