@@ -92,6 +92,17 @@ type VerificationWarning struct {
 	Pointer string `json:"pointer,omitempty"`
 }
 
+// normalizeWire02Typ maps the accepted full media-type form of the Wire 0.2 typ to
+// the compact form by exact string match. Verifiers accept both forms; any other
+// value is returned unchanged. It does not parse content-type parameters, so a
+// parameterized value is not accepted.
+func normalizeWire02Typ(typ string) string {
+	if typ == InteractionRecordTypMediaType {
+		return InteractionRecordTyp
+	}
+	return typ
+}
+
 // VerifyLocal verifies a signed interaction record locally with a provided public key.
 //
 // Enforces the current stable Interaction Record format (interaction-record+jwt)
@@ -136,6 +147,12 @@ func VerifyLocal(receiptJWS string, opts VerifyLocalOptions) *VerifyLocalResult 
 		result.ErrorMessage = fmt.Sprintf("invalid JWS: %v", err)
 		return result
 	}
+
+	// Accept the full media-type form of the Wire 0.2 typ and normalize it to the
+	// compact form before any header validation, so both forms are treated identically
+	// and the decoded header carries the compact form. The match is exact: no
+	// content-type parameter parsing.
+	parsed.Header.Type = normalizeWire02Typ(parsed.Header.Type)
 
 	// Low-level header validation (typ-agnostic)
 	if err := jws.ValidateHeader(parsed.Header); err != nil {
