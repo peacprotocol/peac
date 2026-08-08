@@ -186,10 +186,29 @@ func Issue(opts IssueOptions) (*IssueResult, error) {
 		claims.Exp = opts.Exp
 	}
 
+	// Reject invalid UTF-8 in any caller-controlled claim string BEFORE marshaling, because
+	// encoding/json would silently replace it with U+FFFD and sign a mutated identifier. Run on the
+	// built claims so a caller-supplied receipt-ID generator is covered too.
+	if err := validateClaimUTF8(&claims); err != nil {
+		return nil, err
+	}
+
 	// Marshal and sign
 	payload, err := json.Marshal(claims)
 	if err != nil {
 		return nil, &IssueError{Code: ErrCodeSignFailed, Message: fmt.Sprintf("failed to marshal claims: %v", err)}
+	}
+
+	// Enforce the same raw-bytes I-JSON gate the verifier applies, on the exact bytes about to be
+	// signed. This is the sole gate for classes that survive marshaling as valid JSON: Unicode
+	// noncharacters and numbers whose magnitude exceeds the safe range. Without it the issuer could
+	// emit a payload its own VerifyLocal rejects.
+	if ijErr := assertIJSON(payload); ijErr != nil {
+		msg := ijErr.Error()
+		if ije, ok := ijErr.(*ijsonError); ok {
+			msg = ije.Code + ": " + ije.Msg
+		}
+		return nil, &IssueError{Code: ErrCodeNonIJSONPayload, Message: msg}
 	}
 
 	jwsString, err := opts.SigningKey.SignWithType(payload, InteractionRecordTyp)

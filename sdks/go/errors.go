@@ -24,4 +24,14 @@ const (
 	ErrCodeInvalidPillar = "INVALID_PILLAR"
 	ErrCodeSignFailed    = "SIGN_FAILED"
 	ErrCodeIDGenFailed   = "ID_GEN_FAILED"
+
+	// ErrCodeInvalidUTF8 indicates a caller-controlled claim string is not valid
+	// UTF-8. It is detected before json.Marshal, which would otherwise silently
+	// replace the invalid bytes with U+FFFD and sign a mutated identifier.
+	ErrCodeInvalidUTF8 = "INVALID_UTF8"
+
+	// ErrCodeNonIJSONPayload indicates the marshaled claims payload violates the
+	// raw-bytes I-JSON (RFC 7493) gate the verifier applies. The underlying
+	// canonical code (E_IJSON_*) is preserved in the message.
+	ErrCodeNonIJSONPayload = "NON_IJSON_PAYLOAD"
 )
