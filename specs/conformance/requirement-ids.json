@@ -804,9 +804,9 @@
         {
           "id": "WIRE02-JOSE-008",
           "keyword": "MUST NOT",
-          "summary": "kid MUST NOT exceed 256 characters",
-          "source_fragment": "`kid` MUST NOT exceed 256 characters (DoS safety).",
-          "source_fragment_hash": "sha256:0a2329aa89c09f8af6403f20ea63645a1f1d5de6a1f708f8540bcc1c54dcf42c",
+          "summary": "kid MUST NOT exceed 256 UTF-8 bytes",
+          "source_fragment": "`kid` MUST NOT exceed 256 UTF-8 bytes (DoS safety).",
+          "source_fragment_hash": "sha256:4657e698d1feea1a45ceac8561c38d75a8e4d82f2271f3823a2a41c548bf838a",
           "enforcement_class": "hard_fail",
           "introduced_in": "0.14.4",
           "last_reviewed_in": "0.16.3",

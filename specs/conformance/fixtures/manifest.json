@@ -452,7 +452,7 @@
     "invalid.json": {
       "description": "Wire 0.2 invalid receipt rejection vectors (DD-156)",
       "version": "0.12.7",
-      "fixture_count": 27
+      "fixture_count": 28
     },
     "warnings.json": {
       "description": "Wire 0.2 warning emission vectors (DD-155)",
@@ -492,7 +492,7 @@
     "jose/conformance.json": {
       "description": "Wire 0.2 JWS header constraints conformance vectors (Section 10, DD-164)",
       "version": "0.12.7",
-      "fixture_count": 13
+      "fixture_count": 15
     },
     "policy-binding/conformance.json": {
       "description": "Wire 0.2 policy binding conformance vectors (Section 11, DD-164)",

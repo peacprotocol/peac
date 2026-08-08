@@ -65,9 +65,10 @@ const KID_MAX_UTF8_BYTES = 256;
  *
  * The rule: a non-empty, well-formed Unicode string whose UTF-8 serialization is at most 256 bytes.
  * Length is measured in UTF-8 bytes because that is what bounds the serialized protected header;
- * counting UTF-16 code units admits a 256-unit astral kid that serializes to 1024 bytes. Lone
- * surrogates are rejected because they cannot be encoded, so a header carrying one is refused by the
- * I-JSON gate regardless.
+ * counting UTF-16 code units admits a 256-unit astral kid (128 code points) that serializes to 512
+ * bytes. Lone surrogates are rejected rather than silently replaced with U+FFFD during encoding,
+ * which would change the supplied identifier; a header carrying one is refused by the I-JSON gate
+ * regardless.
  */
 function isAcceptableKid(kid: unknown): kid is string {
   if (typeof kid !== 'string' || kid.length === 0) return false;

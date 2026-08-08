@@ -1,12 +1,12 @@
 {
   "$schema": "https://www.peacprotocol.org/schemas/conformance/inventory.schema.json",
-  "generated_at": "2026-07-20T22:43:44.911Z",
+  "generated_at": "2026-08-08T06:48:32.790Z",
   "version": "0.16.3",
   "schema_version": "0.16.3",
-  "total_fixtures": 688,
-  "total_with_requirements": 243,
+  "total_fixtures": 691,
+  "total_with_requirements": 246,
   "total_unmapped": 445,
-  "wire02_requirement_links": 553,
+  "wire02_requirement_links": 562,
   "carrier_requirement_links": 11,
   "entries": [
     {
@@ -4075,8 +4075,25 @@
     {
       "directory": "wire-02",
       "file": "invalid.json",
+      "fixture_name": "reject-kid-astral-512-utf8-bytes",
+      "description": "JWS header with a kid of 128 supplementary-plane code points (256 UTF-16 code units, 512 UTF-8 bytes) must be rejected; the UTF-8-byte bound, not a code-unit count, governs",
+      "primary_requirement_id": "WIRE02-JOSE-007",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-JOSE-007",
+        "WIRE02-JOSE-008",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005"
+      ],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02",
+      "file": "invalid.json",
       "fixture_name": "reject-kid-too-long",
-      "description": "JWS header with kid exceeding 256 characters must be rejected",
+      "description": "JWS header with kid exceeding 256 UTF-8 bytes must be rejected",
       "primary_requirement_id": "WIRE02-JOSE-007",
       "requirement_ids": [
         "WIRE02-ENV-023",
@@ -4400,7 +4417,17 @@
       "directory": "wire-02/jose",
       "file": "conformance.json",
       "fixture_name": "boundary-kid-256-chars",
-      "description": "kid at exactly 256 characters is accepted (boundary)",
+      "description": "kid at exactly 256 UTF-8 bytes (256 ASCII characters) is accepted (boundary)",
+      "primary_requirement_id": "WIRE02-JOSE-008",
+      "requirement_ids": ["WIRE02-JOSE-008", "WIRE02-JOSE-007"],
+      "status": "boundary",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/jose",
+      "file": "conformance.json",
+      "fixture_name": "boundary-kid-256-utf8-bytes-astral",
+      "description": "kid of 64 supplementary-plane code points (128 UTF-16 code units) is exactly 256 UTF-8 bytes and MUST be accepted; a character bound and a byte bound coincide here only under the UTF-8-byte unit",
       "primary_requirement_id": "WIRE02-JOSE-008",
       "requirement_ids": ["WIRE02-JOSE-008", "WIRE02-JOSE-007"],
       "status": "boundary",
@@ -4479,8 +4506,18 @@
     {
       "directory": "wire-02/jose",
       "file": "conformance.json",
+      "fixture_name": "reject-kid-256-code-units-512-utf8-bytes",
+      "description": "kid of 128 supplementary-plane code points is exactly 256 UTF-16 code units but 512 UTF-8 bytes; a code-unit-counting implementation accepts it, the byte rule MUST reject it",
+      "primary_requirement_id": "WIRE02-JOSE-008",
+      "requirement_ids": ["WIRE02-JOSE-008"],
+      "status": "negative",
+      "has_requirements": true
+    },
+    {
+      "directory": "wire-02/jose",
+      "file": "conformance.json",
       "fixture_name": "reject-kid-over-256",
-      "description": "kid exceeding 256 characters MUST be rejected",
+      "description": "kid exceeding 256 UTF-8 bytes MUST be rejected (257 ASCII bytes)",
       "primary_requirement_id": "WIRE02-JOSE-008",
       "requirement_ids": ["WIRE02-JOSE-008"],
       "status": "negative",

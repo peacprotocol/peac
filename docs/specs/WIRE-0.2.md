@@ -439,11 +439,11 @@ Wire 0.2 receipts are signed as compact JWS tokens (RFC 7515). The following JOS
 
 ### 10.1 Required Fields
 
-| Field | Value                    | Constraint                                                     |
-| ----- | ------------------------ | -------------------------------------------------------------- |
-| `alg` | `EdDSA`                  | Ed25519 only (RFC 8032); all other algorithms MUST be rejected |
-| `typ` | `interaction-record+jwt` | MUST be present in strict mode (Section 16)                    |
-| `kid` | string (1 to 256 chars)  | REQUIRED; identifies the signing key in the issuer JWKS        |
+| Field | Value                         | Constraint                                                     |
+| ----- | ----------------------------- | -------------------------------------------------------------- |
+| `alg` | `EdDSA`                       | Ed25519 only (RFC 8032); all other algorithms MUST be rejected |
+| `typ` | `interaction-record+jwt`      | MUST be present in strict mode (Section 16)                    |
+| `kid` | string (1 to 256 UTF-8 bytes) | REQUIRED; identifies the signing key in the issuer JWKS        |
 
 ### 10.2 Rejected Header Parameters
 
@@ -462,7 +462,7 @@ Presence of any of the following MUST cause a hard error:
 ### 10.3 kid Constraints
 
 - `kid` MUST be present and non-empty. Absent or empty `kid` produces `E_JWS_MISSING_KID`.
-- `kid` MUST NOT exceed 256 characters (DoS safety). Oversized `kid` also produces `E_JWS_MISSING_KID`.
+- `kid` MUST NOT exceed 256 UTF-8 bytes (DoS safety). Oversized `kid` also produces `E_JWS_MISSING_KID`.
 
 ### 10.4 JWS Size Cap
 
@@ -1236,7 +1236,7 @@ Implementations MUST perform steps in the order specified. A step that produces 
 ### 19.2 Validation Steps
 
 **Step 1: Verify JWS signature.**
-Decode the compact JWS and verify the Ed25519 signature against the provided `publicKey`. The `alg` header parameter MUST be `EdDSA`. Signature verification follows the PEAC Ed25519 verification profile (cofactorless; reject small-order public keys; reject a non-reduced scalar `S >= L`; 32-byte key, 64-byte signature), defined in `SECURITY-CONSIDERATIONS.md` Section 1 and cross-checked across the TypeScript and Go reference verifiers by the corpus at `specs/conformance/parity-corpus/ed25519-peac-profile/`. JOSE hardening checks are applied at this step: reject embedded keys (`jwk`, `x5c`, `x5u`, `jku`), reject `crit`, reject `b64: false`, reject `zip`, require `kid` (1 to 256 characters). Failure produces the corresponding `E_JWS_*` or `E_INVALID_SIGNATURE` error code.
+Decode the compact JWS and verify the Ed25519 signature against the provided `publicKey`. The `alg` header parameter MUST be `EdDSA`. Signature verification follows the PEAC Ed25519 verification profile (cofactorless; reject small-order public keys; reject a non-reduced scalar `S >= L`; 32-byte key, 64-byte signature), defined in `SECURITY-CONSIDERATIONS.md` Section 1 and cross-checked across the TypeScript and Go reference verifiers by the corpus at `specs/conformance/parity-corpus/ed25519-peac-profile/`. JOSE hardening checks are applied at this step: reject embedded keys (`jwk`, `x5c`, `x5u`, `jku`), reject `crit`, reject `b64: false`, reject `zip`, require `kid` (1 to 256 UTF-8 bytes). Failure produces the corresponding `E_JWS_*` or `E_INVALID_SIGNATURE` error code.
 
 **Step 2: Apply strictness routing.**
 Examine the decoded `typ` header parameter:
@@ -1393,7 +1393,7 @@ Wire 0.2 introduces the following error codes (in addition to existing Wire 0.1 
 | `E_WIRE_VERSION_MISMATCH`    | Wire Version Mismatch      | JWS `typ` and `peac_version` indicate different wire versions                                  |
 | `E_JWS_EMBEDDED_KEY`         | JWS Embedded Key Rejected  | JWS header contains embedded key material (`jwk`, `x5c`, `x5u`, or `jku`)                      |
 | `E_JWS_CRIT_REJECTED`        | JWS crit Header Rejected   | JWS header contains a `crit` field                                                             |
-| `E_JWS_MISSING_KID`          | JWS kid Missing or Invalid | JWS `kid` is absent, empty, or exceeds 256 characters                                          |
+| `E_JWS_MISSING_KID`          | JWS kid Missing or Invalid | JWS `kid` is absent, empty, or exceeds 256 UTF-8 bytes                                         |
 | `E_JWS_B64_REJECTED`         | JWS b64:false Rejected     | JWS header contains `b64:false` (unencoded payload)                                            |
 | `E_JWS_ZIP_REJECTED`         | JWS zip Header Rejected    | JWS header contains a `zip` compression field                                                  |
 | `E_INVALID_EXTENSION_KEY`    | Invalid Extension Key      | Extension key does not conform to the `<domain>/<segment>` grammar                             |

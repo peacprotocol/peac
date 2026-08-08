@@ -206,7 +206,7 @@
     },
     {
       "id": "jh-008-missing-kid",
-      "description": "Header omits kid; rejected because validateWire02Header requires non-empty kid (DoS-safe, max 256 chars). Replaces an earlier alg-rejection vector since alg validation lives in buildHeader, not validateWire02Header.",
+      "description": "Header omits kid; rejected because validateWire02Header requires non-empty kid (DoS-safe, max 256 UTF-8 bytes). Replaces an earlier alg-rejection vector since alg validation lives in buildHeader, not validateWire02Header.",
       "input": {
         "payload": {
           "peac_version": "0.2",

@@ -206,7 +206,7 @@ const REQUIREMENTS = [
   { section: 10, keyword: 'MUST', summary: 'b64:false MUST be rejected', source_fragment: '`b64` (value `false`) | `E_JWS_B64_REJECTED`', enforcement_class: 'hard_fail', error_code: 'E_JWS_B64_REJECTED' },
   { section: 10, keyword: 'MUST', summary: 'zip header MUST be rejected', source_fragment: '`zip`                 | `E_JWS_ZIP_REJECTED`', enforcement_class: 'hard_fail', error_code: 'E_JWS_ZIP_REJECTED' },
   { section: 10, keyword: 'MUST', summary: 'kid MUST be present and non-empty', source_fragment: '`kid` MUST be present and non-empty. Absent or empty `kid` produces `E_JWS_MISSING_KID`.', enforcement_class: 'hard_fail', error_code: 'E_JWS_MISSING_KID' },
-  { section: 10, keyword: 'MUST NOT', summary: 'kid MUST NOT exceed 256 characters', source_fragment: '`kid` MUST NOT exceed 256 characters (DoS safety).', enforcement_class: 'hard_fail', error_code: 'E_JWS_MISSING_KID' },
+  { section: 10, keyword: 'MUST NOT', summary: 'kid MUST NOT exceed 256 UTF-8 bytes', source_fragment: '`kid` MUST NOT exceed 256 UTF-8 bytes (DoS safety).', enforcement_class: 'hard_fail', error_code: 'E_JWS_MISSING_KID' },
   { section: 10, keyword: 'MUST NOT', summary: 'JWS compact serialization MUST NOT exceed 256 KB', source_fragment: 'The total JWS compact serialization MUST NOT exceed 262,144 bytes (256 KB).', enforcement_class: 'hard_fail', error_code: 'E_INVALID_FORMAT' },
 
   // ===== Section 11: Policy Binding =====
