@@ -6,10 +6,12 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
 
+	"github.com/peacprotocol/peac/sdks/go/internal/kid"
 	"github.com/peacprotocol/peac/sdks/go/jws"
 )
 
@@ -137,7 +139,15 @@ func VerifyLocal(receiptJWS string, opts VerifyLocalOptions) *VerifyLocalResult 
 
 	// Low-level header validation (typ-agnostic)
 	if err := jws.ValidateHeader(parsed.Header); err != nil {
-		result.ErrorCode = "E_INVALID_FORMAT"
+		// A missing or empty kid on a Wire 0.2 record is the profile's
+		// E_JWS_MISSING_KID; any other header defect, and a missing kid on a
+		// non-Wire-0.2 record, stays a generic format error. Gating on typ leaves the
+		// generic jws layer unchanged for other callers.
+		if parsed.Header.Type == InteractionRecordTyp && errors.Is(err, jws.ErrMissingKid) {
+			result.ErrorCode = "E_JWS_MISSING_KID"
+		} else {
+			result.ErrorCode = "E_INVALID_FORMAT"
+		}
 		result.ErrorMessage = fmt.Sprintf("invalid header: %v", err)
 		return result
 	}
@@ -148,6 +158,16 @@ func VerifyLocal(receiptJWS string, opts VerifyLocalOptions) *VerifyLocalResult 
 	if parsed.Header.Type != InteractionRecordTyp {
 		result.ErrorCode = "E_UNSUPPORTED_WIRE_VERSION"
 		result.ErrorMessage = fmt.Sprintf("expected typ %s, got %s", InteractionRecordTyp, parsed.Header.Type)
+		return result
+	}
+
+	// Wire 0.2 kid rule. The raw I-JSON gate above already rejected a malformed-UTF-8
+	// or noncharacter kid as E_IJSON_*, so a kid reaching here is well-formed and only
+	// the oversized case can fire (empty is handled above); it maps to the profile's
+	// E_JWS_MISSING_KID without remapping an earlier I-JSON failure.
+	if err := kid.Validate(parsed.Header.KeyID); err != nil {
+		result.ErrorCode = "E_JWS_MISSING_KID"
+		result.ErrorMessage = fmt.Sprintf("kid does not satisfy the Wire 0.2 profile: %v", err)
 		return result
 	}
 
