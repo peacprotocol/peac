@@ -202,7 +202,7 @@ function buildHeader(raw: Record<string, unknown>): JWSHeader {
  *
  * @param payload - JSON-serializable payload
  * @param privateKey - Ed25519 private key (32 bytes)
- * @param kid - Key ID (ISO 8601 timestamp)
+ * @param kid - Key ID; non-empty, well-formed Unicode, at most 256 UTF-8 bytes (see kid.ts)
  * @returns JWS compact serialization (header.payload.signature)
  */
 /**

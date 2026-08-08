@@ -4,9 +4,12 @@
  * The verifier applies the RFC 7493 I-JSON gate to the decoded header and payload bytes (Wire 0.2
  * Section 10.6). The signer must apply the identical gate to the exact bytes it signs, so that a
  * PEAC signing API can never emit a compact JWS its own verifier rejects as non-I-JSON. These tests
- * assert rejection happens at issuance (the thrown code is a serialization-stage code, raised before
- * Ed25519 signing) and that a successful sign always clears the verifier's raw I-JSON gate. Non-ASCII
- * inputs are written with explicit escapes so their code points do not depend on file encoding.
+ * assert that non-admissible input is rejected during segment serialization/validation, with the
+ * exact stable code for each case, and that any JWS a signer does emit is admitted by the verifier
+ * AND carries a valid Ed25519 signature. The rejection code identifies which validation stage
+ * refused the input; the tests do not instrument the signer and make no claim about signing calls.
+ * Non-ASCII inputs are written with explicit escapes so their code points do not depend on file
+ * encoding.
  */
 import { describe, it, expect, beforeAll } from 'vitest';
 import { sign, signWire02, verify, generateKeypair } from '../src/jws';
@@ -21,15 +24,6 @@ const payload = {
   jti: 'issuance-ijson-001',
 } as const;
 
-// Codes raised while serializing/validating a segment, i.e. strictly before Ed25519 signing.
-const PRE_SIGN_CODES = new Set([
-  'CRYPTO_IJSON_INVALID_STRING',
-  'CRYPTO_IJSON_DUPLICATE_MEMBER_NAME',
-  'CRYPTO_IJSON_NUMBER_OUT_OF_RANGE',
-  'CRYPTO_INVALID_JWS_FORMAT',
-  'CRYPTO_JWS_MISSING_KID',
-]);
-
 let privateKey: Uint8Array;
 let publicKey: Uint8Array;
 beforeAll(async () => {
@@ -40,61 +34,88 @@ const NONCHAR_FDD0 = '\uFDD0';
 const NONCHAR_FFFF = '\uFFFF';
 const LONE_SURROGATE = '\uD800';
 
-async function expectPreSignRejection(run: () => Promise<unknown>): Promise<void> {
+/**
+ * Assert that issuance is refused during segment serialization/validation with an EXACT code. An
+ * allow-set would let a regression take the wrong rejection path and still pass, so every vector
+ * pins the one code the current implementation is confirmed to raise.
+ */
+async function expectIssuanceRejection(
+  run: () => Promise<unknown>,
+  expectedCode: string
+): Promise<void> {
   try {
     await run();
   } catch (err) {
     expect(err).toBeInstanceOf(CryptoError);
-    expect(PRE_SIGN_CODES.has((err as CryptoError).code), `code ${(err as CryptoError).code}`).toBe(
-      true
-    );
+    expect((err as CryptoError).code).toBe(expectedCode);
     return;
   }
-  throw new Error('expected issuance to reject, but it succeeded');
+  throw new Error(`expected issuance to reject with ${expectedCode}, but it succeeded`);
 }
 
-describe('valid issuance still signs, verifies, and clears the I-JSON gate', () => {
+describe('valid issuance signs, is admitted by the verifier, and has a valid signature', () => {
   it('ordinary ASCII kid', async () => {
-    await expect(
-      verify(await signWire02(payload, privateKey, 'key-1'), publicKey)
-    ).resolves.toBeDefined();
+    const result = await verify(await signWire02(payload, privateKey, 'key-1'), publicKey);
+    expect(result.valid).toBe(true);
   });
 
   it('supplementary-plane kid within 256 UTF-8 bytes', async () => {
     const jws = await signWire02(payload, privateKey, '\u{1F600}'.repeat(4));
-    await expect(verify(jws, publicKey)).resolves.toBeDefined();
+    const result = await verify(jws, publicKey);
+    expect(result.valid).toBe(true);
   });
 
   it('payload with a well-formed non-ASCII string', async () => {
     const jws = await signWire02({ ...payload, jti: 'r\u00e9f-\u{1F600}' }, privateKey, 'key-1');
-    await expect(verify(jws, publicKey)).resolves.toBeDefined();
+    const result = await verify(jws, publicKey);
+    expect(result.valid).toBe(true);
   });
 });
 
-describe('non-I-JSON issuance is rejected at the serialization stage', () => {
-  // The thrown code is raised while serializing/validating the segment, i.e. by serializeIJsonSegment,
-  // which runs before ed25519 signing. That is asserted through the code, not by claiming zero calls.
+describe('non-I-JSON issuance is rejected during segment serialization/validation', () => {
+  // A noncharacter reaches the kid header and is refused by the I-JSON string gate; a lone surrogate
+  // is refused earlier by the kid rule (an unpaired surrogate is not well-formed Unicode), which is
+  // why the two kid cases carry different codes.
   it('kid containing a U+FDD0 noncharacter', () =>
-    expectPreSignRejection(() => signWire02(payload, privateKey, `k${NONCHAR_FDD0}`)));
+    expectIssuanceRejection(
+      () => signWire02(payload, privateKey, `k${NONCHAR_FDD0}`),
+      'CRYPTO_IJSON_INVALID_STRING'
+    ));
   it('kid containing a U+FFFF noncharacter', () =>
-    expectPreSignRejection(() => signWire02(payload, privateKey, `k${NONCHAR_FFFF}`)));
+    expectIssuanceRejection(
+      () => signWire02(payload, privateKey, `k${NONCHAR_FFFF}`),
+      'CRYPTO_IJSON_INVALID_STRING'
+    ));
   it('kid containing a lone surrogate', () =>
-    expectPreSignRejection(() => signWire02(payload, privateKey, `k${LONE_SURROGATE}`)));
+    expectIssuanceRejection(
+      () => signWire02(payload, privateKey, `k${LONE_SURROGATE}`),
+      'CRYPTO_JWS_MISSING_KID'
+    ));
   it('payload string containing a noncharacter', () =>
-    expectPreSignRejection(() =>
-      signWire02({ ...payload, jti: `x${NONCHAR_FDD0}` }, privateKey, 'key-1')
+    expectIssuanceRejection(
+      () => signWire02({ ...payload, jti: `x${NONCHAR_FDD0}` }, privateKey, 'key-1'),
+      'CRYPTO_IJSON_INVALID_STRING'
     ));
   it('payload string containing a lone surrogate', () =>
-    expectPreSignRejection(() =>
-      signWire02({ ...payload, jti: `x${LONE_SURROGATE}` }, privateKey, 'key-1')
+    expectIssuanceRejection(
+      () => signWire02({ ...payload, jti: `x${LONE_SURROGATE}` }, privateKey, 'key-1'),
+      'CRYPTO_IJSON_INVALID_STRING'
     ));
   it('Wire 0.1 payload containing a noncharacter', () =>
-    expectPreSignRejection(() => sign({ x: `y${NONCHAR_FDD0}` }, privateKey, 'key-1')));
+    expectIssuanceRejection(
+      () => sign({ x: `y${NONCHAR_FDD0}` }, privateKey, 'key-1'),
+      'CRYPTO_IJSON_INVALID_STRING'
+    ));
 
-  it('payload number outside the I-JSON interoperable range is rejected', async () => {
-    // 2^53 exceeds MAX_SAFE_INTEGER; assertIJson rejects it, so the signer must too. This proves the
-    // gate is the whole I-JSON contract, not a Unicode-only check. The verifier rejects the same.
-    await expectPreSignRejection(() => sign({ n: 9007199254740992 }, privateKey, 'key-1'));
+  it('payload number outside the PEAC safe-numeric-range admission rule is rejected', async () => {
+    // 2^53 exceeds MAX_SAFE_INTEGER. PEAC's existing raw JSON/I-JSON admission gate hard-rejects it
+    // (RFC 7493 recommends SHOULD NOT beyond binary64 interoperability; PEAC is stricter), so the
+    // signer must too. This proves the gate is the whole admission contract, not a Unicode-only
+    // check. The verifier rejects the identical bytes with the same code.
+    await expectIssuanceRejection(
+      () => sign({ n: 9007199254740992 }, privateKey, 'key-1'),
+      'CRYPTO_IJSON_NUMBER_OUT_OF_RANGE'
+    );
   });
 
   it('a payload that cannot be serialized to JSON text is rejected', async () => {
@@ -112,7 +133,7 @@ describe('non-I-JSON issuance is rejected at the serialization stage', () => {
       },
     });
     // JSON.stringify returns no text (undefined/function/symbol) or throws (BigInt, cyclic, a
-    // throwing toJSON or getter). All map to a stable code with no engine or caller text leaked.
+    // throwing toJSON or getter). All map to one stable code with no engine or caller text leaked.
     const bad: unknown[] = [
       undefined,
       () => {},
@@ -123,7 +144,10 @@ describe('non-I-JSON issuance is rejected at the serialization stage', () => {
       throwingGetter,
     ];
     for (const value of bad) {
-      await expectPreSignRejection(() => sign(value, privateKey, 'key-1'));
+      await expectIssuanceRejection(
+        () => sign(value, privateKey, 'key-1'),
+        'CRYPTO_INVALID_JWS_FORMAT'
+      );
     }
   });
 });
@@ -150,14 +174,12 @@ describe('byte identity for accepted inputs', () => {
 });
 
 describe('round-trip invariant', () => {
-  it('every JWS a signer emits clears the verifier raw I-JSON gate', async () => {
+  it('every JWS a signer emits is admitted by the verifier with a valid signature', async () => {
     const kids = ['a', 'key-1', '\u00e9', '\u{1F600}'.repeat(4), 'a'.repeat(256)];
     for (const kid of kids) {
       const jws = await signWire02(payload, privateKey, kid);
-      await expect(
-        verify(jws, publicKey),
-        `kid ${JSON.stringify(kid).slice(0, 20)}`
-      ).resolves.toBeDefined();
+      const result = await verify(jws, publicKey);
+      expect(result.valid, `kid ${JSON.stringify(kid).slice(0, 20)}`).toBe(true);
     }
   });
 });
