@@ -204,6 +204,45 @@ describe('the committed runtime observations', () => {
     }
   });
 
+  it('the runtime-JS build inputs match the measurement revision', () => {
+    // A behavioural corpus pass does not prove the build configuration is unchanged: a build-config
+    // change can alter the emitted wrapper. Bind the first-party runtime-JS build inputs to the
+    // measurement revision so a build change (for example tsup.config.ts) fails applicability closed.
+    // These files are byte-identical at the measurement revision, so this is an exact drift check,
+    // not a rewrite of provenance. (Transitive bundler versions and the measurement-tool helper
+    // closure are recorded as follow-ups: the helper evolved after the measurement revision and so
+    // cannot be pinned to it without a false failure.)
+    const revision = document.measurement_source_revision;
+    const buildConfig = fileAtRevision(REPO_ROOT, revision, 'packages/crypto/tsup.config.ts');
+    if (buildConfig === null) {
+      // Shallow clones and source archives cannot resolve the recorded revision.
+      expect(
+        process.env.PEAC_REQUIRE_PROVENANCE_HISTORY,
+        `revision ${revision} is not resolvable here; audit the build inputs from a full-history checkout`
+      ).toBeUndefined();
+      return;
+    }
+    expect(
+      sha256(readRepositoryFile(REPO_ROOT, 'packages/crypto/tsup.config.ts')),
+      'tsup.config.ts drift from the measurement revision'
+    ).toBe(sha256(buildConfig));
+
+    // Only the build-script projection of package.json is causally relevant to the emitted JS; the
+    // rest (version, description) is not, and must not invalidate evidence.
+    const buildScripts = (buf: Buffer): string => {
+      const pkg = JSON.parse(buf.toString('utf8')) as { scripts?: Record<string, string> };
+      return JSON.stringify({
+        build: pkg.scripts?.build,
+        'build:js': pkg.scripts?.['build:js'],
+      });
+    };
+    const historicalPkg = fileAtRevision(REPO_ROOT, revision, 'packages/crypto/package.json');
+    expect(
+      buildScripts(readRepositoryFile(REPO_ROOT, 'packages/crypto/package.json')),
+      'crypto build-script projection drift from the measurement revision'
+    ).toBe(buildScripts(historicalPkg as Buffer));
+  });
+
   it('the built ed25519Verify decides the corpus as recorded, through the public export', async () => {
     // Known-answer check on the BUILT public wrapper: re-pointing the alias, or a build change that
     // alters the decision, is caught behaviourally here. Requires the package to be built.
