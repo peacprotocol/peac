@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/peacprotocol/peac/sdks/go/evidence"
+	"github.com/peacprotocol/peac/sdks/go/internal/kid"
 	"github.com/peacprotocol/peac/sdks/go/jws"
 )
 
@@ -25,7 +26,10 @@ type IssueOptions struct {
 	// SigningKey for Ed25519 signing (required).
 	SigningKey *jws.SigningKey
 
-	// Kid is the key identifier for the JWS header (required).
+	// Kid is an optional key identifier for the JWS header.
+	//
+	// Deprecated: the signing key's own key ID is authoritative. Leave Kid empty,
+	// or set it equal to SigningKey.KeyID(); a conflicting value is rejected.
 	Kid string
 
 	// Sub is the optional subject URI.
@@ -128,12 +132,20 @@ func Issue(opts IssueOptions) (*IssueResult, error) {
 		return nil, &IssueError{Code: ErrCodeMissingKey, Message: "signing key is required", Field: "SigningKey"}
 	}
 
-	kid := opts.Kid
-	if kid == "" {
-		kid = opts.SigningKey.KeyID()
+	// Wire 0.2 kid contract. The signing key's own key ID is authoritative. An
+	// explicit IssueOptions.Kid must be empty (use the key ID) or equal to it; a
+	// conflicting value is rejected rather than silently ignored. The authoritative
+	// key ID is then validated against the Wire 0.2 kid rule before emission, so the
+	// issuer never signs a kid its own verifier would reject.
+	authoritativeKid := opts.SigningKey.KeyID()
+	if authoritativeKid == "" {
+		return nil, &IssueError{Code: ErrCodeMissingKid, Message: "signing key has no key ID", Field: "SigningKey"}
 	}
-	if kid == "" {
-		return nil, &IssueError{Code: ErrCodeMissingKid, Message: "kid is required", Field: "Kid"}
+	if opts.Kid != "" && opts.Kid != authoritativeKid {
+		return nil, &IssueError{Code: ErrCodeKeyIDMismatch, Message: "Kid conflicts with the signing key's key ID; leave it empty or set it equal", Field: "Kid"}
+	}
+	if err := kid.Validate(authoritativeKid); err != nil {
+		return nil, &IssueError{Code: ErrCodeInvalidKeyID, Message: fmt.Sprintf("signing key ID is not a valid Wire 0.2 kid: %v", err), Field: "SigningKey"}
 	}
 
 	// Validate pillars if provided
@@ -143,9 +155,12 @@ func Issue(opts IssueOptions) (*IssueResult, error) {
 		}
 	}
 
+	// Resolve the effective evidence limits once so extension validation and the extension UTF-8
+	// walk below share one authoritative node ceiling instead of a second hard-coded value.
+	limits := opts.EvidenceLimits.WithDefaults()
+
 	// Validate extensions if provided
 	if opts.Extensions != nil {
-		limits := opts.EvidenceLimits.WithDefaults()
 		if err := evidence.ValidateValue(opts.Extensions, limits); err != nil {
 			return nil, &IssueError{Code: ErrCodeInvalidType, Message: fmt.Sprintf("extension validation failed: %v", err), Field: "Extensions"}
 		}
@@ -186,10 +201,30 @@ func Issue(opts IssueOptions) (*IssueResult, error) {
 		claims.Exp = opts.Exp
 	}
 
+	// Reject invalid UTF-8 in any caller-controlled claim string before marshaling, because
+	// encoding/json would silently replace it with U+FFFD and sign a mutated identifier. Run on the
+	// built claims so a caller-supplied receipt-ID generator is covered too, and share the resolved
+	// node ceiling so the extension walk does not impose a second, unrelated limit.
+	if err := validateClaimUTF8(&claims, limits.MaxTotalNodes); err != nil {
+		return nil, err
+	}
+
 	// Marshal and sign
 	payload, err := json.Marshal(claims)
 	if err != nil {
 		return nil, &IssueError{Code: ErrCodeSignFailed, Message: fmt.Sprintf("failed to marshal claims: %v", err)}
+	}
+
+	// Enforce the PEAC raw JSON/I-JSON admission profile the verifier applies, on the exact bytes
+	// about to be signed. This is the sole gate for classes that survive marshaling as valid JSON:
+	// Unicode noncharacters and numbers outside the safe numeric range. Without it the issuer could
+	// emit a payload its own VerifyLocal rejects.
+	if ijErr := assertIJSON(payload); ijErr != nil {
+		msg := ijErr.Error()
+		if ije, ok := ijErr.(*ijsonError); ok {
+			msg = ije.Code + ": " + ije.Msg
+		}
+		return nil, &IssueError{Code: ErrCodeInvalidJSONProfile, Message: msg}
 	}
 
 	jwsString, err := opts.SigningKey.SignWithType(payload, InteractionRecordTyp)

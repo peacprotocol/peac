@@ -6,10 +6,12 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
 
+	"github.com/peacprotocol/peac/sdks/go/internal/kid"
 	"github.com/peacprotocol/peac/sdks/go/jws"
 )
 
@@ -90,6 +92,44 @@ type VerificationWarning struct {
 	Pointer string `json:"pointer,omitempty"`
 }
 
+// normalizeWire02Typ maps either accepted Wire 0.2 typ spelling, the compact form or
+// the full media-type form, to the canonical compact form. The comparison is
+// case-insensitive ASCII string equality; it does not parse content-type parameters
+// or normalize whitespace, so a parameterized or whitespace-padded value is not
+// accepted. Any other value is returned unchanged and rejected by the later typ check.
+func normalizeWire02Typ(typ string) string {
+	if asciiEqualFold(typ, InteractionRecordTyp) || asciiEqualFold(typ, InteractionRecordTypMediaType) {
+		return InteractionRecordTyp
+	}
+	return typ
+}
+
+// asciiEqualFold reports whether a and b are equal under ASCII case folding: equal
+// length, every byte in the ASCII range, with A-Z folded to a-z. It is deliberately
+// ASCII-only, not Unicode case folding (strings.EqualFold), because the Wire 0.2 typ
+// comparison is defined over ASCII; a non-ASCII byte never matches.
+func asciiEqualFold(a, b string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := 0; i < len(a); i++ {
+		ca, cb := a[i], b[i]
+		if ca >= 0x80 || cb >= 0x80 {
+			return false
+		}
+		if 'A' <= ca && ca <= 'Z' {
+			ca += 'a' - 'A'
+		}
+		if 'A' <= cb && cb <= 'Z' {
+			cb += 'a' - 'A'
+		}
+		if ca != cb {
+			return false
+		}
+	}
+	return true
+}
+
 // VerifyLocal verifies a signed interaction record locally with a provided public key.
 //
 // Enforces the current stable Interaction Record format (interaction-record+jwt)
@@ -135,9 +175,23 @@ func VerifyLocal(receiptJWS string, opts VerifyLocalOptions) *VerifyLocalResult 
 		return result
 	}
 
+	// Accept the full media-type form of the Wire 0.2 typ and normalize it to the
+	// compact form before any header validation, so both forms are treated identically
+	// and the decoded header carries the compact form. The match is exact: no
+	// content-type parameter parsing.
+	parsed.Header.Type = normalizeWire02Typ(parsed.Header.Type)
+
 	// Low-level header validation (typ-agnostic)
 	if err := jws.ValidateHeader(parsed.Header); err != nil {
-		result.ErrorCode = "E_INVALID_FORMAT"
+		// A missing or empty kid on a Wire 0.2 record is the profile's
+		// E_JWS_MISSING_KID; any other header defect, and a missing kid on a
+		// non-Wire-0.2 record, stays a generic format error. Gating on typ leaves the
+		// generic jws layer unchanged for other callers.
+		if parsed.Header.Type == InteractionRecordTyp && errors.Is(err, jws.ErrMissingKid) {
+			result.ErrorCode = "E_JWS_MISSING_KID"
+		} else {
+			result.ErrorCode = "E_INVALID_FORMAT"
+		}
 		result.ErrorMessage = fmt.Sprintf("invalid header: %v", err)
 		return result
 	}
@@ -148,6 +202,16 @@ func VerifyLocal(receiptJWS string, opts VerifyLocalOptions) *VerifyLocalResult 
 	if parsed.Header.Type != InteractionRecordTyp {
 		result.ErrorCode = "E_UNSUPPORTED_WIRE_VERSION"
 		result.ErrorMessage = fmt.Sprintf("expected typ %s, got %s", InteractionRecordTyp, parsed.Header.Type)
+		return result
+	}
+
+	// Wire 0.2 kid rule. The raw I-JSON gate above already rejected a malformed-UTF-8
+	// or noncharacter kid as E_IJSON_*, so a kid reaching here is well-formed and only
+	// the oversized case can fire (empty is handled above); it maps to the profile's
+	// E_JWS_MISSING_KID without remapping an earlier I-JSON failure.
+	if err := kid.Validate(parsed.Header.KeyID); err != nil {
+		result.ErrorCode = "E_JWS_MISSING_KID"
+		result.ErrorMessage = fmt.Sprintf("kid does not satisfy the Wire 0.2 profile: %v", err)
 		return result
 	}
 

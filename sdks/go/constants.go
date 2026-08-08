@@ -3,6 +3,11 @@ package peac
 // InteractionRecordTyp is the JWS typ header for Interaction Record format.
 const InteractionRecordTyp = "interaction-record+jwt"
 
+// InteractionRecordTypMediaType is the full media-type form of the Wire 0.2 typ.
+// Verifiers accept it and normalize it to the compact InteractionRecordTyp; issuers
+// emit the compact form and MUST NOT emit this one.
+const InteractionRecordTypMediaType = "application/interaction-record+jwt"
+
 // PeacVersion is the PEAC protocol version for Interaction Record format.
 const PeacVersion = "0.2"
 

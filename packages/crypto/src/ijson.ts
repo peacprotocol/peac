@@ -5,21 +5,28 @@
  * JSON parsers can collapse duplicate object member names, round or overflow
  * numeric values, or substitute invalid string data before higher-level
  * validation sees the original bytes. The gate also classifies string-level
- * syntax failures consistently at the raw boundary. It rejects, per I-JSON
- * (RFC 7493):
+ * syntax failures consistently at the raw boundary. It rejects:
  *
  *   - duplicate object member names  -> collapsed by JSON.parse (last wins)
  *     => CRYPTO_IJSON_DUPLICATE_MEMBER_NAME
- *   - numbers that are non-finite OR whose absolute magnitude exceeds 2^53-1
- *     (incl. large finite floats) -> rounded/overflowed by JSON.parse
- *     => CRYPTO_IJSON_NUMBER_OUT_OF_RANGE
+ *     RFC 7493 makes unique member names a MUST.
  *   - invalid string content: lone surrogates or noncharacters (directly encoded
  *     or in \u escapes), invalid escape sequences, or invalid UTF-8 bytes
  *     inside a string => CRYPTO_IJSON_INVALID_STRING
+ *     RFC 7493 makes well-formed Unicode strings (no unpaired surrogates, no
+ *     noncharacters) a MUST.
+ *   - numbers that are non-finite OR whose absolute magnitude exceeds 2^53-1
+ *     (incl. large finite floats) -> rounded/overflowed by JSON.parse
+ *     => CRYPTO_IJSON_NUMBER_OUT_OF_RANGE
+ *     This is PEAC's stricter numeric admission rule, not an RFC 7493 MUST: RFC
+ *     7493 says senders SHOULD NOT emit numbers beyond binary64 interoperability
+ *     and warns that integers beyond +/-(2^53-1) cannot be relied on to retain
+ *     exact value. PEAC hard-rejects that range at the raw boundary so a value
+ *     the recipient cannot reproduce exactly never enters a signed record.
  *
- * Escaped solidus ("\/") is valid I-JSON and MUST be accepted. String-encoded
- * large integers (inside quotes) are accepted. Valid surrogate PAIRS are
- * accepted. The numeric bound is exactly 9007199254740991 (= MAX_SAFE_INTEGER).
+ * Escaped solidus ("\/") is valid JSON and is accepted. String-encoded large
+ * integers (inside quotes) are accepted. Valid surrogate PAIRS are accepted. The
+ * numeric admission bound is exactly 9007199254740991 (= MAX_SAFE_INTEGER).
  *
  * This is a strict single-pass JSON parser operating on the RAW BYTES (it does
  * NOT pre-decode the whole document, so it can distinguish invalid UTF-8 INSIDE
