@@ -205,7 +205,7 @@
     },
     {
       "name": "boundary-kid-256-chars",
-      "description": "kid at exactly 256 characters is accepted (boundary)",
+      "description": "kid at exactly 256 UTF-8 bytes (256 ASCII characters) is accepted (boundary)",
       "type": "jws-security",
       "primary_requirement_id": "WIRE02-JOSE-008",
       "requirement_ids": ["WIRE02-JOSE-008", "WIRE02-JOSE-007"],
@@ -229,7 +229,7 @@
     },
     {
       "name": "reject-kid-over-256",
-      "description": "kid exceeding 256 characters MUST be rejected",
+      "description": "kid exceeding 256 UTF-8 bytes MUST be rejected (257 ASCII bytes)",
       "type": "jws-security",
       "primary_requirement_id": "WIRE02-JOSE-008",
       "requirement_ids": ["WIRE02-JOSE-008"],
@@ -324,6 +324,55 @@
       "expected": {
         "valid": false,
         "error_code": "E_JWS_EMBEDDED_KEY"
+      }
+    },
+    {
+      "name": "boundary-kid-256-utf8-bytes-astral",
+      "description": "kid of 64 supplementary-plane code points (128 UTF-16 code units) is exactly 256 UTF-8 bytes and MUST be accepted; a character bound and a byte bound coincide here only under the UTF-8-byte unit",
+      "type": "jws-security",
+      "primary_requirement_id": "WIRE02-JOSE-008",
+      "requirement_ids": ["WIRE02-JOSE-008", "WIRE02-JOSE-007"],
+      "status": "boundary",
+      "input": {
+        "header_overrides": {
+          "kid": "\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00"
+        },
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "jose-boundary-002"
+        }
+      },
+      "expected": {
+        "valid": true
+      }
+    },
+    {
+      "name": "reject-kid-256-code-units-512-utf8-bytes",
+      "description": "kid of 128 supplementary-plane code points is exactly 256 UTF-16 code units but 512 UTF-8 bytes; a code-unit-counting implementation accepts it, the byte rule MUST reject it",
+      "type": "jws-security",
+      "primary_requirement_id": "WIRE02-JOSE-008",
+      "requirement_ids": ["WIRE02-JOSE-008"],
+      "status": "negative",
+      "input": {
+        "header_overrides": {
+          "kid": "\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00"
+        },
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "jose-invalid-009"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_JWS_MISSING_KID"
       }
     }
   ]

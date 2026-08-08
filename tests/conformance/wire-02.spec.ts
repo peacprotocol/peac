@@ -148,7 +148,7 @@ describe('Wire 0.2 Conformance: fixture hygiene', () => {
 
   it('invalid.json: fixture count matches manifest', () => {
     const file = loadWire02Fixtures('invalid.json');
-    expect(file.fixtures.length).toBe(27);
+    expect(file.fixtures.length).toBe(28);
   });
 
   it('warnings.json: fixture count matches manifest', () => {

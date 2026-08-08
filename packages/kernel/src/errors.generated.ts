@@ -559,7 +559,7 @@ export const ERRORS: Record<string, ErrorDefinition> = {
     http_status: 400,
     title: 'JWS kid Missing or Invalid',
     description:
-      'JWS header kid field is absent, empty, or exceeds the maximum allowed length (256 characters)',
+      'JWS header kid field is absent, empty, or exceeds the maximum allowed length (256 UTF-8 bytes)',
     retryable: false,
     next_action: 'abort',
     category: 'cryptography',

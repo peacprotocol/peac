@@ -28,7 +28,8 @@ export function isWellFormedUnicode(s: string): boolean {
 
 /**
  * UTF-8 byte length of a well-formed string. Throws on malformed UTF-16 rather than returning a
- * number, so a caller cannot accept a string on length grounds when it cannot be encoded at all.
+ * number, so a caller cannot accept a string on length grounds when encoding would silently replace
+ * an unpaired surrogate with U+FFFD and change the supplied identifier.
  */
 export function utf8ByteLength(s: string): number {
   let n = 0;

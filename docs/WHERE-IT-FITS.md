@@ -8,13 +8,13 @@ For every comparison below the same sentence holds: **the other system defines t
 
 Logs and traces correlate activity inside one organization's systems. They are designed for observability and debugging.
 
-| Property              | Logs / traces / OTel                    | PEAC records                                  |
-| --------------------- | --------------------------------------- | --------------------------------------------- |
-| Scope                 | Local to one system                     | Portable across organizational boundaries     |
-| Verifier              | Needs access to the system's log store  | Any party with the issuer's public key        |
-| Authenticity          | Trust the storage system                | Ed25519 signature over canonical JWS          |
-| Survives org boundary | No (unless exported, and then unsigned) | Yes                                           |
-| Tamper-evident        | No                                      | Yes (signature over JCS-canonicalized claims) |
+| Property              | Logs / traces / OTel                    | PEAC records                                    |
+| --------------------- | --------------------------------------- | ----------------------------------------------- |
+| Scope                 | Local to one system                     | Portable across organizational boundaries       |
+| Verifier              | Needs access to the system's log store  | Any party with the issuer's public key          |
+| Authenticity          | Trust the storage system                | Ed25519 signature over JCS-canonicalized claims |
+| Survives org boundary | No (unless exported, and then unsigned) | Yes                                             |
+| Tamper-evident        | No                                      | Yes (signature over JCS-canonicalized claims)   |
 
 PEAC is complementary to observability, not a replacement. `receipt_ref` is emitted as an OTel span attribute so traces can point at receipts without carrying the JWS inline. Use your existing OTel / Datadog / Langfuse stack for internal visibility; add PEAC when another party needs proof.
 
