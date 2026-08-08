@@ -392,12 +392,21 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # Full history so the Ed25519 runtime-observation applicability gates can resolve the
+          # measurement source revision instead of silently skipping.
+          fetch-depth: 0
       - uses: ./.github/actions/setup-env
 
       - name: Build all packages
         run: pnpm build
 
       - name: Core tests
+        # Fail closed rather than skip: require the measurement-revision history and the built
+        # artifact so the build-input drift and built-export known-answer gates always run.
+        env:
+          PEAC_REQUIRE_PROVENANCE_HISTORY: '1'
+          PEAC_REQUIRE_BUILT_ARTIFACT: '1'
         run: pnpm test:core
 
       - name: Schema meta-validation

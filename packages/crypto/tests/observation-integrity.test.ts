@@ -209,9 +209,9 @@ describe('the committed runtime observations', () => {
     // change can alter the emitted wrapper. Bind the first-party runtime-JS build inputs to the
     // measurement revision so a build change (for example tsup.config.ts) fails applicability closed.
     // These files are byte-identical at the measurement revision, so this is an exact drift check,
-    // not a rewrite of provenance. (Transitive bundler versions and the measurement-tool helper
-    // closure are recorded as follow-ups: the helper evolved after the measurement revision and so
-    // cannot be pinned to it without a false failure.)
+    // not a rewrite of provenance. This assertion binds the first-party runtime-JS build
+    // configuration; transitive build-tool versions and measurement-tool helper source history are
+    // outside it.
     const revision = document.measurement_source_revision;
     const buildConfig = fileAtRevision(REPO_ROOT, revision, 'packages/crypto/tsup.config.ts');
     if (buildConfig === null) {
