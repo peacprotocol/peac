@@ -6,8 +6,9 @@
  */
 import { describe, it, expect } from 'vitest';
 import Ajv2020 from 'ajv/dist/2020.js';
-import { readFileSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { existsSync, readFileSync } from 'node:fs';
+import { join, resolve, dirname, relative } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import {
   CORPUS_PATH,
   LOCKFILE_PATH,
@@ -163,32 +164,86 @@ describe('the committed runtime observations', () => {
     }
   });
 
-  it('scopes current applicability to the measured Ed25519 surface', () => {
-    // The measured surface is the Ed25519 verification decision, not the whole crypto package.
-    expect(PRODUCTION_SOURCES).toContain('packages/crypto/src/ed25519.ts');
-    expect(PRODUCTION_SOURCES).toContain('packages/crypto/src/internal/ed25519-admissibility.ts');
-    // The JWS/signing layer is outside the measured surface: a change there must not invalidate
-    // Ed25519 applicability, and it is not a named production source.
-    expect(PRODUCTION_SOURCES).not.toContain('packages/crypto/src/jws.ts');
+  // The measured browser wrapper imports the public `ed25519Verify` alias. Applicability must fail
+  // closed on any change to the verify decision surface reached through that alias, and stay green
+  // for unrelated package code. The three checks below bind that surface behaviourally rather than
+  // by asserting membership of a hand-curated list.
 
-    const base = productionSourceManifestDigest(REPO_ROOT, PRODUCTION_SOURCES);
-    // Every named production source binds: dropping one changes the manifest, so an ed25519.ts or
-    // admissibility.ts change does invalidate applicability.
-    for (let i = 0; i < PRODUCTION_SOURCES.length; i++) {
-      const without = PRODUCTION_SOURCES.filter((_, j) => j !== i);
-      expect(
-        productionSourceManifestDigest(REPO_ROOT, without),
-        `dropping ${PRODUCTION_SOURCES[i]} must change the manifest`
-      ).not.toBe(base);
+  it('binds the exported ed25519Verify to the measured verify implementation', async () => {
+    // Re-pointing the export glue in src/index.ts changes the measured wrapper while leaving the
+    // production source manifest untouched, so the alias identity itself is asserted.
+    const [index, ed25519] = await Promise.all([import('../src/index'), import('../src/ed25519')]);
+    expect(index.ed25519Verify, 'ed25519Verify is the ed25519 verify implementation').toBe(
+      ed25519.verify
+    );
+  });
+
+  it('names every first-party source reachable from the verify implementation', () => {
+    // Derive the first-party closure statically from the verify entrypoint so a new import cannot
+    // silently drop out of the attestation. The export glue (src/index.ts) is bound by the identity
+    // test above and is not a byte-attested implementation source.
+    const SRC = join(REPO_ROOT, 'packages/crypto/src') + '/';
+    const seen = new Set<string>();
+    const walk = (absFile: string): void => {
+      const rel = relative(REPO_ROOT, absFile).replace(/\\/g, '/');
+      if (seen.has(rel)) return;
+      seen.add(rel);
+      for (const m of readFileSync(absFile, 'utf8').matchAll(/from\s+'(\.[^']+)'/g)) {
+        let target = resolve(dirname(absFile), m[1]);
+        if (!target.endsWith('.ts')) target += '.ts';
+        if (existsSync(target) && (target + '/').startsWith(SRC)) walk(target);
+      }
+    };
+    walk(join(REPO_ROOT, 'packages/crypto/src/ed25519.ts'));
+    const closure = [...seen].sort();
+    for (const f of closure) {
+      expect(PRODUCTION_SOURCES, `${f} is reachable from verify but not attested`).toContain(f);
     }
-    // A file outside the measured surface would change the manifest only if it were named; its
-    // exclusion is what keeps unrelated package changes from invalidating the evidence.
-    expect(
-      productionSourceManifestDigest(REPO_ROOT, [
-        ...PRODUCTION_SOURCES,
-        'packages/crypto/src/jws.ts',
-      ])
-    ).not.toBe(base);
+    for (const f of PRODUCTION_SOURCES) {
+      expect(closure, `${f} is attested but not in the verify closure`).toContain(f);
+    }
+  });
+
+  it('the built ed25519Verify decides the corpus as recorded, through the public export', async () => {
+    // Known-answer check on the BUILT public wrapper: re-pointing the alias, or a build change that
+    // alters the decision, is caught behaviourally here. Requires the package to be built.
+    const distPath = join(CRYPTO_ROOT, 'dist', 'index.mjs');
+    if (!existsSync(distPath)) {
+      expect(
+        process.env.PEAC_REQUIRE_BUILT_ARTIFACT,
+        'dist/index.mjs is absent; build @peac/crypto before asserting the known-answer decisions'
+      ).toBeUndefined();
+      return;
+    }
+    const { ed25519Verify } = (await import(pathToFileURL(distPath).href)) as {
+      ed25519Verify: (s: Uint8Array, m: Uint8Array, k: Uint8Array) => Promise<boolean>;
+    };
+    const corpus = JSON.parse(readFileSync(join(CORPUS_DIR, 'vectors.json'), 'utf8')) as {
+      vectors: {
+        id: string;
+        description: string;
+        message_hex: string;
+        public_key_hex: string;
+        signature_hex: string;
+        peac_expected: { accepted: boolean | null };
+      }[];
+    };
+    const hex = (s: string) => Uint8Array.from(Buffer.from(s, 'hex'));
+    let acceptedSeen = false;
+    let rejectedSeen = false;
+    for (const v of corpus.vectors) {
+      if (typeof v.peac_expected.accepted !== 'boolean') continue;
+      const got = await ed25519Verify(
+        hex(v.signature_hex),
+        hex(v.message_hex),
+        hex(v.public_key_hex)
+      );
+      expect(got, `${v.id}: ${v.description}`).toBe(v.peac_expected.accepted);
+      acceptedSeen ||= v.peac_expected.accepted;
+      rejectedSeen ||= !v.peac_expected.accepted;
+    }
+    // Both outcomes must be exercised, so neither a constant-true nor a constant-false wrapper passes.
+    expect(acceptedSeen && rejectedSeen, 'corpus exercises both accept and reject').toBe(true);
   });
 
   it('does not claim to recompute the wrapper bundle', () => {
