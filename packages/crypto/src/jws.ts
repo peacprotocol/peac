@@ -16,7 +16,7 @@ import {
   PEAC_ALG,
   VERIFIER_LIMITS,
 } from '@peac/kernel';
-import { base64urlEncode, base64urlDecode, base64urlEncodeString } from './base64url';
+import { base64urlEncode, base64urlDecode } from './base64url';
 import { CryptoError } from './errors';
 import { assertIJson } from './ijson';
 import { isValidKid, MAX_KID_UTF8_BYTES } from './kid';
@@ -205,6 +205,35 @@ function buildHeader(raw: Record<string, unknown>): JWSHeader {
  * @param kid - Key ID (ISO 8601 timestamp)
  * @returns JWS compact serialization (header.payload.signature)
  */
+/**
+ * Serialize one JWS segment (header or payload) to the exact bytes that will be signed, enforcing
+ * I-JSON (RFC 7493) on those bytes before they leave the signer. The verifier applies the same
+ * `assertIJson` contract to the decoded segment bytes (Wire 0.2 Section 10.6), so validating the
+ * identical serialized bytes here keeps issuance and verification symmetric: a signer cannot emit a
+ * header or payload whose raw bytes its own verifier would reject as non-I-JSON. Encoding the same
+ * validated bytes (rather than re-serializing) leaves the signing input for valid inputs unchanged.
+ */
+function serializeIJsonSegment(value: unknown): Uint8Array {
+  let json: string | undefined;
+  try {
+    // JSON.stringify can throw: a BigInt or a circular structure raises TypeError, and a `toJSON`
+    // method or property getter can run arbitrary caller code that throws. Map any such failure to a
+    // stable code; the engine or caller exception text is not surfaced. (JSON.stringify may execute
+    // user code, so serialization is not promised to be side-effect-free.)
+    json = JSON.stringify(value);
+  } catch {
+    throw new CryptoError('CRYPTO_INVALID_JWS_FORMAT', 'JWS segment is not JSON-serializable');
+  }
+  if (typeof json !== 'string') {
+    throw new CryptoError('CRYPTO_INVALID_JWS_FORMAT', 'JWS segment is not JSON-serializable');
+  }
+  const bytes = new TextEncoder().encode(json);
+  // Not wrapped in try/catch: assertIJson raises the stable CRYPTO_IJSON_* codes the verifier also
+  // raises on the same bytes, and those must propagate unchanged.
+  assertIJson(bytes);
+  return bytes;
+}
+
 export async function sign(payload: unknown, privateKey: Uint8Array, kid: string): Promise<string> {
   if (privateKey.length !== 32) {
     throw new CryptoError('CRYPTO_INVALID_KEY_LENGTH', 'Ed25519 private key must be 32 bytes');
@@ -224,8 +253,8 @@ export async function sign(payload: unknown, privateKey: Uint8Array, kid: string
     kid,
   };
 
-  const headerB64 = base64urlEncodeString(JSON.stringify(header));
-  const payloadB64 = base64urlEncodeString(JSON.stringify(payload));
+  const headerB64 = base64urlEncode(serializeIJsonSegment(header));
+  const payloadB64 = base64urlEncode(serializeIJsonSegment(payload));
 
   const signingInput = `${headerB64}.${payloadB64}`;
   const signingInputBytes = new TextEncoder().encode(signingInput);
@@ -276,8 +305,8 @@ export async function signWire02(
     kid,
   };
 
-  const headerB64 = base64urlEncodeString(JSON.stringify(header));
-  const payloadB64 = base64urlEncodeString(JSON.stringify(payload));
+  const headerB64 = base64urlEncode(serializeIJsonSegment(header));
+  const payloadB64 = base64urlEncode(serializeIJsonSegment(payload));
 
   const signingInput = `${headerB64}.${payloadB64}`;
   const signingInputBytes = new TextEncoder().encode(signingInput);
