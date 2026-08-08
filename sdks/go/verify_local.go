@@ -92,6 +92,44 @@ type VerificationWarning struct {
 	Pointer string `json:"pointer,omitempty"`
 }
 
+// normalizeWire02Typ maps either accepted Wire 0.2 typ spelling, the compact form or
+// the full media-type form, to the canonical compact form. The comparison is
+// case-insensitive ASCII string equality; it does not parse content-type parameters
+// or normalize whitespace, so a parameterized or whitespace-padded value is not
+// accepted. Any other value is returned unchanged and rejected by the later typ check.
+func normalizeWire02Typ(typ string) string {
+	if asciiEqualFold(typ, InteractionRecordTyp) || asciiEqualFold(typ, InteractionRecordTypMediaType) {
+		return InteractionRecordTyp
+	}
+	return typ
+}
+
+// asciiEqualFold reports whether a and b are equal under ASCII case folding: equal
+// length, every byte in the ASCII range, with A-Z folded to a-z. It is deliberately
+// ASCII-only, not Unicode case folding (strings.EqualFold), because the Wire 0.2 typ
+// comparison is defined over ASCII; a non-ASCII byte never matches.
+func asciiEqualFold(a, b string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := 0; i < len(a); i++ {
+		ca, cb := a[i], b[i]
+		if ca >= 0x80 || cb >= 0x80 {
+			return false
+		}
+		if 'A' <= ca && ca <= 'Z' {
+			ca += 'a' - 'A'
+		}
+		if 'A' <= cb && cb <= 'Z' {
+			cb += 'a' - 'A'
+		}
+		if ca != cb {
+			return false
+		}
+	}
+	return true
+}
+
 // VerifyLocal verifies a signed interaction record locally with a provided public key.
 //
 // Enforces the current stable Interaction Record format (interaction-record+jwt)
@@ -136,6 +174,12 @@ func VerifyLocal(receiptJWS string, opts VerifyLocalOptions) *VerifyLocalResult 
 		result.ErrorMessage = fmt.Sprintf("invalid JWS: %v", err)
 		return result
 	}
+
+	// Accept the full media-type form of the Wire 0.2 typ and normalize it to the
+	// compact form before any header validation, so both forms are treated identically
+	// and the decoded header carries the compact form. The match is exact: no
+	// content-type parameter parsing.
+	parsed.Header.Type = normalizeWire02Typ(parsed.Header.Type)
 
 	// Low-level header validation (typ-agnostic)
 	if err := jws.ValidateHeader(parsed.Header); err != nil {
