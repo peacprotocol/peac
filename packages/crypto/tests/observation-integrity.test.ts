@@ -6,12 +6,11 @@
  */
 import { describe, it, expect } from 'vitest';
 import Ajv2020 from 'ajv/dist/2020.js';
-import { existsSync, readFileSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import {
   CORPUS_PATH,
   LOCKFILE_PATH,
-  MEASURED_ARTIFACT_PATH,
   PRODUCTION_SOURCES,
   fileAtRevision,
   fileDigest,
@@ -147,23 +146,49 @@ describe('the committed runtime observations', () => {
     }
   });
 
-  it('recomputes the measured artifact digest when the package has been built', () => {
-    // The artifact exists only after a build; its absence is reported rather than passing.
-    const artifact = join(REPO_ROOT, MEASURED_ARTIFACT_PATH);
+  it('treats the measured artifact digest as historical provenance, not a current-tree lock', () => {
+    // measured_artifact_sha256 records the complete built package artifact that existed at the
+    // measurement revision. Unrelated package code (for example the JWS layer) legitimately changes
+    // the built crypto bundle without changing the measured Ed25519 decision surface, so this digest
+    // is provenance and is not asserted against the current build. Current applicability is governed
+    // by the production source manifest and measurement dependencies checked above.
     const wrappers = Object.entries(document.environments).filter(
       ([, e]) => e.surface === 'peac-wrapper'
     );
-    if (!existsSync(artifact)) {
-      expect(
-        process.env.PEAC_REQUIRE_BUILT_ARTIFACT,
-        `${MEASURED_ARTIFACT_PATH} is absent; run the build before asserting the artifact digest`
-      ).toBeUndefined();
-      return;
-    }
-    const expected = fileDigest(REPO_ROOT, MEASURED_ARTIFACT_PATH);
+    expect(wrappers.length, 'wrapper environments are present').toBeGreaterThan(0);
     for (const [id, environment] of wrappers) {
-      expect(environment.measured_artifact_sha256, `${id}: measured artifact`).toBe(expected);
+      expect(environment.measured_artifact_sha256, `${id}: measured artifact provenance`).toMatch(
+        /^[0-9a-f]{64}$/
+      );
     }
+  });
+
+  it('scopes current applicability to the measured Ed25519 surface', () => {
+    // The measured surface is the Ed25519 verification decision, not the whole crypto package.
+    expect(PRODUCTION_SOURCES).toContain('packages/crypto/src/ed25519.ts');
+    expect(PRODUCTION_SOURCES).toContain('packages/crypto/src/internal/ed25519-admissibility.ts');
+    // The JWS/signing layer is outside the measured surface: a change there must not invalidate
+    // Ed25519 applicability, and it is not a named production source.
+    expect(PRODUCTION_SOURCES).not.toContain('packages/crypto/src/jws.ts');
+
+    const base = productionSourceManifestDigest(REPO_ROOT, PRODUCTION_SOURCES);
+    // Every named production source binds: dropping one changes the manifest, so an ed25519.ts or
+    // admissibility.ts change does invalidate applicability.
+    for (let i = 0; i < PRODUCTION_SOURCES.length; i++) {
+      const without = PRODUCTION_SOURCES.filter((_, j) => j !== i);
+      expect(
+        productionSourceManifestDigest(REPO_ROOT, without),
+        `dropping ${PRODUCTION_SOURCES[i]} must change the manifest`
+      ).not.toBe(base);
+    }
+    // A file outside the measured surface would change the manifest only if it were named; its
+    // exclusion is what keeps unrelated package changes from invalidating the evidence.
+    expect(
+      productionSourceManifestDigest(REPO_ROOT, [
+        ...PRODUCTION_SOURCES,
+        'packages/crypto/src/jws.ts',
+      ])
+    ).not.toBe(base);
   });
 
   it('does not claim to recompute the wrapper bundle', () => {
