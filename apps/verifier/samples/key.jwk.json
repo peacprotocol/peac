@@ -1,0 +1,6 @@
+{
+  "kty": "OKP",
+  "crv": "Ed25519",
+  "x": "GHtHQEy_GOU4gMBNOo165OzccTDulD5bvvBHl79qxlM",
+  "kid": "sample-key-1"
+}

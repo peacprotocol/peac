@@ -30,6 +30,27 @@ pnpm --filter @peac/app-verifier build
   expectations are claim constraints, not trust anchors.
 - Reports are deterministic and unsigned; identical verification inputs and evaluation time produce byte-identical reports.
 
+## Try it with the sample record
+
+The `samples/` directory holds a static, ready-to-use record and key, so you can verify without
+generating your own. Paste each file's contents exactly; surrounding whitespace is rejected.
+
+1. **A valid record.** Paste `samples/record.jws` into "PEAC record" and `samples/key.jwk.json` into
+   "Public key", then choose Verify. The result is accepted, in integrity-only mode.
+2. **A tampered record.** Replace the record with `samples/record-tampered.jws` and verify again.
+   Verification fails at the signature stage with `E_INVALID_SIGNATURE`: a single changed byte is
+   detected.
+3. **A trusted key.** Add `samples/context-trust-match.json` to "Verification expectations" and
+   verify the valid record again. The mode becomes trusted-key: the supplied thumbprint matched the
+   selected key. `samples/context-trust-mismatch.json` names a different thumbprint and is rejected
+   at the trusted-key stage.
+4. **A report.** On any completed run, choose "Download report" to save the deterministic, unsigned
+   verification report.
+
+A valid signature establishes that the record was signed by the key you supplied and has not changed
+since. It does not establish that the key or its holder is trustworthy, or that the statements in the
+record are true.
+
 ## Browser support and validation
 
 | Category                        | Coverage                                                            |

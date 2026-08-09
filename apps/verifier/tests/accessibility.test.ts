@@ -174,3 +174,36 @@ describe('state announcement and focus', () => {
     expect(status.textContent).toBe('');
   });
 });
+
+describe('input errors bind to the offending field', () => {
+  const ariaInvalid = (n: MiniNode): string | undefined => {
+    try {
+      return n.getAttribute('aria-invalid');
+    } catch {
+      return undefined;
+    }
+  };
+
+  it('flags the key field on a key input failure and clears it on change', async () => {
+    const root = await mount(async () => ({
+      ok: false,
+      failureStage: 'input',
+      code: 'E_VERIFIER_KEY_JSON_INVALID',
+      message: 'The public key document is not valid JSON.',
+    }));
+    // Textareas render in DOM order: record, key, context.
+    const textareas = root.querySelectorAll('textarea');
+    const button = findByText(root, 'button', /verify/i) as MiniNode;
+
+    button.dispatchEvent('click');
+    await flush();
+    await flush();
+    expect(ariaInvalid(textareas[1])).toBe('true');
+    expect(ariaInvalid(textareas[0])).toBeUndefined();
+    expect(ariaInvalid(textareas[2])).toBeUndefined();
+
+    textareas[1].value = 'x';
+    textareas[1].dispatchEvent('input');
+    expect(ariaInvalid(textareas[1])).toBeUndefined();
+  });
+});

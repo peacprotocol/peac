@@ -150,9 +150,36 @@ export async function initApp(root: HTMLElement): Promise<void> {
     button.disabled = running || fields.hasPendingRead();
   }
 
+  const inputTextareas = [fields.record, fields.keyDocument, fields.contextDocument];
+
+  function clearFieldValidity(): void {
+    for (const ta of inputTextareas) ta.removeAttribute('aria-invalid');
+  }
+
+  // Bind an input-stage failure to the field the operator can act on, so assistive technology
+  // reports the error on that control. Only pre-key-selection stages map to a field; later stages
+  // are about the record's content or the supplied expectations, not a malformed input to correct.
+  function markFieldValidity(result: Awaited<ReturnType<LocalVerifier['verify']>>): void {
+    clearFieldValidity();
+    if (result.ok || !('failureStage' in result)) return;
+    if (result.failureStage !== 'input' && result.failureStage !== 'key_selection') return;
+    const code = String(result.code);
+    const target = code.startsWith('E_VERIFIER_RECORD_')
+      ? fields.record
+      : code.startsWith('E_VERIFIER_KEY_') ||
+          code.startsWith('E_VERIFIER_JWKS_') ||
+          code.startsWith('E_VERIFIER_PRIVATE_KEY_')
+        ? fields.keyDocument
+        : code.startsWith('E_VERIFIER_CONTEXT_')
+          ? fields.contextDocument
+          : undefined;
+    target?.setAttribute('aria-invalid', 'true');
+  }
+
   function clearOutputs(): void {
     results.replaceChildren();
     renderReport(undefined, reportPanel);
+    clearFieldValidity();
   }
 
   function showRunFailure(): void {
@@ -164,6 +191,8 @@ export async function initApp(root: HTMLElement): Promise<void> {
     // Clear any report from a previous run: leaving it visible beside a failure invites reading it
     // as the outcome of this one.
     renderReport(undefined, reportPanel);
+    // An unexpected failure is not an input the operator can correct; do not flag a field.
+    clearFieldValidity();
   }
 
   fields.onChange(() => {
@@ -200,6 +229,7 @@ export async function initApp(root: HTMLElement): Promise<void> {
         if (token !== runToken || revision !== fields.revision()) return;
         renderResults(result, results);
         renderReport(result.report, reportPanel);
+        markFieldValidity(result);
         // Announce the outcome and move focus to the result region, so a keyboard or screen-reader
         // user lands on what changed rather than hunting for it. Focus moves only on a current run.
         status.textContent = result.ok ? 'Verification succeeded.' : 'Verification failed.';
