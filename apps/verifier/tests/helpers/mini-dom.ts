@@ -34,6 +34,7 @@ export interface MiniNode {
   querySelector(sel: string): MiniNode | undefined;
   querySelectorAll(sel: string): MiniNode[];
   setAttribute(name: string, value: string): void;
+  removeAttribute(name: string): void;
   tabIndex?: number;
   className?: string;
   focus(): void;
@@ -50,6 +51,9 @@ function node(tagName: string): MiniNode {
     childNodes: [],
     setAttribute(name, value) {
       attrs.set(name, value);
+    },
+    removeAttribute(name) {
+      attrs.delete(name);
     },
     focus() {},
     appendChild(n) {

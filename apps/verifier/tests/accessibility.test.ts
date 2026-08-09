@@ -174,3 +174,52 @@ describe('state announcement and focus', () => {
     expect(status.textContent).toBe('');
   });
 });
+
+describe('input errors bind to the offending field', () => {
+  const ariaInvalid = (n: MiniNode): string | undefined => {
+    try {
+      return n.getAttribute('aria-invalid');
+    } catch {
+      return undefined;
+    }
+  };
+
+  const describedBy = (n: MiniNode): string[] =>
+    (n.getAttribute('aria-describedby') ?? '').split(/\s+/).filter(Boolean);
+
+  it('binds the input error to the offending field and clears it on change', async () => {
+    const root = await mount(async () => ({
+      ok: false,
+      failureStage: 'input',
+      code: 'E_VERIFIER_KEY_JSON_INVALID',
+      message: 'The public key document is not valid JSON.',
+    }));
+    // Textareas render in DOM order: record, key, context.
+    const textareas = root.querySelectorAll('textarea');
+    const key = textareas[1];
+    const button = findByText(root, 'button', /verify/i) as MiniNode;
+
+    button.dispatchEvent('click');
+    await flush();
+    await flush();
+
+    // The key field is invalid, keeps its permanent hint, and points at the error message.
+    expect(ariaInvalid(key)).toBe('true');
+    expect(describedBy(key)).toContain('key-hint');
+    expect(describedBy(key)).toContain('verification-input-error');
+    expect(byAttr(root, 'p', 'id', 'verification-input-error')).toBeDefined();
+
+    // Unrelated fields are neither invalid nor described by the error.
+    for (const other of [textareas[0], textareas[2]]) {
+      expect(ariaInvalid(other)).toBeUndefined();
+      expect(describedBy(other)).not.toContain('verification-input-error');
+    }
+
+    // Changing the field clears the flag and the error description, keeping the hint.
+    key.value = 'x';
+    key.dispatchEvent('input');
+    expect(ariaInvalid(key)).toBeUndefined();
+    expect(describedBy(key)).toContain('key-hint');
+    expect(describedBy(key)).not.toContain('verification-input-error');
+  });
+});

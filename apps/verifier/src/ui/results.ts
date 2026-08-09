@@ -8,6 +8,13 @@
 import type { BrowserVerificationResult, UiMode } from '../lib/verifier-types.js';
 import { formatClaims } from '../lib/format-claims.js';
 
+/**
+ * Stable id of the message for an input-stage failure, so the field the operator can correct can
+ * reference the concrete error through aria-describedby. Only input and key-selection failures carry
+ * it; later stages describe the record's content, not a malformed input.
+ */
+export const INPUT_ERROR_MESSAGE_ID = 'verification-input-error';
+
 const MODE_COPY: Record<UiMode, string> = {
   'integrity-only':
     'The signature is valid under the supplied key. The verifier did not independently establish that this key was expected for the reported issuer.',
@@ -67,7 +74,12 @@ export function renderResults(result: BrowserVerificationResult, container: HTML
   // Failure: code and a neutral message only. No claims, no stack, no raw key, no echoed record.
   container.className = 'result--fail';
   container.appendChild(el('h2', 'Verification failed'));
-  container.appendChild(el('p', result.message));
+  const message = el('p', result.message);
+  // Give an input-stage error message a stable id so the offending field can point at it.
+  if (result.failureStage === 'input' || result.failureStage === 'key_selection') {
+    message.id = INPUT_ERROR_MESSAGE_ID;
+  }
+  container.appendChild(message);
   const d = el('dl');
   row(d, 'Stage', result.failureStage);
   row(d, 'Code', String(result.code));
