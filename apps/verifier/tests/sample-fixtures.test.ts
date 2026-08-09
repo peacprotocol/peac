@@ -33,14 +33,16 @@ const verifier = await initializeLocalVerifier({ verifierBuild: 'test-build' });
 describe('committed sample fixtures back the public verifier walkthrough', () => {
   it('the sample record verifies under its key (integrity-only)', async () => {
     const r = await verifier.verify({ record, keyDocument, ...base });
-    expect(r.ok).toBe(true);
-    if (r.ok) expect(r.mode).toBe('integrity-only');
+    expect(r).toMatchObject({ ok: true, mode: 'integrity-only' });
   });
 
   it('the tampered sample record is rejected at the signature', async () => {
     const r = await verifier.verify({ record: tampered, keyDocument, ...base });
-    expect(r.ok).toBe(false);
-    if (!r.ok && 'code' in r) expect(r.code).toBe('E_INVALID_SIGNATURE');
+    expect(r).toMatchObject({
+      ok: false,
+      failureStage: 'signature',
+      code: 'E_INVALID_SIGNATURE',
+    });
   });
 
   it('the trust-match context yields the trusted-key mode', async () => {
@@ -50,8 +52,7 @@ describe('committed sample fixtures back the public verifier walkthrough', () =>
       contextDocument: contextTrustMatch,
       ...base,
     });
-    expect(r.ok).toBe(true);
-    if (r.ok) expect(r.mode).toBe('trusted-key');
+    expect(r).toMatchObject({ ok: true, mode: 'trusted-key' });
   });
 
   it('the trust-mismatch context is rejected at the trusted-key stage', async () => {
@@ -61,10 +62,10 @@ describe('committed sample fixtures back the public verifier walkthrough', () =>
       contextDocument: contextTrustMismatch,
       ...base,
     });
-    expect(r.ok).toBe(false);
-    if (!r.ok && 'failureStage' in r) {
-      expect(r.failureStage).toBe('trusted_key');
-      expect(r.code).toBe('E_VERIFIER_TRUSTED_KEY_MISMATCH');
-    }
+    expect(r).toMatchObject({
+      ok: false,
+      failureStage: 'trusted_key',
+      code: 'E_VERIFIER_TRUSTED_KEY_MISMATCH',
+    });
   });
 });
