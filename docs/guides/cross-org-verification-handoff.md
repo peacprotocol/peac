@@ -1,18 +1,18 @@
 # Cross-organization verification handoff
 
-A PEAC record is a signed, self-contained JWS. One organization issues it; another organization
-verifies it locally, without calling back to the issuer, without an account, and without any shared
-online service. This guide walks through that handoff end to end and states precisely what a
+A Wire 0.2 PEAC record is carried as a signed compact JWS. The recipient verifies it locally using
+independently supplied public-key material, with no issuer callback, no account, and no shared online
+verification service. This guide walks through that handoff end to end and states precisely what a
 successful verification does and does not establish.
 
 The shape is always the same: **organization A issues a record and shares it, along with the public
-key, with organization B; organization B verifies it locally.** Nothing in the middle needs to be
-online.
+key, with organization B; organization B verifies it locally.** Verification requires no issuer
+callback or shared online verification service.
 
 ## 1. Organization A issues a record and exports the public key
 
 Records are produced with `issue()` from `@peac/protocol` (see [`docs/VERIFY.md`](../VERIFY.md) for
-the library form). The signing (private) key never leaves organization A. What A shares is:
+the library form). The signing (private) key is not part of the handoff. What A shares is:
 
 - the **compact record** (a JWS string), and
 - the **public key** as a JWK or a JWKS (never the private key).
@@ -25,19 +25,23 @@ pnpm dlx @peac/cli samples generate -o ./s
 # ./s/bundles/sandbox-jwks.json   the public JWKS
 ```
 
-A ready-made pair also ships with the browser verifier under
+The repository includes a ready-made pair under
 [`apps/verifier/samples/`](../../apps/verifier/samples/): `record.jws` and `key.jwk.json`.
 
 ## 2. Organization A transfers the record and key to organization B
 
-Send the record and the public key over any channel: an email attachment, a ticket, a file drop, a
-message. Neither is secret; the security of the handoff does not depend on the transport, because
-verification checks the signature, not the channel.
+Transfer the record and public key using a channel appropriate to the information being exchanged and
+the organizations' requirements. The public key is not secret, but a signed record is not encrypted
+merely because it is a JWS. Signature verification detects changes to the record relative to the
+supplied key; it does not establish how that key reached organization B or whether it is the expected
+key. Transfer the compact JWS byte for byte: whitespace or line-ending normalization that changes the
+supplied string will cause it to be rejected.
 
-If organization B intends to check that the record was signed by a **specific expected key** (not
-merely any key A supplies alongside the record), A also communicates the key's RFC 7638 JWK
-thumbprint **out of band** so B can pin it. That thumbprint is the only independent trust anchor;
-see step 4.
+If organization B needs to establish that the supplied key is the expected key (not merely a key A
+sent alongside the record), B obtains or confirms the expected RFC 7638 JWK thumbprint independently
+of the record-and-key handoff, for example through pre-established configuration, a previously
+recorded expected thumbprint, or a separately authenticated channel. B then supplies that value as a
+trust anchor; see step 4.
 
 ## 3. Organization B verifies locally
 
@@ -66,28 +70,32 @@ matches the public key I used, and is it unchanged?_ It does not answer _should 
 Those are kept deliberately separate. In the browser verifier, organization B can supply a
 **verification context** (a `VerificationContextV1` document) alongside the record and key:
 
-- a **trusted JWK thumbprint** is the only independent trust anchor. When B supplies the thumbprint it
-  obtained out of band in step 2 and it matches the selected key, the result is reported as
-  trusted-key rather than integrity-only.
-- **expected issuer**, **allowed key ids**, and **allowed record types** are claim constraints over
-  values inside the record. They are useful routing and policy checks, but they are attacker-
-  controllable payload values, not trust anchors.
+- Within the browser verifier's current `VerificationContextV1` model, an independently established
+  **trusted JWK thumbprint** is the supported trust-anchor input. When B supplies the thumbprint it
+  confirmed independently in step 2 and it matches the selected key, the result is reported as
+  trusted-key rather than integrity-only. The thumbprint identifies the key; its trust comes from B's
+  independent provenance decision, not from the thumbprint format itself.
+- **expected issuer**, **allowed key ids**, and **allowed record types** are record-supplied signed
+  or protected values. They constrain what organization B accepts, but they do not independently
+  establish key provenance and are not trust anchors.
 
 Supplying no context is a valid, integrity-only verification: the signature is checked, and the
 result says plainly that the key was not independently established as expected.
 
 ## 5. Tamper is detected
 
-Change any byte of the record and verify again. Verification fails at the signature stage with
-`E_INVALID_SIGNATURE`: the record no longer matches the signature. The browser verifier ships a
-`record-tampered.jws` sample that demonstrates exactly this.
+For the included `record-tampered.jws` example, which changes a byte in the signature segment,
+verification fails at the signature stage with `E_INVALID_SIGNATURE`: the record no longer matches
+the signature. More generally, any modification to a record is rejected when it violates the checks
+the verifier applies; depending on what changed, that may be the signature check or an earlier
+structural, encoding, or content check.
 
 ## 6. A deterministic report
 
 The browser verifier can export a deterministic, unsigned verification report for a completed run.
-The same inputs and evaluation time produce a byte-identical report, and its hash makes it
-reproducible and tamper-evident against a retained reference. The report records the outcome; it does
-not, on its own, establish who produced it.
+Given identical verification inputs and evaluation time, the report is byte-identical, so a
+separately retained report hash can be used to detect later changes. The unsigned report records the
+verification outcome; it does not establish who produced the report.
 
 ## What a successful verification establishes, and what it does not
 
