@@ -51,6 +51,8 @@ PEAC records evidence from commerce protocols without executing payments. `payme
 | x402                                          | `@peac/adapter-x402`         | Offer/receipt verification, v1/v2 read             |
 | UCP                                           | `@peac/mappings-ucp`         | Order-vs-payment separation                        |
 
+Some packages listed above are workspace-only surfaces, not published install targets. Install only packages in the active publish manifest; see the [package catalog](#package-catalog) note and [`docs/PACKAGE_STATUS.md`](PACKAGE_STATUS.md) for install status.
+
 See [Commerce Evidence Spec](specs/COMMERCE-EVIDENCE.md) and [Commerce Semantics](specs/COMMERCE-SEMANTICS.md) for boundary rules.
 
 ### Identity and transport integrations
@@ -175,14 +177,14 @@ See [examples/x402-node-server](../examples/x402-node-server) for a working impl
 
 Portable, offline-verifiable evidence packages for disputes, audits, and cross-org handoffs.
 
-A bundle contains receipts, policy snapshots, and a deterministic verification report: everything needed to prove what happened without trusting either party's internal logs.
+A bundle carries signed records, the public keys needed to verify them, policy snapshots, and a signed manifest, so another party can verify the contained evidence without relying on either party's private logs. It does not independently establish that the reported underlying events occurred, were complete, or were factually true.
 
 ```bash
 peac bundle create --receipts ./receipts.ndjson --policy ./policy.yaml --output ./evidence.peacbundle
 peac bundle verify ./evidence.peacbundle --offline
 ```
 
-Design: ZIP archive with deterministic structure (RFC 8785 canonical JSON). Verification fails if keys are missing (no silent network fallback). See [specs/DISPUTE.md](specs/DISPUTE.md).
+Design: a ZIP file is the transport container, not what is hashed. Integrity is anchored at the content layer: the manifest's `content_hash` is a SHA-256 over its RFC 8785 (JCS) canonical form, and `bundle.sig` is a JWS over that hash. Verification runs offline and fails if a required key is missing (no silent network fallback). See [specs/DISPUTE.md](specs/DISPUTE.md).
 
 ### Go SDK
 
@@ -204,7 +206,7 @@ fmt.Println("Valid:", vr.Valid, "Issuer:", vr.Claims.Iss)
 
 ### Python (API-first examples)
 
-Verify receipts against the Hosted Verify API using httpx. Requires Python 3.12+. Examples only, not an SDK.
+Verify receipts against the reference Verify API (the self-hosted `apps/api` verifier; canonical operation `POST /v1/verify`) using httpx. Requires Python 3.12+. Examples only, not an SDK.
 
 ```python
 import httpx
@@ -321,6 +323,8 @@ PEAC is transport-agnostic. Receipts travel via the binding appropriate to each 
 | `@peac/mappings-rsl`             | RSL usage token mapping         |
 | `@peac/mappings-aipref`          | IETF AIPREF vocabulary          |
 | `@peac/mappings-tap`             | Visa TAP mapping                |
+
+Some mappings listed above are workspace-only surfaces, not published install targets; see the [package catalog](#package-catalog) note and [`docs/PACKAGE_STATUS.md`](PACKAGE_STATUS.md) for install status.
 
 ---
 
@@ -484,7 +488,7 @@ Normative spec: [WORKFLOW-CORRELATION.md](specs/WORKFLOW-CORRELATION.md). Exampl
 
 ### Security model
 
-- SSRF protection and strict URL validation in all network paths
+- SSRF protection and strict URL validation on outbound network paths (key, issuer, and policy discovery), each with a cited limit and test
 - JWKS rotation and emergency revocation support
 - DPoP proof-of-possession binding (RFC 9449)
 - Kernel constraints enforced at issuance and verification (fail-closed)
@@ -496,7 +500,7 @@ See [SECURITY.md](../SECURITY.md), [Trust artifacts](TRUST-ARTIFACTS.md), [PROTO
 
 ## Development
 
-**Prerequisites:** Node.js 24 (tested); Node.js 22+ (compatible). pnpm >= 9.
+**Prerequisites:** Node.js 24.18 (tested, per `.node-version`); Node.js 22.13+ (per `engines`). Use the repository-pinned pnpm (8.15.0) via Corepack.
 
 ```bash
 git clone https://github.com/peacprotocol/peac
