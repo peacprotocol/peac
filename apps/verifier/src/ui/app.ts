@@ -13,7 +13,7 @@
 import { initializeLocalVerifier, type LocalVerifier } from '../verify.js';
 import { verifierBuildFromEnvironment } from '../lib/build-info.js';
 import { renderInputs } from './inputs.js';
-import { renderResults } from './results.js';
+import { renderResults, INPUT_ERROR_MESSAGE_ID } from './results.js';
 import { renderReport } from './report-panel.js';
 import { DEFAULT_MAX_CLOCK_SKEW_SECONDS } from '../lib/limits.js';
 
@@ -152,8 +152,21 @@ export async function initApp(root: HTMLElement): Promise<void> {
 
   const inputTextareas = [fields.record, fields.keyDocument, fields.contextDocument];
 
+  // Add or remove the input-error message id from a field's aria-describedby while preserving its
+  // permanent hint id, so assistive technology reads the concrete error on the field it belongs to.
+  function describeError(ta: HTMLTextAreaElement, on: boolean): void {
+    const ids = (ta.getAttribute('aria-describedby') ?? '')
+      .split(/\s+/)
+      .filter((id) => id.length > 0 && id !== INPUT_ERROR_MESSAGE_ID);
+    if (on) ids.push(INPUT_ERROR_MESSAGE_ID);
+    ta.setAttribute('aria-describedby', ids.join(' '));
+  }
+
   function clearFieldValidity(): void {
-    for (const ta of inputTextareas) ta.removeAttribute('aria-invalid');
+    for (const ta of inputTextareas) {
+      ta.removeAttribute('aria-invalid');
+      describeError(ta, false);
+    }
   }
 
   // Bind an input-stage failure to the field the operator can act on, so assistive technology
@@ -173,7 +186,10 @@ export async function initApp(root: HTMLElement): Promise<void> {
         : code.startsWith('E_VERIFIER_CONTEXT_')
           ? fields.contextDocument
           : undefined;
-    target?.setAttribute('aria-invalid', 'true');
+    if (target) {
+      target.setAttribute('aria-invalid', 'true');
+      describeError(target, true);
+    }
   }
 
   function clearOutputs(): void {

@@ -184,7 +184,10 @@ describe('input errors bind to the offending field', () => {
     }
   };
 
-  it('flags the key field on a key input failure and clears it on change', async () => {
+  const describedBy = (n: MiniNode): string[] =>
+    (n.getAttribute('aria-describedby') ?? '').split(/\s+/).filter(Boolean);
+
+  it('binds the input error to the offending field and clears it on change', async () => {
     const root = await mount(async () => ({
       ok: false,
       failureStage: 'input',
@@ -193,17 +196,30 @@ describe('input errors bind to the offending field', () => {
     }));
     // Textareas render in DOM order: record, key, context.
     const textareas = root.querySelectorAll('textarea');
+    const key = textareas[1];
     const button = findByText(root, 'button', /verify/i) as MiniNode;
 
     button.dispatchEvent('click');
     await flush();
     await flush();
-    expect(ariaInvalid(textareas[1])).toBe('true');
-    expect(ariaInvalid(textareas[0])).toBeUndefined();
-    expect(ariaInvalid(textareas[2])).toBeUndefined();
 
-    textareas[1].value = 'x';
-    textareas[1].dispatchEvent('input');
-    expect(ariaInvalid(textareas[1])).toBeUndefined();
+    // The key field is invalid, keeps its permanent hint, and points at the error message.
+    expect(ariaInvalid(key)).toBe('true');
+    expect(describedBy(key)).toContain('key-hint');
+    expect(describedBy(key)).toContain('verification-input-error');
+    expect(byAttr(root, 'p', 'id', 'verification-input-error')).toBeDefined();
+
+    // Unrelated fields are neither invalid nor described by the error.
+    for (const other of [textareas[0], textareas[2]]) {
+      expect(ariaInvalid(other)).toBeUndefined();
+      expect(describedBy(other)).not.toContain('verification-input-error');
+    }
+
+    // Changing the field clears the flag and the error description, keeping the hint.
+    key.value = 'x';
+    key.dispatchEvent('input');
+    expect(ariaInvalid(key)).toBeUndefined();
+    expect(describedBy(key)).toContain('key-hint');
+    expect(describedBy(key)).not.toContain('verification-input-error');
   });
 });

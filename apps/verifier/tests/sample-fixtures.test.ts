@@ -1,7 +1,7 @@
 /**
  * The committed sample fixtures under apps/verifier/samples/ back the "Try it" walkthrough in the
- * README and the outsider acceptance battery. They are static (public key material only, no private
- * key) so an outsider can verify a real record without generating one. This test runs each fixture
+ * README. They are static (public key material only, no private key) so a record can be verified
+ * without generating one. This test runs each fixture
  * through the actual verification pipeline so the fixtures cannot silently rot: the valid record is
  * accepted, the tampered record is rejected at the signature, and the trust context distinguishes a
  * matched from a mismatched trusted key.
@@ -30,7 +30,7 @@ const base = { evaluationTimeUnixSeconds, maxClockSkewSeconds: DEFAULT_MAX_CLOCK
 
 const verifier = await initializeLocalVerifier({ verifierBuild: 'test-build' });
 
-describe('committed sample fixtures back the acceptance walkthrough', () => {
+describe('committed sample fixtures back the public verifier walkthrough', () => {
   it('the sample record verifies under its key (integrity-only)', async () => {
     const r = await verifier.verify({ record, keyDocument, ...base });
     expect(r.ok).toBe(true);
@@ -62,6 +62,9 @@ describe('committed sample fixtures back the acceptance walkthrough', () => {
       ...base,
     });
     expect(r.ok).toBe(false);
-    if (!r.ok && 'failureStage' in r) expect(r.failureStage).toBe('trusted_key');
+    if (!r.ok && 'failureStage' in r) {
+      expect(r.failureStage).toBe('trusted_key');
+      expect(r.code).toBe('E_VERIFIER_TRUSTED_KEY_MISMATCH');
+    }
   });
 });
