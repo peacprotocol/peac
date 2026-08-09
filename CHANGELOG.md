@@ -5,6 +5,53 @@ All notable changes to PEAC Protocol will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.16.4]
+
+Local Record Verification Handoff.
+
+Strengthens local, supplied-key verification of PEAC records and the handoff of a
+record from one organization to another for independent offline verification,
+without changing the wire format, public schema, registered record types, extension
+groups, or structural sentinels.
+
+Fixed: enforces RFC 7493 I-JSON on issuance so issuance and verification apply the
+same admission rules to record bytes, in `@peac/crypto`, `@peac/protocol`, and the
+Go SDK. Bounds the JWS `kid` header by UTF-8 byte length (at most 256 UTF-8 bytes)
+consistently across `@peac/schema`, `@peac/adapter-runtime-governance`, the Go SDK,
+and the kernel error text. Hardens Ed25519 signature admissibility across supported
+runtimes. In the Go SDK, enforces the Wire 0.2 `kid` profile on both issuance and
+verification, and accepts and normalizes the full media-type form of the JOSE `typ`
+header.
+
+Added: a cross-organization verification handoff guide describing how one
+organization issues a record and shares it, along with the public key, so another
+organization verifies it locally with no issuer callback and no shared online
+verification service. Adds committed sample records and public key material and a
+walkthrough for the reference browser verifier. Documents the `kid` bound in UTF-8
+bytes and adds discriminating conformance vectors.
+
+Changed: the reference browser verifier verifies supplied-key records entirely
+locally, with no network, storage, or service worker; adds accessibility
+improvements including field-level error association, focus visibility, and state
+announcement; and is validated across browser engines.
+
+Security: updates the `nanoid` resolution to the patched 3.3.17 or later, and
+updates `golang.org/x/crypto` in the Go gin middleware example to the patched
+release.
+
+Wire format: unchanged (0.2).
+Public schema: unchanged.
+Registered extension groups: unchanged (19).
+Registered receipt types: unchanged (61).
+Conformance sections: unchanged (32).
+Conformance requirement IDs: unchanged (290).
+Published packages: unchanged (36).
+
+Verification of a PEAC record establishes signed-record integrity and possession of
+the signing key matching the supplied public key. It does not by itself establish
+that the key or its holder should be trusted, that the statements in the record are
+factually true, or that any external event the record refers to actually occurred.
+
 ## [0.16.3] - 2026-07-21
 
 Gateway Decision Evidence.
