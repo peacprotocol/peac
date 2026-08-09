@@ -1438,7 +1438,7 @@
       "code": "E_JWS_MISSING_KID",
       "http_status": 400,
       "title": "JWS kid Missing or Invalid",
-      "description": "JWS header kid field is absent, empty, or exceeds the maximum allowed length (256 characters)",
+      "description": "JWS header kid field is absent, empty, or exceeds the maximum allowed length (256 UTF-8 bytes)",
       "category": "cryptography",
       "retryable": false,
       "next_action": "abort"

@@ -99,7 +99,7 @@ Wire 0.2 enforces strict JOSE header validation (DD-156):
 - `crit` header MUST be rejected (no critical extension negotiation)
 - `b64: false` MUST be rejected (detached payload not supported)
 - `zip` header MUST be rejected (no compression)
-- `kid` MUST be present and at most 256 characters
+- `kid` MUST be present and at most 256 UTF-8 bytes
 - `typ` MUST be `interaction-record+jwt`
   (`application/interaction-record+jwt` accepted per RFC 7515)
 - `alg` MUST be `EdDSA`

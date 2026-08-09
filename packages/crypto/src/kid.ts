@@ -7,9 +7,9 @@
  * application-level constraints.
  *
  * The bound is in UTF-8 bytes because that is what bounds the serialized protected header: 256
- * UTF-16 code units of astral code points serialize to 1024 bytes. It is also the only unit on which
- * independent implementations agree, since a bound stated in "characters" counts code units in
- * JavaScript, bytes in Go and Rust, and code points in Python and JSON Schema.
+ * UTF-16 code units of astral code points are 128 code points and serialize to 512 bytes. It is also
+ * the only unit on which independent implementations agree, since a bound stated in "characters"
+ * counts code units in JavaScript, bytes in Go and Rust, and code points in Python and JSON Schema.
  *
  * Well-formedness is part of the same rule because signing serializes the header with
  * JSON.stringify, which emits an unpaired surrogate as an escape that the I-JSON verifier rejects.
@@ -49,7 +49,8 @@ export function isWellFormedUnicode(s: string): boolean {
  * UTF-8 byte length of a WELL-FORMED string, computed without allocating an encoded copy.
  *
  * Throws on malformed UTF-16 rather than returning a number, so a caller cannot accept a string on
- * length grounds when it cannot be encoded at all.
+ * length grounds when encoding would silently replace an unpaired surrogate with U+FFFD and
+ * change the supplied identifier.
  */
 export function utf8ByteLength(s: string): number {
   let n = 0;

@@ -201,7 +201,7 @@
     },
     {
       "name": "reject-kid-too-long",
-      "description": "JWS header with kid exceeding 256 characters must be rejected",
+      "description": "JWS header with kid exceeding 256 UTF-8 bytes must be rejected",
       "type": "jws-security",
       "input": {
         "header_overrides": {
@@ -791,6 +791,38 @@
       "requirement_ids": ["WIRE02-ENV-023", "WIRE02-ISS-001", "WIRE02-MEDIA-005"],
       "status": "negative",
       "_audit_note": "Backfilled by scripts/conformance/backfill-existing-fixtures.mjs"
+    },
+    {
+      "name": "reject-kid-astral-512-utf8-bytes",
+      "description": "JWS header with a kid of 128 supplementary-plane code points (256 UTF-16 code units, 512 UTF-8 bytes) must be rejected; the UTF-8-byte bound, not a code-unit count, governs",
+      "type": "jws-security",
+      "input": {
+        "header_overrides": {
+          "kid": "\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00\ud83d\ude00"
+        },
+        "claims": {
+          "peac_version": "0.2",
+          "kind": "evidence",
+          "type": "org.peacprotocol/payment",
+          "iss": "https://api.example.com",
+          "iat": 1709500000,
+          "jti": "wire02-invalid-028"
+        }
+      },
+      "expected": {
+        "valid": false,
+        "error_code": "E_JWS_MISSING_KID"
+      },
+      "primary_requirement_id": "WIRE02-JOSE-007",
+      "requirement_ids": [
+        "WIRE02-ENV-023",
+        "WIRE02-ISS-001",
+        "WIRE02-JOSE-007",
+        "WIRE02-JOSE-008",
+        "WIRE02-KIND-001",
+        "WIRE02-MEDIA-005"
+      ],
+      "status": "negative"
     }
   ]
 }

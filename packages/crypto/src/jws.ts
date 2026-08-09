@@ -105,7 +105,7 @@ const ACCEPTED_TYP_VALUES = new Set<string>([WIRE_01_JWS_TYP, ...WIRE_02_JWS_TYP
 export function validateWire02Header(header: Record<string, unknown>): void {
   // kid: required, non-empty, at most MAX_KID_UTF8_BYTES UTF-8 bytes (Correction 9, DoS safety).
   // Measured in UTF-8 BYTES, not String.length: `.length` counts UTF-16 code units and does not
-  // bound the serialized header at all (256 astral code units serialize to 1024 bytes), and it makes
+  // bound the serialized header at all (256 astral code units serialize to 512 bytes), and it makes
   // the accepted set differ between JavaScript, Go, Python and Rust implementations. See kid.ts.
   if (!isValidKid(header.kid)) {
     throw new CryptoError(

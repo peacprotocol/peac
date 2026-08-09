@@ -147,6 +147,8 @@ const JOSE_HEADER_HARDENING_FIXTURE_NAMES: ReadonlySet<string> = new Set([
   'reject-empty-kid',
   'reject-kid-over-256',
   'boundary-kid-256-chars',
+  'boundary-kid-256-utf8-bytes-astral',
+  'reject-kid-256-code-units-512-utf8-bytes',
   // wire-02/invalid.json
   'reject-jwk',
   'reject-x5c',
@@ -155,6 +157,7 @@ const JOSE_HEADER_HARDENING_FIXTURE_NAMES: ReadonlySet<string> = new Set([
   'reject-crit',
   'reject-zip',
   'reject-kid-too-long',
+  'reject-kid-astral-512-utf8-bytes',
 ]);
 
 /**
