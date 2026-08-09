@@ -29,7 +29,7 @@ No network calls are made when `--public-key` is supplied. See [`docs/VERIFY.md`
 
 ### 2. Browser verifier
 
-[`apps/verifier/`](../../apps/verifier/) is a client-side browser verifier. All verification runs locally with `verifyLocal()` from `@peac/protocol`; no record is sent to any server. Add the trusted issuer public key to its trust store, then paste or drop a record.
+[`apps/verifier/`](../../apps/verifier/) is a client-side browser verifier. Paste a record and the public key material (a JWK or JWKS), and optionally a set of verification expectations; verification runs locally with `verifyLocal()` from `@peac/protocol`. Nothing is fetched, uploaded or stored, and the application registers no service worker. A supplied trusted JWK thumbprint is the only trust anchor; issuer, key id and record type expectations are claim constraints, not trust anchors.
 
 ```bash
 # from apps/verifier/
@@ -38,7 +38,7 @@ pnpm dev
 # opens on http://localhost:5173
 ```
 
-See [`apps/verifier/README.md`](../../apps/verifier/README.md) for the trust-store and build details.
+See [`apps/verifier/README.md`](../../apps/verifier/README.md) for the build details and a sample walkthrough, and the [cross-organization verification handoff](cross-org-verification-handoff.md) for the end-to-end flow between two organizations.
 
 ### 3. Self-host HTTP
 
@@ -58,6 +58,7 @@ Every path above can verify the shipped sample records. See the [Offline sample 
 
 ## Related
 
+- [Cross-organization verification handoff](cross-org-verification-handoff.md) — the end-to-end flow where one organization issues a record and another verifies it locally.
 - [`docs/VERIFY.md`](../VERIFY.md) — command-line and library verification walkthrough.
 - [`docs/guides/offline-sample-index.md`](offline-sample-index.md) — the shipped valid and invalid sample records.
 - [`docs/START_HERE.md`](../START_HERE.md) — entry path by role.

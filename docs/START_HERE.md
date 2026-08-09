@@ -39,8 +39,9 @@ You have a receipt (JWS string) and want to verify it offline with a public key.
 1. Install: `pnpm add @peac/protocol @peac/crypto`
 2. Follow the [Agent Operator Quickstart](guides/quickstart-agent-operator.md) (5 minutes)
 3. Compare the CLI, browser, and self-host paths in [Verification options](guides/verification-options.md), and try them on the shipped records in the [Offline sample index](guides/offline-sample-index.md)
-4. See [examples/minimal](../examples/minimal/) for typed accessor helpers
-5. Self-host the reference verifier: recipes under [`surfaces/reference-verifier/`](../surfaces/reference-verifier/)
+4. Verify a record another organization issued: [Cross-organization verification handoff](guides/cross-org-verification-handoff.md)
+5. See [examples/minimal](../examples/minimal/) for typed accessor helpers
+6. Self-host the reference verifier: recipes under [`surfaces/reference-verifier/`](../surfaces/reference-verifier/)
 
 Key packages: `@peac/protocol`, `@peac/crypto`.
 
