@@ -10,15 +10,31 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"unicode/utf16"
+	"unicode/utf8"
 )
 
 // Canonicalize produces an RFC 8785 (JCS) canonical serialization of JSON input.
 //
 // Parses with json.Decoder + UseNumber() to preserve numeric precision.
-// Sort object keys by Unicode code point order. Numbers serialized per
-// RFC 8785 Section 3.2.2.3. Strings serialized per RFC 8785 Section 3.2.2.2.
+// Object member names are sorted by UTF-16 code unit ordering, per RFC 8785
+// Section 3.2.3 (NOT Unicode code point order: the two orderings diverge for
+// any pair of a supplementary-plane character, encoded in UTF-16 as a
+// surrogate pair drawn from U+D800-U+DFFF, and a BMP character whose own code
+// point falls above U+D800 -- the surrogate pair sorts first under UTF-16
+// code-unit order even though its code point is numerically larger). Numbers
+// serialized per RFC 8785 Section 3.2.2.3. Strings serialized per RFC 8785
+// Section 3.2.2.2.
 //
-// Byte-for-byte equivalent with TypeScript canonicalize() from @peac/crypto.
+// This matches TypeScript canonicalize() from @peac/crypto, whose
+// `Object.keys(obj).sort()` uses JavaScript's default string comparator --
+// itself a UTF-16 code-unit comparison, per ECMA-262 -- for the same reason.
+// Matching key order does not by itself guarantee byte-for-byte identical
+// output for every input (independent implementations can still diverge
+// elsewhere); the discriminating parity vectors in
+// specs/conformance/parity-corpus/jcs-extended/ and
+// specs/conformance/fixtures/go-interaction-record/ are what's actually
+// verified, and are what this fix is checked against.
 func Canonicalize(input []byte) ([]byte, error) {
 	dec := json.NewDecoder(bytes.NewReader(input))
 	dec.UseNumber()
@@ -81,13 +97,10 @@ func canonicalizeValue(buf *bytes.Buffer, v any) error {
 		}
 		buf.WriteByte(']')
 	case map[string]any:
-		keys := make([]string, 0, len(val))
-		for k := range val {
-			keys = append(keys, k)
+		keys, err := sortedObjectKeys(val)
+		if err != nil {
+			return err
 		}
-		// Sort by Unicode code point order (Go string comparison is byte-level
-		// which matches code point order for valid UTF-8)
-		sort.Strings(keys)
 
 		buf.WriteByte('{')
 		first := true
@@ -110,6 +123,68 @@ func canonicalizeValue(buf *bytes.Buffer, v any) error {
 		return fmt.Errorf("jcs: unsupported type %T", v)
 	}
 	return nil
+}
+
+// objectKey pairs a JSON object member name with its UTF-16 code unit
+// encoding, computed once, so a multi-key sort never re-encodes the same
+// string on every comparison it participates in.
+type objectKey struct {
+	key   string
+	units []uint16
+}
+
+// sortedObjectKeys returns the member names of val ordered by RFC 8785
+// Section 3.2.3: UTF-16 code unit order, compared lexicographically over
+// the []uint16 encoding of each key (NOT Go's native byte-wise string
+// order, which is Unicode code point order and diverges from UTF-16 code
+// unit order for supplementary-plane characters -- see the package doc on
+// Canonicalize).
+//
+// Every key reaching this function was produced by encoding/json decoding
+// UTF-8 input, which never emits invalid UTF-8 in a Go string (invalid
+// input bytes are silently replaced with U+FFFD before the string exists).
+// The public entry point, Canonicalize([]byte), has no path that reaches
+// here with a key that fails utf8.ValidString. The check below is
+// defense-in-depth against a future internal caller that builds a
+// map[string]any programmatically (e.g. from Go values, not from decoding
+// JSON bytes) and feeds it into this codec directly: such a key must be
+// rejected with an error rather than silently treated as if it were valid,
+// which is the same fail-closed posture the raw-bytes I-JSON gate
+// (assertIJSON, ijson.go) applies to record and header bytes before they
+// reach this canonicalizer.
+func sortedObjectKeys(val map[string]any) ([]string, error) {
+	entries := make([]objectKey, 0, len(val))
+	for k := range val {
+		if !utf8.ValidString(k) {
+			return nil, fmt.Errorf("jcs: object key is not valid UTF-8: %q", k)
+		}
+		entries = append(entries, objectKey{key: k, units: utf16.Encode([]rune(k))})
+	}
+	sort.Slice(entries, func(i, j int) bool {
+		return lessUTF16(entries[i].units, entries[j].units)
+	})
+	keys := make([]string, len(entries))
+	for i, e := range entries {
+		keys[i] = e.key
+	}
+	return keys, nil
+}
+
+// lessUTF16 compares two UTF-16 code unit sequences lexicographically: the
+// same rule RFC 8785 Section 3.2.3 requires and the same rule a native
+// UTF-16 string type's default less-than comparison applies. A shorter
+// sequence that is a prefix of a longer one sorts first.
+func lessUTF16(a, b []uint16) bool {
+	n := len(a)
+	if len(b) < n {
+		n = len(b)
+	}
+	for i := 0; i < n; i++ {
+		if a[i] != b[i] {
+			return a[i] < b[i]
+		}
+	}
+	return len(a) < len(b)
 }
 
 // canonicalizeNumber per RFC 8785 Section 3.2.2.3:

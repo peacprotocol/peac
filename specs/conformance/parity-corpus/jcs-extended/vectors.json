@@ -64,6 +64,50 @@
         "emoji": "😀"
       },
       "canonical": "{\"emoji\":\"😀\"}"
+    },
+    {
+      "id": "utf16-order-surrogate-vs-pua",
+      "description": "RFC 8785 Section 3.2.3 requires UTF-16 CODE UNIT ordering for object member names, not Unicode code point ordering; the two diverge exactly here. Key A is U+1F600 (encoded in UTF-16 as the surrogate pair D83D DE00). Key B is U+E000 (Private Use Area; a single BMP code unit E000 -- this character is typically rendered invisibly by editors/fonts). By CODE POINT, U+1F600 (0x1F600) > U+E000 (0xE000), so code-point order would place U+E000 first. By UTF-16 CODE UNIT order, the first (and only comparison-relevant) unit of key A is D83D, which is LESS than E000, so key A sorts first. The independently-computed expected UTF-8 bytes are hex 7b22f09f9880223a312c22ee8080223a327d, SHA-256 04208f6cdb854e2ab1b07dd3633a39dec854344fe72824cf7f2fdb4e2e33129e.",
+      "input": {
+        "😀": 1,
+        "": 2
+      },
+      "canonical": "{\"😀\":1,\"\":2}"
+    },
+    {
+      "id": "utf16-order-nested",
+      "description": "The same divergent key pair (U+1F600 surrogate pair vs U+E000) one level deep inside an object member. UTF-16 code-unit ordering must be applied independently at every nesting level, not only at the top level.",
+      "input": {
+        "outer": {
+          "😀": 1,
+          "": 2
+        }
+      },
+      "canonical": "{\"outer\":{\"😀\":1,\"\":2}}"
+    },
+    {
+      "id": "utf16-order-in-array",
+      "description": "The same divergent key pair inside an object that is itself an array element. Array element order is preserved positionally; only the nested object's own member names are reordered by UTF-16 code unit value.",
+      "input": [
+        {
+          "😀": 1,
+          "": 2
+        },
+        {
+          "a": 1
+        }
+      ],
+      "canonical": "[{\"😀\":1,\"\":2},{\"a\":1}]"
+    },
+    {
+      "id": "utf16-order-prefix-names",
+      "description": "Prefix-related key names under UTF-16 code-unit lexicographic order: \"a\" is a strict prefix of both \"ab\" and \"a\"+U+1F600, so it sorts first. Between \"ab\" and \"a\"+U+1F600, the second code unit decides: 'b' is U+0062 (code unit 0x62), the leading surrogate of U+1F600 is 0xD83D, and 0x62 < 0xD83D, so \"ab\" sorts before \"a\"+U+1F600.",
+      "input": {
+        "a": 1,
+        "ab": 2,
+        "a😀": 3
+      },
+      "canonical": "{\"a\":1,\"ab\":2,\"a😀\":3}"
     }
   ]
 }
