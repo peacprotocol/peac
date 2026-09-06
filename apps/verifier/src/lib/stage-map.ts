@@ -52,7 +52,14 @@ export const STAGE_BY_CODE = {
 /**
  * Look up a stage. An unmapped code returns undefined so the caller can fail CLOSED at the
  * internal-error stage; it must never be treated as a post-signature validation failure.
+ *
+ * OWN-property lookup only. `STAGE_BY_CODE` is an ordinary object, so a plain index would resolve
+ * inherited members for strings such as "constructor", "toString" or "__proto__" and return a
+ * function or object instead of undefined -- which the caller would then treat as a mapped stage.
+ * `satisfies` pins the key set at compile time; it says nothing about runtime lookups with
+ * arbitrary strings, so the guard has to be here.
  */
 export function stageForCanonicalCode(code: string): CanonicalStage | undefined {
+  if (!Object.hasOwn(STAGE_BY_CODE, code)) return undefined;
   return (STAGE_BY_CODE as Record<string, CanonicalStage>)[code];
 }
