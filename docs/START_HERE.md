@@ -94,7 +94,7 @@ You already run MCP, an API or platform gateway, or OpenTelemetry, and you want 
 
 ### Commerce and payment evidence
 
-You want verifiable evidence from commerce and payment flows across x402, paymentauth / MPP (Machine Payments Protocol), ACP, Stripe SPT, or UCP. Prove what was offered, challenged, paid, or settled across organizational boundaries.
+You want verifiable evidence from commerce and payment flows across x402, paymentauth / MPP (Machine Payments Protocol), ACP, Stripe SPT, or UCP. Record what was offered, challenged, and reported paid or settled, as signed records another party can independently verify. Verification establishes what each signed record says and that it has not been altered under the supplied verification context; it does not independently establish payment finality or settlement truth.
 
 1. Choose your protocol:
    - **paymentauth / MPP**: [paymentauth Integration Kit](../integrator-kits/paymentauth/README.md)
