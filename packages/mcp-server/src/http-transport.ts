@@ -73,6 +73,28 @@ const DEFAULT_RATE_LIMIT_RPM = 100;
 const MAX_SESSION_ID_LENGTH = 128;
 
 /**
+ * MCP-Protocol-Version values this server implements. Deliberately narrower
+ * than the SDK's own supported list.
+ */
+const SUPPORTED_PROTOCOL_VERSIONS = [MCP_PROTOCOL_VERSION, '2025-03-26'];
+
+/**
+ * Validate MCP-Protocol-Version for both init and non-init requests.
+ *
+ * An absent header is not an error: per the spec's backwards-compatibility
+ * rule the client is assumed to speak the pre-negotiation default
+ * (2025-03-26). Returns an error message for an unsupported version, or
+ * null when the request may proceed.
+ */
+function checkProtocolVersion(req: IncomingMessage): string | null {
+  const protocolVersion = req.headers['mcp-protocol-version'] as string | undefined;
+  if (protocolVersion && !SUPPORTED_PROTOCOL_VERSIONS.includes(protocolVersion)) {
+    return `Unsupported MCP protocol version: ${protocolVersion} (supported versions: ${SUPPORTED_PROTOCOL_VERSIONS.join(', ')})`;
+  }
+  return null;
+}
+
+/**
  * Validate Mcp-Session-Id: visible ASCII (0x21-0x7E), max 128 chars.
  * MCP spec requires session IDs to be visible ASCII characters only.
  */
@@ -433,13 +455,9 @@ export async function createHttpTransport(
 
         if (isInit) {
           // MCP-Protocol-Version validation (on init)
-          const protocolVersion = req.headers['mcp-protocol-version'] as string | undefined;
-          if (
-            protocolVersion &&
-            protocolVersion !== MCP_PROTOCOL_VERSION &&
-            protocolVersion !== '2025-03-26'
-          ) {
-            sendJson(res, 400, { error: `Unsupported MCP protocol version: ${protocolVersion}` });
+          const versionError = checkProtocolVersion(req);
+          if (versionError) {
+            sendJson(res, 400, { error: versionError });
             return;
           }
 
@@ -463,6 +481,14 @@ export async function createHttpTransport(
 
           // Delegate to transport (it will set Mcp-Session-Id header)
           await entry.transport.handleRequest(req, res, body);
+          return;
+        }
+
+        // Checked before session handling so an unsupported version is
+        // rejected as such, without touching session state.
+        const versionError = checkProtocolVersion(req);
+        if (versionError) {
+          sendJson(res, 400, { error: versionError });
           return;
         }
 

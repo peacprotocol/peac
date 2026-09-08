@@ -33,6 +33,40 @@ async function fetchJson(
   return { status: res.status, headers: res.headers, body };
 }
 
+const MCP_ACCEPT_HEADERS = {
+  'Content-Type': 'application/json',
+  Accept: 'application/json, text/event-stream',
+};
+
+/**
+ * Perform a real initialize request against a running transport and return
+ * the assigned Mcp-Session-Id, for tests that need a genuinely valid session.
+ */
+async function initSession(port: number): Promise<string> {
+  const { status, headers } = await fetchJson(`http://127.0.0.1:${port}/mcp`, {
+    method: 'POST',
+    headers: MCP_ACCEPT_HEADERS,
+    body: JSON.stringify({
+      jsonrpc: '2.0',
+      method: 'initialize',
+      id: 1,
+      params: {
+        protocolVersion: '2025-11-25',
+        capabilities: {},
+        clientInfo: { name: 'test', version: '1.0' },
+      },
+    }),
+  });
+  if (status !== 200) {
+    throw new Error(`initSession failed: expected 200, got ${status}`);
+  }
+  const sessionId = headers.get('mcp-session-id');
+  if (!sessionId) {
+    throw new Error('initSession failed: no Mcp-Session-Id header in response');
+  }
+  return sessionId;
+}
+
 describe('HTTP Transport', () => {
   let cleanup: (() => Promise<void>) | undefined;
 
@@ -834,5 +868,220 @@ describe('HTTP Transport', () => {
     expect(statuses[0]).not.toBe(503);
     expect(statuses[1]).not.toBe(503);
     expect(statuses[2]).toBe(503);
+  });
+
+  // --- MCP-Protocol-Version validation on non-init requests (WP-M2 / MCP-VERSIONGATE-01) ---
+  //
+  // The version gate previously ran only on the init path; a non-init POST
+  // declaring an unsupported protocol version was never rejected for that
+  // reason, and instead either proceeded or surfaced a misleading
+  // "Missing Mcp-Session-Id" 400. These tests pin the corrected behavior:
+  // the version is checked on every request, before session-id handling.
+
+  it('should accept non-init POST with the latest supported protocol version', async () => {
+    const port = getPort();
+    const result = await createHttpTransport({
+      port,
+      host: '127.0.0.1',
+      serverFactory: makeServerFactory(),
+    });
+    cleanup = result.cleanup;
+
+    const sessionId = await initSession(port);
+    const { status } = await fetchJson(`http://127.0.0.1:${port}/mcp`, {
+      method: 'POST',
+      headers: {
+        ...MCP_ACCEPT_HEADERS,
+        'Mcp-Session-Id': sessionId,
+        'MCP-Protocol-Version': '2025-11-25',
+      },
+      body: JSON.stringify({ jsonrpc: '2.0', method: 'tools/list', id: 2 }),
+    });
+    expect(status).toBe(200);
+  });
+
+  it('should accept non-init POST with the legacy supported protocol version', async () => {
+    const port = getPort();
+    const result = await createHttpTransport({
+      port,
+      host: '127.0.0.1',
+      serverFactory: makeServerFactory(),
+    });
+    cleanup = result.cleanup;
+
+    const sessionId = await initSession(port);
+    const { status } = await fetchJson(`http://127.0.0.1:${port}/mcp`, {
+      method: 'POST',
+      headers: {
+        ...MCP_ACCEPT_HEADERS,
+        'Mcp-Session-Id': sessionId,
+        'MCP-Protocol-Version': '2025-03-26',
+      },
+      body: JSON.stringify({ jsonrpc: '2.0', method: 'tools/list', id: 2 }),
+    });
+    expect(status).toBe(200);
+  });
+
+  it('should accept non-init POST with no protocol version header (assumes 2025-03-26 per spec backwards-compat)', async () => {
+    const port = getPort();
+    const result = await createHttpTransport({
+      port,
+      host: '127.0.0.1',
+      serverFactory: makeServerFactory(),
+    });
+    cleanup = result.cleanup;
+
+    const sessionId = await initSession(port);
+    const { status } = await fetchJson(`http://127.0.0.1:${port}/mcp`, {
+      method: 'POST',
+      headers: {
+        ...MCP_ACCEPT_HEADERS,
+        'Mcp-Session-Id': sessionId,
+      },
+      body: JSON.stringify({ jsonrpc: '2.0', method: 'tools/list', id: 2 }),
+    });
+    expect(status).toBe(200);
+  });
+
+  it('should reject non-init POST declaring an unsupported protocol version, naming supported versions and not mentioning the session', async () => {
+    const port = getPort();
+    const result = await createHttpTransport({
+      port,
+      host: '127.0.0.1',
+      serverFactory: makeServerFactory(),
+    });
+    cleanup = result.cleanup;
+
+    const sessionId = await initSession(port);
+    const { status, body } = await fetchJson(`http://127.0.0.1:${port}/mcp`, {
+      method: 'POST',
+      headers: {
+        ...MCP_ACCEPT_HEADERS,
+        'Mcp-Session-Id': sessionId,
+        'MCP-Protocol-Version': '2026-07-28',
+      },
+      body: JSON.stringify({ jsonrpc: '2.0', method: 'tools/list', id: 2 }),
+    });
+    expect(status).toBe(400);
+    expect(body).toMatchObject({
+      error: expect.stringContaining('2026-07-28'),
+    });
+    expect(body).toMatchObject({
+      error: expect.stringContaining('2025-11-25'),
+    });
+    expect(body).toMatchObject({
+      error: expect.stringContaining('2025-03-26'),
+    });
+    const message = (body as { error: string }).error;
+    expect(message.toLowerCase()).not.toContain('session');
+  });
+
+  it('should reject an unsupported protocol version before falling back to the missing-session-id error (ordering)', async () => {
+    const port = getPort();
+    const result = await createHttpTransport({
+      port,
+      host: '127.0.0.1',
+      serverFactory: makeServerFactory(),
+    });
+    cleanup = result.cleanup;
+
+    // No Mcp-Session-Id header at all AND an unsupported version: the
+    // version check must win so the failure reason is unambiguous.
+    const { status, body } = await fetchJson(`http://127.0.0.1:${port}/mcp`, {
+      method: 'POST',
+      headers: {
+        ...MCP_ACCEPT_HEADERS,
+        'MCP-Protocol-Version': '2026-07-28',
+      },
+      body: JSON.stringify({ jsonrpc: '2.0', method: 'tools/list', id: 2 }),
+    });
+    expect(status).toBe(400);
+    const message = (body as { error: string }).error;
+    expect(message).toContain('2026-07-28');
+    expect(message.toLowerCase()).not.toContain('session');
+  });
+
+  it('should reject init POST with an unsupported protocol version (existing behavior preserved)', async () => {
+    const port = getPort();
+    const result = await createHttpTransport({
+      port,
+      host: '127.0.0.1',
+      serverFactory: makeServerFactory(),
+    });
+    cleanup = result.cleanup;
+
+    const { status, body } = await fetchJson(`http://127.0.0.1:${port}/mcp`, {
+      method: 'POST',
+      headers: { ...MCP_ACCEPT_HEADERS, 'MCP-Protocol-Version': '2026-07-28' },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        method: 'initialize',
+        id: 1,
+        params: {
+          protocolVersion: '2026-07-28',
+          capabilities: {},
+          clientInfo: { name: 'test', version: '1.0' },
+        },
+      }),
+    });
+    expect(status).toBe(400);
+    const message = (body as { error: string }).error;
+    expect(message).toContain('2026-07-28');
+  });
+
+  it.each([
+    { label: 'whitespace-only', value: '   ', expectRejected: true },
+    { label: 'very long ASCII', value: 'x'.repeat(5000), expectRejected: true },
+    { label: 'mixed case near-match', value: 'ThE-LaTeSt-VeRsIoN', expectRejected: true },
+    { label: 'wrong-but-plausible date', value: '2025-03-27', expectRejected: true },
+    {
+      label: 'supported value with surrounding junk stripped by HTTP',
+      value: '2025-11-25',
+      expectRejected: false,
+    },
+  ])(
+    'should never throw and always return a deterministic response for odd MCP-Protocol-Version value: $label',
+    async ({ value, expectRejected }) => {
+      const port = getPort();
+      const result = await createHttpTransport({
+        port,
+        host: '127.0.0.1',
+        serverFactory: makeServerFactory(),
+      });
+      cleanup = result.cleanup;
+
+      const sessionId = await initSession(port);
+      const { status } = await fetchJson(`http://127.0.0.1:${port}/mcp`, {
+        method: 'POST',
+        headers: {
+          ...MCP_ACCEPT_HEADERS,
+          'Mcp-Session-Id': sessionId,
+          'MCP-Protocol-Version': value,
+        },
+        body: JSON.stringify({ jsonrpc: '2.0', method: 'tools/list', id: 3 }),
+      });
+      // Every case here is a deterministic 400 (rejected) or 200 (accepted)
+      // -- never a thrown exception, a hang, or a 5xx.
+      expect(status).toBe(expectRejected ? 400 : 200);
+    }
+  );
+
+  it('should treat an absent MCP-Protocol-Version header (not an empty string) as the assumed default on non-init requests', async () => {
+    const port = getPort();
+    const result = await createHttpTransport({
+      port,
+      host: '127.0.0.1',
+      serverFactory: makeServerFactory(),
+    });
+    cleanup = result.cleanup;
+
+    const sessionId = await initSession(port);
+    const headers: Record<string, string> = { ...MCP_ACCEPT_HEADERS, 'Mcp-Session-Id': sessionId };
+    const { status } = await fetchJson(`http://127.0.0.1:${port}/mcp`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ jsonrpc: '2.0', method: 'tools/list', id: 3 }),
+    });
+    expect(status).toBe(200);
   });
 });

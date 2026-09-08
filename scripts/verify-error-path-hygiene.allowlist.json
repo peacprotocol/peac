@@ -22,7 +22,7 @@
     {
       "rule": "emptyCatch",
       "path": "packages/mcp-server/src/http-transport.ts",
-      "lineHint": 228,
+      "lineHint": 250,
       "symbolHint": "createHttpTransport",
       "reason": "invalid publicUrl is skipped; allowedHosts derived from validated bind addresses already",
       "category": "cleanup-only",
