@@ -37,7 +37,8 @@ kept in the loop and the disclosure calendar is coordinated.
 
 | Line                             | Status                                     | Wire format                         | Security-fix window                           |
 | -------------------------------- | ------------------------------------------ | ----------------------------------- | --------------------------------------------- |
-| `v0.15.x`                        | Active (current)                           | Wire 0.2 (`interaction-record+jwt`) | Through the next minor line                   |
+| `v0.16.x`                        | Active (current; latest release `v0.16.4`) | Wire 0.2 (`interaction-record+jwt`) | Through the next minor line                   |
+| `v0.15.x`                        | Maintenance (security fixes only)          | Wire 0.2 (`interaction-record+jwt`) | Through 2026-12-28 (6 months after `v0.16.0`) |
 | `v0.14.x`                        | Maintenance (security fixes only)          | Wire 0.2 (`interaction-record+jwt`) | Through 2026-12-01 (6 months after `v0.15.0`) |
 | `v0.13.x`                        | Maintenance (security fixes only)          | Wire 0.2 (`interaction-record+jwt`) | 6 months after the next minor line ships      |
 | `v0.12.x`                        | Maintenance (critical security fixes only) | Wire 0.2 (`interaction-record+jwt`) | Through 2026-11-03 (6 months after `v0.14.0`) |
