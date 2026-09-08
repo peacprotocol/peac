@@ -2,7 +2,9 @@ package peac
 
 import (
 	"crypto/ed25519"
+	"crypto/sha256"
 	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"os"
 	"path/filepath"
@@ -33,6 +35,10 @@ func TestCrossLang_JCSParity(t *testing.T) {
 			Description string `json:"description"`
 			Input       any    `json:"input"`
 			Canonical   string `json:"canonical"`
+			// Independently fixed expectations (present only on adversarial
+			// vectors): the TypeScript generator must not be the sole oracle.
+			ExpectedUTF8Hex string `json:"expected_utf8_hex"`
+			ExpectedSHA256  string `json:"expected_sha256"`
 		} `json:"vectors"`
 	}
 	if err := json.Unmarshal(data, &fixture); err != nil {
@@ -55,6 +61,18 @@ func TestCrossLang_JCSParity(t *testing.T) {
 			if string(got) != v.Canonical {
 				t.Errorf("JCS parity failure\n  input:    %s\n  got:      %s\n  expected: %s",
 					string(inputBytes), string(got), v.Canonical)
+			}
+			// Adversarial vectors also carry bytes/digest fixed INDEPENDENTLY of
+			// both implementations; check Go against those, not only against the
+			// TypeScript-emitted canonical string.
+			if v.ExpectedUTF8Hex != "" {
+				if hex.EncodeToString(got) != v.ExpectedUTF8Hex {
+					t.Errorf("canonical bytes differ from the independently fixed expectation\n  got:      %x\n  expected: %s", got, v.ExpectedUTF8Hex)
+				}
+				sum := sha256.Sum256(got)
+				if hex.EncodeToString(sum[:]) != v.ExpectedSHA256 {
+					t.Errorf("canonical sha256 differs from the independently fixed expectation\n  got:      %x\n  expected: %s", sum[:], v.ExpectedSHA256)
+				}
 			}
 		})
 	}

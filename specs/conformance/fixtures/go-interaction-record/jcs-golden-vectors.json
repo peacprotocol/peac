@@ -179,7 +179,7 @@
     },
     {
       "id": "unicode-key-ordering",
-      "description": "Unicode key ordering (non-ASCII keys sorted by code point)",
+      "description": "Unicode key ordering (non-ASCII keys sorted by UTF-16 code unit, RFC 8785 3.2.3)",
       "input": {
         "é": 1,
         "a": 2,
@@ -195,7 +195,9 @@
         "😀": 1,
         "": 2
       },
-      "canonical": "{\"😀\":1,\"\":2}"
+      "canonical": "{\"😀\":1,\"\":2}",
+      "expected_utf8_hex": "7b22f09f9880223a312c22ee8080223a327d",
+      "expected_sha256": "04208f6cdb854e2ab1b07dd3633a39dec854344fe72824cf7f2fdb4e2e33129e"
     },
     {
       "id": "utf16-order-nested",
@@ -206,7 +208,9 @@
           "": 2
         }
       },
-      "canonical": "{\"outer\":{\"😀\":1,\"\":2}}"
+      "canonical": "{\"outer\":{\"😀\":1,\"\":2}}",
+      "expected_utf8_hex": "7b226f75746572223a7b22f09f9880223a312c22ee8080223a327d7d",
+      "expected_sha256": "e63d65b016c6388a97d0243bdd0422c913b72a0e8191b9a3f007640518c2a65a"
     },
     {
       "id": "utf16-order-in-array",
@@ -220,7 +224,9 @@
           "a": 1
         }
       ],
-      "canonical": "[{\"😀\":1,\"\":2},{\"a\":1}]"
+      "canonical": "[{\"😀\":1,\"\":2},{\"a\":1}]",
+      "expected_utf8_hex": "5b7b22f09f9880223a312c22ee8080223a327d2c7b2261223a317d5d",
+      "expected_sha256": "6c9bbeb38add695c9d98cf64288e4cb14610d6624447366439030680c18f6336"
     },
     {
       "id": "utf16-order-prefix-names",
@@ -230,7 +236,9 @@
         "ab": 2,
         "a😀": 3
       },
-      "canonical": "{\"a\":1,\"ab\":2,\"a😀\":3}"
+      "canonical": "{\"a\":1,\"ab\":2,\"a😀\":3}",
+      "expected_utf8_hex": "7b2261223a312c226162223a322c2261f09f9880223a337d",
+      "expected_sha256": "2e265b2046ffbb55e607f7722799d4d9a0f3a320168f5526870ff862ec561e08"
     }
   ]
 }
