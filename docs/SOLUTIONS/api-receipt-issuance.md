@@ -8,7 +8,7 @@
 
 ## The problem
 
-An API operator wants to add portable proof to every response. Consumers may be paying partners, downstream services, auditors, or agents acting on behalf of users. Local logs are not enough — the other party needs a signed record that survives your log retention and can be checked without calling back to your service.
+An API operator wants to add portable signed evidence to every response. Consumers may be paying partners, downstream services, auditors, or agents acting on behalf of users. Local logs are not enough — the other party needs a signed record that survives your log retention and can be checked without calling back to your service.
 
 PEAC issues a compact JWS on every response, carried in the `PEAC-Receipt` HTTP header. The signature lets anyone with your public key verify offline.
 

@@ -2,7 +2,7 @@
 
 > Open standard for verifiable interaction records across agent, tool, API, MCP, and cross-runtime systems.
 > Portable signed records anyone can verify offline.
-> Current release: v0.15.2
+> Current release: v0.16.4
 > Last reviewed: 2026-06-24
 
 ## What is PEAC

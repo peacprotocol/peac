@@ -16,7 +16,7 @@ The runtime decides. PEAC records what the runtime attested. The two layers comp
 
 A runtime governance toolkit gives an organization a private control plane: policy evaluation, audit entries, authority narrowing, lifecycle transitions, trust observations, compliance assessments. Those artifacts are valuable inside the organization. Outside the organization they are unverifiable: an auditor, counterparty, downstream reviewer, or customer has no portable way to confirm what the runtime reported without trusting the runtime's read-only view of its own logs.
 
-PEAC produces a signed interaction record per runtime-attested event. The record is portable: any party with the issuer's public key can verify it offline, without calling the runtime, without depending on a particular cloud, without imitating the runtime's internal trust system. The runtime keeps owning execution; PEAC carries the proof.
+PEAC produces a signed interaction record per runtime-attested event. The record is portable: any party with the issuer's public key can verify it offline, without calling the runtime, without depending on a particular cloud, without imitating the runtime's internal trust system. The runtime keeps owning execution; PEAC carries the signed evidence.
 
 ## What PEAC does
 
@@ -102,7 +102,7 @@ The structure and signature of each record are validated; the truth of the runti
 | Audit logging              | the runtime | a runtime-internal audit chain the runtime attests                         |
 | **Portable signed record** | **PEAC**    | **`interaction-record+jwt` over Ed25519, verifiable offline by any party** |
 
-PEAC reads what the runtime reported, records it under the canonical `org.peacprotocol/runtime-governance` extension namespace (six receipt-type URIs, shipped v0.12.10), signs the record, and stops there. The runtime keeps its native exports, its dashboards, its admin UI, its in-tenant trust system. PEAC adds a portable proof artifact alongside them.
+PEAC reads what the runtime reported, records it under the canonical `org.peacprotocol/runtime-governance` extension namespace (six receipt-type URIs, shipped v0.12.10), signs the record, and stops there. The runtime keeps its native exports, its dashboards, its admin UI, its in-tenant trust system. PEAC adds a portable signed evidence artifact alongside them.
 
 ## Where to go from here
 

@@ -12,7 +12,7 @@ New here? [Try PEAC in 5 minutes](TRY.md) or [verify a record](VERIFY.md).
 
 ## I run an API or HTTP service
 
-You want to issue signed receipts proving what terms applied and what happened on every response.
+You want to issue signed receipts that report what terms applied and what happened on every response.
 
 1. Install: `pnpm add @peac/middleware-express @peac/crypto @peac/protocol`
 2. Follow the [API Provider Quickstart](guides/quickstart-api-provider.md) (5 minutes)
@@ -133,7 +133,7 @@ Receipt-side normative profile: [`docs/specs/PRIVACY-PROFILE.md`](specs/PRIVACY-
 
 ## Core concepts
 
-- **Receipt:** a signed JWS (`interaction-record+jwt`) proving what terms applied and what happened. The JOSE header `typ` is `interaction-record+jwt`; the HTTP request or response body is `application/json` (or the `PEAC-Receipt` HTTP header) carrying the compact JWS string.
+- **Receipt:** a signed JWS (`interaction-record+jwt`) recording what terms applied and what happened. The JOSE header `typ` is `interaction-record+jwt`; the HTTP request or response body is `application/json` (or the `PEAC-Receipt` HTTP header) carrying the compact JWS string.
 - **Kind:** `evidence` (records what happened) or `challenge` (requests proof from a peer).
 - **Type:** reverse-DNS identifier for what the receipt represents (for example `org.peacprotocol/payment`).
 - **Extensions:** typed data groups (commerce, access, identity, and more) carrying domain-specific content.

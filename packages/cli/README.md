@@ -27,7 +27,39 @@ peac verify <jws>
 peac verify receipt.jws --verbose
 ```
 
-Decodes the receipt, displays claims (issuer, audience, amount, payment rail), and verifies the cryptographic signature. Exit code 0 on success, 1 on failure.
+Decodes the receipt, displays claims (issuer, audience, amount, payment rail), and verifies the cryptographic signature. Without `--public-key`, verification resolves the issuer's keys over the network via issuer discovery. Exit code 0 on success, 1 on failure.
+
+### Verify offline with a supplied public key
+
+```bash
+peac verify <jws-or-path> --public-key <jwk-or-single-key-jwks.json>
+```
+
+`--public-key <path>` verifies the record locally against the supplied public Ed25519 key using `verifyLocal()` from `@peac/protocol`. No network request, issuer discovery, or JWKS fetch is made, and there is no fallback to the network path. The record structure is validated as well as the signature.
+
+The key file must be one of:
+
+- a bare public Ed25519 JWK (`{"kty":"OKP","crv":"Ed25519","x":"..."}`), or
+- a single-key JWKS (`{"keys":[<that JWK>]}`).
+
+The loader fails closed and rejects: a file that is not valid JSON or not an object; a JWKS with no keys or with more than one key; a JWK that contains private key material (`d`); a key that is not `kty` `OKP` with `crv` `Ed25519`; a JWK missing the public value `x`, or whose `x` is not a 32-byte base64url value; and key files larger than 16 KiB. Error messages never echo key material.
+
+Try it on the shipped samples. `samples generate` writes valid records under `valid/` and the matching public key set to `bundles/sandbox-jwks.json`:
+
+```bash
+peac samples generate -o ./s
+peac verify ./s/valid/basic-record.jws --public-key ./s/bundles/sandbox-jwks.json
+```
+
+Expected output:
+
+```text
+Signature valid (offline).
+```
+
+On failure the command prints `Verification failed: <message>` with the error code (for example `E_INVALID_SIGNATURE` for a modified record) and exits 1.
+
+A valid result establishes that the record was signed by the private key matching the supplied public key and has not changed since. It does not establish that the key or its holder should be trusted, or that the statements inside the record are true.
 
 ### Decode a receipt without verification
 
