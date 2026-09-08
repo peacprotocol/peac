@@ -32,6 +32,15 @@ describe('coverage against the real union', () => {
   it('has no default branch: an unknown code returns undefined', () => {
     expect(stageForCanonicalCode('E_TOTALLY_NEW_CODE')).toBeUndefined();
   });
+
+  it.each(['constructor', 'toString', '__proto__', 'hasOwnProperty', 'valueOf', 'isPrototypeOf'])(
+    'inherited Object member %s is NOT a stage (own-property lookup only)',
+    (code) => {
+      // Without the own-property guard these resolve to inherited functions/objects, which are
+      // truthy and would be treated as a mapped stage by a caller that only rejects `undefined`.
+      expect(stageForCanonicalCode(code)).toBeUndefined();
+    }
+  );
 });
 
 describe('stage assignment', () => {
