@@ -38,13 +38,17 @@ interface Corpus {
 const corpus: Corpus = JSON.parse(readFileSync(CORPUS_PATH, 'utf8'));
 
 describe('JCS extended parity corpus (TypeScript side)', () => {
-  it('corpus has the expected six vectors', () => {
+  it('corpus has the expected ten vectors', () => {
     expect(corpus.vectors.map((v) => v.id).sort()).toEqual([
       'escape-sequences',
       'integer-vs-float-same-value',
       'nested-depth-5',
       'numeric-zero-and-neg-zero',
       'unicode-nfc-nfd',
+      'utf16-order-in-array',
+      'utf16-order-nested',
+      'utf16-order-prefix-names',
+      'utf16-order-surrogate-vs-pua',
       'utf16-surrogate-pair',
     ]);
   });

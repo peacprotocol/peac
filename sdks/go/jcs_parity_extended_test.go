@@ -40,17 +40,21 @@ func TestJCSExtendedParityCorpus(t *testing.T) {
 		t.Fatalf("cannot parse corpus JSON: %v", err)
 	}
 
-	if len(corpus.Vectors) != 6 {
-		t.Fatalf("corpus vector count = %d, want 6", len(corpus.Vectors))
+	if len(corpus.Vectors) != 10 {
+		t.Fatalf("corpus vector count = %d, want 10", len(corpus.Vectors))
 	}
 
 	expectedIDs := map[string]bool{
-		"unicode-nfc-nfd":             false,
-		"nested-depth-5":              false,
-		"numeric-zero-and-neg-zero":   false,
-		"integer-vs-float-same-value": false,
-		"escape-sequences":            false,
-		"utf16-surrogate-pair":        false,
+		"unicode-nfc-nfd":              false,
+		"nested-depth-5":               false,
+		"numeric-zero-and-neg-zero":    false,
+		"integer-vs-float-same-value":  false,
+		"escape-sequences":             false,
+		"utf16-surrogate-pair":         false,
+		"utf16-order-surrogate-vs-pua": false,
+		"utf16-order-nested":           false,
+		"utf16-order-in-array":         false,
+		"utf16-order-prefix-names":     false,
 	}
 
 	for _, vector := range corpus.Vectors {

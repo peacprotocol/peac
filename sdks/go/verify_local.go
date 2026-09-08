@@ -295,13 +295,32 @@ func VerifyLocal(receiptJWS string, opts VerifyLocalOptions) *VerifyLocalResult 
 	// Policy binding
 	if opts.PolicyBytes != nil && claims.Peac != nil && claims.Peac.Digest != "" {
 		localDigest, err := ComputePolicyDigest(opts.PolicyBytes)
-		if err == nil {
-			result.PolicyBinding = CheckPolicyBinding(claims.Peac.Digest, localDigest)
-			if result.PolicyBinding == PolicyBindingFailed {
-				result.ErrorCode = "E_POLICY_BINDING_FAILED"
-				result.ErrorMessage = "policy digest mismatch"
-				return result
+		if err != nil {
+			// The caller supplied policy bytes that cannot be canonicalized (not
+			// I-JSON, or not JSON at all). This is neither "no policy supplied"
+			// (unavailable) nor "digests differ" (failed): it is rejected caller
+			// input, and it fails CLOSED with the raw-admission code -- the same
+			// posture the TypeScript verifier takes for a malformed policyDigest
+			// option (E_INVALID_FORMAT). Previously this branch swallowed the
+			// error and returned Valid=true with PolicyBinding=unavailable, so a
+			// malformed local policy silently read as "not checked". Signature
+			// integrity was established above and is not what this code reports:
+			// the message names the policy document explicitly.
+			result.PolicyBinding = PolicyBindingUnavailable
+			var ie *ijsonError
+			if errors.As(err, &ie) {
+				result.ErrorCode = ie.Code
+			} else {
+				result.ErrorCode = "E_INVALID_FORMAT"
 			}
+			result.ErrorMessage = err.Error()
+			return result
+		}
+		result.PolicyBinding = CheckPolicyBinding(claims.Peac.Digest, localDigest)
+		if result.PolicyBinding == PolicyBindingFailed {
+			result.ErrorCode = "E_POLICY_BINDING_FAILED"
+			result.ErrorMessage = "policy digest mismatch"
+			return result
 		}
 	} else if opts.PolicyBytes != nil && (claims.Peac == nil || claims.Peac.Digest == "") {
 		result.PolicyBinding = PolicyBindingUnavailable
