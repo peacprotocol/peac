@@ -1,6 +1,7 @@
 # PEAC Go SDK
 
-Go client library for PEAC protocol receipt issuance, verification, and policy evaluation.
+Go library for PEAC interaction record issuance, local verification, and policy evaluation
+(Wire 0.2, `interaction-record+jwt`).
 
 ## Installation
 
@@ -22,7 +23,7 @@ go get github.com/peacprotocol/peac/sdks/go/middleware/gin
 
 ## Quick Start
 
-### Issuing Receipts
+### Issuing records
 
 ```go
 package main
@@ -32,34 +33,44 @@ import (
     "log"
 
     peac "github.com/peacprotocol/peac/sdks/go"
+    "github.com/peacprotocol/peac/sdks/go/jws"
 )
 
 func main() {
-    // Create a signing key (in production, load from secure storage)
-    signingKey, err := peac.GenerateSigningKey("my-key-id")
+    // Create a signing key (in production, load from secure storage).
+    // The key ID becomes the JWS `kid` header.
+    signingKey, err := jws.GenerateSigningKey("https://api.example.com/keys/1")
     if err != nil {
         log.Fatal(err)
     }
 
     result, err := peac.Issue(peac.IssueOptions{
-        Issuer:     "https://publisher.example",
-        Audience:   "https://agent.example",
-        Amount:     1000,  // Amount in minor units (e.g., cents)
-        Currency:   "USD",
-        Rail:       "stripe",
-        Reference:  "pi_abc123",
+        Iss:     "https://api.example.com",
+        Kind:    peac.KindEvidence,
+        Type:    "org.peacprotocol/payment",
+        Pillars: []string{"commerce"},
+        Extensions: map[string]any{
+            "org.peacprotocol/commerce": map[string]any{
+                "payment_rail": "x402",
+                "amount_minor": "1000",
+                "currency":     "USD",
+            },
+        },
         SigningKey: signingKey,
     })
     if err != nil {
         log.Fatal(err)
     }
 
-    fmt.Printf("Receipt JWS: %s\n", result.JWS)
-    fmt.Printf("Receipt ID: %s\n", result.ReceiptID)
+    fmt.Printf("Record JWS: %s\n", result.JWS)
+    fmt.Printf("Record ID: %s\n", result.ReceiptID)
 }
 ```
 
-### Verifying Receipts
+### Verifying records locally
+
+Verification runs entirely locally against a supplied public key. No network request, JWKS
+discovery, or issuer callback is made.
 
 ```go
 package main
@@ -67,37 +78,83 @@ package main
 import (
     "fmt"
     "log"
-    "time"
 
     peac "github.com/peacprotocol/peac/sdks/go"
+    "github.com/peacprotocol/peac/sdks/go/jws"
 )
 
 func main() {
-    receiptJWS := "eyJhbGciOiJFZERTQSIsImtpZCI6Ii4uLiJ9..."
+    recordJWS := "eyJhbGciOiJFZERTQSIsInR5cCI6ImludGVyYWN0aW9uLXJlY29yZCtqd3QiLCJraWQiOiIuLi4ifQ..."
 
-    result, err := peac.Verify(receiptJWS, peac.VerifyOptions{
-        Issuer:   "https://publisher.example",
-        Audience: "https://agent.example",
-        MaxAge:   time.Hour,
-    })
+    // The verifier needs only the issuer's 32-byte Ed25519 public key.
+    publicKey, err := jws.ParsePublicKeyFromBytes(rawPublicKeyBytes())
     if err != nil {
         log.Fatal(err)
     }
 
-    fmt.Printf("Receipt ID: %s\n", result.Claims.ReceiptID)
-    fmt.Printf("Issued At: %d\n", result.Claims.IssuedAt)
-    fmt.Printf("Purpose: %v\n", result.Claims.PurposeDeclared)
+    result := peac.VerifyLocal(recordJWS, peac.VerifyLocalOptions{
+        PublicKey: publicKey,
+        Issuer:    "https://api.example.com", // optional: iss must match when set
+    })
+    if !result.Valid {
+        log.Fatalf("verification failed: %s: %s", result.ErrorCode, result.ErrorMessage)
+    }
+
+    fmt.Printf("Issuer: %s\n", result.Claims.Iss)
+    fmt.Printf("Kind: %s, Type: %s\n", result.Claims.Kind, result.Claims.Type)
+    fmt.Printf("Key ID: %s, Wire: %s\n", result.Kid, result.WireVersion)
 }
+
+// rawPublicKeyBytes returns the issuer's raw 32-byte Ed25519 public key, for example
+// decoded from the base64url `x` member of the issuer's public JWK.
+func rawPublicKeyBytes() []byte { /* ... */ return nil }
 ```
 
-### Evaluating Policies
+A valid result establishes that the record was signed by the private key matching the supplied
+public key and has not changed since. It does not establish that the key or its holder should be
+trusted, or that the statements inside the record are true.
+
+### Binding a policy document
+
+A record may carry a `policy` block whose `digest` is the JCS (RFC 8785) SHA-256 digest of a policy
+document. A verifier that holds its own copy of that document can check the binding:
+
+```go
+policyJSON := []byte(`{"version":"peac-policy/0.1","rules":[]}`)
+
+digest, err := peac.ComputePolicyDigest(policyJSON) // "sha256:<hex>" over RFC 8785 JCS bytes
+if err != nil {
+    log.Fatal(err)
+}
+
+issued, err := peac.Issue(peac.IssueOptions{
+    Iss:        "https://api.example.com",
+    Kind:       peac.KindEvidence,
+    Type:       "org.peacprotocol/api-call",
+    Policy:     &peac.PolicyBlock{Digest: digest, URI: "https://api.example.com/.well-known/peac.txt"},
+    SigningKey: signingKey,
+})
+if err != nil {
+    log.Fatal(err)
+}
+
+result := peac.VerifyLocal(issued.JWS, peac.VerifyLocalOptions{
+    PublicKey:   signingKey.PublicKey(),
+    PolicyBytes: policyJSON, // the verifier's own copy of the policy document
+})
+fmt.Printf("Policy binding: %s\n", result.PolicyBinding) // verified, failed, or unavailable
+```
+
+A `verified` binding means the digest in the record matches the digest of the bytes the verifier
+supplied. It binds bytes, not events: it does not establish that the policy was applied.
+
+### Evaluating policies
 
 ```go
 package main
 
 import (
     "fmt"
-    "log"
 
     "github.com/peacprotocol/peac/sdks/go/policy"
 )
@@ -158,101 +215,152 @@ The workspace file (`go.work`) links all modules for seamless local development 
 
 ## Features
 
-- Ed25519 signature signing and verification
-- Receipt issuance with UUIDv7 receipt IDs (v0.9.29+)
-- Policy evaluation with first-match-wins semantics (v0.9.29+)
-- JWKS discovery and caching
-- Purpose claims support (v0.9.24+)
-- Agent identity attestation support (v0.9.25+)
-- Thread-safe JWKS cache with stale-while-revalidate
-- Comprehensive error types with retry hints
-- Evidence validation with DoS protection (v0.9.29+)
+- Ed25519 signing and verification (RFC 8032, PEAC admissibility profile)
+- Interaction record issuance (Wire 0.2, `interaction-record+jwt`) with UUIDv7 record IDs
+- Local verification with a supplied public key (`VerifyLocal`); no network access
+- RFC 7493 I-JSON admission applied on both issuance and verification
+- JWS `kid` bounded by UTF-8 byte length (at most 256 UTF-8 bytes) on issuance and verification
+- Policy digest computation and three-state policy binding (RFC 8785 JCS + SHA-256)
+- Policy evaluation with first-match-wins semantics
+- Evidence validation with DoS protection limits on extension values
+- JWKS fetch and caching helpers (`jwks` package)
 
 ## API Reference
 
-### Issue (v0.9.29+)
+### Issue
 
 ```go
 func Issue(opts IssueOptions) (*IssueResult, error)
+func IssueJWS(opts IssueOptions) (string, error)
 ```
 
-Creates a signed PEAC receipt JWS.
+Creates a signed interaction record in the current stable format (`interaction-record+jwt`).
+Validates all inputs, generates a UUIDv7 record ID, and signs with Ed25519.
 
 #### IssueOptions
 
-| Field        | Type          | Description                                       |
-| ------------ | ------------- | ------------------------------------------------- |
-| `Issuer`     | `string`      | Issuer URL (required, must be https://)           |
-| `Audience`   | `string`      | Audience URL (required, must be https://)         |
-| `Amount`     | `int64`       | Amount in minor units (required, >= 0)            |
-| `Currency`   | `string`      | ISO 4217 currency code (required, e.g., "USD")    |
-| `Rail`       | `string`      | Payment rail identifier (required)                |
-| `Reference`  | `string`      | Payment reference (required)                      |
-| `SigningKey` | `*SigningKey` | Ed25519 signing key (required)                    |
-| `Subject`    | `string`      | Subject URL (optional, must be https://)          |
-| `Expiry`     | `int64`       | Unix timestamp for expiry (optional)              |
-| `Env`        | `string`      | Environment: "live" or "test" (default: "test")   |
-| `Network`    | `string`      | Payment network (optional)                        |
-| `Evidence`   | `any`         | Additional evidence (optional, JSON-serializable) |
+| Field            | Type                 | Description                                                                               |
+| ---------------- | -------------------- | ----------------------------------------------------------------------------------------- |
+| `Iss`            | `string`             | Issuer URI (required; must start with `https://` or `did:`)                               |
+| `Kind`           | `string`             | Structural kind (required): `peac.KindEvidence` or `peac.KindChallenge`                   |
+| `Type`           | `string`             | Semantic type (required), reverse-DNS or URI, e.g. `org.peacprotocol/mcp-tool-call`       |
+| `SigningKey`     | `*jws.SigningKey`    | Ed25519 signing key (required); its key ID becomes the JWS `kid` header                   |
+| `Kid`            | `string`             | Deprecated. Leave empty or equal to `SigningKey.KeyID()`; a conflicting value is rejected |
+| `Sub`            | `string`             | Optional subject URI                                                                      |
+| `Exp`            | `int64`              | Optional expiration (Unix seconds)                                                        |
+| `Pillars`        | `[]string`           | Optional pillar values from the closed 10-pillar taxonomy (`peac.ValidPillars`)           |
+| `Actor`          | `*ActorBinding`      | Optional top-level actor binding                                                          |
+| `Extensions`     | `map[string]any`     | Optional extension map (`ext` claim)                                                      |
+| `Policy`         | `*PolicyBlock`       | Optional policy binding block (`digest`, `uri`, `version`)                                |
+| `Clock`          | `Clock`              | Optional clock for timestamp generation (system clock if nil)                             |
+| `IDGen`          | `ReceiptIDGenerator` | Optional record-ID generator (UUIDv7 if nil)                                              |
+| `EvidenceLimits` | `evidence.Limits`    | Optional DoS-protection limits on extension values (defaults if zero)                     |
 
-#### URL Restrictions
+#### IssueResult
 
-All URL fields (`Issuer`, `Audience`, `Subject`) must:
+| Field       | Type     | Description                                    |
+| ----------- | -------- | ---------------------------------------------- |
+| `JWS`       | `string` | Compact JWS serialization of the signed record |
+| `ReceiptID` | `string` | Generated UUIDv7 record identifier             |
+| `IssuedAt`  | `int64`  | Issuance time (Unix seconds)                   |
 
-- Use the `https://` scheme
-- Have a valid host
-- **Not** contain URL fragments (e.g., `#section`)
-- **Not** contain userinfo (e.g., `user:pass@`)
+#### Issue error codes
 
-#### Evidence Structure
+Issuance failures return `*IssueError` with `Code`, `Message`, and `Field`:
 
-Evidence is placed in `payment.evidence` in the receipt claims (not at the top level):
+| Code                   | Description                                                              |
+| ---------------------- | ------------------------------------------------------------------------ |
+| `MISSING_ISSUER`       | `Iss` is empty                                                           |
+| `INVALID_ISSUER`       | `Iss` does not start with `https://` or `did:`                           |
+| `MISSING_KIND`         | `Kind` is empty                                                          |
+| `INVALID_KIND`         | `Kind` is not `evidence` or `challenge`                                  |
+| `MISSING_TYPE`         | `Type` is empty                                                          |
+| `INVALID_TYPE`         | `Type` is malformed                                                      |
+| `INVALID_PILLAR`       | A pillar value is outside the closed taxonomy                            |
+| `MISSING_SIGNING_KEY`  | No signing key provided                                                  |
+| `KEY_ID_MISMATCH`      | `Kid` set to a value that differs from the signing key's own key ID      |
+| `INVALID_KEY_ID`       | Key ID violates the Wire 0.2 `kid` rule (UTF-8, at most 256 UTF-8 bytes) |
+| `INVALID_UTF8`         | A caller-controlled claim string is not valid UTF-8                      |
+| `INVALID_JSON_PROFILE` | The marshaled payload fails the raw JSON admission profile               |
+| `SIGN_FAILED`          | Signing failed                                                           |
+| `ID_GEN_FAILED`        | Record-ID generation failed                                              |
 
-```go
-// Evidence is nested under payment
-opts := peac.IssueOptions{
-    // ...
-    Evidence: map[string]any{"custom": "data"},
-}
-
-// In the resulting receipt claims:
-// claims.payment.evidence = {"custom": "data"}
-```
-
-### Verify
-
-```go
-func Verify(receiptJWS string, opts VerifyOptions) (*VerifyResult, error)
-```
-
-Verifies a PEAC receipt JWS and returns the verified claims.
-
-#### VerifyOptions
-
-| Field       | Type              | Description                           |
-| ----------- | ----------------- | ------------------------------------- |
-| `Issuer`    | `string`          | Expected issuer (required)            |
-| `Audience`  | `string`          | Expected audience (required)          |
-| `MaxAge`    | `time.Duration`   | Maximum receipt age (default: 1 hour) |
-| `ClockSkew` | `time.Duration`   | Clock skew tolerance (default: 30s)   |
-| `JWKSURL`   | `string`          | Explicit JWKS URL (optional)          |
-| `KeySet`    | `*jwks.KeySet`    | Pre-loaded key set (optional)         |
-| `JWKSCache` | `*jwks.Cache`     | JWKS cache instance (optional)        |
-| `Context`   | `context.Context` | Request context                       |
-
-#### VerifyResult
+### VerifyLocal
 
 ```go
-type VerifyResult struct {
-    Claims          *PEACReceiptClaims
-    SubjectSnapshot *SubjectProfileSnapshot
-    KeyID           string
-    Algorithm       string
-    Perf            *VerifyPerf
-}
+func VerifyLocal(receiptJWS string, opts VerifyLocalOptions) *VerifyLocalResult
 ```
 
-### Policy Evaluation (v0.9.29+)
+Verifies a signed interaction record locally with a supplied public key. Enforces the current
+stable format (`interaction-record+jwt`; the full media-type form of `typ` is accepted and
+normalized). Never fetches keys.
+
+#### VerifyLocalOptions
+
+| Field          | Type                | Description                                                                                |
+| -------------- | ------------------- | ------------------------------------------------------------------------------------------ |
+| `PublicKey`    | `ed25519.PublicKey` | 32-byte Ed25519 public key (required)                                                      |
+| `Issuer`       | `string`            | Expected issuer URI (optional; when set, `iss` must match)                                 |
+| `MaxClockSkew` | `time.Duration`     | Clock skew tolerance (default 30s)                                                         |
+| `RequireExp`   | `bool`              | Require the `exp` claim                                                                    |
+| `PolicyBytes`  | `[]byte`            | Local policy document; when set, its JCS + SHA-256 digest is compared with `policy.digest` |
+
+#### VerifyLocalResult
+
+| Field           | Type                       | Description                             |
+| --------------- | -------------------------- | --------------------------------------- |
+| `Valid`         | `bool`                     | Whether every verification check passed |
+| `Claims`        | `*InteractionRecordClaims` | Verified claims (nil when invalid)      |
+| `Kid`           | `string`                   | Key ID from the JWS header              |
+| `Algorithm`     | `string`                   | Always `EdDSA`                          |
+| `Warnings`      | `[]VerificationWarning`    | Non-fatal warnings                      |
+| `PolicyBinding` | `PolicyBindingStatus`      | `verified`, `failed`, or `unavailable`  |
+| `WireVersion`   | `string`                   | `0.2`                                   |
+| `ReceiptRef`    | `string`                   | `sha256:<hex>` of the compact JWS bytes |
+| `ErrorCode`     | `string`                   | Error code when `Valid` is false        |
+| `ErrorMessage`  | `string`                   | Error message when `Valid` is false     |
+
+#### VerifyLocal error codes
+
+| Code                         | Description                                                |
+| ---------------------------- | ---------------------------------------------------------- |
+| `E_INVALID_FORMAT`           | Malformed JWS, header, or payload                          |
+| `E_IJSON_*`                  | Raw header or payload bytes fail RFC 7493 I-JSON admission |
+| `E_JWS_MISSING_KID`          | Protected header has no `kid`                              |
+| `E_UNSUPPORTED_WIRE_VERSION` | `typ` or `peac_version` is not Wire 0.2                    |
+| `E_INVALID_SIGNATURE`        | Signature does not verify under the supplied key           |
+| `E_NOT_YET_VALID`            | `iat` is in the future beyond the skew tolerance           |
+| `E_EXPIRED`                  | `exp` has passed                                           |
+| `E_INVALID_ISSUER`           | `iss` does not match `Issuer`                              |
+| `E_CONSTRAINT_VIOLATION`     | A required claim or constraint is missing or invalid       |
+| `E_POLICY_BINDING_FAILED`    | `policy.digest` does not match the supplied policy bytes   |
+
+### Policy binding helpers
+
+```go
+func ComputePolicyDigest(policyJSON []byte) (string, error)
+func CheckPolicyBinding(receiptDigest, localDigest string) PolicyBindingStatus
+```
+
+`ComputePolicyDigest` returns `sha256:<hex>` over the RFC 8785 JCS canonicalization of the input,
+matching the TypeScript `computePolicyDigestJcs()`. `CheckPolicyBinding` returns `verified` when both
+digests are present and equal, `failed` when both are present and differ, and `unavailable` when
+either is absent.
+
+### Keys (`jws` package)
+
+```go
+func GenerateSigningKey(keyID string) (*SigningKey, error)
+func NewSigningKey(privateKey ed25519.PrivateKey, keyID string) (*SigningKey, error)
+func NewSigningKeyFromSeed(seed []byte, keyID string) (*SigningKey, error)
+func ParsePublicKeyFromBytes(data []byte) (ed25519.PublicKey, error)
+```
+
+`SigningKey.KeyID()` returns the key identifier used as the JWS `kid`; `SigningKey.PublicKey()`
+returns the corresponding Ed25519 public key. `ParsePublicKeyFromBytes` accepts a raw 32-byte
+Ed25519 public key.
+
+### Policy Evaluation
 
 ```go
 func Evaluate(policy *PolicyDocument, context *EvaluationContext) *EvaluationResult
@@ -285,111 +393,30 @@ const (
 const ReasonNilPolicy = "nil policy"
 ```
 
-### JWKS Caching
+### Legacy Wire 0.1 API (deprecated)
 
-For production use, create a shared JWKS cache:
-
-```go
-cache := jwks.NewCache(jwks.CacheOptions{
-    TTL:                  5 * time.Minute,
-    StaleWhileRevalidate: true,
-})
-
-result, err := peac.Verify(receiptJWS, peac.VerifyOptions{
-    Issuer:    "https://publisher.example",
-    Audience:  "https://agent.example",
-    JWKSCache: cache,
-})
-```
-
-### Error Handling
-
-All errors are of type `*PEACError` with structured information:
-
-```go
-result, err := peac.Verify(receiptJWS, opts)
-if err != nil {
-    if peacErr, ok := err.(*peac.PEACError); ok {
-        fmt.Printf("Error Code: %s\n", peacErr.Code)
-        fmt.Printf("HTTP Status: %d\n", peacErr.HTTPStatus())
-        fmt.Printf("Retryable: %v\n", peacErr.IsRetryable())
-    }
-}
-```
-
-#### Error Codes
-
-| Code                  | HTTP | Description                   |
-| --------------------- | ---- | ----------------------------- |
-| `E_INVALID_SIGNATURE` | 400  | Signature verification failed |
-| `E_INVALID_FORMAT`    | 400  | Invalid JWS format            |
-| `E_EXPIRED`           | 401  | Receipt has expired           |
-| `E_NOT_YET_VALID`     | 401  | Receipt not yet valid         |
-| `E_INVALID_ISSUER`    | 400  | Issuer mismatch               |
-| `E_INVALID_AUDIENCE`  | 400  | Audience mismatch             |
-| `E_JWKS_FETCH_FAILED` | 503  | Failed to fetch JWKS          |
-| `E_KEY_NOT_FOUND`     | 400  | Key ID not in JWKS            |
-
-#### Issue Error Codes (v0.9.29+)
-
-| Code                    | Description                         |
-| ----------------------- | ----------------------------------- |
-| `E_INVALID_ISSUER`      | Invalid issuer URL                  |
-| `E_INVALID_AUDIENCE`    | Invalid audience URL                |
-| `E_INVALID_SUBJECT`     | Invalid subject URL                 |
-| `E_INVALID_CURRENCY`    | Invalid currency code               |
-| `E_INVALID_AMOUNT`      | Invalid amount (negative)           |
-| `E_INVALID_EXPIRY`      | Invalid expiry (negative)           |
-| `E_INVALID_ENV`         | Invalid env (must be "live"/"test") |
-| `E_INVALID_RAIL`        | Missing payment rail                |
-| `E_INVALID_REFERENCE`   | Missing payment reference           |
-| `E_INVALID_EVIDENCE`    | Evidence validation failed          |
-| `E_MISSING_SIGNING_KEY` | No signing key provided             |
-
-#### Identity Error Codes (v0.9.25+)
-
-| Code                     | HTTP | Description                  |
-| ------------------------ | ---- | ---------------------------- |
-| `E_IDENTITY_MISSING`     | 401  | No identity attestation      |
-| `E_IDENTITY_SIG_INVALID` | 401  | Identity signature invalid   |
-| `E_IDENTITY_EXPIRED`     | 401  | Identity attestation expired |
-| `E_IDENTITY_KEY_UNKNOWN` | 401  | Identity key not found       |
+`Verify`, `VerifyWithContext`, `VerifyOptions`, `VerifyResult`, `PEACReceiptClaims`, `ErrorCode`,
+and `PEACError` remain exported so existing middleware compiles, but they support Wire 0.1 only and
+are deprecated. `Verify` does not verify current records: it returns `E_INVALID_FORMAT` with the
+message "Wire 0.1 Verify() is deprecated; use VerifyLocal() for Interaction Record format". Use
+`VerifyLocal` for all current records.
 
 ## Claims Structure
 
 ```go
-type PEACReceiptClaims struct {
-    // Standard JWT claims
-    Issuer    string   `json:"iss"`
-    Subject   string   `json:"sub,omitempty"`
-    Audience  []string `json:"aud,omitempty"`
-    IssuedAt  int64    `json:"iat"`
-    ExpiresAt int64    `json:"exp,omitempty"`
-    JWTID     string   `json:"jti"`
-
-    // PEAC claims
-    ReceiptID       string   `json:"receipt_id"`
-    PurposeDeclared []string `json:"purpose_declared,omitempty"`
-    PurposeEnforced string   `json:"purpose_enforced,omitempty"`
-    Decision        string   `json:"decision,omitempty"`
-
-    // Evidence
-    Payment      *PaymentEvidence `json:"payment,omitempty"`
-    Attestations []Attestation    `json:"attestations,omitempty"`
-}
-```
-
-## Agent Identity (v0.9.25+)
-
-The SDK supports agent identity attestations:
-
-```go
-type AgentIdentityEvidence struct {
-    AgentID         string      `json:"agent_id"`
-    ControlType     string      `json:"control_type"`  // "operator" or "user-delegated"
-    Capabilities    []string    `json:"capabilities,omitempty"`
-    DelegationChain []string    `json:"delegation_chain,omitempty"`
-    Proof           *AgentProof `json:"proof,omitempty"`
+type InteractionRecordClaims struct {
+    Iss         string         `json:"iss"`
+    Sub         string         `json:"sub,omitempty"`
+    Iat         int64          `json:"iat"`
+    Exp         int64          `json:"exp,omitempty"`
+    Rid         string         `json:"rid"`
+    Kind        string         `json:"kind"`
+    Type        string         `json:"type"`
+    PeacVersion string         `json:"peac_version"`
+    Pillars     []string       `json:"pillars,omitempty"`
+    Actor       *ActorBinding  `json:"actor,omitempty"`
+    Ext         map[string]any `json:"ext,omitempty"`
+    Peac        *PolicyBlock   `json:"policy,omitempty"`
 }
 ```
 
@@ -424,7 +451,6 @@ For example, v0.9.29 would have tags:
 ## Requirements
 
 - Go 1.26 or later
-- `golang.org/x/crypto` for Ed25519
 
 ## License
 
