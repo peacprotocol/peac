@@ -46,7 +46,7 @@ or participants before grouping records. Apply these rules:
 1. Verify every PEAC record and confirm that its issuer/key is accepted
    under the relying party's review policy.
 2. Establish a bounded review set and an explicit accepted-issuer or
-   participant policy. A valid signature proves control of the signing
+   participant policy. A valid signature establishes control of the signing
    key; it does not by itself establish that the issuer belongs to the
    reviewed workflow.
 3. Group only accepted records by `correlation.workflow_id`. A matching

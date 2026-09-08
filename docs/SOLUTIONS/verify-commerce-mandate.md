@@ -58,7 +58,7 @@ Prerequisites: Node 22+, pnpm 8+. No external service required.
 
 ## When to use this
 
-- An auditor needs portable proof that a mandate was reportedly bound for a merchant and payer.
+- An auditor needs portable evidence that a mandate was reportedly bound for a merchant and payer.
 - A counterparty needs to verify that an authorization, capture, a refund was reported, or a settlement state was reported without calling the rail's API.
 - A reviewer needs to verify a signed record reporting a settlement state (pending, completed, failed, reversed, partial) tied to a specific mandate.
 - A finance team needs evidence that a budget event (limit set, threshold crossed, etc.) was reportedly observed against a specific mandate.

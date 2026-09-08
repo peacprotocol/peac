@@ -29,12 +29,12 @@ Two record roles, both ordinary PEAC records on the frozen wire format:
 | redaction fact            | integrator extension, `redaction_applied: true/false`                                                |
 | tool-definition reference | integrator extension, `tool_definition_ref` (see below)                                              |
 
-**Per tool-definition manifest** (registered type `org.peacprotocol/provenance-record`): the gateway signs a digest of the tool definitions it exposes (names, descriptions, schemas, risk tiers). Each per-call record references this record by `receipt_ref`. A verifier can then prove which definitions the gateway was serving when a call happened, which makes silently changed tool descriptions and schemas detectable after the fact.
+**Per tool-definition manifest** (registered type `org.peacprotocol/provenance-record`): the gateway signs a digest of the tool definitions it exposes (names, descriptions, schemas, risk tiers). Each per-call record references this record by `receipt_ref`. A verifier can then establish which definitions the gateway reported serving when a call happened, which makes silently changed tool descriptions and schemas detectable after the fact.
 
 Two rules carry the whole pattern:
 
 - **Digests, never payloads.** Arguments and results may contain customer data; the record binds hashes. Redact first, then hash, and record that redaction was applied so the verifier knows what the digest covers.
-- **Claim only what the record binds.** A valid signature proves the record was not modified. It says nothing about content the record did not bind. Binding digests is what extends the proof to the content.
+- **Claim only what the record binds.** A valid signature establishes that the record was not modified since it was signed under the supplied key. It says nothing about content the record did not bind. Binding digests is what extends that evidence to the content bytes; a digest match binds bytes, not events.
 
 ## How it is carried
 
@@ -54,12 +54,12 @@ A modified result fails check 4 even though check 2 still passes; a modified rec
 
 ## Deny records
 
-Record refusals, not just successes. A denied `tools/call` produces the same record shape with `decision: deny` and a deny reason. When a workflow later disputes why an action did not happen, the gateway can prove the refusal and the policy reference that produced it.
+Record refusals, not just successes. A denied `tools/call` produces the same record shape with `decision: deny` and a deny reason. When a workflow later disputes why an action did not happen, the gateway can present signed evidence of the refusal and the policy reference that produced it.
 
 ## What this composes with
 
 - **Auth** keeps authenticating; the record can reference the actor, it does not replace the credential.
-- **Policy engines** keep deciding; the record proves which policy reference was in force, it does not evaluate policy.
+- **Policy engines** keep deciding; the record establishes which policy reference the gateway reported as in force, it does not evaluate policy.
 - **OpenTelemetry** keeps correlating; the record carries `trace_id` through the correlation extension and a span can carry the record's `receipt_ref` attribute.
 - **The gateway itself** keeps routing, scanning, and redacting; PEAC is the artifact it emits outward.
 
