@@ -92,6 +92,10 @@ Profile boundary rules:
 | `payer_ref`                 | OpaqueRef         | Caller-reported EIP-3009 four-tuple `payer` reference                                                                                                                         |
 | `pay_to_ref`                | OpaqueRef         | Caller-reported EIP-3009 four-tuple `payTo` reference                                                                                                                         |
 
+This field carries a format contract only: `sha256:` followed by 64 lowercase hexadecimal characters. The preimage is profile-defined and out of scope for this schema, so generic verification treats the value as a caller-asserted reference and does not recompute it.
+
+Document binding, specified in [DOCUMENT-BINDING.md](DOCUMENT-BINDING.md), is a separate mechanism with a normative preimage.
+
 ### 4.3 Per-event-kind additional fields
 
 | Event kind                                       | Additional required                                                        | Additional optional                                                                                                                               |

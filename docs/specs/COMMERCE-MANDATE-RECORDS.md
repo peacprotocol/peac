@@ -73,6 +73,10 @@ The type URI in the PEAC record envelope (`type` field) MUST match the `event_ki
 | `scheme_id`                | string     | Bounded scheme identifier (see Section 6)                      |
 | `scheme_ref`               | OpaqueRef  | Opaque scheme reference (mutually exclusive with `scheme_id`)  |
 
+These fields carry a format contract only: `sha256:` followed by 64 lowercase hexadecimal characters. The preimage is profile-defined and out of scope for this schema, so generic verification treats these values as caller-asserted references and does not recompute them.
+
+Document binding is a separate mechanism. `bindings.policy`, `bindings.documents` and `bindings.terms` have a normative preimage and are recomputed; see [DOCUMENT-BINDING.md](DOCUMENT-BINDING.md). The extension field `policy_digest` is not part of that mechanism.
+
 ### 4.3 Per-event-kind additional fields
 
 | Event kind                        | Additional required                                              | Additional optional                                                             |

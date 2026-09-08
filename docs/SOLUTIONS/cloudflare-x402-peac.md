@@ -62,7 +62,7 @@ const jsonDigest = await computeX402TermsDigest({
 // uri without bytes returns 'unavailable'
 const uriDigest = await computeX402TermsDigest({
   representation: 'uri',
-  uri: 'https://api.example.com/.well-known/peac-terms.txt',
+  uri: 'https://api.example.com/.well-known/peac.txt',
 });
 ```
 

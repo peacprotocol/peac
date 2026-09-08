@@ -66,6 +66,10 @@ Every record carries a closed-enum discriminator at `event_kind` whose value mat
 
 `observed_at` is required on every event family. Optional metadata: `observed_by_ref`, `upstream_event_ref`, `upstream_artifact_digest`.
 
+This field carries a format contract only: `sha256:` followed by 64 lowercase hexadecimal characters. The preimage is profile-defined and out of scope for this schema, so generic verification treats the value as a caller-asserted reference and does not recompute it.
+
+Document binding, specified in [DOCUMENT-BINDING.md](DOCUMENT-BINDING.md), is a separate mechanism with a normative preimage.
+
 `credential.storage_surface` is REQUIRED for `credential.sub_event` values that handle credential material directly (`issued`, `rotated`, `synced`) and OPTIONAL for `revoked`. When the caller cannot capture or describe the storage surface safely, the placeholder `{ "kind": "unknown", "material_redaction": "never_capture" }` satisfies the invariant.
 
 ## 6. Schema (NORMATIVE)

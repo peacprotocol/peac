@@ -93,6 +93,10 @@ Every event kind carries:
 | `score_ref`                | OpaqueRef       | OPTIONAL    | Opaque reference to a stored score artifact (score values are NEVER inlined; see §6)                     |
 | `result_digest`            | sha256 string   | OPTIONAL    | Canonical digest of the result artifact                                                                  |
 
+These fields carry a format contract only: `sha256:` followed by 64 lowercase hexadecimal characters. The preimage is profile-defined and out of scope for this schema, so generic verification treats these values as caller-asserted references and does not recompute them.
+
+Document binding is a separate mechanism. `bindings.policy`, `bindings.documents` and `bindings.terms` have a normative preimage and are recomputed; see [DOCUMENT-BINDING.md](DOCUMENT-BINDING.md). The extension field `policy_digest` is not part of that mechanism.
+
 ### 5.2 Per-event-kind required fields
 
 | `event_kind`                     | Additional REQUIRED fields                                                                                 |
