@@ -42,11 +42,11 @@
     "@peac/kernel": "workspace:*",
     "@peac/schema": "workspace:*",
     "yazl": "^3.3.1",
-    "yauzl": "^2.10.0"
+    "yauzl": "^3.4.0"
   },
   "devDependencies": {
     "@types/node": "^22.19.11",
-    "@types/yauzl": "^2.10.3",
+    "@types/yauzl": "^3.4.0",
     "@types/yazl": "^3.3.0",
     "typescript": "^5.3.3",
     "vitest": "^4.1.0",
