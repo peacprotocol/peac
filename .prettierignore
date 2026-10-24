@@ -22,18 +22,6 @@ pnpm-lock.yaml
 
 # local development state (gitignored)
 **/.local/**
-.claude/
-.gstack/
-
-# workspace-only files (gitignored)
-CLAUDE.md
-reference/
-
-# local evidence pack outputs (gitignored)
-docs/evidence-pack/
-
-# paper artifacts (gitignored)
-paper/
 
 # performance result snapshots (generated artifact)
 perf-results.json

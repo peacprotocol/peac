@@ -35,13 +35,12 @@
       "dependsOn": ["build"],
       "outputs": []
     },
-    "sbom": {
-      "dependsOn": ["build"],
-      "outputs": ["*.sbom.json"]
+    "dev": {
+      "cache": false,
+      "persistent": true
     },
-    "release": {
-      "dependsOn": ["lint", "typecheck", "build", "test", "conformance", "perf", "sbom"],
-      "outputs": []
+    "clean": {
+      "cache": false
     }
   }
 }

@@ -24,7 +24,6 @@ pnpm test
 
 # TypeScript checks
 pnpm typecheck:core    # Blocking - must pass
-pnpm typecheck:legacy  # Advisory
 ```
 
 ### 2. Lint and Format
@@ -98,16 +97,15 @@ pnpm add @peac/protocol @peac/schema @peac/crypto
 
 The following CI checks run automatically on every PR:
 
-| Check               | Command                 | Status   |
-| ------------------- | ----------------------- | -------- |
-| Format              | `pnpm format:check`     | Blocking |
-| Lint                | `pnpm lint`             | Blocking |
-| Domain Guard        | `scripts/guard.sh`      | Blocking |
-| TypeScript (core)   | `pnpm typecheck:core`   | Blocking |
-| TypeScript (legacy) | `pnpm typecheck:legacy` | Advisory |
-| Build               | `pnpm build`            | Blocking |
-| Core Tests          | `pnpm test:core`        | Blocking |
-| Conformance         | `tests/conformance/`    | Blocking |
-| Performance         | P95 verify <=5ms        | Advisory |
+| Check             | Command               | Status   |
+| ----------------- | --------------------- | -------- |
+| Format            | `pnpm format:check`   | Blocking |
+| Lint              | `pnpm lint`           | Blocking |
+| Domain Guard      | `scripts/guard.sh`    | Blocking |
+| TypeScript (core) | `pnpm typecheck:core` | Blocking |
+| Build             | `pnpm build`          | Blocking |
+| Core Tests        | `pnpm test:core`      | Blocking |
+| Conformance       | `tests/conformance/`  | Blocking |
+| Performance       | P95 verify <=5ms      | Advisory |
 
 See [CI_BEHAVIOR.md](./CI_BEHAVIOR.md) for detailed CI documentation.

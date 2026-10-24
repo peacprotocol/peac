@@ -10,13 +10,6 @@ export default [
       '**/coverage/**',
       '**/node_modules/**',
       'apps/api/src/**/*.test.js',
-      'archive/**',
-      'paper/**',
-      'reference/**',
-      'packages/sdk-js/src/**/*.test.js',
-      'packages/sdk-js/tests/**',
-      'packages/sdk-js/archived/**',
-      'reference/**',
     ],
   },
 
@@ -146,16 +139,6 @@ export default [
     languageOptions: {
       globals: {
         ...globals.browser,
-      },
-    },
-  },
-
-  // --- Service worker: add SW globals ---
-  {
-    files: ['apps/verifier/public/sw.js'],
-    languageOptions: {
-      globals: {
-        ...globals.serviceworker,
       },
     },
   },
