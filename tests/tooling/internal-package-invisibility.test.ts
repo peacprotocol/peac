@@ -41,7 +41,6 @@ const FORBIDDEN_PATHS = [
 // Paths that may legitimately mention the names (workspace-only paths, test
 // infrastructure that enforces the rule, or this test itself).
 const ALLOWED_SUBSTRINGS = [
-  'reference/', // untracked workspace path (excluded from grep anyway)
   'tests/tooling/internal-package-invisibility.test.ts', // this test
 ];
 

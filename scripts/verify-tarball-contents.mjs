@@ -8,7 +8,7 @@
  *
  *   - any src/_internal/** path (internal source MUST stay out of published
  *     tarballs; only emitted dist/ output may surface)
- *   - any workspace-only path (reference/ and other untracked directories)
+ *   - any workspace-only path (untracked directories)
  *   - any test fixture path that wasn't intended for consumers
  *
  * Allowed contents (typical published package tarball):
