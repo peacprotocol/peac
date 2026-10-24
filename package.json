@@ -82,7 +82,7 @@
     "audit:errors": "node scripts/audit-error-emissions.mjs",
     "audit:errors:write": "node scripts/audit-error-emissions.mjs --write",
     "release:deprecate:v0.13.0:dry-run": "NPM_DEPRECATE_DRY_RUN=1 bash scripts/release/npm-deprecate-v0.13.0.sh",
-    "mutation:baseline": "pnpm dlx -p @stryker-mutator/core@^9 -p @stryker-mutator/vitest-runner@^9 stryker run --config-file stryker.conf.json",
+    "mutation:baseline": "pnpm dlx -p @stryker-mutator/core@^9 -p @stryker-mutator/vitest-runner@^9 stryker run --config-file scripts/stryker.conf.json",
     "verify:release-closeout": "node scripts/verify-release-closeout.mjs",
     "verify:release-closeout:test": "node scripts/verify-release-closeout.test.mjs",
     "verify:changelog-entry:test": "node scripts/extract-changelog-entry.test.mjs",
