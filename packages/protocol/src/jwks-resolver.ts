@@ -409,6 +409,7 @@ function jwkEntryProblem(entry: unknown): string | null {
     return 'x must be a canonical base64url 32-byte value';
   }
   if (Object.prototype.hasOwnProperty.call(entry, 'd')) return 'private key member d present';
+  if (entry.kid !== undefined && typeof entry.kid !== 'string') return 'kid must be a string';
   if (entry.use !== undefined && entry.use !== 'sig') return 'use must be sig';
   if (entry.alg !== undefined && entry.alg !== 'EdDSA' && entry.alg !== 'Ed25519') {
     return 'alg must be EdDSA or Ed25519';
