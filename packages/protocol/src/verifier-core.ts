@@ -22,6 +22,7 @@ import { WIRE_TYPE } from '@peac/kernel';
 import { PEACReceiptClaims, ReceiptClaims } from '@peac/schema';
 import type { SSRFFetchError } from './ssrf-safe-fetch.js';
 import { resolveJWKS } from './jwks-resolver.js';
+import type { RevokedKeyInfo } from './jwks-resolver.js';
 import { createReportBuilder } from './verification-report.js';
 import type { PinnedKey, VerificationReport, VerifierPolicy } from './verifier-types.js';
 import {
@@ -143,6 +144,8 @@ interface JWKSFetchSuccess {
   fromCache: boolean;
   /** Raw JWKS bytes for digest computation (only present when not from cache) */
   rawBytes?: Uint8Array;
+  /** Revoked keys from issuer configuration */
+  revokedKeys?: RevokedKeyInfo[];
 }
 
 /**
@@ -172,7 +175,15 @@ async function fetchIssuerJWKS(
     jwks: result.jwks,
     fromCache: result.fromCache,
     rawBytes: result.rawBytes,
+    revokedKeys: result.revokedKeys,
   };
+}
+
+/**
+ * Find the issuer revocation entry for a kid, if any
+ */
+function findRevokedKey(kid: string, revokedKeys?: RevokedKeyInfo[]): RevokedKeyInfo | undefined {
+  return revokedKeys?.find((rk) => rk.kid === kid);
 }
 
 // ---------------------------------------------------------------------------
@@ -418,6 +429,20 @@ export async function verifyReceiptCore(options: VerifyCoreOptions): Promise<Ver
         keys_count: jwksResult.jwks.keys.length,
       });
 
+      const revokedPinned = findRevokedKey(kid!, jwksResult.revokedKeys);
+      if (revokedPinned) {
+        builder.fail('key.resolve', 'E_REVOKED_KEY_USED', {
+          kid,
+          revoked_at: revokedPinned.revoked_at,
+          ...(revokedPinned.reason && { reason: revokedPinned.reason }),
+        });
+        builder.failure('key_not_found', normalizedIssuer, kid);
+        return {
+          valid: false,
+          report: includeMeta ? builder.addTimestamp().build() : builder.build(),
+        };
+      }
+
       // Find the key
       const jwk = jwksResult.jwks.keys.find((k) => k.kid === kid);
       if (!jwk) {
@@ -489,6 +514,20 @@ export async function verifyReceiptCore(options: VerifyCoreOptions): Promise<Ver
       from_cache: jwksResult.fromCache,
       keys_count: jwksResult.jwks.keys.length,
     });
+
+    const revoked = findRevokedKey(kid!, jwksResult.revokedKeys);
+    if (revoked) {
+      builder.fail('key.resolve', 'E_REVOKED_KEY_USED', {
+        kid,
+        revoked_at: revoked.revoked_at,
+        ...(revoked.reason && { reason: revoked.reason }),
+      });
+      builder.failure('key_not_found', normalizedIssuer, kid);
+      return {
+        valid: false,
+        report: includeMeta ? builder.addTimestamp().build() : builder.build(),
+      };
+    }
 
     // Find the key
     const jwk = jwksResult.jwks.keys.find((k) => k.kid === kid);
