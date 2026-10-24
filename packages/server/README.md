@@ -4,9 +4,7 @@ PEAC verification server with DoS protection, rate limiting, and circuit breaker
 
 ## Installation
 
-```bash
-pnpm add @peac/server
-```
+`@peac/server` is not published from this repository; build it from source here with `pnpm --filter @peac/server build`. To verify records locally, use `verifyLocal()` from `@peac/protocol` or the `peac` CLI.
 
 ## What It Does
 
@@ -19,7 +17,8 @@ Verification results are not cached: each request is verified on its own and `/v
 ### Run the server via CLI
 
 ```bash
-npx peac-server
+pnpm --filter @peac/server build
+pnpm --filter @peac/server start
 ```
 
 ### Use the Hono app programmatically
