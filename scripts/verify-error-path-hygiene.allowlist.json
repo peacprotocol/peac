@@ -22,7 +22,7 @@
     {
       "rule": "emptyCatch",
       "path": "packages/mcp-server/src/http-transport.ts",
-      "lineHint": 279,
+      "lineHint": 268,
       "symbolHint": "createHttpTransport",
       "reason": "invalid publicUrl is skipped; allowedHosts derived from validated bind addresses already",
       "category": "cleanup-only",
@@ -58,7 +58,7 @@
     {
       "rule": "emptyCatch",
       "path": "packages/mcp-server/src/session-manager.ts",
-      "lineHint": 128,
+      "lineHint": 125,
       "symbolHint": "terminateSession",
       "reason": "cleanup-only transport/server close on session termination",
       "category": "cleanup-only",
@@ -67,7 +67,7 @@
     {
       "rule": "emptyCatch",
       "path": "packages/mcp-server/src/session-manager.ts",
-      "lineHint": 150,
+      "lineHint": 147,
       "symbolHint": "cleanup",
       "reason": "cleanup-only transport/server close during sweep cleanup",
       "category": "cleanup-only",

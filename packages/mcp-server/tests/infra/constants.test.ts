@@ -24,8 +24,7 @@ describe('infra/constants', () => {
     expect(MCP_PROTOCOL_VERSION).toBe('2025-11-25');
   });
 
-  // src/infra must not import the MCP SDK (dependency-cruiser rule), so the
-  // value is a literal; this keeps it equal to the SDK's latest revision.
+  // src/infra cannot import the SDK, so the literal is pinned to it here.
   it('reports the latest protocol version of the MCP SDK', () => {
     expect(MCP_PROTOCOL_VERSION).toBe(LATEST_PROTOCOL_VERSION);
   });

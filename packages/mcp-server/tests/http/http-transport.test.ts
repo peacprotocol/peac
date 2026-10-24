@@ -876,13 +876,8 @@ describe('HTTP Transport', () => {
     expect(statuses[2]).toBe(503);
   });
 
-  // --- MCP-Protocol-Version validation on non-init requests (WP-M2 / MCP-VERSIONGATE-01) ---
-  //
-  // The version gate previously ran only on the init path; a non-init POST
-  // declaring an unsupported protocol version was never rejected for that
-  // reason, and instead either proceeded or surfaced a misleading
-  // "Missing Mcp-Session-Id" 400. These tests pin the corrected behavior:
-  // the version is checked on every request, before session-id handling.
+  // --- MCP-Protocol-Version validation on non-init requests ---
+  // The version is checked on every request, before session-id handling.
 
   it('should accept non-init POST with the latest supported protocol version', async () => {
     const port = getPort();
@@ -1093,11 +1088,6 @@ describe('HTTP Transport', () => {
 });
 
 // --- Accepted protocol versions follow the SDK's supported list ---
-//
-// Version negotiation is delegated to the SDK, so the HTTP version gate must
-// accept every revision the SDK can negotiate. Otherwise a client that the
-// SDK negotiated to, for example, 2025-06-18 is refused on its first request
-// after initialize.
 
 /** Extract result.protocolVersion from an initialize response (JSON or SSE-framed). */
 function negotiatedVersionFrom(body: unknown): string | undefined {
@@ -1128,10 +1118,7 @@ function supportedVersionsIn(message: string): string[] {
   return match ? match[1].split(', ') : [];
 }
 
-/**
- * Send initialize requesting `requestedVersion` in the body, optionally with an
- * MCP-Protocol-Version header on the initialize request itself.
- */
+/** Send initialize for `requestedVersion`, optionally with an MCP-Protocol-Version header. */
 async function initializeRequesting(
   port: number,
   requestedVersion: string,
@@ -1166,7 +1153,7 @@ async function initializeRequesting(
   };
 }
 
-/** Send a follow-up ping on an existing session declaring `version`. */
+/** Send a ping on an existing session declaring `version`. */
 async function pingWithVersion(
   port: number,
   sessionId: string,
@@ -1306,6 +1293,24 @@ describe('HTTP Transport: rate-limit keys and bounds', () => {
 
   const pingBody = JSON.stringify({ jsonrpc: '2.0', method: 'ping', id: 1 });
 
+  it('describes the rate limit as per session or client address at startup', async () => {
+    const write = vi.spyOn(process.stderr, 'write');
+    try {
+      const port = getPort();
+      const result = await createHttpTransport({
+        port,
+        host: '127.0.0.1',
+        rateLimitRpm: 7,
+        serverFactory: makeServerFactory(),
+      });
+      cleanup = result.cleanup;
+      const lines = write.mock.calls.map((call) => String(call[0]));
+      expect(lines).toContain('  Rate limit: 7 req/min per session or client address\n');
+    } finally {
+      write.mockRestore();
+    }
+  });
+
   it('limits requests with rotating unknown session ids at the per-address rate', async () => {
     const port = getPort();
     const result = await createHttpTransport({
@@ -1342,8 +1347,7 @@ describe('HTTP Transport: rate-limit keys and bounds', () => {
     });
     cleanup = result.cleanup;
 
-    // One client (203.0.113.1) sends a session header naming another
-    // client's address bucket.
+    // 203.0.113.1 sends a session header naming 203.0.113.2's address key.
     const attackerStatuses: number[] = [];
     for (let i = 0; i < 3; i++) {
       const { status } = await fetchJson(`http://127.0.0.1:${port}/mcp`, {
@@ -1438,6 +1442,89 @@ describe('HTTP Transport: rate-limit keys and bounds', () => {
     }
     expect(largestSeen).toBeLessThanOrEqual(MAX_RATE_LIMIT_KEYS);
     expect(result.rateLimitKeyCount()).toBe(MAX_RATE_LIMIT_KEYS);
+  }, 120_000);
+
+  /** Address for index `i`, distinct for every i below 2^24. */
+  function addressFor(i: number): string {
+    return `10.${(i >> 16) & 255}.${(i >> 8) & 255}.${i & 255}`;
+  }
+
+  async function statusFrom(port: number, address: string): Promise<number> {
+    const { status } = await fetchJson(`http://127.0.0.1:${port}/mcp`, {
+      method: 'POST',
+      headers: { ...MCP_ACCEPT_HEADERS, 'X-Forwarded-For': address },
+      body: pingBody,
+    });
+    return status;
+  }
+
+  /** Send one request from each address in [from, to), in concurrent batches. */
+  async function sendFromRange(port: number, from: number, to: number): Promise<void> {
+    for (let start = from; start < to; start += 100) {
+      const batch = [];
+      for (let i = start; i < Math.min(start + 100, to); i++) {
+        batch.push(statusFrom(port, addressFor(i)));
+      }
+      await Promise.all(batch);
+    }
+  }
+
+  it('evicts the oldest rate-limit window first when the map is full', async () => {
+    const port = getPort();
+    const result = await createHttpTransport({
+      port,
+      host: '127.0.0.1',
+      trustProxy: 'loopback',
+      rateLimitRpm: 1,
+      serverFactory: makeServerFactory(),
+    });
+    cleanup = result.cleanup;
+
+    const last = MAX_RATE_LIMIT_KEYS - 1;
+    expect(await statusFrom(port, addressFor(0))).not.toBe(429);
+    await sendFromRange(port, 1, last);
+    expect(await statusFrom(port, addressFor(last))).not.toBe(429);
+    expect(result.rateLimitKeyCount()).toBe(MAX_RATE_LIMIT_KEYS);
+
+    // A new address at capacity evicts the oldest window (address 0).
+    expect(await statusFrom(port, addressFor(MAX_RATE_LIMIT_KEYS))).not.toBe(429);
+    expect(result.rateLimitKeyCount()).toBe(MAX_RATE_LIMIT_KEYS);
+
+    // The newest earlier window is kept, so its second request is limited.
+    expect(await statusFrom(port, addressFor(last))).toBe(429);
+    // The evicted address restarts with a fresh window.
+    expect(await statusFrom(port, addressFor(0))).not.toBe(429);
+  }, 120_000);
+
+  it('evicts an expired window before a renewed active one', async () => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    try {
+      vi.setSystemTime(10_000_000);
+      const port = getPort();
+      const result = await createHttpTransport({
+        port,
+        host: '127.0.0.1',
+        trustProxy: 'loopback',
+        rateLimitRpm: 1,
+        serverFactory: makeServerFactory(),
+      });
+      cleanup = result.cleanup;
+
+      expect(await statusFrom(port, addressFor(0))).not.toBe(429);
+      await sendFromRange(port, 1, MAX_RATE_LIMIT_KEYS);
+      expect(result.rateLimitKeyCount()).toBe(MAX_RATE_LIMIT_KEYS);
+
+      // Every window has expired; address 0 starts a new, active window.
+      vi.setSystemTime(10_000_000 + 61_000);
+      expect(await statusFrom(port, addressFor(0))).not.toBe(429);
+
+      // A new address at capacity evicts an expired window, not address 0's.
+      expect(await statusFrom(port, addressFor(MAX_RATE_LIMIT_KEYS))).not.toBe(429);
+      expect(result.rateLimitKeyCount()).toBe(MAX_RATE_LIMIT_KEYS);
+      expect(await statusFrom(port, addressFor(0))).toBe(429);
+    } finally {
+      vi.useRealTimers();
+    }
   }, 120_000);
 });
 

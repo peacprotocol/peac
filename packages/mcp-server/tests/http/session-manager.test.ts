@@ -162,9 +162,7 @@ describe('SessionManager', () => {
     expect(manager.size).toBe(2);
   });
 
-  // hasSession() is the lookup used to choose a rate-limit key. Unlike
-  // getSession(), it must not refresh lastSeen, so a check alone never keeps
-  // an idle session alive.
+  // Unlike getSession(), hasSession() must not refresh lastSeen.
   describe('hasSession', () => {
     afterEach(() => {
       vi.useRealTimers();

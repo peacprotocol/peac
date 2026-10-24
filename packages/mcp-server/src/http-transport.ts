@@ -76,11 +76,7 @@ const MAX_SESSION_ID_LENGTH = 128;
 /** Upper bound on tracked rate-limit windows; the oldest window is evicted first. */
 export const MAX_RATE_LIMIT_KEYS = 10_000;
 
-/**
- * MCP-Protocol-Version values accepted on the HTTP transport: exactly the revisions the SDK
- * supports, so this gate never rejects a version the SDK negotiated. Version negotiation stays
- * in the SDK, and the SDK's own transport validates against the same list.
- */
+/** Accepted MCP-Protocol-Version values: exactly the SDK's supported list. */
 const SUPPORTED_PROTOCOL_VERSIONS: readonly string[] = SDK_SUPPORTED_PROTOCOL_VERSIONS;
 
 /**
@@ -112,12 +108,7 @@ function isValidSessionId(id: string): boolean {
   return true;
 }
 
-/**
- * Choose the rate-limit key for a request. Only a syntactically valid id of a
- * live session counts as a session key; everything else is keyed by client
- * address, so rotating the header cannot mint fresh windows, and a header such
- * as `ip:<address>` cannot land in another client's window.
- */
+/** Rate-limit key: a valid id of a live session, otherwise the client address. */
 export function rateLimitKeyFor(
   sessionId: string | undefined,
   clientIp: string,
@@ -199,7 +190,7 @@ function validatePublicUrl(rawUrl: string): { url: URL; normalized: string } | {
  */
 export async function createHttpTransport(options: HttpTransportOptions): Promise<{
   cleanup: () => Promise<void>;
-  /** Number of tracked rate-limit windows (at most MAX_RATE_LIMIT_KEYS); a test seam. */
+  /** Number of tracked rate-limit windows (test seam). */
   rateLimitKeyCount: () => number;
 }> {
   const port = options.port ?? 3000;
@@ -215,9 +206,7 @@ export async function createHttpTransport(options: HttpTransportOptions): Promis
   });
   sessionManager.startSweep();
 
-  // Per-session + per-IP rate limiting (fixed one-minute windows keyed on a
-  // live session, otherwise on the client IP; see rateLimitKeyFor). At most
-  // MAX_RATE_LIMIT_KEYS windows are tracked.
+  // One-minute windows keyed by rateLimitKeyFor; at most MAX_RATE_LIMIT_KEYS are tracked.
   const rateLimits = new Map<string, RateLimitEntry>();
 
   function checkRateLimit(key: string): boolean {
@@ -580,7 +569,7 @@ export async function createHttpTransport(options: HttpTransportOptions): Promis
       process.stderr.write(
         `  Sessions: max ${options.maxSessions ?? 100} (${options.maxSessionsPerIp ?? 10}/IP), TTL ${(options.sessionTtlMs ?? 1_800_000) / 1000}s\n`
       );
-      process.stderr.write(`  Rate limit: ${rateLimitRpm} req/min per session\n`);
+      process.stderr.write(`  Rate limit: ${rateLimitRpm} req/min per session or client address\n`);
       process.stderr.write(
         `  CORS: ${corsOrigins.size > 0 ? [...corsOrigins].join(', ') : 'deny all'}\n`
       );
