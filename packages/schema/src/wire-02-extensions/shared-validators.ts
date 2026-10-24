@@ -336,10 +336,7 @@ export const Iso8601DateSchema = Iso8601DateStringSchema;
  * Uses Zod 4 top-level `z.iso.datetime({ offset: true })` (preferred
  * over the deprecated method-style `z.string().datetime()`).
  *
- * This is NOT strictly RFC 3339: it accepts minute-precision timestamps
- * (e.g., `2026-03-14T12:00+05:30` without seconds), which ISO 8601
- * allows but RFC 3339 does not. Use Rfc3339DateTimeSchema for strict
- * RFC 3339 compliance.
+ * RFC 3339 date-time with offset; seconds are required.
  *
  * Consistent with Wire 0.2 `occurred_at` field validation semantics.
  */
@@ -380,9 +377,9 @@ export const Rfc3339DateTimeSchema = z.iso
 
 /**
  * @deprecated Use Iso8601OffsetDateTimeSchema or Rfc3339DateTimeSchema.
- * This alias points to Iso8601OffsetDateTimeSchema (which accepts
- * minute-precision and is therefore NOT strictly RFC 3339). Preserved
- * for backward compatibility only. Remove-not-before: v0.13.0.
+ * This alias points to Iso8601OffsetDateTimeSchema (RFC 3339 date-time
+ * with offset; seconds are required). Preserved for backward
+ * compatibility only. Remove-not-before: v0.13.0.
  */
 export const Rfc3339TimestampSchema = Iso8601OffsetDateTimeSchema;
 
