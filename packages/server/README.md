@@ -10,7 +10,9 @@ pnpm add @peac/server
 
 ## What It Does
 
-`@peac/server` is a production-ready HTTP verification server built on Hono. It exposes a `/verify` endpoint for validating signed interaction receipts, with sliding-window rate limiting (per-IP and global), a circuit breaker for JWKS key fetching, and response caching. It ships as both a library and a CLI binary (`peac-server`).
+`@peac/server` is a production-ready HTTP verification server built on Hono. It exposes a `/verify` endpoint for validating signed interaction receipts, with sliding-window rate limiting (per-IP and global) and a circuit breaker for JWKS key fetching. It ships as both a library and a CLI binary (`peac-server`).
+
+Verification results are not cached: each request is verified on its own and `/verify` responses carry `Cache-Control: no-store`. Issuer key material is cached by the JWKS resolver in `@peac/protocol`. A request body over 32 KiB is rejected with `413` (`application/problem+json`) before it is parsed, and a body that is not valid JSON is rejected with `400`.
 
 ## How Do I Use It?
 
@@ -36,7 +38,7 @@ console.log('PEAC verification server running on port 3000');
 import { getRateLimiterStats, CircuitBreaker } from '@peac/server';
 
 const stats = getRateLimiterStats();
-console.log(`Global requests in window: ${stats.globalCount}`);
+console.log(`Global requests in window: ${stats.global}`);
 
 const breaker = new CircuitBreaker({
   failureThreshold: 5,
@@ -51,8 +53,6 @@ const result = await breaker.execute(() => fetchJwks(uri));
 
 - `@peac/protocol` (Layer 3): Receipt verification logic
 - `@peac/schema` (Layer 1): Request validation schemas
-- `@peac/jwks-cache`: JWKS key resolution with SSRF protection
-- `@peac/http-signatures`: RFC 9421 request signature verification
 
 ## For Agent Developers
 
