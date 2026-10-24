@@ -76,7 +76,7 @@
     {
       "rule": "emptyCatch",
       "path": "packages/net/node/src/impl.ts",
-      "lineHint": 395,
+      "lineHint": 406,
       "symbolHint": "cidrOverlapsDangerousRanges",
       "reason": "filter-skip parse failure for sampled IP test points inside CIDR overlap probe",
       "category": "cleanup-only",
@@ -86,7 +86,7 @@
     {
       "rule": "emptyCatch",
       "path": "packages/net/node/src/impl.ts",
-      "lineHint": 1351,
+      "lineHint": 1375,
       "symbolHint": "emitAuditEvent",
       "reason": "audit hooks MUST NOT throw per documented contract; failures are silently dropped",
       "category": "telemetry-only",
@@ -96,7 +96,7 @@
     {
       "rule": "emptyCatch",
       "path": "packages/net/node/src/impl.ts",
-      "lineHint": 1426,
+      "lineHint": 1450,
       "symbolHint": "emitAuditEvent",
       "reason": "second-line audit-hook-error guard; primary guard prevents re-entry",
       "category": "telemetry-only",

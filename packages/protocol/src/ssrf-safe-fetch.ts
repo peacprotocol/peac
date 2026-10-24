@@ -440,12 +440,9 @@ async function resolveHostname(
 
 const NULL_BODY_STATUSES = new Set([101, 103, 204, 205, 304]);
 
+// Cancelling an unlocked body does not reject; any error propagates to the caller.
 async function discardBody(response: Response): Promise<void> {
-  try {
-    await response.body?.cancel();
-  } catch {
-    // Body already closed
-  }
+  await response.body?.cancel();
 }
 
 /**
