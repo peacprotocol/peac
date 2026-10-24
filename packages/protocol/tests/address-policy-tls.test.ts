@@ -93,7 +93,7 @@ function makeCertificate(dnsNames: string[]): { key: string; cert: string } {
     der(0x31, der(0x30, oid('2.5.4.3'), der(0x0c, Buffer.from('local test', 'utf8'))))
   );
   const serial = randomBytes(16);
-  serial[0] &= 0x7f;
+  serial[0] = (serial[0] & 0x7f) | 0x40;
   const now = Date.now();
   const subjectAltName = der(
     0x30,
@@ -173,6 +173,7 @@ describe('key fetch over local TLS', () => {
   });
 
   afterAll(async () => {
+    if (!server) return;
     server.closeAllConnections();
     await new Promise<void>((resolve) => server.close(() => resolve()));
   });
