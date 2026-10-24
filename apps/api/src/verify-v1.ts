@@ -13,6 +13,7 @@
  */
 
 import type { Context } from 'hono';
+import { bodyLimit } from 'hono/body-limit';
 import { z } from 'zod';
 import { verifyLocal, computePolicyDigestJcs } from '@peac/protocol';
 import { decode, base64urlDecode, jwkToPublicKeyBytes } from '@peac/crypto';
@@ -33,6 +34,16 @@ import { deterministicStringify } from './utils.js';
 
 const MAX_BODY_SIZE = 256 * 1024; // 256 KB
 const PROBLEM_CONTENT_TYPE = 'application/problem+json';
+
+// Counts the body while it is read and rejects it once it passes the limit, for
+// bodies without a Content-Length header (chunked transfer). A declared
+// Content-Length is compared with the limit and trusted: the HTTP server is
+// expected to enforce Content-Length framing, as the Node HTTP parser does.
+const bodyLimitGuard = bodyLimit({
+  maxSize: MAX_BODY_SIZE,
+  onError: (c) =>
+    problemResponse(c, toProblemDetails('E_PAYLOAD_TOO_LARGE', { limit: String(MAX_BODY_SIZE) })),
+});
 
 const VerifyRequestSchema = z
   .object({
@@ -180,7 +191,8 @@ export function createVerifyV1Handler() {
       );
     }
 
-    // Body size check
+    // Body size check: reject a declared Content-Length over the limit without
+    // reading the body, then count the body as it is read when none is declared.
     const contentLength = c.req.header('content-length');
     if (contentLength && parseInt(contentLength, 10) > MAX_BODY_SIZE) {
       return problemResponse(
@@ -188,6 +200,14 @@ export function createVerifyV1Handler() {
         toProblemDetails('E_PAYLOAD_TOO_LARGE', { limit: String(MAX_BODY_SIZE) })
       );
     }
+    let oversize: Response | void;
+    try {
+      oversize = await bodyLimitGuard(c, async () => {});
+    } catch {
+      // The body could not be read (for example, the client disconnected).
+      return problemResponse(c, toProblemDetails('E_INVALID_FORMAT', {}));
+    }
+    if (oversize) return oversize;
 
     // Parse JSON
     let body: unknown;
