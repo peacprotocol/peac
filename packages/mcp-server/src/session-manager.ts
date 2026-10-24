@@ -106,6 +106,12 @@ export class SessionManager {
     return entry;
   }
 
+  /** Whether an unexpired session exists; unlike getSession(), does not refresh lastSeen. */
+  hasSession(sessionId: string): boolean {
+    const entry = this.sessions.get(sessionId);
+    return entry !== undefined && Date.now() - entry.lastSeen <= this.ttlMs;
+  }
+
   /** Terminate and clean up a specific session */
   async terminateSession(sessionId: string): Promise<boolean> {
     const entry = this.sessions.get(sessionId);

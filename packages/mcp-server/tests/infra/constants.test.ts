@@ -1,4 +1,5 @@
 import { describe, it, expect } from 'vitest';
+import { LATEST_PROTOCOL_VERSION } from '@modelcontextprotocol/sdk/types.js';
 import {
   SERVER_NAME,
   SERVER_VERSION,
@@ -21,6 +22,11 @@ describe('infra/constants', () => {
 
   it('exports MCP protocol version', () => {
     expect(MCP_PROTOCOL_VERSION).toBe('2025-11-25');
+  });
+
+  // src/infra cannot import the SDK, so the literal is pinned to it here.
+  it('reports the latest protocol version of the MCP SDK', () => {
+    expect(MCP_PROTOCOL_VERSION).toBe(LATEST_PROTOCOL_VERSION);
   });
 
   it('exports sensible default limits', () => {
