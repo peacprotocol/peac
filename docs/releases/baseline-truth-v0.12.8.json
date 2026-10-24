@@ -39,7 +39,5 @@
     "facts.json Go SDK: default -> supported (more precise)",
     "Build targets confirmed: 97 (via turbo dry run)"
   ],
-  "excluded_from_truth_surface": [
-    "docs/ROADMAP.md: simplified public roadmap, NOT a repo truth surface for release gating. Managed separately from canonical truth surfaces. reference/ROADMAP_LOCAL.md is the authoritative roadmap."
-  ]
+  "excluded_from_truth_surface": []
 }
