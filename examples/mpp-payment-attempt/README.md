@@ -14,6 +14,6 @@ pnpm --filter @peac/example-mpp-payment-attempt demo
 1. `fromMPPPaymentAttempt` with `artifact_kind='authorization'` emits `commerce.event=authorization`. Optional `facilitator_attestation` is preserved verbatim under `proofs.paymentauth.attempt.facilitator_attestation`.
 2. `fromMPPSettlement` with `artifact_kind='settlement'` emits `commerce.event=settlement`. Settlement attestation is preserved under `proofs.paymentauth.settlement.facilitator_attestation`.
 3. Pairing `fromMPPSettlement` with `artifact_kind='authorization'` throws `MapperBoundaryError` (`commerce.finality_synthesis_blocked`) in all strictness modes.
-4. `paymentauth` is the canonical code and registry term aligned with the active draft `draft-ryan-httpauth-payment-01`. MPP is an ecosystem prose term; token material is never carried.
+4. `paymentauth` is the canonical code and registry term aligned with the individual draft `draft-ryan-httpauth-payment-01` (work in progress). MPP is an ecosystem prose term; token material is never carried.
 
 See also: [`docs/profiles/mpp-payment-evidence.md`](../../docs/profiles/mpp-payment-evidence.md).

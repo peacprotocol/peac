@@ -2,7 +2,7 @@
 
 ## What is PEAC?
 
-PEAC (Protocol for Evidence of AI Completion) is an open protocol for issuing, verifying, and bundling cryptographic receipts that attest to AI agent actions. Receipts are signed JWS tokens (Ed25519) with structured claims covering commerce, attribution, identity, and more.
+PEAC is an open protocol for portable, verifiable interaction records. Records are signed JWS tokens (Ed25519) with structured claims.
 
 ## What this kit provides
 
@@ -13,7 +13,7 @@ PEAC (Protocol for Evidence of AI Completion) is an open protocol for issuing, v
 
 ## Quick start
 
-1. Install the PEAC SDK: `npm install @peac/sdk-js`
+1. Install the PEAC packages: `npm install @peac/protocol`
 2. Follow the integration guide in `INTEGRATION-GUIDE.md`
 3. Run conformance tests against the provided fixtures
 4. Review the security FAQ in `SECURITY-FAQ.md`
@@ -25,7 +25,6 @@ PEAC (Protocol for Evidence of AI Completion) is an open protocol for issuing, v
 | `@peac/schema`   | Receipt schemas and validation   |
 | `@peac/crypto`   | Ed25519 signing and verification |
 | `@peac/protocol` | Issue and verify receipts        |
-| `@peac/sdk-js`   | Consumer-facing SDK              |
 
 ## Support
 

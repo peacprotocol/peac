@@ -4,7 +4,7 @@ Self-contained pilot kit for an independent external entity to issue a PEAC Inte
 
 ## Prerequisites
 
-- Node.js >= 22.0.0
+- Node.js >= 22.13.0
 - pnpm
 
 ## Quick Start

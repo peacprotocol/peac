@@ -97,4 +97,4 @@ const result = extractCarrierFromACPHeaders(responseHeaders);
 
 - `@peac/mappings-acp`: session lifecycle, carrier adapter
 - ACP spec: https://www.agenticcommerce.dev/ (maintained by OpenAI and Stripe)
-- ACP version: `2026-01-30` (latest published)
+- ACP version: `2026-01-30` (the version this mapping targets)

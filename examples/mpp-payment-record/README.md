@@ -2,7 +2,7 @@
 
 MPP handles the payment flow. PEAC records the resulting payment event as a portable signed `org.peacprotocol/payment` record verifiable without MPP server logs.
 
-This is a draft-aligned composition example for the "Payment" HTTP authentication scheme (`draft-ryan-httpauth-payment-01`, an active individual Internet-Draft and work in progress, not a finalized standard). It shows how a service that already speaks the HTTP 402 + `Payment-Receipt` flow can record each payment event as a portable, signed record that a customer, auditor, counterparty, or dispute system can verify offline, without access to the server's logs.
+This is a draft-aligned composition example for the "Payment" HTTP authentication scheme (`draft-ryan-httpauth-payment-01`, an individual Internet-Draft revision and work in progress, not a finalized standard). It shows how a service that already speaks the HTTP 402 + `Payment-Receipt` flow can record each payment event as a portable, signed record that a customer, auditor, counterparty, or dispute system can verify offline, without access to the server's logs.
 
 PEAC records and verifies. It does not settle, authorize, authenticate, or replace the payment protocol.
 

@@ -19,8 +19,8 @@ PEAC does not orchestrate protocols, control systems, or enforce behavior. It re
 - Verify offline from the CLI: `pnpm dlx @peac/cli samples generate -o ./s` then `pnpm dlx @peac/cli verify ./s/valid/basic-record.jws --public-key ./s/bundles/sandbox-jwks.json` (prints `Signature valid (offline).`)
 - Verify a record over MCP: start the MCP server, then call `peac_verify` with a JWS and public key
 - Issue a record: use `@peac/protocol` with `issue()` and an Ed25519 signing key
-- GitHub: https://github.com/peacprotocol/peac
-- Website: https://www.peacprotocol.org
+- [GitHub](https://github.com/peacprotocol/peac): source repository
+- [Website](https://www.peacprotocol.org): project site
 - MCP Registry: `io.github.peacprotocol/peac`
 
 ## Key Packages
@@ -46,17 +46,20 @@ PEAC does not orchestrate protocols, control systems, or enforce behavior. It re
 
 ## Documentation
 
-- Start Here: https://www.peacprotocol.org/start-here
-- Integration patterns: https://github.com/peacprotocol/peac/blob/main/docs/guides/integration-patterns.md
-- Verification options: https://github.com/peacprotocol/peac/blob/main/docs/guides/verification-options.md
-- Offline sample index: https://github.com/peacprotocol/peac/blob/main/docs/guides/offline-sample-index.md
-- Wire Format: https://www.peacprotocol.org/docs/architecture/wire-format
-- Package Layering: https://www.peacprotocol.org/docs/architecture/package-layering
-- Error Codes: https://www.peacprotocol.org/docs/reference/error-codes
-- Evidence Carrier Contract: https://github.com/peacprotocol/peac/blob/main/docs/specs/EVIDENCE-CARRIER-CONTRACT.md
-- Kernel Constraints: https://github.com/peacprotocol/peac/blob/main/docs/specs/KERNEL-CONSTRAINTS.md
-- MCP Server: https://www.peacprotocol.org/tools/mcp-server
-- Security: https://www.peacprotocol.org/security
+- [Start Here](https://www.peacprotocol.org/start-here): entry point for new users
+- [Integration patterns](https://github.com/peacprotocol/peac/blob/main/docs/guides/integration-patterns.md): wiring PEAC into MCP, OpenTelemetry, or a gateway
+- [Verification options](https://github.com/peacprotocol/peac/blob/main/docs/guides/verification-options.md): ways to verify a record
+- [Offline sample index](https://github.com/peacprotocol/peac/blob/main/docs/guides/offline-sample-index.md): sample records for offline verification
+- [Wire Format](https://www.peacprotocol.org/docs/architecture/wire-format): record wire format
+- [Package Layering](https://www.peacprotocol.org/docs/architecture/package-layering): package layering
+- [Error Codes](https://github.com/peacprotocol/peac/blob/main/specs/kernel/errors.json): error code registry
+- [Evidence Carrier Contract](https://github.com/peacprotocol/peac/blob/main/docs/specs/EVIDENCE-CARRIER-CONTRACT.md): common carry interface
+- [Kernel Constraints](https://github.com/peacprotocol/peac/blob/main/docs/specs/KERNEL-CONSTRAINTS.md): structural limits
+- [MCP Server](https://www.peacprotocol.org/tools/mcp-server): MCP server tool
+- [Security](https://www.peacprotocol.org/security): security information
+- [Specification index](https://github.com/peacprotocol/peac/blob/main/docs/SPEC_INDEX.md): normative and informative specifications
+- [Changelog](https://github.com/peacprotocol/peac/blob/main/CHANGELOG.md): release history
+- [Security policy](https://github.com/peacprotocol/peac/blob/main/SECURITY.md): vulnerability reporting
 
 ## Technical Notes
 

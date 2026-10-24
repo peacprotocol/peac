@@ -99,7 +99,7 @@ For A2A (Agent-to-Agent Protocol, Linux Foundation) discovery via `/.well-known/
 }
 ```
 
-The extension URI key maps to a nested object containing the carrier array. This follows the A2A metadata convention. A2A v1.0.0 Agent Card shape is required; v0.3.0 compatibility was removed in v0.13.0 (DD-186). Cards without a valid `supportedInterfaces[0].url` are rejected.
+The extension URI key maps to a nested object containing the carrier array. This follows the A2A metadata convention. A2A v1.0.0 Agent Card shape is required; v0.3.0 compatibility was removed in v0.13.0. Cards without a valid `supportedInterfaces[0].url` are rejected.
 
 ## Discovery
 
@@ -120,6 +120,17 @@ Canonical PEAC purpose vocabulary:
 | `user_action` | Agent acting on user behalf    |
 | `inference`   | Runtime inference / RAG        |
 | `index`       | Content indexing (store)       |
+
+## Working in this repository
+
+- Requirements: Node.js 22.13.0 or later (Node 24 recommended; see `.node-version`) and pnpm 8.15.0 (`packageManager`).
+- Install: `pnpm install --frozen-lockfile`
+- Build: `pnpm build`
+- Test: `pnpm test`
+- Lint: `pnpm lint`
+- Typecheck: `pnpm typecheck:core`
+- Format check: `pnpm format:check`
+- Open pull requests using `.github/pull_request_template.md`.
 
 ## Contact
 
