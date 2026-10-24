@@ -1,7 +1,7 @@
 /**
  * MCP Streamable HTTP transport
  *
- * Adds HTTP transport alongside stdio. Unprotected mode only (v0.11.0).
+ * Adds HTTP transport alongside stdio. Unprotected mode only.
  * Each session gets its own McpServer + transport (CVE-2026-25536 defense).
  *
  * Endpoints:
@@ -14,6 +14,7 @@
 
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { SUPPORTED_PROTOCOL_VERSIONS as SDK_SUPPORTED_PROTOCOL_VERSIONS } from '@modelcontextprotocol/sdk/types.js';
 import { SessionManager } from './session-manager.js';
 import { SERVER_NAME, SERVER_VERSION, MCP_PROTOCOL_VERSION } from './infra/constants.js';
 
@@ -72,19 +73,19 @@ const DEFAULT_MAX_REQUEST_BYTES = 1_048_576; // 1 MB
 const DEFAULT_RATE_LIMIT_RPM = 100;
 const MAX_SESSION_ID_LENGTH = 128;
 
-/**
- * MCP-Protocol-Version values this server implements. Deliberately narrower
- * than the SDK's own supported list.
- */
-const SUPPORTED_PROTOCOL_VERSIONS = [MCP_PROTOCOL_VERSION, '2025-03-26'];
+/** Upper bound on tracked rate-limit windows; the oldest window is evicted first. */
+export const MAX_RATE_LIMIT_KEYS = 10_000;
+
+/** Accepted MCP-Protocol-Version values: exactly the SDK's supported list. */
+const SUPPORTED_PROTOCOL_VERSIONS: readonly string[] = SDK_SUPPORTED_PROTOCOL_VERSIONS;
 
 /**
  * Validate MCP-Protocol-Version for both init and non-init requests.
  *
  * An absent header is not an error: per the spec's backwards-compatibility
- * rule the client is assumed to speak the pre-negotiation default
- * (2025-03-26). Returns an error message for an unsupported version, or
- * null when the request may proceed.
+ * rule the client is assumed to speak the SDK's default negotiated revision
+ * (DEFAULT_NEGOTIATED_PROTOCOL_VERSION). Returns an error message for an
+ * unsupported version, or null when the request may proceed.
  */
 function checkProtocolVersion(req: IncomingMessage): string | null {
   const protocolVersion = req.headers['mcp-protocol-version'] as string | undefined;
@@ -105,6 +106,17 @@ function isValidSessionId(id: string): boolean {
     if (code < 0x21 || code > 0x7e) return false;
   }
   return true;
+}
+
+/** Rate-limit key: a valid id of a live session, otherwise the client address. */
+export function rateLimitKeyFor(
+  sessionId: string | undefined,
+  clientIp: string,
+  isLiveSession: (id: string) => boolean
+): string {
+  return sessionId !== undefined && isValidSessionId(sessionId) && isLiveSession(sessionId)
+    ? `session:${sessionId}`
+    : `ip:${clientIp}`;
 }
 
 /**
@@ -176,9 +188,11 @@ function validatePublicUrl(rawUrl: string): { url: URL; normalized: string } | {
  * Create and start an HTTP server for MCP Streamable HTTP transport.
  * Returns a cleanup function to shut everything down.
  */
-export async function createHttpTransport(
-  options: HttpTransportOptions
-): Promise<{ cleanup: () => Promise<void> }> {
+export async function createHttpTransport(options: HttpTransportOptions): Promise<{
+  cleanup: () => Promise<void>;
+  /** Number of tracked rate-limit windows (test seam). */
+  rateLimitKeyCount: () => number;
+}> {
   const port = options.port ?? 3000;
   const host = options.host ?? '127.0.0.1';
   const corsOrigins = new Set(options.corsOrigins ?? []);
@@ -192,15 +206,19 @@ export async function createHttpTransport(
   });
   sessionManager.startSweep();
 
-  // Per-session + per-IP rate limiting (token bucket keyed on session ID,
-  // falling back to IP for unauthenticated init requests)
+  // One-minute windows keyed by rateLimitKeyFor; at most MAX_RATE_LIMIT_KEYS are tracked.
   const rateLimits = new Map<string, RateLimitEntry>();
 
   function checkRateLimit(key: string): boolean {
     const now = Date.now();
     let entry = rateLimits.get(key);
     if (!entry || now - entry.windowStart > ONE_MINUTE_MS) {
+      if (!entry && rateLimits.size >= MAX_RATE_LIMIT_KEYS) {
+        const oldest = rateLimits.keys().next().value; // Map keeps insertion order
+        if (oldest !== undefined) rateLimits.delete(oldest);
+      }
       entry = { count: 0, windowStart: now };
+      rateLimits.delete(key);
       rateLimits.set(key, entry);
     }
     entry.count++;
@@ -395,7 +413,7 @@ export async function createHttpTransport(
 
     // --- MCP endpoint ---
     if (pathname === '/mcp') {
-      // GET /mcp -> 405 (SSE streaming deferred)
+      // GET /mcp -> 405 (server-initiated SSE streams are not supported)
       if (req.method === 'GET') {
         res.writeHead(405, { Allow: 'POST, DELETE', 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ error: 'Method Not Allowed. Use POST for JSON-RPC requests.' }));
@@ -428,7 +446,9 @@ export async function createHttpTransport(
       if (req.method === 'POST') {
         // Rate limit check
         const sessionId = req.headers['mcp-session-id'] as string | undefined;
-        const rateLimitKey = sessionId ?? `ip:${getClientIp(req)}`;
+        const rateLimitKey = rateLimitKeyFor(sessionId, getClientIp(req), (id) =>
+          sessionManager.hasSession(id)
+        );
         if (!checkRateLimit(rateLimitKey)) {
           res.writeHead(429, { 'Content-Type': 'application/json', 'Retry-After': '60' });
           res.end(JSON.stringify({ error: 'Rate limit exceeded' }));
@@ -549,12 +569,12 @@ export async function createHttpTransport(
       process.stderr.write(
         `  Sessions: max ${options.maxSessions ?? 100} (${options.maxSessionsPerIp ?? 10}/IP), TTL ${(options.sessionTtlMs ?? 1_800_000) / 1000}s\n`
       );
-      process.stderr.write(`  Rate limit: ${rateLimitRpm} req/min per session\n`);
+      process.stderr.write(`  Rate limit: ${rateLimitRpm} req/min per session or client address\n`);
       process.stderr.write(
         `  CORS: ${corsOrigins.size > 0 ? [...corsOrigins].join(', ') : 'deny all'}\n`
       );
       process.stderr.write(
-        `  Mode: unprotected (token validation deferred to v0.11.x+; deployer auth via reverse proxy)\n`
+        `  Mode: unprotected (no token validation; deploy behind an authenticating reverse proxy)\n`
       );
 
       resolve({
@@ -562,6 +582,7 @@ export async function createHttpTransport(
           await sessionManager.cleanup();
           await new Promise<void>((res) => server.close(() => res()));
         },
+        rateLimitKeyCount: () => rateLimits.size,
       });
     });
   });
