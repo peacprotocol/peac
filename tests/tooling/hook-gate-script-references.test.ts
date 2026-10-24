@@ -17,8 +17,6 @@ const ENTRY_POINTS: readonly string[] = [
   'scripts/guard.sh',
   'scripts/pre-push-strict.sh',
   'scripts/release/run-gates.sh',
-  'scripts/release-gate-0.11.3.sh',
-  'scripts/release-gate-0.12.0-preview.1.sh',
 ];
 
 const SCRIPT_REF = /(?<![\w./-])scripts\/[A-Za-z0-9_./-]+\.(?:sh|mjs|cjs|js|ts)(?![\w])/g;

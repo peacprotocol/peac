@@ -48,7 +48,7 @@ export default defineConfig({
   },
   server: {
     fs: {
-      deny: ['archive', 'ex', 'sdks'],
+      deny: ['sdks'],
     },
   },
   test: {
@@ -58,14 +58,10 @@ export default defineConfig({
     exclude: [
       '**/node_modules/**',
       '**/dist/**',
-      'archive/**',
-      'ex/**',
       'sdks/**',
       // apps/api has legacy .test.js files run via node --test (not vitest).
       // The new .test.ts files under apps/api/tests/ run via the root include list.
       'apps/api/src/**/*.test.js',
-      'packages/core/src/**/*.test.js',
-      'packages/sdk-js/tests/**',
       // tests/smoke re-enabled for v0.11.1 (MCP carrier e2e is a release gate)
       // QUARANTINE: surfaces/nextjs/middleware/tests/parity.test.ts
       //

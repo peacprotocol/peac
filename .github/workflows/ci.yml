@@ -90,7 +90,6 @@ jobs:
               - 'vitest*.config.*'
               - '.eslintrc*'
               - 'eslint.config.*'
-              - '.prettierrc*'
               - '.prettierignore'
               - 'prettier.config.*'
               - '.dependency-cruiser.json'
@@ -323,10 +322,6 @@ jobs:
 
       - name: TypeScript check (core packages)
         run: pnpm typecheck:core
-
-      - name: TypeScript check (legacy - advisory)
-        continue-on-error: true
-        run: pnpm typecheck:legacy || true
 
       - name: Build all packages
         run: pnpm build
