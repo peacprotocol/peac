@@ -383,8 +383,8 @@ describe('Iso8601OffsetDateTimeSchema (ISO 8601 with offset, any precision)', ()
     expect(Iso8601OffsetDateTimeSchema.safeParse('2026-03-14T12:00:00.123Z').success).toBe(true);
   });
 
-  it('accepts minute-precision (ISO 8601 allows, RFC 3339 does not)', () => {
-    expect(Iso8601OffsetDateTimeSchema.safeParse('2026-03-14T12:00Z').success).toBe(true);
+  it('rejects minute-precision (RFC 3339 requires seconds)', () => {
+    expect(Iso8601OffsetDateTimeSchema.safeParse('2026-03-14T12:00Z').success).toBe(false);
   });
 
   it('rejects date-only strings', () => {
@@ -429,8 +429,7 @@ describe('Rfc3339DateTimeSchema (strict RFC 3339: offset + seconds required)', (
 describe('Rfc3339TimestampSchema (deprecated alias)', () => {
   it('is the same schema as Iso8601OffsetDateTimeSchema (NOT strict RFC 3339)', () => {
     expect(Rfc3339TimestampSchema).toBe(Iso8601OffsetDateTimeSchema);
-    // This alias accepts minute-precision, which strict RFC 3339 does not.
-    // Users who need strict RFC 3339 should use Rfc3339DateTimeSchema.
+    // Distinct schema objects; Rfc3339DateTimeSchema adds its own seconds check.
     expect(Rfc3339TimestampSchema).not.toBe(Rfc3339DateTimeSchema);
   });
 });

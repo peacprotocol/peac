@@ -2357,7 +2357,9 @@ describe('agent-run-lineage-records: introspection totality and fork corresponde
         manifest,
         finalizationObservedAt: '2026-01-15T10:03Z',
       })
-    ).rejects.toThrow('agent-action observed_at is outside the strict RFC 3339 profile');
+    ).rejects.toThrow(
+      'agent-action payload invalid for issuance: org.peacprotocol/agent-action-invoked-observed'
+    );
   });
 
   it('issueRun accepts strict fractional and offset finalization timestamps', async () => {

@@ -21,7 +21,7 @@
     "@peac/protocol": "workspace:*",
     "@peac/schema": "workspace:*",
     "hono": "^4.12.18",
-    "zod": "^4.3.6"
+    "zod": "^4.6.6"
   },
   "devDependencies": {
     "@types/node": "^22.19.11",
