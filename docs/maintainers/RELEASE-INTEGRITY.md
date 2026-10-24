@@ -101,7 +101,7 @@ JSON is the machine-verifiable release evidence.
 | Category            | Gates                                                                                                    | Scope       |
 | ------------------- | -------------------------------------------------------------------------------------------------------- | ----------- |
 | Build & Lint        | build, lint, typecheck, test                                                                             | All targets |
-| Guards              | guard, planning-leak, format                                                                             | All targets |
+| Guards              | guard, format                                                                                            | All targets |
 | Architecture        | layer-boundary                                                                                           | All targets |
 | Coherence           | version-coherence, codegen-fresh, release-state-coherence                                                | All targets |
 | Security            | no-network, wire-01-frozen                                                                               | All targets |

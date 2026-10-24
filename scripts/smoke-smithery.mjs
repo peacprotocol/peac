@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Smithery smoke harness (self-controlled, local-only).
+// Smithery smoke harness (self-controlled, runs locally).
 //
 // Validates the canonical Smithery configuration at
 // packages/mcp-server/smithery.yaml (the existing source of truth) and

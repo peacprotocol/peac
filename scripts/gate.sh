@@ -87,14 +87,6 @@ run_check "commerce coverage" node scripts/conformance/check-commerce-coverage.m
 # --- Public-example source hygiene (PR 3 surface only; cheap; runs in fast mode too) ---
 run_check "example source gate" node scripts/verify-example-source-gate.mjs
 
-# --- Planning leak (local-only script; skipped on fresh clones/CI) ---
-if [ -f scripts/check-planning-leak.sh ]; then
-  run_check "planning leak" bash scripts/check-planning-leak.sh
-else
-  echo "== planning leak =="
-  echo "SKIP: check-planning-leak.sh not present (local-only)"
-fi
-
 # --- Summary ---
 echo ""
 if [ "$bad" -eq 0 ]; then

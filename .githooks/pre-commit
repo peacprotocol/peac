@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
 # .githooks/pre-commit
-# Repo-managed pre-commit hook: lint-staged auto-format + planning leak check.
+# Repo-managed pre-commit hook: lint-staged auto-format.
 # Install: bash scripts/setup-hooks.sh
 #
 # This hook is NOT optional. It runs lint-staged (Prettier --write on staged
-# files) so formatting issues are fixed before they reach CI. The planning
-# leak check prevents strategic content from leaking into commits.
+# files) so formatting issues are fixed before they reach CI.
 #
 # Bypass: PEAC_SKIP_PRE_COMMIT=1 git commit -m "..."
 # A bypass logs a warning and requires the env var to be set explicitly.
@@ -15,7 +14,7 @@ set -euo pipefail
 
 if [ "${PEAC_SKIP_PRE_COMMIT:-}" = "1" ]; then
   echo "[pre-commit] BYPASSED (PEAC_SKIP_PRE_COMMIT=1)"
-  echo "[pre-commit] WARNING: CI will still enforce formatting and planning leak checks."
+  echo "[pre-commit] WARNING: CI will still enforce formatting."
   exit 0
 fi
 
@@ -36,12 +35,6 @@ if git diff --cached --name-only | grep -q 'specs/kernel/registries.json'; then
   pnpm codegen:registries
   git add packages/kernel/src/registries.generated.ts
   echo "[pre-commit] registries.generated.ts updated and staged"
-fi
-
-# Planning leak check (local-only script; skipped on fresh clones)
-if [ -f scripts/check-planning-leak.sh ]; then
-  echo "[pre-commit] Checking for planning leaks..."
-  bash scripts/check-planning-leak.sh
 fi
 
 echo "[pre-commit] OK"

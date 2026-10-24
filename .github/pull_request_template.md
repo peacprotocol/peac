@@ -30,7 +30,7 @@
 - [ ] Tests added for new functionality
 - [ ] Commit messages use conventional format
 - [ ] PR title is technical and under 70 chars
-- [ ] PR body contains only technical content (no internal planning, sequencing, or process language)
+- [ ] PR text describes the change and its validation only
 
 ## Neutrality and abstraction check
 

@@ -4,7 +4,7 @@
  * The internal package names @peac/record-core, @peac/resolver-http,
  * @peac/compat, and @peac/registries are workspace-private. They MUST
  * NOT appear on any tracked public surface until they are explicitly
- * promoted via a dedicated roadmap decision with its own gate review.
+ * promoted via a dedicated gate review.
  *
  * This test greps tracked files under public surfaces for those four
  * names and fails if any appears outside allowed contexts.
@@ -38,10 +38,10 @@ const FORBIDDEN_PATHS = [
   'CHANGELOG.md',
 ];
 
-// Paths that may legitimately mention the names (local planning, test
+// Paths that may legitimately mention the names (workspace-only paths, test
 // infrastructure that enforces the rule, or this test itself).
 const ALLOWED_SUBSTRINGS = [
-  'reference/', // gitignored local planning (excluded from grep anyway)
+  'reference/', // untracked workspace path (excluded from grep anyway)
   'tests/tooling/internal-package-invisibility.test.ts', // this test
   'CLAUDE.md', // local operating manual
 ];
