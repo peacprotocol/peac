@@ -18,15 +18,6 @@
       "transport": {
         "type": "stdio"
       }
-    },
-    {
-      "registryType": "npm",
-      "identifier": "@peac/mcp-server",
-      "version": "0.16.4",
-      "transport": {
-        "type": "streamable-http",
-        "url": "http://localhost:3000/mcp"
-      }
     }
   ]
 }
