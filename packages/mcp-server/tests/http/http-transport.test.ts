@@ -1549,7 +1549,7 @@ describe('rateLimitKeyFor', () => {
     expect(rateLimitKeyFor(undefined, '10.0.0.1', () => true)).toBe('ip:10.0.0.1');
   });
 
-  it('keys a syntactically invalid session id by client address without looking it up', () => {
+  it('keys a malformed session id by client address', () => {
     const isLive = vi.fn(() => true);
     expect(rateLimitKeyFor('', '10.0.0.1', isLive)).toBe('ip:10.0.0.1');
     expect(rateLimitKeyFor('has space', '10.0.0.1', isLive)).toBe('ip:10.0.0.1');
