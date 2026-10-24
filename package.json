@@ -180,7 +180,8 @@
       "@opentelemetry/core@>=2.0.0 <2.8.0": ">=2.8.0 <3",
       "proxy-addr@>=2.0.0 <2.0.8": ">=2.0.8 <3",
       "body-parser@>=2.0.0 <2.4.0": ">=2.4.0 <3",
-      "body-parser@<1.20.9": ">=1.20.9 <2"
+      "body-parser@<1.20.9": ">=1.20.9 <2",
+      "handlebars@<4.7.10": "4.7.10"
     },
     "overridesComments": {
       "minimatch": "Cross-major pin to 10.2.4: typescript-estree requires ^9.0.4 but 9.x has no patch for GHSA-3ppc-4f35-3m26. minimatch 10.x is API-compatible (same globbing interface). 10.2.4 patches GHSA-7r86-cg39-jmmj and GHSA-23c5-xmqv-rm74 (ReDoS). Drops Node 18 (fine: repo baseline is >=22.0.0). Lint verified clean.",
@@ -213,7 +214,8 @@
       "@opentelemetry/core@>=2.0.0 <2.8.0": "Range-scoped to the 2.x line below 2.8.0; forces >=2.8.0 <3 (fixes GHSA-8988-4f7v-96qf). Upper bound <3 keeps the 2.x line. Reached via examples/telemetry-otel.",
       "proxy-addr@>=2.0.0 <2.0.8": "Range-scoped to proxy-addr 2.x below 2.0.8; forces >=2.0.8 <3 (fixes GHSA-jqcg-44mw-7w3h). Prod path: @peac/mcp-server -> @modelcontextprotocol/sdk -> express 5 -> proxy-addr; also express 4 in examples.",
       "body-parser@>=2.0.0 <2.4.0": "Range-scoped to body-parser 2.x below 2.4.0; forces >=2.4.0 <3 (fixes GHSA-27r3-jxmh-p828 and GHSA-v422-hmwv-36x6). Prod path: @peac/mcp-server -> @modelcontextprotocol/sdk -> express 5 -> body-parser.",
-      "body-parser@<1.20.9": "Range-scoped to body-parser 1.x below 1.20.9; forces >=1.20.9 <2 (fixes GHSA-27r3-jxmh-p828 and GHSA-v422-hmwv-36x6). Examples only, via express 4."
+      "body-parser@<1.20.9": "Range-scoped to body-parser 1.x below 1.20.9; forces >=1.20.9 <2 (fixes GHSA-27r3-jxmh-p828 and GHSA-v422-hmwv-36x6). Examples only, via express 4.",
+      "handlebars@<4.7.10": "Range-scoped to handlebars below 4.7.10 and pinned to the patched 4.7.10 (fixes GHSA-8r5x-fm3f-whwj and GHSA-p8wg-vrv2-v86f). Dev-only via apps/api -> ts-jest; not in any published package."
     }
   },
   "lint-staged": {
