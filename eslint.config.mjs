@@ -1,6 +1,15 @@
+import { existsSync, readFileSync } from 'node:fs';
 import js from '@eslint/js';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
+
+// Optional per-checkout ignore list (untracked); one pattern per line.
+const localIgnores = existsSync('.ignore.local')
+  ? readFileSync('.ignore.local', 'utf8')
+      .split('\n')
+      .map((line) => line.trim())
+      .filter((line) => line && !line.startsWith('#'))
+  : [];
 
 export default [
   // --- Global ignores ---
@@ -10,6 +19,10 @@ export default [
       '**/coverage/**',
       '**/node_modules/**',
       'apps/api/src/**/*.test.js',
+      '.*/**',
+      '!.github/**',
+      '!.githooks/**',
+      ...localIgnores,
     ],
   },
 
@@ -72,27 +85,41 @@ export default [
   // history and no longer on the active lint path, so the rule now targets the
   // canonical content-signals mapping package only.)
   {
-    files: [
-      'packages/mappings/content-signals/src/**/*.ts',
-    ],
+    files: ['packages/mappings/content-signals/src/**/*.ts'],
     rules: {
       'no-restricted-imports': [
         'error',
         {
           paths: [
-            { name: 'node-fetch', message: 'Network I/O forbidden in content-signal parser packages. Pass pre-fetched bytes to the parser.' },
+            {
+              name: 'node-fetch',
+              message:
+                'Network I/O forbidden in content-signal parser packages. Pass pre-fetched bytes to the parser.',
+            },
             { name: 'got', message: 'Network I/O forbidden in content-signal parser packages.' },
             { name: 'axios', message: 'Network I/O forbidden in content-signal parser packages.' },
             { name: 'undici', message: 'Network I/O forbidden in content-signal parser packages.' },
-            { name: 'node:http', message: 'Network I/O forbidden in content-signal parser packages.' },
-            { name: 'node:https', message: 'Network I/O forbidden in content-signal parser packages.' },
-            { name: 'node:net', message: 'Network I/O forbidden in content-signal parser packages.' },
+            {
+              name: 'node:http',
+              message: 'Network I/O forbidden in content-signal parser packages.',
+            },
+            {
+              name: 'node:https',
+              message: 'Network I/O forbidden in content-signal parser packages.',
+            },
+            {
+              name: 'node:net',
+              message: 'Network I/O forbidden in content-signal parser packages.',
+            },
             { name: 'http', message: 'Network I/O forbidden in content-signal parser packages.' },
             { name: 'https', message: 'Network I/O forbidden in content-signal parser packages.' },
             { name: 'net', message: 'Network I/O forbidden in content-signal parser packages.' },
           ],
           patterns: [
-            { group: ['node:http', 'node:https', 'node:net'], message: 'Network I/O forbidden in content-signal parser packages.' },
+            {
+              group: ['node:http', 'node:https', 'node:net'],
+              message: 'Network I/O forbidden in content-signal parser packages.',
+            },
           ],
         },
       ],

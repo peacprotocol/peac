@@ -23,6 +23,11 @@ pnpm-lock.yaml
 # local development state (gitignored)
 **/.local/**
 
+# top-level hidden directories other than the tracked ones
+/.*/
+!/.github/
+!/.githooks/
+
 # performance result snapshots (generated artifact)
 perf-results.json
 
