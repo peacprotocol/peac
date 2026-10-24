@@ -1,5 +1,5 @@
 {
-  "description": "Baseline truth report for v0.12.8. Generated as PR 0 artifact for v0.12.9 release planning.",
+  "description": "Baseline truth report for v0.12.8. Generated as PR 0 artifact for the v0.12.9 release.",
   "generated": "2026-04-10",
   "version": "0.12.8",
   "wire_format_version": "0.2",

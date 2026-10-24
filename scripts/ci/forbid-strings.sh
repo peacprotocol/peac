@@ -5,7 +5,7 @@ set -euo pipefail
 # This script is called by CI to enforce repo-wide rules
 #
 # HARD FAILURES (exit 1):
-#   - Literal "IETF" in tracked files (except CLAUDE.md which documents the rule)
+#   - Literal "IETF" in tracked files (except the files that document the rule)
 #   - RFC aspiration patterns: RFC-ready, RFC ready, RFC milestone, RFC target, RFC submission
 #   - Any emojis (warning, checkmark, rocket, fire, robot, bullseye, star, etc.)
 #   - Em dashes in source/config code (prose docs may use standard punctuation)
@@ -28,7 +28,6 @@ get_tracked_files() {
 # CHECK 1: IETF mentions (HARD FAILURE)
 # =============================================================================
 # Block "IETF" as internal goal language, but allow in URLs (external RFC refs)
-# CLAUDE.md is allowed because it documents this rule
 echo "Checking for IETF mentions..."
 # First find files with IETF
 ietf_files=$(get_tracked_files | xargs grep -il 'IETF' 2>/dev/null || true)

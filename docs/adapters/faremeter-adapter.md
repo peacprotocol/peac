@@ -2,7 +2,7 @@
 
 PEAC Protocol adapter for Faremeter metering and billing.
 
-**Status:** Not implemented. Historical planning document; no committed release.
+**Status:** Not implemented. Design notes only; no committed release.
 **Package:** `@peac/adapter-faremeter` (proposed)
 **Layer:** 4 (Adapters)
 

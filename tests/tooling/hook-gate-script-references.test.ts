@@ -1,5 +1,5 @@
 /**
- * Git hooks, the CI workflow and the gate scripts must invoke only scripts that are tracked in
+ * The listed hooks, CI workflow and gate scripts must invoke only scripts that are tracked in
  * this repository. A guarded call to a script that is not tracked is dead code for every clone.
  */
 import { describe, it, expect } from 'vitest';
@@ -14,6 +14,9 @@ const ENTRY_POINTS: readonly string[] = [
   '.githooks/pre-push',
   '.github/workflows/ci.yml',
   'scripts/gate.sh',
+  'scripts/guard.sh',
+  'scripts/pre-push-strict.sh',
+  'scripts/release/run-gates.sh',
   'scripts/release-gate-0.11.3.sh',
   'scripts/release-gate-0.12.0-preview.1.sh',
 ];

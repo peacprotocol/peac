@@ -42,7 +42,6 @@ const FORBIDDEN_PATTERNS = [
   /\/\.claude\//,
   /^reference\//,
   /\/reference\//,
-  /\bwarm-percolating-flask\.md$/,
   /\b__tests__\//,
   /\b__snapshots__\//,
   // Workspace-only files identifiable by name.

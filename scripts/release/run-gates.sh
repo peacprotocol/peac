@@ -222,12 +222,6 @@ fi
 # --- Release State Coherence ---
 echo ""
 echo "--- Release State Coherence ---"
-if [ -f scripts/check-release-state-coherence.sh ]; then
-  run_gate "release-state-coherence" bash scripts/check-release-state-coherence.sh
-else
-  echo "  [release-state-coherence] SKIP (script not found)"
-fi
-
 # --- CHANGELOG Coverage ---
 echo ""
 echo "--- CHANGELOG Coverage ---"

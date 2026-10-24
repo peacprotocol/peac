@@ -43,7 +43,6 @@ const FORBIDDEN_PATHS = [
 const ALLOWED_SUBSTRINGS = [
   'reference/', // untracked workspace path (excluded from grep anyway)
   'tests/tooling/internal-package-invisibility.test.ts', // this test
-  'CLAUDE.md', // local operating manual
 ];
 
 function runGrep(pattern: string, paths: string[]): string[] {

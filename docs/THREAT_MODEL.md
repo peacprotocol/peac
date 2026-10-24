@@ -119,7 +119,7 @@ v0.13.2 adds an internal-only shadow-mode diagnostic foundation in `apps/api` fo
 
 These mitigations are in effect but have scheduled follow-ups for a future
 release. The stability contract and security operations describe the current
-behavior; the scheduled work is planning scope, not a current gap in
+behavior; the remaining work is not a current gap in
 shipped behavior.
 
 - Mutation-testing baseline (Stryker for TypeScript; `go-mutesting` for Go).
