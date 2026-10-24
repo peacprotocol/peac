@@ -112,7 +112,7 @@ echo "== forbid X-PEAC headers (RFC 6648) =="
 # Strict repo-wide check: X-PEAC-* headers are forbidden everywhere
 # Use [Xx] pattern to avoid self-matching in this script
 # Exclude: archive (legacy), scripts that check FOR violations, CI that checks FOR violations
-XPEAC_ALLOW='^(archive/|CHANGELOG\.md|scripts/(guard\.sh|verify-protocol-strings\.mjs|verify-spec-drift\.mjs|pre-release-verify\.sh)|\.github/workflows/ci\.yml)'
+XPEAC_ALLOW='^(archive/|CHANGELOG\.md|scripts/(guard\.sh|verify-protocol-strings\.mjs|verify-spec-drift\.mjs)|\.github/workflows/ci\.yml)'
 if git grep -nE '[Xx]-PEAC-' -- ':!node_modules' \
   | grep -vE "$XPEAC_ALLOW" | grep .; then
   echo "FAIL: Found X-PEAC headers - use PEAC-* instead (RFC 6648)"
@@ -141,7 +141,7 @@ echo "== forbid npm invocations =="
 # net-node test-pack-install (tests published package in clean npm project),
 # capture-core test-exports (tests consumer exports resolution),
 # publish workflow (npm install for OIDC), docs/release (npm publish docs), publish-manifest (description)
-NPM_ALLOW='^(IMPLEMENTATION_STATUS\.md|README\.md|packages/.*/README\.md|(docs/)?RELEASING\.md|CHANGELOG\.md|docs/maintainers/(RELEASING|NPM_PUBLISH|RELEASE-INTEGRITY|SECURITY-POSTURE).*\.md|docs/(VERIFY-RELEASE|guides/edge/|release/)|scripts/(guard\.sh|pack-smoke\.mjs|pack-.*\.sh|otel-smoke\.sh|check-readme-consistency\.sh|publish-manifest\.json|setup-trusted-publishing\.sh|validate-mcp-install\.mjs|release/pack-install-smoke(-registry)?\.(sh|mjs)|verify-dist-private-leaks\.mjs)|packages/net/node/scripts/test-pack-install\.mjs|packages/capture/core/scripts/test-exports\.mjs|\.github/workflows/(publish|promote-latest|publish-mcp-registry)\.yml|integrator-kits/|surfaces/distribution/|llms\.txt|examples/hello-world/|tests/tooling/disc-mention-scope\.test\.ts|docs/MIGRATION_CURRENT\.md|archive/discovery/README\.md)'
+NPM_ALLOW='^(IMPLEMENTATION_STATUS\.md|README\.md|packages/.*/README\.md|(docs/)?RELEASING\.md|CHANGELOG\.md|docs/maintainers/(RELEASING|NPM_PUBLISH|RELEASE-INTEGRITY|SECURITY-POSTURE).*\.md|docs/(VERIFY-RELEASE|guides/edge/|release/)|scripts/(guard\.sh|pack-smoke\.mjs|pack-.*\.sh|otel-smoke\.sh|publish-manifest\.json|setup-trusted-publishing\.sh|validate-mcp-install\.mjs|release/pack-install-smoke(-registry)?\.(sh|mjs)|verify-dist-private-leaks\.mjs)|packages/net/node/scripts/test-pack-install\.mjs|packages/capture/core/scripts/test-exports\.mjs|\.github/workflows/(publish|promote-latest|publish-mcp-registry)\.yml|integrator-kits/|surfaces/distribution/|llms\.txt|examples/hello-world/|tests/tooling/disc-mention-scope\.test\.ts|docs/MIGRATION_CURRENT\.md|archive/discovery/README\.md)'
 if gg_wb n '\bnpm (run|ci|install|pack|publish)\b' '(^|[^[:alnum:]_])npm (run|ci|install|pack|publish)([^[:alnum:]_]|$)' -- ':!node_modules' ':!archive/**' | grep -vE "$NPM_ALLOW" | grep .; then
   bad=1
 else

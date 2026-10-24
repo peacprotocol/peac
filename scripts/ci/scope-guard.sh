@@ -18,7 +18,7 @@
 #   scope:surfaces   -> surfaces/
 #   scope:adapters   -> packages/adapters/
 #   scope:mappings   -> packages/mappings/
-#   scope:governance -> docs/governance/, docs/STANDARDS.md, docs/VERSIONING.md
+#   scope:governance -> docs/governance/
 #
 # Multiple scope labels can be combined (union of allowlists).
 # Every scope implicitly allows: CHANGELOG.md, pnpm-lock.yaml (lockfile drift).
