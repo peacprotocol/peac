@@ -56,6 +56,7 @@ interface LaneOptions {
   ref?: string;
   examplesApps?: string;
   browserMatrix?: string;
+  serverTests?: string;
 }
 
 /** All lanes passing, with the activation flags and lane results under test. */
@@ -76,6 +77,7 @@ function lanes(opts: LaneOptions = {}): Record<string, string> {
     'needs.type-build.result': 'success',
     'needs.tests-core.result': 'success',
     'needs.tooling-gates.result': 'success',
+    'needs.server-tests.result': opts.serverTests ?? 'success',
     'needs.examples-apps.result': examplesApps,
     'needs.pack-smoke.result': 'success',
     'needs.node-compat.result': 'success',
@@ -184,5 +186,28 @@ describe('the browser-matrix state table is exhaustive over result values', () =
     expect(evaluate(lanes({ browserMatrix: 'skipped' }))).toBe(0);
     expect(evaluate(lanes({ browserMatrix: 'failure' }))).not.toBe(0);
     expect(evaluate(lanes({ browserMatrix: 'cancelled' }))).not.toBe(0);
+  });
+});
+
+// The application test job (@peac/mcp-server, @peac/server) activates like the core test job:
+// a failure or cancellation blocks the aggregate, and a skip (no source change) does not.
+describe('the application test job blocks the aggregate', () => {
+  it('success is accepted', () => {
+    expect(evaluate(lanes({ serverTests: 'success' }))).toBe(0);
+  });
+
+  it('a skipped job (no source change) is allowed', () => {
+    expect(evaluate(lanes({ serverTests: 'skipped' }))).toBe(0);
+  });
+
+  it('failure and cancellation block the aggregate', () => {
+    expect(evaluate(lanes({ serverTests: 'failure' }))).not.toBe(0);
+    expect(evaluate(lanes({ serverTests: 'cancelled' }))).not.toBe(0);
+  });
+
+  it('a failure blocks regardless of which path activated the job', () => {
+    expect(evaluate(lanes({ core: 'true', serverTests: 'failure' }))).not.toBe(0);
+    expect(evaluate(lanes({ rootConfig: 'true', serverTests: 'failure' }))).not.toBe(0);
+    expect(evaluate(lanes({ ref: 'refs/heads/main', serverTests: 'failure' }))).not.toBe(0);
   });
 });
