@@ -12,6 +12,7 @@
  */
 
 import type { Context } from 'hono';
+import { bodyLimit } from 'hono/body-limit';
 import { z } from 'zod';
 import { issueWire02, IssueError } from '@peac/protocol';
 import { base64urlDecode } from '@peac/crypto';
@@ -21,6 +22,14 @@ import { deterministicStringify } from './utils.js';
 
 const PROBLEM_CONTENT_TYPE = 'application/problem+json';
 const MAX_BODY_SIZE = 256 * 1024; // 256 KB
+
+// Bounds the request body while it is read, including bodies that carry no
+// Content-Length header (chunked transfer).
+const bodyLimitGuard = bodyLimit({
+  maxSize: MAX_BODY_SIZE,
+  onError: (c) =>
+    problemResponse(c, toProblemDetails('E_PAYLOAD_TOO_LARGE', { limit: String(MAX_BODY_SIZE) })),
+});
 
 /**
  * Hosted Issue request schema. Uses canonical EvidencePillarSchema from
@@ -74,8 +83,11 @@ export function createIssueV1Handler(opts?: IssueV1Options) {
       });
     }
 
-    // Actual body-size enforcement: read raw text with cap, then parse
-    // Read raw body text, then enforce actual byte-size cap (not char length)
+    // Bound the body while it is read (declared and streamed bodies alike),
+    // then enforce the actual byte-size cap on the decoded text (not char length)
+    const oversize = await bodyLimitGuard(c, async () => {});
+    if (oversize) return oversize;
+
     let rawBody: string;
     try {
       rawBody = await c.req.text();
