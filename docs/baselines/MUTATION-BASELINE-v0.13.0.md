@@ -11,7 +11,7 @@
 
 ## Configuration
 
-The repo-root [`stryker.conf.json`](../../stryker.conf.json) targets the
+The [`scripts/stryker.conf.json`](../../scripts/stryker.conf.json) targets the
 five highest-leverage layers: `@peac/kernel`, `@peac/schema`,
 `@peac/crypto`, `@peac/protocol`, and `@peac/policy-kit`. Generated
 files (`*.generated.ts`), test files, and `__tests__/` directories are

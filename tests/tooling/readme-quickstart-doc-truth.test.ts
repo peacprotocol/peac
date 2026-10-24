@@ -114,7 +114,7 @@ const TSX_BIN = join(REPO_ROOT, 'node_modules', '.bin', 'tsx');
 const ROOT_PKG_PATH = join(REPO_ROOT, 'package.json');
 const FACTS_PATH = join(REPO_ROOT, 'docs', 'releases', 'facts.json');
 const CODE_HEADING = '## Use PEAC in code';
-const NVMRC_PATH = join(REPO_ROOT, '.nvmrc');
+const NODE_VERSION_PATH = join(REPO_ROOT, '.node-version');
 const GOMOD_PATH = join(REPO_ROOT, 'sdks', 'go', 'go.mod');
 
 /** The body of the "## Use PEAC in code" section (up to the next H2). */
@@ -361,10 +361,10 @@ describe('README runtime-support truth', () => {
     expect(README_TEXT).not.toMatch(/Node 22\+/);
   });
 
-  it('the canonical Node major in the README matches the repo toolchain pin (.nvmrc)', () => {
-    const pin = readFileSync(NVMRC_PATH, 'utf8').trim();
+  it('the canonical Node major in the README matches the repo toolchain pin (.node-version)', () => {
+    const pin = readFileSync(NODE_VERSION_PATH, 'utf8').trim();
     const major = pin.split('.')[0];
-    expect(major, '.nvmrc major version').toMatch(/^\d+$/);
+    expect(major, '.node-version major version').toMatch(/^\d+$/);
     expect(README_TEXT).toContain(`Node ${major} is the canonical tested runtime`);
   });
 

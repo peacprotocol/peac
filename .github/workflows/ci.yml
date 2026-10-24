@@ -82,7 +82,6 @@ jobs:
             # must trigger type-build, tests-core, and pack-smoke
             root_config:
               - '.node-version'
-              - '.nvmrc'
               - 'package.json'
               - 'pnpm-lock.yaml'
               - 'pnpm-workspace.yaml'
