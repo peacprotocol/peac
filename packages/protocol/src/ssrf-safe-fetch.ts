@@ -3,9 +3,11 @@
  *
  * Implements SSRF protection per VERIFIER-SECURITY-MODEL.md:
  * - HTTPS only
- * - Block private IP ranges (RFC 1918)
- * - Block link-local addresses
- * - Block loopback addresses
+ * - Allow only global unicast addresses: every block in the IANA IPv4 and IPv6
+ *   special-purpose registries is refused, including private, loopback,
+ *   link-local, shared, multicast and reserved ranges, and IPv4-mapped forms
+ * - Fail closed when DNS returns no addresses
+ * - Connect only to the vetted addresses (no second resolution)
  * - Redirect limits and scheme downgrade protection
  *
  * ## Security Model: Best-Effort Protection
@@ -34,9 +36,8 @@
  *
  * | Protection | Requires |
  * |------------|----------|
- * | Private IP blocking (RFC 1918) | DNS pre-resolution |
- * | Loopback blocking (127.0.0.0/8) | DNS pre-resolution |
- * | Link-local blocking (169.254.0.0/16) | DNS pre-resolution |
+ * | Special-purpose address blocking (global unicast only) | DNS pre-resolution |
+ * | Connection to the vetted address only | DNS pre-resolution + `https` module |
  *
  * ## Runtime Capability Model
  *
@@ -44,7 +45,7 @@
  *
  * | Runtime           | DNS Pre-Resolution | IP Blocking | Notes |
  * |-------------------|-------------------|-------------|-------|
- * | Node.js           | YES               | YES         | Full protection via dns module |
+ * | Node.js           | YES               | YES         | Resolve once, vet, connect to the vetted address |
  * | Browser           | NO                | NO          | Relies on server-side validation |
  * | Cloudflare Workers| NO                | NO          | No DNS access, relies on CF network |
  * | Deno              | NO                | NO          | dns module not available by default |
@@ -55,7 +56,9 @@
  * @packageDocumentation
  */
 
+import type { LookupAddress, LookupOptions } from 'dns';
 import { VERIFIER_LIMITS, VERIFIER_NETWORK } from '@peac/kernel';
+import { classifyAddress } from './_internal/address-policy.js';
 
 // ---------------------------------------------------------------------------
 // SSRF Capability Model
@@ -148,9 +151,9 @@ function detectCapabilities(): SSRFCapabilities {
       networkIsolation: false,
       protectionLevel: 'full',
       notes: [
-        'Full SSRF protection available via Node.js dns module',
-        'DNS resolution checked before HTTP connection',
-        'All RFC 1918 private ranges blocked',
+        'Hostnames are resolved once via the Node.js dns module',
+        'Every resolved address must be a global unicast address',
+        'The connection is made only to a vetted address',
       ],
     };
   }
@@ -324,116 +327,17 @@ export interface SSRFFetchError {
 }
 
 /**
- * IPv4 address parsed into components
- */
-interface IPv4Address {
-  octets: [number, number, number, number];
-}
-
-/**
- * Parse an IPv4 address string into octets
- */
-function parseIPv4(ip: string): IPv4Address | null {
-  const parts = ip.split('.');
-  if (parts.length !== 4) return null;
-
-  const octets: number[] = [];
-  for (const part of parts) {
-    const num = parseInt(part, 10);
-    if (isNaN(num) || num < 0 || num > 255) return null;
-    octets.push(num);
-  }
-
-  return { octets: octets as [number, number, number, number] };
-}
-
-/**
- * Check if an IPv4 address is in a CIDR range
- */
-function isInCIDR(ip: IPv4Address, cidr: string): boolean {
-  const [rangeStr, maskStr] = cidr.split('/');
-  const range = parseIPv4(rangeStr);
-  if (!range) return false;
-
-  const maskBits = parseInt(maskStr, 10);
-  if (isNaN(maskBits) || maskBits < 0 || maskBits > 32) return false;
-
-  // Convert to 32-bit integers
-  const ipNum = (ip.octets[0] << 24) | (ip.octets[1] << 16) | (ip.octets[2] << 8) | ip.octets[3];
-  const rangeNum =
-    (range.octets[0] << 24) | (range.octets[1] << 16) | (range.octets[2] << 8) | range.octets[3];
-
-  // Create mask
-  const mask = maskBits === 0 ? 0 : ~((1 << (32 - maskBits)) - 1);
-
-  return (ipNum & mask) === (rangeNum & mask);
-}
-
-/**
- * Check if an IPv6 address is loopback (::1)
- */
-function isIPv6Loopback(ip: string): boolean {
-  const normalized = ip.toLowerCase().replace(/^::ffff:/, '');
-  return normalized === '::1' || normalized === '0:0:0:0:0:0:0:1';
-}
-
-/**
- * Check if an IPv6 address is link-local (fe80::/10)
- */
-function isIPv6LinkLocal(ip: string): boolean {
-  const normalized = ip.toLowerCase();
-  return (
-    normalized.startsWith('fe8') ||
-    normalized.startsWith('fe9') ||
-    normalized.startsWith('fea') ||
-    normalized.startsWith('feb')
-  );
-}
-
-/**
- * Check if an IP address is private/blocked
+ * Check if an IP address is outside the allowed address space.
+ *
+ * Only global unicast addresses outside the IANA IPv4 and IPv6 special-purpose
+ * blocks are allowed. IPv4-mapped IPv6 addresses are judged by the embedded
+ * IPv4 address; input that does not parse as an address is blocked.
  */
 export function isBlockedIP(
   ip: string
 ): { blocked: true; reason: 'private_ip' | 'loopback' | 'link_local' } | { blocked: false } {
-  // Handle IPv4-mapped IPv6 addresses
-  const ipv4Match = ip.match(/^::ffff:(\d+\.\d+\.\d+\.\d+)$/i);
-  const effectiveIP = ipv4Match ? ipv4Match[1] : ip;
-
-  // Check IPv4
-  const ipv4 = parseIPv4(effectiveIP);
-  if (ipv4) {
-    // RFC 1918 private ranges
-    if (
-      isInCIDR(ipv4, '10.0.0.0/8') ||
-      isInCIDR(ipv4, '172.16.0.0/12') ||
-      isInCIDR(ipv4, '192.168.0.0/16')
-    ) {
-      return { blocked: true, reason: 'private_ip' };
-    }
-
-    // Loopback
-    if (isInCIDR(ipv4, '127.0.0.0/8')) {
-      return { blocked: true, reason: 'loopback' };
-    }
-
-    // Link-local
-    if (isInCIDR(ipv4, '169.254.0.0/16')) {
-      return { blocked: true, reason: 'link_local' };
-    }
-
-    return { blocked: false };
-  }
-
-  // Check IPv6
-  if (isIPv6Loopback(ip)) {
-    return { blocked: true, reason: 'loopback' };
-  }
-  if (isIPv6LinkLocal(ip)) {
-    return { blocked: true, reason: 'link_local' };
-  }
-
-  return { blocked: false };
+  const verdict = classifyAddress(ip);
+  return verdict.allowed ? { blocked: false } : { blocked: true, reason: verdict.reason };
 }
 
 /**
@@ -506,8 +410,11 @@ async function resolveHostname(
         };
       }
 
-      // No results but no errors either (unlikely)
-      return { ok: true, ips: [], browser: false };
+      // An empty answer leaves nothing to vet: fail closed
+      return {
+        ok: false,
+        message: `DNS resolution returned no addresses for ${hostname}`,
+      };
     } catch (err) {
       // DNS module import failed or other error
       return {
@@ -522,14 +429,113 @@ async function resolveHostname(
   return { ok: true, ips: [], browser: true };
 }
 
+const NULL_BODY_STATUSES = new Set([101, 103, 204, 205, 304]);
+
+/**
+ * GET a URL over HTTPS, connecting only to the given vetted addresses.
+ *
+ * The hostname is never resolved again: the socket lookup returns the vetted
+ * addresses, while the URL host is still used for the Host header, TLS SNI and
+ * certificate verification. Redirects are not followed.
+ */
+async function fetchFromVettedAddresses(
+  url: string,
+  addresses: readonly string[],
+  headers: Record<string, string>,
+  signal: AbortSignal
+): Promise<Response> {
+  const https = await import('https');
+  const entries: LookupAddress[] = addresses.map((address) => ({
+    address,
+    family: address.includes(':') ? 6 : 4,
+  }));
+
+  const lookup = (
+    _hostname: string,
+    options: LookupOptions,
+    callback: (
+      err: NodeJS.ErrnoException | null,
+      address: string | LookupAddress[],
+      family?: number
+    ) => void
+  ): void => {
+    if (options.all) {
+      callback(null, entries);
+    } else {
+      callback(null, entries[0].address, entries[0].family);
+    }
+  };
+
+  return new Promise<Response>((resolve, reject) => {
+    const req = https.request(
+      new URL(url),
+      { method: 'GET', headers, lookup, agent: false, signal },
+      (res) => {
+        try {
+          const status = res.statusCode ?? 0;
+          const responseHeaders = new Headers();
+          for (const [name, value] of Object.entries(res.headers)) {
+            if (value === undefined) continue;
+            if (Array.isArray(value)) {
+              for (const item of value) responseHeaders.append(name, item);
+            } else {
+              responseHeaders.set(name, value);
+            }
+          }
+
+          if (NULL_BODY_STATUSES.has(status)) {
+            res.resume();
+            resolve(new Response(null, { status, headers: responseHeaders }));
+            return;
+          }
+
+          let settled = false;
+          const body = new ReadableStream<Uint8Array>({
+            start(controller) {
+              res.on('data', (chunk: Buffer) => {
+                if (settled) return;
+                controller.enqueue(new Uint8Array(chunk));
+                if ((controller.desiredSize ?? 0) <= 0) res.pause();
+              });
+              res.on('end', () => {
+                if (settled) return;
+                settled = true;
+                controller.close();
+              });
+              res.on('error', (err) => {
+                if (settled) return;
+                settled = true;
+                controller.error(err);
+              });
+            },
+            pull() {
+              res.resume();
+            },
+            cancel() {
+              settled = true;
+              res.destroy();
+            },
+          });
+          resolve(new Response(body, { status, headers: responseHeaders }));
+        } catch (err) {
+          res.destroy();
+          reject(err);
+        }
+      }
+    );
+    req.on('error', reject);
+    req.end();
+  });
+}
+
 /**
  * Perform an SSRF-safe fetch
  *
  * This function implements the SSRF protection algorithm from VERIFIER-SECURITY-MODEL.md:
  * 1. Parse URL; reject if not https://
- * 2. Resolve hostname to IP(s)
- * 3. For each IP: reject if private, link-local, or loopback
- * 4. Perform fetch with timeout
+ * 2. Resolve hostname to IP(s); an empty answer is a failure
+ * 3. For each IP: reject unless it is a global unicast address
+ * 4. Perform the request with timeout, connecting only to the vetted IPs
  * 5. On redirect: increment counter, reject if > max, apply checks to redirect URL
  * 6. Validate response size
  *
@@ -611,9 +617,10 @@ export async function ssrfSafeFetch(
     }
   }
 
-  // Step 4: Perform fetch with timeout
+  // Step 4: Perform fetch with timeout, connecting only to vetted addresses
   let redirectCount = 0;
   let currentUrl = url;
+  let vettedAddresses: readonly string[] | null = dnsResult.browser ? null : dnsResult.ips;
   const originalOrigin = parsedUrl.origin;
 
   while (true) {
@@ -621,14 +628,23 @@ export async function ssrfSafeFetch(
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
-      const response = await fetch(currentUrl, {
-        headers: {
-          Accept: 'application/json, text/plain',
-          ...headers,
-        },
-        signal: controller.signal,
-        redirect: 'manual', // Handle redirects manually for security
-      });
+      const requestHeaders = {
+        Accept: 'application/json, text/plain',
+        ...headers,
+      };
+      const response =
+        vettedAddresses === null
+          ? await fetch(currentUrl, {
+              headers: requestHeaders,
+              signal: controller.signal,
+              redirect: 'manual', // Handle redirects manually for security
+            })
+          : await fetchFromVettedAddresses(
+              currentUrl,
+              vettedAddresses,
+              requestHeaders,
+              controller.signal
+            );
 
       clearTimeout(timeoutId);
 
@@ -735,6 +751,7 @@ export async function ssrfSafeFetch(
         }
 
         currentUrl = redirectUrl.href;
+        vettedAddresses = redirectDnsResult.browser ? null : redirectDnsResult.ips;
         continue;
       }
 

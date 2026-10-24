@@ -126,7 +126,13 @@ export const ADDITIONAL_BLOCKED_CIDRS_V6: Array<[ipaddr.IPv6, number]> = [
   [ipaddr.IPv6.parse('2002::'), 16], // 6to4 (deprecated)
   [ipaddr.IPv6.parse('64:ff9b::'), 96], // NAT64
   [ipaddr.IPv6.parse('100::'), 64], // Discard prefix
+  [ipaddr.IPv6.parse('3fff::'), 20], // Documentation
 ];
+
+/**
+ * IPv6 global unicast space; addresses outside it are never allowed
+ */
+const IPV6_GLOBAL_UNICAST: [ipaddr.IPv6, number] = [ipaddr.IPv6.parse('2000::'), 3];
 
 // Error codes imported from codes.ts (single source of truth)
 // Re-export for testing subpath consumers
@@ -487,6 +493,10 @@ export function isPrivateIP(ip: string, policy?: SSRFPolicy): boolean {
       if (addr.match(network, prefix)) {
         return true;
       }
+    }
+
+    if (!addr.match(IPV6_GLOBAL_UNICAST[0], IPV6_GLOBAL_UNICAST[1])) {
+      return true;
     }
   }
 
