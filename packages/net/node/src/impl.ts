@@ -124,9 +124,20 @@ export const ADDITIONAL_BLOCKED_CIDRS_V6: Array<[ipaddr.IPv6, number]> = [
   [ipaddr.IPv6.parse('2001:db8::'), 32], // Documentation
   [ipaddr.IPv6.parse('2001::'), 23], // TEREDO (deprecated)
   [ipaddr.IPv6.parse('2002::'), 16], // 6to4 (deprecated)
-  [ipaddr.IPv6.parse('64:ff9b::'), 96], // NAT64
+  [ipaddr.IPv6.parse('64:ff9b::'), 96], // NAT64 (isPrivateIP judges the embedded IPv4 address)
   [ipaddr.IPv6.parse('100::'), 64], // Discard prefix
+  [ipaddr.IPv6.parse('3fff::'), 20], // Documentation
 ];
+
+/**
+ * IPv6 global unicast space; addresses outside it are never allowed
+ */
+const IPV6_GLOBAL_UNICAST: [ipaddr.IPv6, number] = [ipaddr.IPv6.parse('2000::'), 3];
+
+/**
+ * NAT64 well-known prefix (RFC 6052); the low 32 bits carry an IPv4 address
+ */
+const NAT64_WELL_KNOWN: [ipaddr.IPv6, number] = [ipaddr.IPv6.parse('64:ff9b::'), 96];
 
 // Error codes imported from codes.ts (single source of truth)
 // Re-export for testing subpath consumers
@@ -455,6 +466,15 @@ export function isPrivateIP(ip: string, policy?: SSRFPolicy): boolean {
     }
   }
 
+  // NAT64 well-known prefix: judge the embedded IPv4 address
+  if (
+    addr.kind() === 'ipv6' &&
+    (addr as ipaddr.IPv6).match(NAT64_WELL_KNOWN[0], NAT64_WELL_KNOWN[1])
+  ) {
+    const embedded = ipaddr.fromByteArray((addr as ipaddr.IPv6).toByteArray().slice(12));
+    return isPrivateIP(embedded.toString(), policy);
+  }
+
   // Use ipaddr.js range() for RFC 6890-grade classification
   const range = addr.range();
 
@@ -487,6 +507,10 @@ export function isPrivateIP(ip: string, policy?: SSRFPolicy): boolean {
       if (addr.match(network, prefix)) {
         return true;
       }
+    }
+
+    if (!addr.match(IPV6_GLOBAL_UNICAST[0], IPV6_GLOBAL_UNICAST[1])) {
+      return true;
     }
   }
 
