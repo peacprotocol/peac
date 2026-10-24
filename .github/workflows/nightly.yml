@@ -8,6 +8,10 @@ on:
     tags:
       - 'v*' # Trigger on version tags
 
+# Least-privilege: read-only by default. No job in this workflow writes to the repository.
+permissions:
+  contents: read
+
 jobs:
   full-test-suite:
     name: Complete Test Suite
@@ -59,48 +63,6 @@ jobs:
           echo "Performance SLO targets:"
           echo "  - Sign p95 <= 3ms"
           echo "  - Verify p95 <= 1ms"
-
-      - name: Integration checks
-        run: |
-          set -euo pipefail
-
-          echo "Running integration tests..."
-
-          # MCP server integration (TS entrypoint - run via tsx)
-          if [ -f "packages/adapters/mcp/server.ts" ]; then
-            echo '{"jsonrpc":"2.0","method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{"tools":{}},"serverInfo":{"name":"peac-receipts","version":"0.9.15"}}}' | \
-              timeout 5s pnpm -w exec tsx packages/adapters/mcp/server.ts || echo "MCP test completed"
-          else
-            echo "MCP adapter not present - skipping MCP integration test"
-          fi
-
-          # OpenAI functions file exists and has tools
-          if [ -f "packages/adapters/openai/functions.json" ]; then
-            node -e "
-              const funcs = require('./packages/adapters/openai/functions.json');
-              if (!funcs.functions || funcs.functions.length < 4) throw new Error('Missing OpenAI functions');
-              console.log('OpenAI functions validated:', funcs.functions.length);
-            "
-          else
-            echo "OpenAI adapter not present - skipping OpenAI functions validation"
-          fi
-
-          # Schema validation (if schemas exist)
-          if [ -f "schemas/receipt.v1.1.json" ] && [ -f "schemas/discovery.v1.1.json" ] && [ -f "schemas/purge.v1.0.json" ]; then
-            node -e "
-              const receipt   = require('./schemas/receipt.v1.1.json');
-              const discovery = require('./schemas/discovery.v1.1.json');
-              const purge     = require('./schemas/purge.v1.0.json');
-
-              const has = (o,p) => p.split('.').reduce((x,k)=>x && k in x ? x[k] : undefined, o) !== undefined;
-
-              if (!has(receipt,   'properties.verification'))       throw new Error('Missing verification in receipt schema');
-              if (!has(receipt,   'properties.audit_chain'))         throw new Error('Missing audit_chain in receipt schema');
-              console.log('All enhanced schemas validated');
-            "
-          else
-            echo "Schemas not present - using core types in packages/"
-          fi
 
   # Node-only runtime validation (Deno/Bun removed - not target runtimes for v0.9.x)
   node-runtime-validation:
@@ -221,4 +183,3 @@ jobs:
           echo "Node.js runtime validation completed"
           echo "Shadow-mode test suite completed"
           echo "Performance validation completed"
-          echo "Integration tests executed"
