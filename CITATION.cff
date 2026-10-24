@@ -10,17 +10,20 @@ authors:
 repository-code: 'https://github.com/peacprotocol/peac'
 url: 'https://www.peacprotocol.org'
 abstract: >-
-  PEAC is an open standard for verifiable interaction records across automated
-  systems. It provides a transport-neutral receipt format built on JWS with
-  deterministic verification semantics, enabling independent implementations to
-  produce identical accept/reject decisions.
+  PEAC is an open protocol for portable, verifiable interaction records across
+  agent, tool, API, and cross-runtime workflows. Records are signed JWS
+  artifacts (Interaction Record Format 0.2) with deterministic verification
+  semantics, so independent implementations produce the same accept or reject
+  decision.
 keywords:
-  - verifiable-credentials
-  - digital-receipts
-  - machine-to-machine
-  - api-billing
-  - content-licensing
-  - agent-protocols
+  - interaction-records
+  - signed-records
+  - offline-verification
+  - jws
+  - ed25519
+  - mcp
+  - agents
+  - evidence
 license: Apache-2.0
 version: '0.16.4'
 date-released: '2026-08-09'

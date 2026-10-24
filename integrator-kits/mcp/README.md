@@ -11,7 +11,7 @@ PEAC integrates with MCP in two ways:
 
 ## Prerequisites
 
-- Node.js >= 22.0.0
+- Node.js >= 22.13.0
 
 ## Quick Start: stdio (default)
 
@@ -127,9 +127,9 @@ import { verifyLocal } from '@peac/protocol';
 
 const toolResponse = /* MCP tool result */;
 if (hasReceipt(toolResponse)) {
-  const carrier = extractReceipt(toolResponse);
-  if (carrier?.receipt_jws) {
-    const result = await verifyLocal(carrier.receipt_jws, issuerPublicKey);
+  const jws = extractReceipt(toolResponse);
+  if (jws) {
+    const result = await verifyLocal(jws, issuerPublicKey);
     console.log('Valid:', result.valid);
   }
 }

@@ -10,7 +10,7 @@ PEAC integrates with A2A at the metadata layer. Receipts travel as Evidence Carr
 
 ## Prerequisites
 
-- Node.js >= 22.0.0
+- Node.js >= 22.13.0
 - `@peac/mappings-a2a`, `@peac/protocol`, `@peac/crypto`
 
 ```bash

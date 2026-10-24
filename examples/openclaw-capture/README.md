@@ -19,7 +19,7 @@ pnpm -C examples/openclaw-capture demo
 
 ## Requirements
 
-- Node.js 22+
+- Node.js >= 22.13.0
 - pnpm 8+
 - Run from the monorepo root (uses `workspace:*` dependencies)
 

@@ -19,8 +19,8 @@ New here? A few good entry points:
 
 ### Prerequisites
 
-- Node.js >= 22.0.0 (pinned in `.node-version`; Node 24 is primary CI target per DD-161)
-- pnpm >= 8.0.0
+- Node.js 22.13.0 or later (Node 24 recommended; see `.node-version`)
+- pnpm 8.15.0 (see `packageManager` in `package.json`)
 - Git with proper configuration
 
 ### Local Development
@@ -28,7 +28,7 @@ New here? A few good entry points:
 ```bash
 git clone https://github.com/peacprotocol/peac.git
 cd peac
-pnpm install
+pnpm install --frozen-lockfile
 pnpm build
 pnpm test
 ```
@@ -37,25 +37,21 @@ pnpm test
 
 ```
 peac/
-├── apps/                  # Deployable applications
-│   ├── api/              # @peac/app-api
-│   ├── worker/           # @peac/app-worker
-│   └── demo/             # @peac/app-demo
-├── packages/             # Publishable libraries
-│   ├── core/            # @peac/core
-│   ├── receipts/        # @peac/receipts
-│   └── ...              # See packages/ for full list
-├── specs/kernel/         # Normative kernel definitions
-├── docs/                 # Protocol documentation
-└── archive/              # Legacy pre-v0.9.15 materials
+├── apps/                  # api, sandbox-issuer, verifier
+├── packages/              # Publishable libraries (see packages/ for the full list)
+├── specs/                 # Kernel, wire, registry, conformance, benchmarks
+├── docs/                  # Protocol documentation
+├── examples/              # Runnable examples
+├── sdks/go/               # Go SDK
+└── surfaces/              # Distribution and integration surfaces
 ```
 
 ## Contribution Workflow
 
 1. **Issue First**: Open an issue to discuss significant changes
 2. **Fork & Branch**: Create feature branch from `main`
-3. **Development**: Follow coding standards and test coverage requirements
-4. **Testing**: Ensure all tests pass and coverage is maintained
+3. **Development**: Follow the coding standards below
+4. **Testing**: Ensure all tests pass
 5. **Pull Request**: Submit PR with clear description
 6. **Merge**: Maintainers merge PRs manually on GitHub (see below)
 
@@ -76,7 +72,6 @@ peac/
 
 - TypeScript strict mode required
 - ESLint + Prettier formatting enforced
-- Test coverage ≥50% maintained
 - Performance budgets respected
 
 ### Commit Convention
@@ -108,24 +103,11 @@ perf(scope): optimize performance
 
 ### Performance Requirements
 
-- Receipt signing: p95 ≤ 3ms
-- Receipt verification: p95 ≤ 1ms
-- Crawler operations: ≤ 35ms
-- API endpoints: documented SLOs
+Benchmarks and regression targets are defined in `specs/benchmarks/slo.json`; see [`docs/BENCHMARK-METHODOLOGY.md`](../docs/BENCHMARK-METHODOLOGY.md).
 
 ## CI/CD validation pipeline
 
-Our 7-phase enterprise pipeline validates:
-
-1. **Setup & Validation** - Version, structure, legacy check
-2. **Code Quality** - Lint, format, typecheck, boundaries
-3. **Build** - All packages with artifact caching
-4. **Test Suite** - Comprehensive testing with coverage
-5. **Conformance & Performance** - Schema validation, perf budgets
-6. **Security & SBOM** - Audit, vulnerability scanning
-7. **Production Readiness** - Final validation gate
-
-All phases must pass before merge.
+CI runs lint, format, typecheck, tests, conformance, dependency audit and CodeQL; see [`docs/CI_BEHAVIOR.md`](../docs/CI_BEHAVIOR.md). All required checks must pass before merge.
 
 ## Security Considerations
 
@@ -137,17 +119,7 @@ All phases must pass before merge.
 
 ## Release Process
 
-The project follows semantic versioning with development releases:
-
-- `0.9.12-dev.1` for development
-- `0.9.12` for stable releases
-- Breaking changes documented
-
-### Branching workflow
-
-- Create release branches: `release/vX.X.X`
-- Feature branches: `feature/description`
-- Never push releases directly to main
+Versions follow SemVer; see [`docs/specs/VERSIONING.md`](../docs/specs/VERSIONING.md).
 
 ## Getting Help
 
