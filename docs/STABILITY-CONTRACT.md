@@ -16,8 +16,8 @@ expectations to concrete, reviewable entries.
 | `internal-only` | Not part of the public surface. Not documented on README, `docs/START_HERE.md`, examples, listings, or marketing prose.                                                                                                      |
 
 These classifications describe behavioral stability, not package-level
-maintenance (security and correctness fixes apply to every active line per
-[Security operations](SECURITY-OPERATIONS.md)).
+maintenance (security and correctness fixes ship in the latest release line; see
+[`SECURITY.md`](../SECURITY.md)).
 
 ## Wire formats
 

@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.peacprotocol.org/schemas/conformance/requirement-registry.schema.json",
-  "version": "0.16.4",
+  "version": "0.16.5",
   "spec_file": "docs/specs/WIRE-0.2.md",
   "sections": [
     {
