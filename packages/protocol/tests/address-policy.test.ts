@@ -173,13 +173,22 @@ describe('key fetch connection target', () => {
     expect(attempts).toEqual([]);
   });
 
-  it('rejects a NAT64 answer without connecting', async () => {
+  it('rejects a NAT64 answer that embeds a link-local address without connecting', async () => {
     dnsState.resolve6Answers = [['64:ff9b::a9fe:a9fe']];
 
     const result = await ssrfSafeFetch('https://keys.example.com/jwks.json', { timeoutMs: 2000 });
 
     expect(result.ok).toBe(false);
-    if (!result.ok) expect(result.reason).toBe('private_ip');
+    if (!result.ok) expect(result.reason).toBe('link_local');
     expect(attempts).toEqual([]);
+  });
+
+  it('connects to a NAT64 answer that embeds a global unicast address', async () => {
+    dnsState.resolve6Answers = [['64:ff9b::5db8:d822']];
+
+    const result = await ssrfSafeFetch('https://keys.example.com/jwks.json', { timeoutMs: 2000 });
+
+    expect(result.ok).toBe(false);
+    expect(attempts.flat()).toEqual(['64:ff9b::5db8:d822']);
   });
 });

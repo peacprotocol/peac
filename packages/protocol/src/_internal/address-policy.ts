@@ -3,8 +3,9 @@
  *
  * An address is allowed only when it is a global unicast address outside every
  * block in the IANA IPv4 and IPv6 Special-Purpose Address Registries (RFC 6890
- * and updates). IPv4-mapped IPv6 addresses (::ffff:0:0/96) are judged by the
- * embedded IPv4 address. Anything that does not parse as an address is refused.
+ * and updates). IPv4-mapped IPv6 addresses (::ffff:0:0/96) and NAT64
+ * well-known prefix addresses (64:ff9b::/96) are judged by the embedded IPv4
+ * address. Anything that does not parse as an address is refused.
  *
  * Pure function: no I/O, runtime-neutral.
  */
@@ -141,9 +142,10 @@ const IPV6_BLOCKS_IN_GLOBAL: ReadonlyArray<readonly [number[], number]> = [
 const IPV6_LOOPBACK = v6('::1');
 const IPV6_LINK_LOCAL = v6('fe80::');
 const IPV4_MAPPED = v6('::ffff:0:0');
+const NAT64_WELL_KNOWN = v6('64:ff9b::');
 
 function classifyIPv6(groups: readonly number[]): AddressVerdict {
-  if (matchesPrefix(groups, IPV4_MAPPED, 96)) {
+  if (matchesPrefix(groups, IPV4_MAPPED, 96) || matchesPrefix(groups, NAT64_WELL_KNOWN, 96)) {
     return classifyIPv4(groups[6] * 0x10000 + groups[7]);
   }
   if (!matchesPrefix(groups, GLOBAL_UNICAST_V6, 3)) {

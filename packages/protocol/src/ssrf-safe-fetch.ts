@@ -5,7 +5,8 @@
  * - HTTPS only
  * - Allow only global unicast addresses: every block in the IANA IPv4 and IPv6
  *   special-purpose registries is refused, including private, loopback,
- *   link-local, shared, multicast and reserved ranges, and IPv4-mapped forms
+ *   link-local, shared, multicast and reserved ranges; IPv4-mapped and NAT64
+ *   forms are judged by the embedded IPv4 address
  * - Fail closed when DNS returns no addresses
  * - Connect only to the vetted addresses (no second resolution)
  * - Redirect limits and scheme downgrade protection
@@ -330,8 +331,9 @@ export interface SSRFFetchError {
  * Check if an IP address is outside the allowed address space.
  *
  * Only global unicast addresses outside the IANA IPv4 and IPv6 special-purpose
- * blocks are allowed. IPv4-mapped IPv6 addresses are judged by the embedded
- * IPv4 address; input that does not parse as an address is blocked.
+ * blocks are allowed. IPv4-mapped and NAT64 (64:ff9b::/96) IPv6 addresses are
+ * judged by the embedded IPv4 address; input that does not parse as an address
+ * is blocked.
  */
 export function isBlockedIP(
   ip: string
