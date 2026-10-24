@@ -121,8 +121,6 @@ for scope in $SCOPE_LABELS; do
       ;;
     scope:governance)
       add_pattern '^docs/governance/'
-      add_pattern '^docs/STANDARDS\.md$'
-      add_pattern '^docs/VERSIONING\.md$'
       ;;
     *)
       echo "[scope-guard] WARNING: Unknown scope label '$scope', ignoring."

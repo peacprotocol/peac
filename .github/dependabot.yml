@@ -9,9 +9,9 @@ updates:
       # ESM-only -- breaks dual CJS/ESM build
       - dependency-name: 'chalk'
         versions: ['>=5']
-      # Track Node 22 types (engines floor)
+      # Pinned to 20.x for Node 22 compatibility
       - dependency-name: '@types/node'
-        versions: ['>=23']
+        versions: ['>=21']
       # Major API changes -- deferred
       - dependency-name: 'jose'
         versions: ['>=6']

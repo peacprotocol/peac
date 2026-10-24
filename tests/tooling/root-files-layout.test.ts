@@ -141,7 +141,11 @@ describe('root file layout', () => {
       expect(pkg.scripts[task], task).toContain(`turbo run ${task}`);
       expect(turbo.tasks[task], task).toBeDefined();
     }
-    expect(turbo.tasks.dev).toMatchObject({ cache: false, persistent: true });
+    expect(turbo.tasks.dev).toMatchObject({
+      dependsOn: ['^build'],
+      cache: false,
+      persistent: true,
+    });
     expect(turbo.tasks.clean).toMatchObject({ cache: false });
     expect(turbo.tasks.sbom).toBeUndefined();
     expect(turbo.tasks.release).toBeUndefined();
