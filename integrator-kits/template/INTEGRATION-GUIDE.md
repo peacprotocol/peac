@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- Node.js >= 22.0.0
+- Node.js >= 22.13.0
 - An Ed25519 signing keypair
 - A PEAC issuer identity (HTTPS URL)
 

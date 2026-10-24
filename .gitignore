@@ -94,3 +94,6 @@ examples/*/generated/
 
 # Local state artifacts (not part of the published protocol surface)
 /state/
+
+# Optional per-checkout ignore list for format and lint
+/.ignore.local

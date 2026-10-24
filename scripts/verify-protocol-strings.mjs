@@ -58,8 +58,6 @@ const EXCLUDE_GLOBS = [
   'surfaces/nextjs/**',
   // Transport packages (gRPC metadata keys use lowercase - tracked separately)
   'packages/transport/**',
-  // Pre-release verification script (checks FOR X-PEAC patterns)
-  'scripts/pre-release-verify.sh',
   // Guard script (checks FOR these patterns to forbid them - not usage)
   'scripts/guard.sh',
 ];

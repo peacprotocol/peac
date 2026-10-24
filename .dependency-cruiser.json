@@ -15,13 +15,6 @@
       "to": { "circular": true }
     },
     {
-      "name": "no-legacy-imports",
-      "severity": "error",
-      "comment": "No imports from legacy pkgs/ directory",
-      "from": { "path": ".*" },
-      "to": { "path": "^pkgs/" }
-    },
-    {
       "name": "kernel-no-upward",
       "severity": "error",
       "comment": "L0 kernel must not import any higher layer. [^/]* suffix on telemetry/middleware matches hyphenated variants (telemetry-otel, middleware-core, middleware-express) since bare 'middleware/' would not match 'middleware-core/'.",
@@ -120,7 +113,7 @@
     {
       "name": "no-l5-import-from-libraries",
       "severity": "error",
-      "comment": "Catch-all: library/utility packages must not import L5 application packages. Covers pillar packages, jwks-cache, pay402, sdk-js, etc. that lack individual layer rules.",
+      "comment": "Catch-all: library/utility packages must not import L5 application packages. Covers pillar packages, jwks-cache, pay402, etc. that lack individual layer rules.",
       "from": {
         "path": "^packages/(?!server/|cli/|mcp-server/)",
         "pathNot": "\\.(test|spec)\\.ts$"
@@ -132,7 +125,7 @@
     {
       "name": "mcp-server-no-sdk-in-core",
       "severity": "error",
-      "comment": "DD-57: handlers, schemas, and infra must have ZERO MCP SDK imports",
+      "comment": "handlers, schemas, and infra must have ZERO MCP SDK imports",
       "from": {
         "path": "^packages/mcp-server/src/(handlers|schemas|infra)/",
         "pathNot": "\\.(test|spec)\\.ts$"

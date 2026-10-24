@@ -51,7 +51,7 @@ pnpm test                       # Core tests
 pnpm format:check
 
 # Version integrity
-./scripts/check-version-integrity.sh
+pnpm version:check
 ```
 
 ### 2. Documentation Verification
@@ -164,7 +164,7 @@ fi
 pnpm lint && pnpm build && pnpm typecheck:core && pnpm test
 ./scripts/guard.sh
 ./scripts/check-publish-list.sh
-./scripts/check-version-integrity.sh
+pnpm version:check
 
 # 3. Dry run to verify package list
 node scripts/publish-public.mjs --dry-run

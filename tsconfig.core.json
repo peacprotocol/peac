@@ -40,7 +40,6 @@
     "**/dist/**",
     "**/*.test.ts",
     "**/*.spec.ts",
-    "archive/**",
     "packages/**/node_modules/**"
   ]
 }

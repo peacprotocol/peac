@@ -12,12 +12,12 @@ Receipts are JWS compact serialization tokens. Verification involves:
 2. Validating structural kernel constraints (depth, size limits)
 3. Parsing the claims against the PEAC schema
 4. Verifying the Ed25519 signature against the issuer's public key (via JWKS)
-5. Checking temporal validity (iat, exp with clock skew tolerance)
-6. Binding checks (issuer, audience, subject if applicable)
+5. Checking the issued-at time (`iat`) with clock skew tolerance
+6. Binding checks (issuer, and subject if supplied)
 
 ## What prevents replay attacks?
 
-Each receipt contains a unique `rid` (receipt ID, UUIDv7) and `iat` (issued-at timestamp). Verifiers can check `rid` for uniqueness and `iat`/`exp` for temporal validity.
+Each record contains a `jti` (unique record ID) and `iat` (issued-at timestamp). Verifiers can track `jti` for uniqueness and check `iat` for temporal validity.
 
 ## What about key rotation?
 

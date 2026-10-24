@@ -16,7 +16,7 @@ Start with our documentation:
 
 - Bug reports: Use the bug report template
 - Feature requests: Use the feature request template
-- Questions: Use the question template
+- Questions: Use [Discussions](https://github.com/peacprotocol/peac/discussions)
 
 **Email**
 

@@ -22,7 +22,7 @@ integrator-kits/
 1. Copy `template/` to a new directory named after the ecosystem
 2. Customize the README, integration guide, and security FAQ
 3. Add ecosystem-specific conformance fixtures to `fixtures/`
-4. Register the adapter in the conformance harness (see `scripts/conformance-harness.ts`)
+4. Register the adapter in the conformance harness (see `packages/conformance-harness/src/cli.ts`)
 
 ## Running conformance tests
 

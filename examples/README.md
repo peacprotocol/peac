@@ -18,7 +18,7 @@ Outcome-led recipes walk through the full story for each of these: [`docs/SOLUTI
 
 ## Full catalog
 
-Every example below builds and runs end-to-end. The shipped list is the source of truth; new additions arrive alongside their corresponding spec or profile.
+The shipped list is the source of truth; new additions arrive alongside their corresponding spec or profile.
 
 | Example                                                                         | Description                                                                                                                                                       |
 | ------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -59,6 +59,19 @@ Every example below builds and runs end-to-end. The shipped list is the source o
 | [`openclaw-capture`](./openclaw-capture/)                                       | OpenClaw tool calls as signed interaction records.                                                                                                                |
 | [`telemetry-otel`](./telemetry-otel/)                                           | OpenTelemetry integration with privacy modes.                                                                                                                     |
 | [`external-pilot`](./external-pilot/)                                           | External pilot integration skeleton.                                                                                                                              |
+| [`quickstart`](./quickstart/)                                                   | Issue and verify a record with one package.                                                                                                                       |
+| [`cf-policy-x402-terms`](./cf-policy-x402-terms/)                               | Compose PEAC policy binding with x402 terms across four representations.                                                                                          |
+| [`mcp-paid-tool-records`](./mcp-paid-tool-records/)                             | Bind a priced MCP tool call to a settled x402 payment as a signed payment record, verified offline.                                                               |
+| [`mpp-payment-record`](./mpp-payment-record/)                                   | Record an MPP/paymentauth Payment-Receipt as a signed payment record, verified offline.                                                                           |
+| [`x402-paid-resource-records`](./x402-paid-resource-records/)                   | Record an x402 offer/receipt settlement as a signed payment record, with digest-mismatch detection.                                                               |
+| [`x402-weather-proof`](./x402-weather-proof/)                                   | x402 offer/receipt verification and PEAC record generation.                                                                                                       |
+| [`stripe-x402-crypto`](./stripe-x402-crypto/)                                   | Stripe x402 crypto payment to PEAC record to offline verification.                                                                                                |
+| [`ucp-webhook-express`](./ucp-webhook-express/)                                 | Verify HTTP Message Signatures on UCP webhooks and issue records.                                                                                                 |
+| [`workflow-correlation`](./workflow-correlation/)                               | Link records into a multi-step workflow DAG.                                                                                                                      |
+| [`runtime-composition-records`](./runtime-composition-records/)                 | A runtime governance toolkit decides; PEAC issues portable signed records.                                                                                        |
+| [`runtime-governance-records`](./runtime-governance-records/)                   | Issue, verify, and summarize runtime governance records.                                                                                                          |
+| [`open-model-inference-records`](./open-model-inference-records/)               | Bind an inference observation manifest digest into a signed agent-action record, verified offline.                                                                |
+| [`python`](./python/)                                                           | Python HTTP client for the Hosted Verify API (examples only, not an SDK).                                                                                         |
 
 ## Prerequisites
 
@@ -94,9 +107,9 @@ pnpm --filter @peac/example-provisioning-lifecycle run verify
 
 ## CI
 
-Every example is verified in CI via `pnpm examples:check` (TypeScript compilation) and, for examples with a `demo` target, runtime exercises in the release pipeline. Forbidden patterns (such as `X-`-prefixed PEAC headers) are blocked by the workspace lint configuration.
+Every TypeScript example is type-checked in CI via `pnpm examples:check`, and many are also executed by tests under `tests/tooling/`. Forbidden patterns (such as `X-`-prefixed PEAC headers) are blocked in CI.
 
 ## Requirements
 
-- Node.js 22+
-- pnpm 8+
+- Node.js 22.13.0 or later (Node 24 recommended)
+- pnpm 8.15.0 (see `packageManager`)

@@ -18,5 +18,4 @@ limitations under the License.
 This product includes the following third-party software:
 
 - jose (https://github.com/panva/jose) - MIT License
-- lru-cache (https://github.com/isaacs/node-lru-cache) - ISC License
 - zod (https://github.com/colinhacks/zod) - MIT License
