@@ -1,16 +1,20 @@
 #!/usr/bin/env bash
 # .githooks/commit-msg
-# Repo-managed commit-msg hook: checks commit message against local denylist.
+# Repo-managed commit-msg hook: checks the commit message against built-in rules.
 # Install: bash scripts/setup-hooks.sh (or: git config core.hooksPath .githooks)
 #
-# Reads patterns from reference/guard-denylist.txt (local-only, gitignored).
-# Also checks for objective issues (internal markers, hidden Unicode).
+# Built-in rules only. No pattern file is read from any path, and a finding is reported
+# as a rule id, never as the pattern or the offending text.
+#
+# Git passes the message file as $1. When the hook is run by hand without an argument, the
+# message path is resolved with `git rev-parse --git-path COMMIT_EDITMSG`, which is also
+# correct inside a linked worktree.
 #
 # Bypass: PEAC_SKIP_COMMIT_MSG=1 git commit -m "..."
 
 set -euo pipefail
 
-COMMIT_MSG_FILE="$1"
+COMMIT_MSG_FILE="${1:-$(git rev-parse --git-path COMMIT_EDITMSG)}"
 
 if [ "${PEAC_SKIP_COMMIT_MSG:-}" = "1" ]; then
   echo "[commit-msg] BYPASSED (PEAC_SKIP_COMMIT_MSG=1)"
@@ -18,34 +22,17 @@ if [ "${PEAC_SKIP_COMMIT_MSG:-}" = "1" ]; then
   exit 0
 fi
 
-REPO_ROOT="$(git rev-parse --show-toplevel)"
-DENYLIST="$REPO_ROOT/reference/guard-denylist.txt"
 FAILED=0
 
 # Built-in checks (always active, safe for tracked script)
 if grep -iE 'reference/.*_LOCAL\.' "$COMMIT_MSG_FILE" >/dev/null 2>&1; then
-  echo "[commit-msg] FAIL: Commit message references local-only files"
+  echo "[commit-msg] FAIL: rule local-reference-path in $COMMIT_MSG_FILE"
   FAILED=1
 fi
 
 if grep -iE '(NEXT_STEPS|ROADMAP_LOCAL|STRATEGY_LOCAL|SCOPE_LEDGER|MASTER_PLAN_LOCAL)' "$COMMIT_MSG_FILE" >/dev/null 2>&1; then
-  echo "[commit-msg] FAIL: Commit message contains internal planning markers"
+  echo "[commit-msg] FAIL: rule planning-marker in $COMMIT_MSG_FILE"
   FAILED=1
-fi
-
-# Local denylist check (if denylist exists)
-if [ -f "$DENYLIST" ]; then
-  while IFS= read -r line || [ -n "$line" ]; do
-    # Skip comments and blank lines
-    trimmed=$(echo "$line" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
-    [ -z "$trimmed" ] && continue
-    echo "$trimmed" | grep -q '^#' && continue
-
-    if grep -iE "$trimmed" "$COMMIT_MSG_FILE" >/dev/null 2>&1; then
-      echo "[commit-msg] FAIL: Commit message matches denylist pattern: $trimmed"
-      FAILED=1
-    fi
-  done < "$DENYLIST"
 fi
 
 if [ "$FAILED" -eq 1 ]; then

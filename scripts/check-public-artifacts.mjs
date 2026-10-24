@@ -10,9 +10,9 @@
  *   node scripts/check-public-artifacts.mjs --body-file .tmp/pr.md   # check a PR body file
  *   node scripts/check-public-artifacts.mjs --text "some text"       # check inline text
  *
- * Pattern sources:
- *   1. Built-in patterns (objective checks, always active)
- *   2. reference/guard-denylist.txt (local-only, if present)
+ * Rules: the built-in patterns below are the only source of rules. No pattern file is
+ * read from any path. A finding is reported as the rule id and the location
+ * (source:line); neither the matched pattern nor the offending line is printed.
  *
  * Exit codes:
  *   0  No violations found
@@ -22,11 +22,10 @@
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { execSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, '..');
-const DENYLIST_PATH = resolve(REPO_ROOT, 'reference/guard-denylist.txt');
 
 // Built-in patterns: objective checks that are safe to have in a tracked file.
 // These are standard OSS hygiene patterns, not strategy-revealing.
@@ -38,45 +37,52 @@ const BUILTIN_PATTERNS = [
   /cryptographic receipts for agentic commerce/i,
 ];
 
-/**
- * Load additional patterns from the local-only denylist file.
- * Returns empty array if file doesn't exist (e.g., in CI).
- */
-function loadDenylistPatterns() {
-  if (!existsSync(DENYLIST_PATH)) {
-    return [];
-  }
-  const content = readFileSync(DENYLIST_PATH, 'utf-8');
-  const patterns = [];
-  for (const line of content.split('\n')) {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith('#')) continue;
-    try {
-      patterns.push(new RegExp(trimmed, 'i'));
-    } catch {
-      // Skip invalid regex lines
-    }
-  }
-  return patterns;
+// Stable ids for the patterns above, in the same order. A finding reports the id, never the pattern.
+const BUILTIN_RULE_IDS = [
+  'local-reference-path',
+  'hidden-unicode',
+  'local-memory-file',
+  'retired-tagline',
+];
+if (BUILTIN_RULE_IDS.length !== BUILTIN_PATTERNS.length) {
+  throw new Error('rule id table is out of step with the built-in patterns');
 }
 
 /**
- * Check text against all patterns. Returns array of violations.
+ * Run git in the repository root without a shell. Returns stdout.
  */
-function checkText(text, source, patterns) {
+function git(...args) {
+  return execFileSync('git', args, { encoding: 'utf-8', cwd: REPO_ROOT });
+}
+
+/**
+ * Resolve the commit message path through git, so linked worktrees (whose git
+ * directory is not <root>/.git) are found. Returns null outside a repository.
+ */
+function commitMessagePath() {
+  try {
+    return resolve(
+      REPO_ROOT,
+      git('rev-parse', '--git-path', 'COMMIT_EDITMSG').replace(/\r?\n$/, '')
+    );
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Check text against all rules. Returns array of violations (rule id and
+ * location only; the matched text and the pattern are never retained).
+ */
+function checkText(text, source) {
   const violations = [];
   const lines = text.split('\n');
   for (let i = 0; i < lines.length; i++) {
-    for (const pattern of patterns) {
+    BUILTIN_PATTERNS.forEach((pattern, index) => {
       if (pattern.test(lines[i])) {
-        violations.push({
-          source,
-          line: i + 1,
-          pattern: pattern.source,
-          text: lines[i].trim().slice(0, 120),
-        });
+        violations.push({ source, line: i + 1, rule: BUILTIN_RULE_IDS[index] });
       }
-    }
+    });
   }
   return violations;
 }
@@ -86,10 +92,7 @@ function checkText(text, source, patterns) {
  */
 function getStagedFiles() {
   try {
-    const output = execSync('git diff --cached --name-only --diff-filter=ACM', {
-      encoding: 'utf-8',
-      cwd: REPO_ROOT,
-    });
+    const output = git('diff', '--cached', '--name-only', '--diff-filter=ACM');
     return output
       .split('\n')
       .filter(Boolean)
@@ -101,7 +104,6 @@ function getStagedFiles() {
 
 function main() {
   const args = process.argv.slice(2);
-  const allPatterns = [...BUILTIN_PATTERNS, ...loadDenylistPatterns()];
   const allViolations = [];
 
   // Check --body-file argument
@@ -110,21 +112,21 @@ function main() {
     const bodyFile = resolve(args[bodyFileIdx + 1]);
     if (existsSync(bodyFile)) {
       const content = readFileSync(bodyFile, 'utf-8');
-      allViolations.push(...checkText(content, `body-file: ${args[bodyFileIdx + 1]}`, allPatterns));
+      allViolations.push(...checkText(content, `body-file: ${args[bodyFileIdx + 1]}`));
     }
   }
 
   // Check --text argument
   const textIdx = args.indexOf('--text');
   if (textIdx !== -1 && args[textIdx + 1]) {
-    allViolations.push(...checkText(args[textIdx + 1], 'inline text', allPatterns));
+    allViolations.push(...checkText(args[textIdx + 1], 'inline text'));
   }
 
-  // Check commit message if .git/COMMIT_EDITMSG exists
-  const commitMsgPath = resolve(REPO_ROOT, '.git/COMMIT_EDITMSG');
-  if (existsSync(commitMsgPath) && !args.includes('--no-commit-msg')) {
+  // Check the commit message if git has one for this worktree
+  const commitMsgPath = commitMessagePath();
+  if (commitMsgPath && existsSync(commitMsgPath) && !args.includes('--no-commit-msg')) {
     const commitMsg = readFileSync(commitMsgPath, 'utf-8');
-    allViolations.push(...checkText(commitMsg, 'commit message', allPatterns));
+    allViolations.push(...checkText(commitMsg, 'commit message'));
   }
 
   // Check staged files (unless --no-staged)
@@ -133,11 +135,10 @@ function main() {
     for (const file of stagedFiles) {
       const fullPath = resolve(REPO_ROOT, file);
       if (!existsSync(fullPath)) continue;
-      // Skip this script and the denylist
+      // Skip this script: it defines the rules
       if (file === 'scripts/check-public-artifacts.mjs') continue;
-      if (file.startsWith('reference/')) continue;
       // Skip generated lockfiles: their resolved-package integrity hashes are
-      // base64 strings whose substrings can spuriously match denylist tokens
+      // base64 strings whose substrings can spuriously match pattern tokens
       // (e.g., "GTM" inside a sha512 hash). Lockfiles are auto-generated by
       // pnpm/npm/yarn and have no human-authored prose to lint.
       if (
@@ -150,7 +151,7 @@ function main() {
       }
       try {
         const content = readFileSync(fullPath, 'utf-8');
-        allViolations.push(...checkText(content, file, allPatterns));
+        allViolations.push(...checkText(content, file));
       } catch {
         // Skip binary or unreadable files
       }
@@ -158,20 +159,17 @@ function main() {
   }
 
   if (allViolations.length === 0) {
-    if (allPatterns.length <= BUILTIN_PATTERNS.length) {
-      console.log('Public artifact check: OK (built-in patterns only; local denylist not found)');
-    } else {
-      console.log('Public artifact check: OK');
-    }
+    console.log('Public artifact check: OK');
     process.exit(0);
   }
 
   console.error(`Public artifact check: ${allViolations.length} violation(s) found\n`);
   for (const v of allViolations) {
-    console.error(`  ${v.source}:${v.line}: matched /${v.pattern}/i`);
-    console.error(`    ${v.text}`);
+    console.error(`  ${v.source}:${v.line}: rule ${v.rule}`);
   }
-  console.error('\nFix: remove non-technical language from public artifacts.');
+  console.error(
+    '\nFix: remove the flagged content from the artifact (the rule id names the check).'
+  );
   process.exit(1);
 }
 
