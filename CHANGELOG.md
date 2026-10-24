@@ -5,6 +5,90 @@ All notable changes to PEAC Protocol will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.16.5] - 2026-10-24
+
+Security and Maintenance Updates.
+
+Tightens request handling, key resolution, and input validation across the
+reference packages and applications, and updates runtime dependencies, without
+changing the wire format, registered record types, extension groups, error codes,
+or structural sentinels.
+
+Fixed: `@peac/protocol` checks JWKS entries against the Ed25519 public verification
+key profile before use, skipping entries that are not `OKP`/`Ed25519` keys with a
+canonical 32-byte `x` or that carry private key material, and `verifyReceiptCore`
+fails key resolution with `E_REVOKED_KEY_USED` for a key listed in the issuer's
+`revoked_keys` (#1030). Key and pointer fetches in `@peac/protocol` accept only
+global unicast addresses, and `@peac/net-node` passes the same address test vectors
+(#1031). The reference API enforces its 256 KiB request body limit on `/v1/verify`
+and `/v1/issue` for every request framing, including chunked bodies (#1013). The
+`@peac/server` workspace package, which is not published from this repository,
+bounds `/verify` request bodies to 32 KiB before parsing, verifies every request
+without reusing earlier results, and returns generic error responses (#1029). The
+`@peac/mcp-server` HTTP transport validates `MCP-Protocol-Version` on every request
+against the versions the MCP SDK supports, keys rate limits on a live session or the
+client address, and tracks at most 10,000 rate-limit windows (#979, #1014); its MCP
+Registry manifest lists only the published stdio package (#1012). The Go SDK sorts
+JCS (RFC 8785) object keys by UTF-16 code unit order, and `ComputePolicyDigest`
+applies the I-JSON admission check (#973). The reference browser verifier resolves
+verification stages by own-property lookup only (#974).
+
+Changed: timestamp fields require seconds, as RFC 3339 specifies; values such as
+`2026-03-14T12:00Z` are rejected on issue and verify (#1015). String length limits
+count Unicode code points rather than UTF-16 code units, on issue and verify (#1015).
+In `@peac/mcp-server`, a tool call whose arguments contain more than 1024 array
+elements and object members returns an error result (#1015). On Node.js, key and
+pointer fetches in `@peac/protocol` connect directly to the address that passed the
+address check, keeping the URL host for the `Host` header, TLS server name, and
+certificate check; proxy settings and a global fetch dispatcher no longer apply to
+these fetches, and NAT64 addresses that embed a global IPv4 address are accepted
+(#1031). The reference API counts request bodies as they stream: a body over the
+limit gets `413 E_PAYLOAD_TOO_LARGE`, and a body that cannot be read gets
+`400 E_INVALID_FORMAT` (#1013). In `@peac/server`, a `/verify` body over 32 KiB gets
+`413` (`application/problem+json`) instead of `400`; responses carry
+`Cache-Control: no-store`, the `X-Cache` and `Vary` headers are removed, and `/slo`
+no longer reports a `cache` block (#1029).
+
+Dependencies: `@modelcontextprotocol/sdk` 1.32.1 in `@peac/mcp-server`, `undici`
+`^6.29.1` in `@peac/net-node`, and `zod` `^4.6.6` in every package that declares it;
+root overrides move `hono`, `@hono/node-server`, `qs`, `ip-address`,
+`@opentelemetry/core`, `proxy-addr`, and `body-parser` to current releases within
+their major lines (#1015). Development tooling overrides for `fast-uri`,
+`browserslist`, `next`, `handlebars`, `vite`, `sharp`, `js-yaml`, `brace-expansion`,
+and `source-map-js` (#972, #1015).
+
+Security: security fixes ship in a new release of the latest release line, and
+earlier release lines do not receive backported fixes. `SECURITY.md` states this
+policy; upgrade to 0.16.5.
+
+Docs: describes records as evidence in the start-here guide (#976), states how
+profile-defined digest fields are computed and fixes a discovery path example
+(#977), refreshes version references and the Go SDK and CLI READMEs (#978), removes
+superseded documents (#1023), corrects the rate-limit statement in the Smithery
+deployment guide, and updates the pinned `@peac/mcp-server` version in the editor
+configuration samples.
+
+CI: runs the `@peac/mcp-server` and `@peac/server` test suites on pull requests,
+builds and tests every Go module, and defaults MCP Registry publishing to a dry run
+(#1011); hooks and gates call only scripts tracked in the repository (#1028); removes
+unused root files and keeps the Node.js pin in `.node-version` (#1032); reviews the
+dependency audit allowlist (#971, #975).
+
+Wire format: unchanged (0.2).
+Public schema: unchanged; timestamp and string-length validation is stricter as
+noted above.
+Kernel error codes: unchanged (189).
+Registered extension groups: unchanged (19).
+Registered receipt types: unchanged (61).
+Conformance sections: unchanged (32).
+Conformance requirement IDs: unchanged (290).
+Published packages: unchanged (36).
+
+Verification of a PEAC record establishes signed-record integrity and possession of
+the signing key matching the supplied public key. It does not by itself establish
+that the key or its holder should be trusted, that the statements in the record are
+factually true, or that any external event the record refers to actually occurred.
+
 ## [0.16.4]
 
 Local Record Verification Handoff.
@@ -1474,8 +1558,6 @@ Cross-rail conformance parity, settlement semantic equivalence, and naming truth
 
 - `@peac/adapter-did`: deferred to v0.12.6
 - x402 V2 full adapter rewrite: deferred to v0.12.6
-
-## [Unreleased]
 
 ## [0.12.3]
 

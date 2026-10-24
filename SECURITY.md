@@ -35,16 +35,16 @@ kept in the loop and the disclosure calendar is coordinated.
 
 ## Supported versions
 
-| Line                             | Status                                     | Wire format                         | Security-fix window                           |
-| -------------------------------- | ------------------------------------------ | ----------------------------------- | --------------------------------------------- |
-| `v0.16.x`                        | Active (current; latest release `v0.16.4`) | Wire 0.2 (`interaction-record+jwt`) | Through the next minor line                   |
-| `v0.15.x`                        | Maintenance (security fixes only)          | Wire 0.2 (`interaction-record+jwt`) | Through 2026-12-28 (6 months after `v0.16.0`) |
-| `v0.14.x`                        | Maintenance (security fixes only)          | Wire 0.2 (`interaction-record+jwt`) | Through 2026-12-01 (6 months after `v0.15.0`) |
-| `v0.13.x`                        | Maintenance (security fixes only)          | Wire 0.2 (`interaction-record+jwt`) | 6 months after the next minor line ships      |
-| `v0.12.x`                        | Maintenance (critical security fixes only) | Wire 0.2 (`interaction-record+jwt`) | Through 2026-11-03 (6 months after `v0.14.0`) |
-| `v0.11.x`                        | Maintenance (security fixes only)          | Wire 0.1 (`peac-receipt/0.1`)       | Through 2026-10-25 (6 months after `v0.13.0`) |
-| `v0.10.x` and earlier            | End of life                                | Wire 0.1 and earlier                | No further updates                            |
-| `peac.receipt/0.9` archival path | Historical verify-only                     | `peac.receipt/0.9`                  | Archived at `v0.13.0`                         |
+Security fixes ship in a new release of the latest release line. Earlier
+release lines do not receive backported fixes; upgrade to the latest
+release to receive them.
+
+| Line                             | Status                               | Wire format                         |
+| -------------------------------- | ------------------------------------ | ----------------------------------- |
+| `v0.16.x`                        | Supported (latest release `v0.16.5`) | Wire 0.2 (`interaction-record+jwt`) |
+| `v0.12.x` to `v0.15.x`           | Not supported; upgrade to `v0.16.x`  | Wire 0.2 (`interaction-record+jwt`) |
+| `v0.11.x` and earlier            | Not supported; upgrade to `v0.16.x`  | Wire 0.1 and earlier                |
+| `peac.receipt/0.9` archival path | Historical verify-only               | `peac.receipt/0.9`                  |
 
 See [Compatibility matrix](docs/COMPATIBILITY_MATRIX.md) for full runtime
 and wire-format compatibility, and [Security operations](docs/SECURITY-OPERATIONS.md)

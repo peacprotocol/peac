@@ -3,7 +3,7 @@
   "mcpServers": {
     "peac": {
       "command": "npx",
-      "args": ["-y", "@peac/mcp-server@0.15.0"],
+      "args": ["-y", "@peac/mcp-server@0.16.5"],
       "env": {}
     }
   }
