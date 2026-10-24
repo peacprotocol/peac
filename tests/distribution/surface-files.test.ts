@@ -59,27 +59,18 @@ describe('server.json', () => {
     expect(repo.source).toBe('github');
   });
 
-  it('declares both stdio and streamable-http transports', () => {
+  it('declares the npm package with the stdio transport', () => {
     const packages = serverJson.packages as Array<Record<string, unknown>>;
-    expect(packages).toHaveLength(2);
-    for (const pkg of packages) {
-      expect(pkg.registryType).toBe('npm');
-      expect(pkg.identifier).toBe('@peac/mcp-server');
-    }
-    const transportTypes = packages.map((p) => (p.transport as Record<string, unknown>).type);
-    expect(transportTypes).toContain('stdio');
-    expect(transportTypes).toContain('streamable-http');
+    expect(packages).toHaveLength(1);
+    const [pkg] = packages;
+    expect(pkg.registryType).toBe('npm');
+    expect(pkg.identifier).toBe('@peac/mcp-server');
+    expect((pkg.transport as Record<string, unknown>).type).toBe('stdio');
   });
 
-  it('streamable-http entry declares required url field', () => {
-    const packages = serverJson.packages as Array<Record<string, unknown>>;
-    const httpEntry = packages.find(
-      (p) => (p.transport as Record<string, unknown>).type === 'streamable-http'
-    );
-    expect(httpEntry).toBeDefined();
-    const transport = httpEntry!.transport as Record<string, unknown>;
-    expect(typeof transport.url).toBe('string');
-    expect(transport.url).toMatch(/^https?:\/\//);
+  it('does not advertise a loopback endpoint', () => {
+    const raw = JSON.stringify(serverJson);
+    expect(raw).not.toMatch(/localhost|127\.0\.0\.1|\[::1\]/);
   });
 
   it('version matches package.json version', () => {
