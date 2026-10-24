@@ -14,6 +14,7 @@
 
 import { createServer, type IncomingMessage, type ServerResponse } from 'node:http';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { SUPPORTED_PROTOCOL_VERSIONS as SDK_SUPPORTED_PROTOCOL_VERSIONS } from '@modelcontextprotocol/sdk/types.js';
 import { SessionManager } from './session-manager.js';
 import { SERVER_NAME, SERVER_VERSION, MCP_PROTOCOL_VERSION } from './infra/constants.js';
 
@@ -72,19 +73,23 @@ const DEFAULT_MAX_REQUEST_BYTES = 1_048_576; // 1 MB
 const DEFAULT_RATE_LIMIT_RPM = 100;
 const MAX_SESSION_ID_LENGTH = 128;
 
+/** Upper bound on tracked rate-limit windows; the oldest window is evicted first. */
+export const MAX_RATE_LIMIT_KEYS = 10_000;
+
 /**
- * MCP-Protocol-Version values this server implements. Deliberately narrower
- * than the SDK's own supported list.
+ * MCP-Protocol-Version values accepted on the HTTP transport: exactly the revisions the SDK
+ * supports, so this gate never rejects a version the SDK negotiated. Version negotiation stays
+ * in the SDK, and the SDK's own transport validates against the same list.
  */
-const SUPPORTED_PROTOCOL_VERSIONS = [MCP_PROTOCOL_VERSION, '2025-03-26'];
+const SUPPORTED_PROTOCOL_VERSIONS: readonly string[] = SDK_SUPPORTED_PROTOCOL_VERSIONS;
 
 /**
  * Validate MCP-Protocol-Version for both init and non-init requests.
  *
  * An absent header is not an error: per the spec's backwards-compatibility
- * rule the client is assumed to speak the pre-negotiation default
- * (2025-03-26). Returns an error message for an unsupported version, or
- * null when the request may proceed.
+ * rule the client is assumed to speak the SDK's default negotiated revision
+ * (DEFAULT_NEGOTIATED_PROTOCOL_VERSION). Returns an error message for an
+ * unsupported version, or null when the request may proceed.
  */
 function checkProtocolVersion(req: IncomingMessage): string | null {
   const protocolVersion = req.headers['mcp-protocol-version'] as string | undefined;
@@ -105,6 +110,22 @@ function isValidSessionId(id: string): boolean {
     if (code < 0x21 || code > 0x7e) return false;
   }
   return true;
+}
+
+/**
+ * Choose the rate-limit key for a request. Only a syntactically valid id of a
+ * live session counts as a session key; everything else is keyed by client
+ * address, so rotating the header cannot mint fresh windows, and a header such
+ * as `ip:<address>` cannot land in another client's window.
+ */
+export function rateLimitKeyFor(
+  sessionId: string | undefined,
+  clientIp: string,
+  isLiveSession: (id: string) => boolean
+): string {
+  return sessionId !== undefined && isValidSessionId(sessionId) && isLiveSession(sessionId)
+    ? `session:${sessionId}`
+    : `ip:${clientIp}`;
 }
 
 /**
@@ -176,9 +197,11 @@ function validatePublicUrl(rawUrl: string): { url: URL; normalized: string } | {
  * Create and start an HTTP server for MCP Streamable HTTP transport.
  * Returns a cleanup function to shut everything down.
  */
-export async function createHttpTransport(
-  options: HttpTransportOptions
-): Promise<{ cleanup: () => Promise<void> }> {
+export async function createHttpTransport(options: HttpTransportOptions): Promise<{
+  cleanup: () => Promise<void>;
+  /** Number of tracked rate-limit windows (at most MAX_RATE_LIMIT_KEYS); a test seam. */
+  rateLimitKeyCount: () => number;
+}> {
   const port = options.port ?? 3000;
   const host = options.host ?? '127.0.0.1';
   const corsOrigins = new Set(options.corsOrigins ?? []);
@@ -192,15 +215,21 @@ export async function createHttpTransport(
   });
   sessionManager.startSweep();
 
-  // Per-session + per-IP rate limiting (token bucket keyed on session ID,
-  // falling back to IP for unauthenticated init requests)
+  // Per-session + per-IP rate limiting (fixed one-minute windows keyed on a
+  // live session, otherwise on the client IP; see rateLimitKeyFor). At most
+  // MAX_RATE_LIMIT_KEYS windows are tracked.
   const rateLimits = new Map<string, RateLimitEntry>();
 
   function checkRateLimit(key: string): boolean {
     const now = Date.now();
     let entry = rateLimits.get(key);
     if (!entry || now - entry.windowStart > ONE_MINUTE_MS) {
+      if (!entry && rateLimits.size >= MAX_RATE_LIMIT_KEYS) {
+        const oldest = rateLimits.keys().next().value; // Map keeps insertion order
+        if (oldest !== undefined) rateLimits.delete(oldest);
+      }
       entry = { count: 0, windowStart: now };
+      rateLimits.delete(key);
       rateLimits.set(key, entry);
     }
     entry.count++;
@@ -428,7 +457,9 @@ export async function createHttpTransport(
       if (req.method === 'POST') {
         // Rate limit check
         const sessionId = req.headers['mcp-session-id'] as string | undefined;
-        const rateLimitKey = sessionId ?? `ip:${getClientIp(req)}`;
+        const rateLimitKey = rateLimitKeyFor(sessionId, getClientIp(req), (id) =>
+          sessionManager.hasSession(id)
+        );
         if (!checkRateLimit(rateLimitKey)) {
           res.writeHead(429, { 'Content-Type': 'application/json', 'Retry-After': '60' });
           res.end(JSON.stringify({ error: 'Rate limit exceeded' }));
@@ -562,6 +593,7 @@ export async function createHttpTransport(
           await sessionManager.cleanup();
           await new Promise<void>((res) => server.close(() => res()));
         },
+        rateLimitKeyCount: () => rateLimits.size,
       });
     });
   });

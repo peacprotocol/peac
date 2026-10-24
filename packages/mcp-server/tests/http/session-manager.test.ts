@@ -2,7 +2,7 @@
  * Session manager unit tests
  */
 
-import { describe, it, expect, afterEach } from 'vitest';
+import { describe, it, expect, afterEach, vi } from 'vitest';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { SessionManager } from '../../src/session-manager.js';
 
@@ -160,6 +160,70 @@ describe('SessionManager', () => {
     const s3 = await manager.createSession(factory, '10.0.0.1');
     expect(s3).toBeTruthy();
     expect(manager.size).toBe(2);
+  });
+
+  // hasSession() is the lookup used to choose a rate-limit key. Unlike
+  // getSession(), it must not refresh lastSeen, so a check alone never keeps
+  // an idle session alive.
+  describe('hasSession', () => {
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('reports a live session without refreshing lastSeen', async () => {
+      vi.useFakeTimers({ toFake: ['Date'] });
+      vi.setSystemTime(1_000_000);
+      manager = new SessionManager({ ttlMs: 60_000 });
+      const entry = await manager.createSession(makeServerFactory());
+      const createdLastSeen = entry.lastSeen;
+
+      vi.setSystemTime(1_000_000 + 30_000);
+      expect(manager.hasSession(entry.sessionId)).toBe(true);
+      expect(entry.lastSeen).toBe(createdLastSeen);
+    });
+
+    it('returns false for an unknown session id', () => {
+      manager = new SessionManager();
+      expect(manager.hasSession('nonexistent')).toBe(false);
+    });
+
+    it('applies the same expiry rule as the eviction sweep, without evicting', async () => {
+      vi.useFakeTimers({ toFake: ['Date'] });
+      vi.setSystemTime(2_000_000);
+      manager = new SessionManager({ ttlMs: 60_000 });
+      const entry = await manager.createSession(makeServerFactory());
+
+      // At exactly the TTL the sweep still keeps the session.
+      vi.setSystemTime(2_000_000 + 60_000);
+      expect(manager.hasSession(entry.sessionId)).toBe(true);
+
+      // Past the TTL the sweep would evict it, so it is not live.
+      vi.setSystemTime(2_000_000 + 60_001);
+      expect(manager.hasSession(entry.sessionId)).toBe(false);
+
+      // The check itself neither evicts nor revives the session.
+      expect(manager.size).toBe(1);
+      expect(entry.lastSeen).toBe(2_000_000);
+    });
+
+    it('does not keep an idle session alive when called repeatedly', async () => {
+      vi.useFakeTimers({ toFake: ['Date'] });
+      vi.setSystemTime(3_000_000);
+      manager = new SessionManager({ ttlMs: 60_000 });
+      const idle = await manager.createSession(makeServerFactory());
+
+      for (let t = 10_000; t <= 60_000; t += 10_000) {
+        vi.setSystemTime(3_000_000 + t);
+        expect(manager.hasSession(idle.sessionId)).toBe(true);
+      }
+
+      // Creating a session past the idle session's TTL evicts it.
+      vi.setSystemTime(3_000_000 + 60_001);
+      await manager.createSession(makeServerFactory());
+      expect(manager.hasSession(idle.sessionId)).toBe(false);
+      expect(manager.getSession(idle.sessionId)).toBeUndefined();
+      expect(manager.size).toBe(1);
+    });
   });
 
   it('should cleanup all sessions', async () => {

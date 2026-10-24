@@ -2,9 +2,15 @@
  * HTTP transport integration tests
  */
 
-import { describe, it, expect, afterEach } from 'vitest';
+import { randomUUID } from 'node:crypto';
+import { describe, it, expect, afterEach, vi } from 'vitest';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { createHttpTransport } from '../../src/http-transport.js';
+import { SUPPORTED_PROTOCOL_VERSIONS as SDK_SUPPORTED_PROTOCOL_VERSIONS } from '@modelcontextprotocol/sdk/types.js';
+import {
+  createHttpTransport,
+  rateLimitKeyFor,
+  MAX_RATE_LIMIT_KEYS,
+} from '../../src/http-transport.js';
 
 function makeServerFactory(): () => McpServer {
   return () => {
@@ -1083,5 +1089,381 @@ describe('HTTP Transport', () => {
       body: JSON.stringify({ jsonrpc: '2.0', method: 'tools/list', id: 3 }),
     });
     expect(status).toBe(200);
+  });
+});
+
+// --- Accepted protocol versions follow the SDK's supported list ---
+//
+// Version negotiation is delegated to the SDK, so the HTTP version gate must
+// accept every revision the SDK can negotiate. Otherwise a client that the
+// SDK negotiated to, for example, 2025-06-18 is refused on its first request
+// after initialize.
+
+/** Extract result.protocolVersion from an initialize response (JSON or SSE-framed). */
+function negotiatedVersionFrom(body: unknown): string | undefined {
+  let message: unknown = body;
+  if (typeof body === 'string') {
+    const dataLine = body.split('\n').find((line) => line.startsWith('data: '));
+    if (!dataLine) return undefined;
+    message = JSON.parse(dataLine.slice('data: '.length));
+  }
+  const result = (message as { result?: { protocolVersion?: unknown } } | null)?.result;
+  return typeof result?.protocolVersion === 'string' ? result.protocolVersion : undefined;
+}
+
+/** True when a JSON or SSE-framed JSON-RPC response carries a result (not an error). */
+function hasJsonRpcResult(body: unknown): boolean {
+  let message: unknown = body;
+  if (typeof body === 'string') {
+    const dataLine = body.split('\n').find((line) => line.startsWith('data: '));
+    if (!dataLine) return false;
+    message = JSON.parse(dataLine.slice('data: '.length));
+  }
+  return typeof message === 'object' && message !== null && 'result' in message;
+}
+
+/** Parse the "(supported versions: a, b, c)" list out of a rejection message. */
+function supportedVersionsIn(message: string): string[] {
+  const match = /\(supported versions: ([^)]*)\)/.exec(message);
+  return match ? match[1].split(', ') : [];
+}
+
+/**
+ * Send initialize requesting `requestedVersion` in the body, optionally with an
+ * MCP-Protocol-Version header on the initialize request itself.
+ */
+async function initializeRequesting(
+  port: number,
+  requestedVersion: string,
+  headerVersion?: string
+): Promise<{
+  status: number;
+  sessionId: string | null;
+  negotiatedVersion: string | undefined;
+  body: unknown;
+}> {
+  const headers: Record<string, string> = { ...MCP_ACCEPT_HEADERS };
+  if (headerVersion !== undefined) headers['MCP-Protocol-Version'] = headerVersion;
+  const res = await fetchJson(`http://127.0.0.1:${port}/mcp`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({
+      jsonrpc: '2.0',
+      method: 'initialize',
+      id: 1,
+      params: {
+        protocolVersion: requestedVersion,
+        capabilities: {},
+        clientInfo: { name: 'test', version: '1.0' },
+      },
+    }),
+  });
+  return {
+    status: res.status,
+    sessionId: res.headers.get('mcp-session-id'),
+    negotiatedVersion: res.status === 200 ? negotiatedVersionFrom(res.body) : undefined,
+    body: res.body,
+  };
+}
+
+/** Send a follow-up ping on an existing session declaring `version`. */
+async function pingWithVersion(
+  port: number,
+  sessionId: string,
+  version: string
+): Promise<{ status: number; body: unknown }> {
+  const { status, body } = await fetchJson(`http://127.0.0.1:${port}/mcp`, {
+    method: 'POST',
+    headers: {
+      ...MCP_ACCEPT_HEADERS,
+      'Mcp-Session-Id': sessionId,
+      'MCP-Protocol-Version': version,
+    },
+    body: JSON.stringify({ jsonrpc: '2.0', method: 'ping', id: 2 }),
+  });
+  return { status, body };
+}
+
+describe('HTTP Transport: accepted protocol versions follow the SDK', () => {
+  let cleanup: (() => Promise<void>) | undefined;
+
+  afterEach(async () => {
+    if (cleanup) {
+      await cleanup();
+      cleanup = undefined;
+    }
+  });
+
+  async function start(): Promise<number> {
+    const port = getPort();
+    const result = await createHttpTransport({
+      port,
+      host: '127.0.0.1',
+      serverFactory: makeServerFactory(),
+    });
+    cleanup = result.cleanup;
+    return port;
+  }
+
+  it('relies on an SDK list that contains 2025-06-18 and not 2026-07-28', () => {
+    expect(SDK_SUPPORTED_PROTOCOL_VERSIONS).toContain('2025-06-18');
+    expect(SDK_SUPPORTED_PROTOCOL_VERSIONS).toContain('2024-11-05');
+    expect(SDK_SUPPORTED_PROTOCOL_VERSIONS).not.toContain('2026-07-28');
+  });
+
+  it('accepts every SDK-supported protocol version on requests after initialize', async () => {
+    const port = await start();
+    const sessionId = await initSession(port);
+    const outcomes = [];
+    for (const version of SDK_SUPPORTED_PROTOCOL_VERSIONS) {
+      const { status, body } = await pingWithVersion(port, sessionId, version);
+      outcomes.push({ version, status, result: hasJsonRpcResult(body) });
+    }
+    expect(outcomes).toEqual(
+      SDK_SUPPORTED_PROTOCOL_VERSIONS.map((version) => ({ version, status: 200, result: true }))
+    );
+  });
+
+  it('serves a 2025-06-18 client across initialize and later requests', async () => {
+    const port = await start();
+    const init = await initializeRequesting(port, '2025-06-18');
+    expect(init.status).toBe(200);
+    expect(init.negotiatedVersion).toBe('2025-06-18');
+    expect(init.sessionId).toBeTruthy();
+
+    // The SDK client sends the negotiated version on every later request.
+    for (let i = 0; i < 3; i++) {
+      const follow = await pingWithVersion(port, init.sessionId!, '2025-06-18');
+      expect(follow.status).toBe(200);
+      expect(hasJsonRpcResult(follow.body)).toBe(true);
+    }
+  });
+
+  it('accepts a 2025-06-18 MCP-Protocol-Version header on the initialize request itself', async () => {
+    const port = await start();
+    const init = await initializeRequesting(port, '2025-06-18', '2025-06-18');
+    expect(init.status).toBe(200);
+    expect(init.negotiatedVersion).toBe('2025-06-18');
+  });
+
+  it('serves a client the SDK negotiates to 2024-11-05 on later requests', async () => {
+    const port = await start();
+    const init = await initializeRequesting(port, '2024-11-05');
+    expect(init.status).toBe(200);
+    expect(init.negotiatedVersion).toBe('2024-11-05');
+
+    const follow = await pingWithVersion(port, init.sessionId!, '2024-11-05');
+    expect(follow.status).toBe(200);
+    expect(hasJsonRpcResult(follow.body)).toBe(true);
+  });
+
+  it('accepts on later requests whatever version the SDK negotiated, for any requested version', async () => {
+    const port = await start();
+    const requested = [...SDK_SUPPORTED_PROTOCOL_VERSIONS, '2026-07-28', '1999-01-01'];
+    const outcomes = [];
+    for (const version of requested) {
+      const init = await initializeRequesting(port, version);
+      expect(init.status).toBe(200);
+      expect(init.negotiatedVersion).toBeDefined();
+      const follow = await pingWithVersion(port, init.sessionId!, init.negotiatedVersion!);
+      outcomes.push({ requested: version, status: follow.status });
+    }
+    expect(outcomes).toEqual(requested.map((version) => ({ requested: version, status: 200 })));
+  });
+
+  it('rejects 2026-07-28 after initialize with a 400 listing exactly the SDK-supported versions', async () => {
+    const port = await start();
+    const sessionId = await initSession(port);
+    const { status, body } = await pingWithVersion(port, sessionId, '2026-07-28');
+    expect(status).toBe(400);
+    const message = (body as { error: string }).error;
+    expect(message).toContain('Unsupported MCP protocol version: 2026-07-28');
+    expect(supportedVersionsIn(message)).toEqual([...SDK_SUPPORTED_PROTOCOL_VERSIONS]);
+  });
+
+  it('rejects a 2026-07-28 header on initialize with a 400 listing exactly the SDK-supported versions', async () => {
+    const port = await start();
+    const init = await initializeRequesting(port, '2026-07-28', '2026-07-28');
+    expect(init.status).toBe(400);
+    expect(init.sessionId).toBeNull();
+    const message = (init.body as { error: string }).error;
+    expect(message).toContain('Unsupported MCP protocol version: 2026-07-28');
+    expect(supportedVersionsIn(message)).toEqual([...SDK_SUPPORTED_PROTOCOL_VERSIONS]);
+  });
+});
+
+// --- Rate-limit keys and bounds ---
+
+describe('HTTP Transport: rate-limit keys and bounds', () => {
+  let cleanup: (() => Promise<void>) | undefined;
+
+  afterEach(async () => {
+    if (cleanup) {
+      await cleanup();
+      cleanup = undefined;
+    }
+  });
+
+  const pingBody = JSON.stringify({ jsonrpc: '2.0', method: 'ping', id: 1 });
+
+  it('limits requests with rotating unknown session ids at the per-address rate', async () => {
+    const port = getPort();
+    const result = await createHttpTransport({
+      port,
+      host: '127.0.0.1',
+      rateLimitRpm: 10,
+      serverFactory: makeServerFactory(),
+    });
+    cleanup = result.cleanup;
+
+    let limited = 0;
+    let passed = 0;
+    for (let i = 0; i < 1000; i++) {
+      const { status } = await fetchJson(`http://127.0.0.1:${port}/mcp`, {
+        method: 'POST',
+        headers: { ...MCP_ACCEPT_HEADERS, 'Mcp-Session-Id': randomUUID() },
+        body: pingBody,
+      });
+      if (status === 429) limited++;
+      else passed++;
+    }
+    expect(passed).toBe(10);
+    expect(limited).toBe(990);
+  }, 60_000);
+
+  it('does not let a session id shaped like an address key spend another client budget', async () => {
+    const port = getPort();
+    const result = await createHttpTransport({
+      port,
+      host: '127.0.0.1',
+      trustProxy: 'loopback',
+      rateLimitRpm: 2,
+      serverFactory: makeServerFactory(),
+    });
+    cleanup = result.cleanup;
+
+    // One client (203.0.113.1) sends a session header naming another
+    // client's address bucket.
+    const attackerStatuses: number[] = [];
+    for (let i = 0; i < 3; i++) {
+      const { status } = await fetchJson(`http://127.0.0.1:${port}/mcp`, {
+        method: 'POST',
+        headers: {
+          ...MCP_ACCEPT_HEADERS,
+          'X-Forwarded-For': '203.0.113.1',
+          'Mcp-Session-Id': 'ip:203.0.113.2',
+        },
+        body: pingBody,
+      });
+      attackerStatuses.push(status);
+    }
+    // The sender is limited in its own bucket.
+    expect(attackerStatuses[2]).toBe(429);
+
+    // The other client (203.0.113.2) still has its full budget.
+    const { status } = await fetchJson(`http://127.0.0.1:${port}/mcp`, {
+      method: 'POST',
+      headers: { ...MCP_ACCEPT_HEADERS, 'X-Forwarded-For': '203.0.113.2' },
+      body: JSON.stringify({
+        jsonrpc: '2.0',
+        method: 'initialize',
+        id: 1,
+        params: {
+          protocolVersion: '2025-11-25',
+          capabilities: {},
+          clientInfo: { name: 'test', version: '1.0' },
+        },
+      }),
+    });
+    expect(status).toBe(200);
+  });
+
+  it('keeps a separate rate-limit window for a live session', async () => {
+    const port = getPort();
+    const result = await createHttpTransport({
+      port,
+      host: '127.0.0.1',
+      rateLimitRpm: 2,
+      serverFactory: makeServerFactory(),
+    });
+    cleanup = result.cleanup;
+
+    // initialize: address window count 1
+    const sessionId = await initSession(port);
+
+    const sessionStatuses: number[] = [];
+    for (let i = 0; i < 3; i++) {
+      const { status } = await fetchJson(`http://127.0.0.1:${port}/mcp`, {
+        method: 'POST',
+        headers: { ...MCP_ACCEPT_HEADERS, 'Mcp-Session-Id': sessionId },
+        body: pingBody,
+      });
+      sessionStatuses.push(status);
+    }
+    expect(sessionStatuses).toEqual([200, 200, 429]);
+
+    // The address window is unaffected by the session's requests: count 2.
+    await expect(initSession(port)).resolves.toBeTruthy();
+  });
+
+  it('keeps the rate-limit map bounded under many distinct client addresses', async () => {
+    const port = getPort();
+    const result = await createHttpTransport({
+      port,
+      host: '127.0.0.1',
+      trustProxy: 'loopback',
+      serverFactory: makeServerFactory(),
+    });
+    cleanup = result.cleanup;
+
+    expect(MAX_RATE_LIMIT_KEYS).toBe(10_000);
+    const total = MAX_RATE_LIMIT_KEYS + 200;
+    const batchSize = 100;
+    let largestSeen = 0;
+    for (let start = 0; start < total; start += batchSize) {
+      const batch = [];
+      for (let i = start; i < Math.min(start + batchSize, total); i++) {
+        const address = `10.${(i >> 16) & 255}.${(i >> 8) & 255}.${i & 255}`;
+        batch.push(
+          fetchJson(`http://127.0.0.1:${port}/mcp`, {
+            method: 'POST',
+            headers: { ...MCP_ACCEPT_HEADERS, 'X-Forwarded-For': address },
+            body: pingBody,
+          })
+        );
+      }
+      const responses = await Promise.all(batch);
+      for (const r of responses) expect(r.status).not.toBe(429);
+      largestSeen = Math.max(largestSeen, result.rateLimitKeyCount());
+    }
+    expect(largestSeen).toBeLessThanOrEqual(MAX_RATE_LIMIT_KEYS);
+    expect(result.rateLimitKeyCount()).toBe(MAX_RATE_LIMIT_KEYS);
+  }, 120_000);
+});
+
+describe('rateLimitKeyFor', () => {
+  it('keys a session header shaped like an address key by the real client address', () => {
+    expect(rateLimitKeyFor('ip:10.0.0.2', '10.0.0.1', () => false)).toBe('ip:10.0.0.1');
+  });
+
+  it('keys a valid id of a live session by session', () => {
+    const id = randomUUID();
+    expect(rateLimitKeyFor(id, '10.0.0.1', (candidate) => candidate === id)).toBe(`session:${id}`);
+  });
+
+  it('keys a valid but unknown session id by client address', () => {
+    expect(rateLimitKeyFor(randomUUID(), '10.0.0.1', () => false)).toBe('ip:10.0.0.1');
+  });
+
+  it('keys a request without a session id by client address', () => {
+    expect(rateLimitKeyFor(undefined, '10.0.0.1', () => true)).toBe('ip:10.0.0.1');
+  });
+
+  it('keys a syntactically invalid session id by client address without looking it up', () => {
+    const isLive = vi.fn(() => true);
+    expect(rateLimitKeyFor('', '10.0.0.1', isLive)).toBe('ip:10.0.0.1');
+    expect(rateLimitKeyFor('has space', '10.0.0.1', isLive)).toBe('ip:10.0.0.1');
+    expect(rateLimitKeyFor('x'.repeat(129), '10.0.0.1', isLive)).toBe('ip:10.0.0.1');
+    expect(isLive).not.toHaveBeenCalled();
   });
 });

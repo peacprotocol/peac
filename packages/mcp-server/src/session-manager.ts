@@ -106,6 +106,15 @@ export class SessionManager {
     return entry;
   }
 
+  /**
+   * Whether a live session exists. Unlike getSession(), this does not refresh
+   * lastSeen. A session past its TTL is not live (the same rule as evictStale).
+   */
+  hasSession(sessionId: string): boolean {
+    const entry = this.sessions.get(sessionId);
+    return entry !== undefined && Date.now() - entry.lastSeen <= this.ttlMs;
+  }
+
   /** Terminate and clean up a specific session */
   async terminateSession(sessionId: string): Promise<boolean> {
     const entry = this.sessions.get(sessionId);
