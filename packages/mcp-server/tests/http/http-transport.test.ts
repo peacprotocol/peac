@@ -1306,6 +1306,9 @@ describe('HTTP Transport: rate-limit keys and bounds', () => {
       cleanup = result.cleanup;
       const lines = write.mock.calls.map((call) => String(call[0]));
       expect(lines).toContain('  Rate limit: 7 req/min per session or client address\n');
+      expect(lines).toContain(
+        '  Mode: unprotected (no token validation; deploy behind an authenticating reverse proxy)\n'
+      );
     } finally {
       write.mockRestore();
     }

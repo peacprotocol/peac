@@ -1,7 +1,7 @@
 /**
  * MCP Streamable HTTP transport
  *
- * Adds HTTP transport alongside stdio. Unprotected mode only (v0.11.0).
+ * Adds HTTP transport alongside stdio. Unprotected mode only.
  * Each session gets its own McpServer + transport (CVE-2026-25536 defense).
  *
  * Endpoints:
@@ -413,7 +413,7 @@ export async function createHttpTransport(options: HttpTransportOptions): Promis
 
     // --- MCP endpoint ---
     if (pathname === '/mcp') {
-      // GET /mcp -> 405 (SSE streaming deferred)
+      // GET /mcp -> 405 (server-initiated SSE streams are not supported)
       if (req.method === 'GET') {
         res.writeHead(405, { Allow: 'POST, DELETE', 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ error: 'Method Not Allowed. Use POST for JSON-RPC requests.' }));
@@ -574,7 +574,7 @@ export async function createHttpTransport(options: HttpTransportOptions): Promis
         `  CORS: ${corsOrigins.size > 0 ? [...corsOrigins].join(', ') : 'deny all'}\n`
       );
       process.stderr.write(
-        `  Mode: unprotected (token validation deferred to v0.11.x+; deployer auth via reverse proxy)\n`
+        `  Mode: unprotected (no token validation; deploy behind an authenticating reverse proxy)\n`
       );
 
       resolve({
