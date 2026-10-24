@@ -7,6 +7,9 @@
  * commit message must be resolved through git itself so that linked worktrees (whose git
  * directory is not `<root>/.git`) are checked rather than silently skipped.
  *
+ * Both tools fail closed: an input they were asked to check but cannot read (a missing message
+ * file, a missing or unreadable body file) is an error, never a pass.
+ *
  * The behavioural cases run both tools against throwaway repositories created under the OS temp
  * directory, so no state of the repository under test is read or modified. Strings that match a
  * built-in rule are assembled at run time so this file does not itself trip the linter.
@@ -122,7 +125,7 @@ function writeMessage(text: string): string {
   return file;
 }
 
-describe('no private path is referenced', () => {
+describe('no pattern file is read', () => {
   it.each([
     ['scripts/check-public-artifacts.mjs', SCRIPT],
     ['.githooks/commit-msg', HOOK],
@@ -219,5 +222,69 @@ describe('a finding is reported as a rule id and a location, never as pattern te
     expect(r.out).toContain(`rule planning-marker in ${file}`);
     expect(r.out).not.toContain(marker);
     expect(r.out).not.toContain(LINE_MARKER);
+  });
+});
+
+describe('both tools fail closed when an input cannot be read', () => {
+  const missing = (name: string) => join(base, `does-not-exist-${name}`);
+
+  it('the linter exits 2 for a missing body file and never reports OK', () => {
+    const r = linter('--no-staged', '--no-commit-msg', '--body-file', missing('body.md'));
+    expect(r.status).toBe(2);
+    expect(r.out).toContain('cannot read body file');
+    expect(r.out).not.toContain('Public artifact check: OK');
+  });
+
+  it('the linter exits 2 for a body file that is a directory', () => {
+    const r = linter('--no-staged', '--no-commit-msg', '--body-file', base);
+    expect(r.status).toBe(2);
+    expect(r.out).not.toContain('Public artifact check: OK');
+  });
+
+  it('the linter exits 2 when --body-file or --text has no value', () => {
+    for (const flag of ['--body-file', '--text']) {
+      const r = linter('--no-staged', '--no-commit-msg', flag);
+      expect(r.status, flag).toBe(2);
+      expect(r.out, flag).toContain(`${flag} needs`);
+      expect(r.out, flag).not.toContain('Public artifact check: OK');
+    }
+  });
+
+  it('the linter still passes a readable clean body file', () => {
+    const file = join(base, 'clean-body.md');
+    writeFileSync(file, 'A clean technical body.\n');
+    const r = linter('--no-staged', '--no-commit-msg', '--body-file', file);
+    expect(r.status).toBe(0);
+    expect(r.out).toContain('Public artifact check: OK');
+  });
+
+  it('the hook fails for a missing message file and never reports OK', () => {
+    const r = hook(missing('message'));
+    expect(r.status).not.toBe(0);
+    expect(r.out).toContain('rule message-file-unreadable');
+    expect(r.out).not.toContain('[commit-msg] OK');
+  });
+
+  it('the hook fails when the message path is a directory', () => {
+    const r = hook(base);
+    expect(r.status).not.toBe(0);
+    expect(r.out).toContain('rule message-file-unreadable');
+    expect(r.out).not.toContain('[commit-msg] OK');
+  });
+
+  it('the hook fails on the no-argument path when the worktree has no message file', () => {
+    rmSync(join(gitDirOf(linked), 'COMMIT_EDITMSG'), { force: true });
+    const r = hook();
+    expect(r.status).not.toBe(0);
+    expect(r.out).toContain('rule message-file-unreadable');
+    expect(r.out).not.toContain('[commit-msg] OK');
+  });
+
+  it('the hook fails on the no-argument path outside a repository', () => {
+    const outside = mkdtempSync(join(base, 'outside-'));
+    const r = run('bash', [HOOK], outside);
+    expect(r.status).not.toBe(0);
+    expect(r.out).toContain('rule message-file-unreadable');
+    expect(r.out).not.toContain('[commit-msg] OK');
   });
 });

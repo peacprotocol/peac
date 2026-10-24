@@ -120,7 +120,8 @@ jobs:
           retention-days: 7
 
   # The module floor is exercised by the `test` job (the `go` directive in sdks/go/go.mod). This
-  # job runs every module on the newest supported Go release line as well (latest patch release).
+  # job runs every module on the newest supported Go release line as well (the patch release
+  # that setup-go resolves for that line).
   test-newest-go:
     name: Build + Test (Go 1.27)
     runs-on: ubuntu-24.04

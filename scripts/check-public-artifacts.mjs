@@ -17,6 +17,7 @@
  * Exit codes:
  *   0  No violations found
  *   1  One or more violations found
+ *   2  An input could not be read (missing value, missing or unreadable file)
  */
 
 import { readFileSync, existsSync } from 'node:fs';
@@ -102,24 +103,38 @@ function getStagedFiles() {
   }
 }
 
+/**
+ * Fail closed: an input that was asked for but cannot be read is an error, never a pass.
+ */
+function failInput(message) {
+  console.error(`Public artifact check: ${message}`);
+  process.exit(2);
+}
+
 function main() {
   const args = process.argv.slice(2);
   const allViolations = [];
 
   // Check --body-file argument
   const bodyFileIdx = args.indexOf('--body-file');
-  if (bodyFileIdx !== -1 && args[bodyFileIdx + 1]) {
-    const bodyFile = resolve(args[bodyFileIdx + 1]);
-    if (existsSync(bodyFile)) {
-      const content = readFileSync(bodyFile, 'utf-8');
-      allViolations.push(...checkText(content, `body-file: ${args[bodyFileIdx + 1]}`));
+  if (bodyFileIdx !== -1) {
+    const bodyFileArg = args[bodyFileIdx + 1];
+    if (!bodyFileArg) failInput('--body-file needs a path');
+    let content;
+    try {
+      content = readFileSync(resolve(bodyFileArg), 'utf-8');
+    } catch {
+      failInput(`cannot read body file: ${bodyFileArg}`);
     }
+    allViolations.push(...checkText(content, `body-file: ${bodyFileArg}`));
   }
 
   // Check --text argument
   const textIdx = args.indexOf('--text');
-  if (textIdx !== -1 && args[textIdx + 1]) {
-    allViolations.push(...checkText(args[textIdx + 1], 'inline text'));
+  if (textIdx !== -1) {
+    const text = args[textIdx + 1];
+    if (text === undefined) failInput('--text needs a value');
+    if (text) allViolations.push(...checkText(text, 'inline text'));
   }
 
   // Check the commit message if git has one for this worktree

@@ -8,18 +8,24 @@
 #
 # Git passes the message file as $1. When the hook is run by hand without an argument, the
 # message path is resolved with `git rev-parse --git-path COMMIT_EDITMSG`, which is also
-# correct inside a linked worktree.
+# correct inside a linked worktree. A message file that is missing or unreadable fails the hook.
 #
 # Bypass: PEAC_SKIP_COMMIT_MSG=1 git commit -m "..."
 
 set -euo pipefail
 
-COMMIT_MSG_FILE="${1:-$(git rev-parse --git-path COMMIT_EDITMSG)}"
+COMMIT_MSG_FILE="${1:-$(git rev-parse --git-path COMMIT_EDITMSG 2>/dev/null || true)}"
 
 if [ "${PEAC_SKIP_COMMIT_MSG:-}" = "1" ]; then
   echo "[commit-msg] BYPASSED (PEAC_SKIP_COMMIT_MSG=1)"
   echo "[commit-msg] WARNING: Commit message was not checked for non-technical language."
   exit 0
+fi
+
+# Fail closed: a message that cannot be read is never reported as clean.
+if [ ! -f "$COMMIT_MSG_FILE" ] || [ ! -r "$COMMIT_MSG_FILE" ]; then
+  echo "[commit-msg] FAIL: rule message-file-unreadable"
+  exit 1
 fi
 
 FAILED=0
