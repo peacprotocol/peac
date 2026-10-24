@@ -23,8 +23,10 @@ import { deterministicStringify } from './utils.js';
 const PROBLEM_CONTENT_TYPE = 'application/problem+json';
 const MAX_BODY_SIZE = 256 * 1024; // 256 KB
 
-// Bounds the request body while it is read, including bodies that carry no
-// Content-Length header (chunked transfer).
+// Counts the body while it is read and rejects it once it passes the limit, for
+// bodies without a Content-Length header (chunked transfer). A declared
+// Content-Length is compared with the limit and trusted: the HTTP server is
+// expected to enforce Content-Length framing, as the Node HTTP parser does.
 const bodyLimitGuard = bodyLimit({
   maxSize: MAX_BODY_SIZE,
   onError: (c) =>
@@ -83,9 +85,16 @@ export function createIssueV1Handler(opts?: IssueV1Options) {
       });
     }
 
-    // Bound the body while it is read (declared and streamed bodies alike),
-    // then enforce the actual byte-size cap on the decoded text (not char length)
-    const oversize = await bodyLimitGuard(c, async () => {});
+    // Reject a declared Content-Length over the limit before the body is read
+    // and count the body as it is read when none is declared, then enforce the
+    // byte-size cap on the decoded text (not char length).
+    let oversize: Response | void;
+    try {
+      oversize = await bodyLimitGuard(c, async () => {});
+    } catch {
+      // The body could not be read (for example, the client disconnected).
+      return problemResponse(c, toProblemDetails('E_INVALID_FORMAT'));
+    }
     if (oversize) return oversize;
 
     let rawBody: string;

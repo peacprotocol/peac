@@ -118,6 +118,32 @@ function streamedRequest(
   return req;
 }
 
+// A body stream that delivers one chunk and then fails, as when a client
+// disconnects in the middle of an upload.
+function failingRequest(path: string): Request {
+  let sentFirstChunk = false;
+  const stream = new ReadableStream<Uint8Array>(
+    {
+      pull(controller) {
+        if (!sentFirstChunk) {
+          sentFirstChunk = true;
+          controller.enqueue(encoder.encode('{"receipt":"'));
+          return;
+        }
+        controller.error(new Error('request stream failed'));
+      },
+    },
+    { highWaterMark: 0 }
+  );
+  const init: StreamInit = {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: stream,
+    duplex: 'half',
+  };
+  return new Request(`http://localhost${path}`, init);
+}
+
 interface ProblemBody {
   status?: number;
   peac_error_code?: string;
@@ -195,6 +221,26 @@ describe('POST /v1/verify streamed body limit', () => {
     expect(counter.pulledBytes).toBe(0);
   });
 
+  it('rejects a streamed multi-byte body that is over the limit in bytes but not in characters', async () => {
+    const prefix = '{"receipt":"';
+    const suffix = '"}';
+    const body = prefix + '\u00e9'.repeat(MAX_BODY_SIZE / 2) + suffix;
+    expect(body.length).toBeLessThan(MAX_BODY_SIZE);
+    expect(encoder.encode(body).byteLength).toBeGreaterThan(MAX_BODY_SIZE);
+    const res = await app.fetch(streamedRequest('/v1/verify', body));
+    expect(res.status).toBe(413);
+    const problem = await readJson<ProblemBody>(res);
+    expect(problem?.peac_error_code).toBe('E_PAYLOAD_TOO_LARGE');
+  });
+
+  it('returns 400 E_INVALID_FORMAT when the request body cannot be read', async () => {
+    const res = await app.fetch(failingRequest('/v1/verify'));
+    expect(res.status).toBe(400);
+    expect(res.headers.get('content-type')).toContain(PROBLEM_MEDIA_TYPE);
+    const problem = await readJson<ProblemBody>(res);
+    expect(problem?.peac_error_code).toBe('E_INVALID_FORMAT');
+  });
+
   it('verifies a streamed body within the limit exactly like a length-delimited body', async () => {
     const issueRes = await app.fetch(
       new Request('http://localhost/v1/issue', {
@@ -269,6 +315,27 @@ describe('POST /v1/issue streamed body limit (PEAC_HOSTED_ISSUE enabled)', () =>
     if (problem) {
       expect(problem.peac_error_code).not.toBe('E_PAYLOAD_TOO_LARGE');
     }
+  });
+
+  it('rejects a declared Content-Length over the limit without reading the body', async () => {
+    const counter: PullCounter = { pulledBytes: 0 };
+    const res = await app.fetch(
+      streamedRequest('/v1/issue', makeIssueBody(MAX_BODY_SIZE + 1), counter, {
+        'Content-Length': String(MAX_BODY_SIZE + 1),
+      })
+    );
+    expect(res.status).toBe(413);
+    const problem = await readJson<ProblemBody>(res);
+    expect(problem?.peac_error_code).toBe('E_PAYLOAD_TOO_LARGE');
+    expect(counter.pulledBytes).toBe(0);
+  });
+
+  it('returns 400 E_INVALID_FORMAT when the request body cannot be read', async () => {
+    const res = await app.fetch(failingRequest('/v1/issue'));
+    expect(res.status).toBe(400);
+    expect(res.headers.get('content-type')).toContain(PROBLEM_MEDIA_TYPE);
+    const problem = await readJson<ProblemBody>(res);
+    expect(problem?.peac_error_code).toBe('E_INVALID_FORMAT');
   });
 
   it('issues from a streamed body within the limit', async () => {

@@ -1,7 +1,8 @@
 // Boundary coverage for the 256 KiB raw body-size invariant on the
 // `/v1/verify` and `/v1/issue` Hosted Verify / Hosted Issue routes.
 //
-// Invariant under test (apps/api/src/verify-v1.ts:34, hosted-issue.ts:23):
+// Invariant under test (`MAX_BODY_SIZE` in apps/api/src/verify-v1.ts and
+// apps/api/src/hosted-issue.ts):
 //
 //   const MAX_BODY_SIZE = 256 * 1024;
 //
@@ -16,10 +17,14 @@
 // valid issuance request body. The boundary invariant is narrower than
 // end-to-end success and that is the only thing this test asserts.
 //
-// Verify-v1 enforcement path: Content-Length header pre-check at
-//   apps/api/src/verify-v1.ts:185-188.
-// Hosted-issue enforcement path: raw body read + TextEncoder byte count at
-//   apps/api/src/hosted-issue.ts:86-91.
+// Verify-v1 enforcement path: the Content-Length header pre-check, then
+//   `bodyLimitGuard` (hono/body-limit) for bodies without a Content-Length
+//   (apps/api/src/verify-v1.ts).
+// Hosted-issue enforcement path: `bodyLimitGuard` before the body read (it
+//   rejects a declared Content-Length over the limit and counts a body without
+//   one), then a TextEncoder byte count on the decoded text
+//   (apps/api/src/hosted-issue.ts).
+// Streamed (chunked) request bodies are covered in body-limit.streamed.test.ts.
 
 import { describe, it, expect, beforeAll } from 'vitest';
 import { Hono } from 'hono';

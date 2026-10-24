@@ -8,7 +8,7 @@ Traceability matrix mapping DD-210 threat vectors to specific tests, budgets, an
 | --- | --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
 | T1  | SSRF via JWKS resolution          | HTTPS-only; private IP rejection; DNS rebinding check; 5s timeout                                                                                                                                                                        | Issuer allowlist test; untrusted issuer returns `E_VERIFY_ISSUER_CONFIG_MISSING` | No outbound fetch for unknown issuers (allowlist-first)                                              |
 | T2  | JWKS cache poisoning              | Per-tenant cache isolation; 5-min TTL; `InMemoryCache`                                                                                                                                                                                   | Rate limit isolation test (separate key/IP buckets)                              | Stale cache entry expires; fresh fetch required                                                      |
-| T3  | Oversized JWS                     | 256 KB max body (`content-length` check + Zod `.max()`)                                                                                                                                                                                  | `rejects oversized body` test (413)                                              | Returns `E_PAYLOAD_TOO_LARGE`; no parsing attempted                                                  |
+| T3  | Oversized JWS                     | 256 KB max body (`content-length` check, a bounded read for bodies without a `content-length` via `hono/body-limit`, and Zod `.max()`)                                                                                                   | `rejects oversized body` test (413); `body-limit.streamed.test.ts`               | Returns `E_PAYLOAD_TOO_LARGE`; no parsing attempted                                                  |
 | T4  | Pathological JSON (deep nesting)  | Zod strict validation; kernel constraints enforced by `verifyLocal()`                                                                                                                                                                    | Zod strict schema test; constraint violation test                                | Returns `E_CONSTRAINT_VIOLATION` (422)                                                               |
 | T5  | `receipt_url` fetch amplification | Issuer discovery disabled by default; allowlist-only JWKS. When discovery is enabled: no explicit semaphore or per-tenant discovery rate limiter in alpha (relies on handler-level rate limit); full budget enforcement is v0.12.9 scope | Untrusted issuer test confirms no fetch when discovery disabled                  | No fetch for non-allowlisted issuers (discovery off); delegated to handler rate limit (discovery on) |
 | T6  | Cross-tenant leakage              | Per-key rate limit buckets; `InMemoryCache` keyed by issuer                                                                                                                                                                              | API key vs anonymous rate limit isolation test                                   | No cross-tenant state                                                                                |
@@ -18,14 +18,14 @@ Traceability matrix mapping DD-210 threat vectors to specific tests, budgets, an
 
 ## Request Budget
 
-| Limit                  | Value        | Enforcement Point                                         |
-| ---------------------- | ------------ | --------------------------------------------------------- |
-| Raw body size          | 256 KB       | `content-length` header check + Zod `.max(MAX_BODY_SIZE)` |
-| JWKS fetch timeout     | 5s           | `@peac/jwks-cache` `timeoutMs` option                     |
-| JWKS response size     | 1 MB         | `@peac/jwks-cache` `maxResponseBytes` option              |
-| Rate limit (anonymous) | 100 req/min  | `MemoryRateLimitStore` per-IP bucket                      |
-| Rate limit (API key)   | 1000 req/min | `MemoryRateLimitStore` per-key bucket                     |
-| Max JWKS keys          | 100          | `@peac/jwks-cache` `maxKeys` option                       |
+| Limit                  | Value        | Enforcement Point                                                                            |
+| ---------------------- | ------------ | -------------------------------------------------------------------------------------------- |
+| Raw body size          | 256 KB       | `content-length` header check + bounded read (`hono/body-limit`) + Zod `.max(MAX_BODY_SIZE)` |
+| JWKS fetch timeout     | 5s           | `@peac/jwks-cache` `timeoutMs` option                                                        |
+| JWKS response size     | 1 MB         | `@peac/jwks-cache` `maxResponseBytes` option                                                 |
+| Rate limit (anonymous) | 100 req/min  | `MemoryRateLimitStore` per-IP bucket                                                         |
+| Rate limit (API key)   | 1000 req/min | `MemoryRateLimitStore` per-key bucket                                                        |
+| Max JWKS keys          | 100          | `@peac/jwks-cache` `maxKeys` option                                                          |
 
 ## Log-Only Policy
 
