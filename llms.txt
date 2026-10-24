@@ -52,7 +52,7 @@ PEAC does not orchestrate protocols, control systems, or enforce behavior. It re
 - [Offline sample index](https://github.com/peacprotocol/peac/blob/main/docs/guides/offline-sample-index.md): sample records for offline verification
 - [Wire Format](https://www.peacprotocol.org/docs/architecture/wire-format): record wire format
 - [Package Layering](https://www.peacprotocol.org/docs/architecture/package-layering): package layering
-- [Error Codes](https://www.peacprotocol.org/docs/reference/error-codes): error code reference
+- [Error Codes](https://github.com/peacprotocol/peac/blob/main/specs/kernel/errors.json): error code registry
 - [Evidence Carrier Contract](https://github.com/peacprotocol/peac/blob/main/docs/specs/EVIDENCE-CARRIER-CONTRACT.md): common carry interface
 - [Kernel Constraints](https://github.com/peacprotocol/peac/blob/main/docs/specs/KERNEL-CONSTRAINTS.md): structural limits
 - [MCP Server](https://www.peacprotocol.org/tools/mcp-server): MCP server tool
