@@ -1,6 +1,6 @@
 /**
  * PEAC Verification Server
- * Production-ready server with DoS protection, rate limiting, and caching
+ * Verification server with a request-size limit, rate limiting and a circuit breaker
  */
 
 export { app } from './server';
