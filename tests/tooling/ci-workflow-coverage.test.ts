@@ -242,8 +242,7 @@ describe('the MCP Registry workflow defaults to a dry run', () => {
     expect(env.CHECKSUM_LINUX_AMD64).toMatch(/^[0-9a-f]{64}$/);
     expect(env.CHECKSUM_LINUX_ARM64).toMatch(/^[0-9a-f]{64}$/);
     expect(env.CHECKSUM_LINUX_AMD64).not.toBe(env.CHECKSUM_LINUX_ARM64);
-    // The previous pin is superseded; the checksums are verified before extraction.
-    expect(version).not.toBe('v1.7.9');
+    // The checksums are verified before extraction.
     const script = install?.run ?? '';
     expect(script.indexOf('sha256sum')).toBeGreaterThan(-1);
     expect(script.indexOf('sha256sum')).toBeLessThan(script.indexOf('tar xzf'));

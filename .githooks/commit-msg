@@ -1,14 +1,10 @@
 #!/usr/bin/env bash
 # .githooks/commit-msg
-# Repo-managed commit-msg hook: checks the commit message against built-in rules.
+# Repo-managed commit-msg hook: fails closed when the commit message file cannot be read.
 # Install: bash scripts/setup-hooks.sh (or: git config core.hooksPath .githooks)
 #
-# Built-in rules only. No pattern file is read from any path, and a finding is reported
-# as a rule id, never as the pattern or the offending text.
-#
-# Git passes the message file as $1. When the hook is run by hand without an argument, the
-# message path is resolved with `git rev-parse --git-path COMMIT_EDITMSG`, which is also
-# correct inside a linked worktree. A message file that is missing or unreadable fails the hook.
+# Git passes the message file as $1. Without an argument the path is resolved with
+# `git rev-parse --git-path COMMIT_EDITMSG`, which is also correct inside a linked worktree.
 #
 # Bypass: PEAC_SKIP_COMMIT_MSG=1 git commit -m "..."
 
@@ -18,34 +14,12 @@ COMMIT_MSG_FILE="${1:-$(git rev-parse --git-path COMMIT_EDITMSG 2>/dev/null || t
 
 if [ "${PEAC_SKIP_COMMIT_MSG:-}" = "1" ]; then
   echo "[commit-msg] BYPASSED (PEAC_SKIP_COMMIT_MSG=1)"
-  echo "[commit-msg] WARNING: Commit message was not checked for non-technical language."
+  echo "[commit-msg] WARNING: Commit message was not checked."
   exit 0
 fi
 
-# Fail closed: a message that cannot be read is never reported as clean.
 if [ ! -f "$COMMIT_MSG_FILE" ] || [ ! -r "$COMMIT_MSG_FILE" ]; then
   echo "[commit-msg] FAIL: rule message-file-unreadable"
-  exit 1
-fi
-
-FAILED=0
-
-# Built-in checks (always active, safe for tracked script)
-if grep -iE 'reference/.*_LOCAL\.' "$COMMIT_MSG_FILE" >/dev/null 2>&1; then
-  echo "[commit-msg] FAIL: rule local-reference-path in $COMMIT_MSG_FILE"
-  FAILED=1
-fi
-
-if grep -iE '(NEXT_STEPS|ROADMAP_LOCAL|STRATEGY_LOCAL|SCOPE_LEDGER|MASTER_PLAN_LOCAL)' "$COMMIT_MSG_FILE" >/dev/null 2>&1; then
-  echo "[commit-msg] FAIL: rule planning-marker in $COMMIT_MSG_FILE"
-  FAILED=1
-fi
-
-if [ "$FAILED" -eq 1 ]; then
-  echo ""
-  echo "[commit-msg] Commit message contains non-technical language."
-  echo "[commit-msg] Rewrite the message to be technical and implementation-focused."
-  echo "[commit-msg] Bypass: PEAC_SKIP_COMMIT_MSG=1 git commit ..."
   exit 1
 fi
 

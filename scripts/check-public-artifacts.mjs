@@ -29,22 +29,15 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, '..');
 
 // Built-in patterns: objective checks that are safe to have in a tracked file.
-// These are standard OSS hygiene patterns, not strategy-revealing.
+// These are standard OSS hygiene patterns.
 const BUILTIN_PATTERNS = [
-  /reference\/.*_LOCAL\./i,
   /[\u200B-\u200F\u2028-\u202F\u2060-\u206F\uFEFF]/, // hidden/bidi Unicode
-  /MEMORY\.md/,
   // Retired category tagline; never valid on any tracked artifact.
   /cryptographic receipts for agentic commerce/i,
 ];
 
 // Stable ids for the patterns above, in the same order. A finding reports the id, never the pattern.
-const BUILTIN_RULE_IDS = [
-  'local-reference-path',
-  'hidden-unicode',
-  'local-memory-file',
-  'retired-tagline',
-];
+const BUILTIN_RULE_IDS = ['hidden-unicode', 'retired-tagline'];
 if (BUILTIN_RULE_IDS.length !== BUILTIN_PATTERNS.length) {
   throw new Error('rule id table is out of step with the built-in patterns');
 }

@@ -93,9 +93,7 @@ jobs:
           echo "go.mod files: ${modules}; go.work modules: ${listed}"
           test "${modules}" -eq "${listed}"
 
-      # Every module is built, vetted and tested on its own (workspace mode off), so each
-      # module's go.mod is proven sufficient. Modules are discovered rather than listed, so a
-      # new module is covered without a workflow edit.
+      # Each module is built, vetted and tested on its own (workspace mode off); modules are discovered.
       - name: Build + Vet + Test (every module)
         working-directory: sdks/go
         env:
@@ -119,9 +117,7 @@ jobs:
           path: sdks/go/coverage.out
           retention-days: 7
 
-  # The module floor is exercised by the `test` job (the `go` directive in sdks/go/go.mod). This
-  # job runs every module on the newest supported Go release line as well (the patch release
-  # that setup-go resolves for that line).
+  # The `test` job covers the module floor; this job covers the newest supported Go release line.
   test-newest-go:
     name: Build + Test (Go 1.27)
     runs-on: ubuntu-24.04

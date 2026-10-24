@@ -493,16 +493,8 @@ jobs:
       - name: Tooling gates (tests/tooling)
         run: pnpm test:tooling
 
-  # ---------------------------------------------------------------------------
-  # Lane 3a-bis: application test suites (@peac/mcp-server and @peac/server)
-  #
-  # `pnpm test:core` does not include the application packages, so before this lane their
-  # suites ran only in publish and local gate runs and could not gate a pull request. Turbo
-  # builds each package and its dependencies first (the `test` task depends on `build`), which
-  # the end-to-end suites need because they spawn the built server. The lane activates exactly
-  # like `tests-core` and is a dependency of the required `ci` aggregator below, so a failure
-  # here blocks the required check without changing its name.
-  # ---------------------------------------------------------------------------
+  # Application package suites (@peac/mcp-server, @peac/server); not part of test:core.
+  # Turbo builds each package and its dependencies first.
   server-tests:
     name: MCP Server and Server Tests
     needs: detect-changes
@@ -868,7 +860,7 @@ jobs:
             echo "FAIL: tests-core failed"; exit 1
           fi
 
-          # server-tests: required when it runs, OK when skipped (same activation as tests-core)
+          # server-tests: required when it runs, OK when skipped
           if [[ "${{ needs.server-tests.result }}" == "failure" || "${{ needs.server-tests.result }}" == "cancelled" ]]; then
             echo "FAIL: server-tests failed"; exit 1
           fi
