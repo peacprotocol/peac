@@ -35,28 +35,21 @@ kept in the loop and the disclosure calendar is coordinated.
 
 ## Supported versions
 
-Security fixes ship in a new release of the latest release line. Earlier
-release lines do not receive backported fixes; upgrade to the latest
-release to receive them.
+Security fixes ship in a new release of the latest release line, currently
+`v0.16.x` (latest release `v0.16.5`). Earlier release lines do not receive
+fixes; upgrade to the latest release.
 
-| Line                             | Status                               | Wire format                         |
-| -------------------------------- | ------------------------------------ | ----------------------------------- |
-| `v0.16.x`                        | Supported (latest release `v0.16.5`) | Wire 0.2 (`interaction-record+jwt`) |
-| `v0.12.x` to `v0.15.x`           | Not supported; upgrade to `v0.16.x`  | Wire 0.2 (`interaction-record+jwt`) |
-| `v0.11.x` and earlier            | Not supported; upgrade to `v0.16.x`  | Wire 0.1 and earlier                |
-| `peac.receipt/0.9` archival path | Historical verify-only               | `peac.receipt/0.9`                  |
-
-See [Compatibility matrix](docs/COMPATIBILITY_MATRIX.md) for full runtime
-and wire-format compatibility, and [Security operations](docs/SECURITY-OPERATIONS.md)
-for support-window definitions.
+See [Compatibility matrix](docs/COMPATIBILITY_MATRIX.md) for runtime and
+wire-format compatibility, and [Security operations](docs/SECURITY-OPERATIONS.md)
+for fix policy by surface state within the latest release line.
 
 ## Supply chain
 
-- All published packages ship npm provenance attestations via GitHub
-  Actions OIDC trusted publishing. Consumers can verify with
-  `npm audit signatures @peac/protocol`.
-- Build provenance follows SLSA v1.2; build inputs are attested per
-  in-toto v1.0.
+- Packages published by the release workflow carry npm provenance: an
+  in-toto attestation with the SLSA Provenance v1 predicate, generated
+  through GitHub Actions OIDC trusted publishing. After installing, run
+  `npm audit signatures` in the consuming project to verify registry
+  signatures and provenance attestations.
 - SHA-pinned GitHub Actions; CodeQL and dependency review run on every
   pull request.
 - Production-dependency audit must be clean on every release; the gate

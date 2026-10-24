@@ -22,7 +22,7 @@ The current deprecation schedule is in [Deprecation Policy](DEPRECATION_POLICY.m
 | Runtime                      | Status        | Policy                                                          |
 | ---------------------------- | ------------- | --------------------------------------------------------------- |
 | Node.js 24 (Active LTS)      | Required      | Primary CI and development target                               |
-| Node.js 22 (Maintenance LTS) | Compatibility | `engines.node >= 22.13.0` floor; security fixes backported      |
+| Node.js 22 (Maintenance LTS) | Compatibility | `engines.node >= 22.13.0` floor; security fixes keep this floor |
 | Node.js 25+                  | Advisory      | Forward-compat CI lane; no support guarantee                    |
 | Go                           | Supported     | Wire 0.2 core (issue and local verify); middleware experimental |
 | Python                       | Not started   | API-first via the reference verifier HTTP API                   |
@@ -44,10 +44,10 @@ PEAC does not currently operate a bug bounty program.
 
 ### npm package provenance
 
-All published packages use npm provenance attestation (`publishConfig.provenance: true`) via GitHub Actions OIDC trusted publishing. Consumers can verify:
+All published packages use npm provenance attestation (`publishConfig.provenance: true`) via GitHub Actions OIDC trusted publishing. Consumers can verify registry signatures and provenance attestations from a project that has installed the packages:
 
 ```bash
-npm audit signatures @peac/protocol
+npm audit signatures
 ```
 
 ### OIDC trusted publishing

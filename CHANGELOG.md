@@ -33,16 +33,19 @@ JCS (RFC 8785) object keys by UTF-16 code unit order, and `ComputePolicyDigest`
 applies the I-JSON admission check (#973). The reference browser verifier resolves
 verification stages by own-property lookup only (#974).
 
-Changed: timestamp fields require seconds, as RFC 3339 specifies; values such as
-`2026-03-14T12:00Z` are rejected on issue and verify (#1015). String length limits
-count Unicode code points rather than UTF-16 code units, on issue and verify (#1015).
+Changed: in the TypeScript packages, timestamp fields require seconds, as RFC 3339
+specifies; values such as `2026-03-14T12:00Z` are rejected on issue and verify
+(#1015). In the TypeScript packages, string length limits count Unicode code points
+rather than UTF-16 code units, on issue and verify (#1015).
 In `@peac/mcp-server`, a tool call whose arguments contain more than 1024 array
 elements and object members returns an error result (#1015). On Node.js, key and
 pointer fetches in `@peac/protocol` connect directly to the address that passed the
 address check, keeping the URL host for the `Host` header, TLS server name, and
 certificate check; proxy settings and a global fetch dispatcher no longer apply to
 these fetches, and NAT64 addresses that embed a global IPv4 address are accepted
-(#1031). The reference API counts request bodies as they stream: a body over the
+(#1031). `@peac/net-node` refuses IPv6 destinations outside global unicast
+(`2000::/3`) and in `3fff::/20`, and judges NAT64 addresses by their embedded IPv4
+address (#1031). The reference API counts request bodies as they stream: a body over the
 limit gets `413 E_PAYLOAD_TOO_LARGE`, and a body that cannot be read gets
 `400 E_INVALID_FORMAT` (#1013). In `@peac/server`, a `/verify` body over 32 KiB gets
 `413` (`application/problem+json`) instead of `400`; responses carry
@@ -53,9 +56,9 @@ Dependencies: `@modelcontextprotocol/sdk` 1.32.1 in `@peac/mcp-server`, `undici`
 `^6.29.1` in `@peac/net-node`, and `zod` `^4.6.6` in every package that declares it;
 root overrides move `hono`, `@hono/node-server`, `qs`, `ip-address`,
 `@opentelemetry/core`, `proxy-addr`, and `body-parser` to current releases within
-their major lines (#1015). Development tooling overrides for `fast-uri`,
+their major lines (#1015). Development tooling overrides move `fast-uri`,
 `browserslist`, `next`, `handlebars`, `vite`, `sharp`, `js-yaml`, `brace-expansion`,
-and `source-map-js` (#972, #1015).
+and `source-map-js` to current releases (#972, #1015).
 
 Security: security fixes ship in a new release of the latest release line, and
 earlier release lines do not receive backported fixes. `SECURITY.md` states this
@@ -89,7 +92,7 @@ the signing key matching the supplied public key. It does not by itself establis
 that the key or its holder should be trusted, that the statements in the record are
 factually true, or that any external event the record refers to actually occurred.
 
-## [0.16.4]
+## [0.16.4] - 2026-08-09
 
 Local Record Verification Handoff.
 
@@ -177,7 +180,7 @@ possession of the signing key. It does not independently establish that the
 decision occurred, was complete, was correct, was enforced, or that the issuer is
 authorized for a deployment.
 
-## [0.16.2]
+## [0.16.2] - 2026-07-14
 
 Portable Evidence Pack.
 
@@ -203,7 +206,7 @@ Registered receipt types: unchanged (61).
 Conformance sections: unchanged (32).
 Conformance requirement IDs: unchanged (290).
 
-## [0.16.1]
+## [0.16.1] - 2026-06-28
 
 CLI Metadata Alignment.
 
@@ -219,7 +222,7 @@ Registered receipt types: unchanged (61).
 Conformance sections: unchanged (32).
 Conformance requirement IDs: unchanged (290).
 
-## [0.16.0]
+## [0.16.0] - 2026-06-28
 
 Deterministic Verification for Portable Records.
 
@@ -243,7 +246,7 @@ Registered receipt types: unchanged (61).
 Conformance sections: unchanged (32).
 Conformance requirement IDs: unchanged (290).
 
-## [0.15.3]
+## [0.15.3] - 2026-06-26
 
 Integration and verifier pack.
 
@@ -264,7 +267,7 @@ Registered receipt types: unchanged (61).
 Conformance sections: unchanged (32).
 Conformance requirement IDs: unchanged (290).
 
-## [0.15.2]
+## [0.15.2] - 2026-06-22
 
 Verification and signing hardening.
 
@@ -345,7 +348,7 @@ Conformance sections: unchanged (32).
   `esbuild` dev-server advisory recorded as a dev-only allowlist exception
   (#840).
 
-## [0.15.1]
+## [0.15.1] - 2026-06-11
 
 Samples and offline verification.
 
@@ -408,7 +411,7 @@ Conformance sections: unchanged (32).
 - Dependency-audit allowlist review dates renewed for dev-only exceptions
   (#830).
 
-## [0.15.0]
+## [0.15.0] - 2026-06-01
 
 Interoperability for portable signed records.
 
@@ -472,7 +475,7 @@ signing envelope. No wire/signing change. No runtime behavior change.
   exception entries with updated expiry windows. No production-bundle or
   runtime change.
 
-## [0.14.5]
+## [0.14.5] - 2026-05-22
 
 Public Verification Readiness.
 
@@ -557,7 +560,7 @@ signing envelope. No wire/signing change. No runtime behavior change.
   `peac.txt` policy-document loading; `@peac/mappings-content-signals`
   for AIPREF / robots.txt / tdmrep parsing.
 
-## [0.14.4]
+## [0.14.4] - 2026-05-19
 
 Composition Surfaces.
 
@@ -622,7 +625,7 @@ signing envelope. No wire/signing change.
 - `docs/SOLUTIONS/mcp-tool-call-receipts.md` gains one cross-link to
   the new MCP composition guide.
 
-## [0.14.3]
+## [0.14.3] - 2026-05-17
 
 Agent Action, Commerce Mandate, and Gateway Export Records.
 
@@ -703,7 +706,7 @@ Default observable behavior: unchanged for existing surfaces.
   `@peac/example-telemetry-otel@0.0.0`; no published runtime package
   depends on protobufjs.
 
-## [0.14.2]
+## [0.14.2] - 2026-05-11
 
 Provisioning Lifecycle Records.
 
@@ -779,7 +782,7 @@ Default observable behavior: unchanged for existing surfaces.
 
 - Bumped `hono`, `fast-uri`, and `ip-address` to patched versions.
 
-## [0.14.1]
+## [0.14.1] - 2026-05-08
 
 Execution Surfaces + Observational Lifecycle Records.
 
@@ -866,7 +869,7 @@ Default observable behavior: unchanged for existing surfaces.
 - See `docs/release-notes/v0.14.1.md` for the per-surface
   walkthrough.
 
-## [0.14.0]
+## [0.14.0] - 2026-05-03
 
 Bounded Validation Gate.
 
@@ -911,7 +914,7 @@ preserving byte-equivalent behavior across the covered runtime matrix.
   extension-key change, or default-path behavior change.
 - npm `next` only. No `latest` promotion in this release.
 
-## [0.13.4]
+## [0.13.4] - 2026-05-02
 
 Validation Readiness and Runtime Invariants. This release is
 behavior-preserving. It strengthens runtime-invariant verification
@@ -995,7 +998,7 @@ change, extension-key change, or default-path behavior change.
 - OpenAPI verify contract: unchanged. OpenAPI 3.1.x unchanged.
 - npm dist-tag: `next` only.
 
-## [0.13.3]
+## [0.13.3] - 2026-05-01
 
 Documentation and internal test-infrastructure release. No public API change. No wire-format change. No new public package. No publish-manifest change. Published to npm `next` only.
 
@@ -1016,7 +1019,7 @@ Documentation and internal test-infrastructure release. No public API change. No
 - Active publish-manifest count: 36 (unchanged from v0.13.2).
 - npm dist-tag: `next` only.
 
-## [0.13.2]
+## [0.13.2] - 2026-05-01
 
 Internal foundations release. No public API change. No wire format change. No new public package. No publish-manifest change. Published to npm `next` only.
 
@@ -1055,7 +1058,7 @@ Internal foundations release. No public API change. No wire format change. No ne
 
 - All 16 open Dependabot alerts present at the start of the v0.13.2 window were closed. Closures: `handlebars` (1 critical, 3 high, 2 medium, 1 low — all dev-only via `ts-jest` upgrade); `hono` (1 medium runtime; reachability audit confirmed `hono/jsx` is not imported, upgraded for hygiene); 8 dev-only alerts via range-scoped `pnpm.overrides` (`defu`, `vite` ×2, `esbuild`, `next`, `postcss`, `undici` ×2). 0 open Dependabot alerts on the release commit.
 
-## [0.13.1]
+## [0.13.1] - 2026-04-27
 
 Internal foundations release. No public API change. No wire format change. No new public package. Published to npm `next` only.
 
@@ -1076,7 +1079,7 @@ Internal foundations release. No public API change. No wire format change. No ne
 - Wire format (`peac-receipt/0.1` envelope, `interaction-record+jwt` JWS `typ`): unchanged.
 - OpenAPI verify contract, error code count (186), extension group count (12), and active publish-manifest count (36): unchanged.
 
-## [0.13.0]
+## [0.13.0] - 2026-04-25
 
 Doctrine cleanup, scheduled deprecation removals, and v0.13.0 baseline artifacts. Records-first wording across active surfaces; legacy `peac.receipt/0.9` quarantined to historical-marker contexts; `ProofMethodSchema` and A2A v0.3.0 compatibility removed; `@peac/core` and `@peac/pref` archived; legacy `POST /verify` removed from the active OpenAPI contract while the runtime alias continues to serve `/v1/verify`-shape responses with `Deprecation`, `Sunset`, and `Link` headers through the advertised Sunset; published normative resource-limits spec, standards ledger, v0.13.0 baseline snapshot, error-emission audit, and mutation-testing posture. No wire format change. No new signing envelope. No new public package.
 
@@ -1125,7 +1128,7 @@ Doctrine cleanup, scheduled deprecation removals, and v0.13.0 baseline artifacts
 - `@peac/core` is not in the v0.13.0 active publish manifest. Historical npm versions `<=0.9.14` remain installable for verify-only use of historical `peac.receipt/0.9` records.
 - `@peac/pref` is not in the v0.13.0 active publish manifest. Historical npm versions `<=0.12.14` remain installable. Migration target: `@peac/mappings-content-signals`.
 
-## [0.12.14]
+## [0.12.14] - 2026-04-22
 
 Policy binding and privacy-aware verification. Typed document binding for terms and policy, publisher-supplied canonical digest support, privacy-aware deployment guidance, and verifier privacy defaults including JWKS cache retention caps and a no-raw-personal-data minimization mode. Documentation, tests, and tooling only. No wire, schema, kernel, crypto, or protocol public-API change.
 
@@ -1165,7 +1168,7 @@ The following items are deferred to v0.13.0:
 - Package-surface reduction program with measurable gate.
 - Hosted Issue GA decision.
 
-## [0.12.13]
+## [0.12.13] - 2026-04-20
 
 Compliance mappings, verifier contract alignment, portable proof workflows, and Go adapter follow-through. Documentation, tests, workflows, and SDK support tooling only. No wire, schema, kernel, crypto, or protocol public-API change.
 
@@ -1211,7 +1214,7 @@ The following items are deferred to v0.13.0:
 - Package-surface reduction program with measurable gate.
 - Hosted Issue GA decision.
 
-## [0.12.12]
+## [0.12.12] - 2026-04-19
 
 Docs, compatibility, and trust artifacts release. No wire format, schema, kernel, crypto, protocol public API, or normative behavior changes. Layer 4 + tooling + docs only.
 
@@ -1250,7 +1253,7 @@ The following items are deferred to v0.12.13:
 - Commerce lifecycle grouping export under `packages/audit/`.
 - External audit prep scaffolding; Python SDK decision gate.
 
-## [0.12.11]
+## [0.12.11] - 2026-04-15
 
 ### Added
 
@@ -1290,7 +1293,7 @@ The following items are deferred to v0.12.13:
 - Extended JCS parity test expansion.
 - TypeDoc + PageFind searchable API reference build pipeline.
 
-## [0.12.10]
+## [0.12.10] - 2026-04-14
 
 ### Added
 
@@ -1322,7 +1325,7 @@ The following items are deferred to v0.12.13:
 - EU AI Act Annex IV mapping: v0.12.12
 - ISO 42001 Clause 8 mapping: v0.12.12
 
-## [0.12.9]
+## [0.12.9] - 2026-04-11
 
 ### Added
 
@@ -1359,7 +1362,7 @@ The following items are deferred to v0.12.13:
 - Payment Identifier extension, gas sponsoring, Bazaar discovery, SIWX: tracked for a future release
 - Runnable `x402-upto-evidence` example: deferred to a follow-up PR to avoid pre-release truth-surface drift
 
-## [0.12.8]
+## [0.12.8] - 2026-04-10
 
 ### Added
 
@@ -1401,7 +1404,7 @@ The Go SDK core types and functions have been rewritten for the Interaction Reco
 - Hosted Issue GA (non-provisional): v0.13.0
 - Formal conformance registry registration for 25 pending IDs: v0.12.9
 
-## [0.12.7]
+## [0.12.7] - 2026-04-08
 
 Coherence, trust, and installability release. No new protocol surface.
 
@@ -1443,7 +1446,7 @@ Coherence, trust, and installability release. No new protocol surface.
 
 ---
 
-## [0.12.6]
+## [0.12.6] - 2026-04-01
 
 x402 V2 support, DID resolution, A2A OAuth, gRPC transport, receipt URL middleware, and supply-chain provenance mappings.
 
@@ -1475,7 +1478,45 @@ x402 V2 support, DID resolution, A2A OAuth, gRPC transport, receipt URL middlewa
 
 ---
 
-## [0.12.4]
+## [0.12.5] - 2026-03-28
+
+### Theme: Commerce Hardening + Interop Proofs
+
+Cross-rail conformance parity, settlement semantic equivalence, and naming truth cleanup.
+
+### Added
+
+- Execution-backed commerce rail conformance fixtures: 40 vectors across paymentauth, ACP, Stripe SPT, and UCP (3 valid, 4 invalid, 2 edge, 1 security per rail)
+- Registry-derived commerce coverage gate (`check-commerce-coverage.mjs`): enforces minimum vector floor per rail, derived from `registries.json`
+- Cross-rail settlement semantic equivalence test: one deterministic payment scenario ($25.00 USD settled) mapped through all 5 commerce rails
+- Asymmetric safety invariant: delegation/lifecycle/provisioning functions must not emit settlement-like commerce events
+- `isValidAmountMinor()` and `AmountMinorStringSchema` in `@peac/schema`: validate-and-reject utility with shared source of truth
+- Commerce integration matrix (`docs/specs/COMMERCE-INTEGRATION-MATRIX.md`) with upstream compatibility table
+- Paymentauth carrier roundtrip conformance test (attach, extract, coexistence)
+- Stripe out-of-order observation race test (authorization vs settlement ordering)
+- `verify:commerce-coverage` script in root package.json
+- Commerce coverage check wired into `gate.sh`
+
+### Changed
+
+- README: `paymentauth/MPP` to `paymentauth`; Agentic Commerce Protocol (ACP) expanded on first mention
+- Commerce evidence spec: paymentauth naming clarification (code/registry term vs ecosystem prose)
+- Commerce semantics spec: added cross-rail invariants section with equivalence and asymmetric safety prose
+- Commerce profile: removed internal shorthand from event field description
+- 6915 tests (was 6664)
+- 92 build targets (was 91)
+
+### Fixed
+
+- Fixture `spec_revision` pinned to `draft-ryan-httpauth-payment-01` (active Internet-Draft)
+- `intent_spec_revision` marked provisional (not publicly listed on datatracker.ietf.org)
+
+### Deferred
+
+- `@peac/adapter-did`: deferred to v0.12.6
+- x402 V2 full adapter rewrite: deferred to v0.12.6
+
+## [0.12.4] - 2026-03-25
 
 ### Theme: Commerce Evidence + Integration Depth
 
@@ -1521,45 +1562,7 @@ PEAC as the neutral portable evidence layer across paymentauth/MPP, ACP, x402, S
 - Go/Python SDK: deferred to v0.12.6 (gated on external signal)
 - A2A v1.0 OAuth PKCE, A2A v1.0 gRPC binding: deferred to v0.12.6
 
-## [0.12.5]
-
-### Theme: Commerce Hardening + Interop Proofs
-
-Cross-rail conformance parity, settlement semantic equivalence, and naming truth cleanup.
-
-### Added
-
-- Execution-backed commerce rail conformance fixtures: 40 vectors across paymentauth, ACP, Stripe SPT, and UCP (3 valid, 4 invalid, 2 edge, 1 security per rail)
-- Registry-derived commerce coverage gate (`check-commerce-coverage.mjs`): enforces minimum vector floor per rail, derived from `registries.json`
-- Cross-rail settlement semantic equivalence test: one deterministic payment scenario ($25.00 USD settled) mapped through all 5 commerce rails
-- Asymmetric safety invariant: delegation/lifecycle/provisioning functions must not emit settlement-like commerce events
-- `isValidAmountMinor()` and `AmountMinorStringSchema` in `@peac/schema`: validate-and-reject utility with shared source of truth
-- Commerce integration matrix (`docs/specs/COMMERCE-INTEGRATION-MATRIX.md`) with upstream compatibility table
-- Paymentauth carrier roundtrip conformance test (attach, extract, coexistence)
-- Stripe out-of-order observation race test (authorization vs settlement ordering)
-- `verify:commerce-coverage` script in root package.json
-- Commerce coverage check wired into `gate.sh`
-
-### Changed
-
-- README: `paymentauth/MPP` to `paymentauth`; Agentic Commerce Protocol (ACP) expanded on first mention
-- Commerce evidence spec: paymentauth naming clarification (code/registry term vs ecosystem prose)
-- Commerce semantics spec: added cross-rail invariants section with equivalence and asymmetric safety prose
-- Commerce profile: removed internal shorthand from event field description
-- 6915 tests (was 6664)
-- 92 build targets (was 91)
-
-### Fixed
-
-- Fixture `spec_revision` pinned to `draft-ryan-httpauth-payment-01` (active Internet-Draft)
-- `intent_spec_revision` marked provisional (not publicly listed on datatracker.ietf.org)
-
-### Deferred
-
-- `@peac/adapter-did`: deferred to v0.12.6
-- x402 V2 full adapter rewrite: deferred to v0.12.6
-
-## [0.12.3]
+## [0.12.3] - 2026-03-17
 
 ### Added
 
@@ -1583,7 +1586,7 @@ Cross-rail conformance parity, settlement semantic equivalence, and naming truth
 - x402 V2 delta audit: v0.12.4
 - A2A v0.3.0 type removal: v0.13.0
 
-## [0.12.2]
+## [0.12.2] - 2026-03-16
 
 ### Profile-Defined Types and Extension Groups
 
@@ -1620,7 +1623,7 @@ profiles, and introduces shared protocol-grade validators.
 - Commerce events vocabulary expansion: v0.12.3+
 - Profile capability signaling: v0.12.3+
 
-## [0.12.1]
+## [0.12.1] - 2026-03-14
 
 ### x402 Upstream Wire Sync
 
@@ -1674,7 +1677,7 @@ Aligns `@peac/adapter-x402` with the current x402 offer-receipt extension wire s
 
 See `docs/guides/x402-migration-0.12.1.md` for field-by-field migration guidance.
 
-## [0.12.0]
+## [0.12.0] - 2026-03-09
 
 ### Interaction Record Format 0.2 (Stable)
 
@@ -1770,7 +1773,7 @@ full Wire 0.2 feature set.
 - Remaining 5 pillar extension groups (consent, compliance, privacy, safety, provenance): deferred to v0.12.1+
 - Go SDK: deferred to v0.13.0+
 
-## [0.12.0-preview.2]
+## [0.12.0-preview.2] - 2026-03-06
 
 ### Interaction Record Format 0.2 Preview (Hardening)
 
@@ -1870,7 +1873,7 @@ stable promotion.
 - Public API surface lock: deferred to v0.12.0 stable
 - Migration guide: deferred to v0.12.0 stable
 
-## [0.12.0-preview.1]
+## [0.12.0-preview.1] - 2026-03-03
 
 ### Interaction Record Format 0.2 Preview
 
@@ -1918,7 +1921,7 @@ dist-tag for early adoption testing.
 - **Deprecated:** `WIRE_TYPE` and `WIRE_VERSION` constants in `@peac/kernel`
 - **Deprecated:** `JWSHeader` Zod schema alias (use `Wire01JWSHeaderSchema`)
 
-## [0.11.3]
+## [0.11.3] - 2026-03-02
 
 ### Identity, Zero Trust, and Enterprise Readiness
 
@@ -2019,7 +2022,7 @@ merge, and governance framework alignment mappings.
 - OpenAI adapter streaming: deferred to v0.12.1
 - ActorBinding/ProofMethod schema unification: deferred to v0.12.0
 
-## [0.11.2]
+## [0.11.2] - 2026-02-25
 
 ### Content Signals + Evidence Locators
 
@@ -2101,7 +2104,7 @@ inference adapter, and MCP Registry distribution surfaces.
 - `next_action` and `retryable` are error metadata fields, not wire format fields
 - `receipt_url` is a carrier metadata field, not a wire format field
 
-## [0.11.1]
+## [0.11.1] - 2026-02-24
 
 ### Evidence Carrier Contract + A2A Mapping
 
@@ -2207,7 +2210,7 @@ support and content-addressed receipt references.
 - **OWASP ASI-04** (Supply Chain): Carrier validation as defense
 - **CVE-2026-25536**: MCP SDK floor remains >= 1.26.0
 
-## [0.11.0]
+## [0.11.0] - 2026-02-23
 
 ### Infrastructure Modernization + Enterprise Readiness
 
@@ -2315,7 +2318,7 @@ If you import schemas from `@peac/schema`, align your Zod major to v4:
 - **Zod ^4.3.6**: Full migration from 3.25.x
 - **OWASP ASI-01 through ASI-10**: Alignment mapping in `docs/security/OWASP-ASI-MAPPING.md`
 
-## [0.10.14]
+## [0.10.14] - 2026-02-22
 
 ### Quality Hardening and Zod 4 Preparation
 
@@ -2392,7 +2395,7 @@ package, and lays the groundwork for the Zod 4 migration in v0.11.0.
 - Design decisions: DD-59 (per-fixture versioning), DD-60 (kernel
   constraints), DD-101 (editorial hygiene), DD-118 (Polish Bucket)
 
-## [0.10.13]
+## [0.10.13] - 2026-02-19
 
 ### MCP Server for AI Agents
 
@@ -2441,7 +2444,7 @@ bundle receipts locally: no API keys, no network required.
 - Capability tokens deferred to v0.11.x (HTTP transport)
 - All audit HIGH vulnerabilities are dev-only (eslint/wrangler chains)
 
-## [0.10.12]
+## [0.10.12] - 2026-02-16
 
 ### OpenClaw Activation, Durable Capture, and RFC 9421 Proof Profile
 
@@ -2522,7 +2525,7 @@ specification with conformance vectors and an extension schema.
 - RFC 9421 proof capture is a profile (doc + vectors), not a runtime dependency
 - No new registry entries required (uses existing `http.request` op type)
 
-## [0.10.11]
+## [0.10.11] - 2026-02-14
 
 ### Runtime Dependencies and x402 Payment Rail
 
@@ -2584,7 +2587,7 @@ v2), expands the registry spec, and adds the Stripe x402 payment rail adapter.
 - Wire format `peac-receipt/0.1` remains FROZEN
 - No API surface changes to existing packages
 
-## [0.10.10]
+## [0.10.10] - 2026-02-11
 
 ### Dev Toolchain Modernization
 
@@ -2641,7 +2644,7 @@ Node.js baseline to 22 LTS. No runtime, API, or wire format changes.
 - No runtime dependency changes
 - No API surface changes
 
-## [0.10.9]
+## [0.10.9] - 2026-02-08
 
 ### Foundation Hardening: Architecture, CI, and Server Reliability
 
@@ -2767,7 +2770,7 @@ deferred from v0.10.8 (`middleware-core`, `middleware-express`, `adapter-opencla
   exhaustion under sustained load
 - Publish-manifest closure check prevents broken dependency chains on npm
 
-## [0.10.8]
+## [0.10.8] - 2026-02-07
 
 ### Adoption Release: Middleware, Conformance, and Infrastructure
 
@@ -2830,7 +2833,7 @@ testing tools, and infrastructure apps (sandbox issuer, browser verifier, verify
   (Hono's c.json() always overrides Content-Type to application/json)
 - Security headers now applied on all error paths including early-return 429/413
 
-## [0.10.7]
+## [0.10.7] - 2026-02-04
 
 ### Interaction Evidence Extension
 
@@ -2929,7 +2932,7 @@ normative validation precedence and semantic decisions (array rejection, empty-a
 - Interaction evidence stored in extensions, NOT top-level `evidence.interaction`
 - Extension key: `org.peacprotocol/interaction@0.1`
 
-## [0.10.5]
+## [0.10.5] - 2026-01-30
 
 ### npm Publish Script Hardening
 
@@ -2958,7 +2961,7 @@ Fixes for reliable incremental OIDC Trusted Publishing rollout.
 - During OIDC rollout: Keep `--strict=false`, add packages to manifest as you configure them
 - Once all packages configured: Switch to `--strict=true` in workflow
 
-## [0.10.4]
+## [0.10.4] - 2026-01-30
 
 ### GitHub Actions npm Publish with OIDC Trusted Publishing
 
@@ -3015,7 +3018,7 @@ Secure, automated npm publishing via GitHub Actions with OIDC Trusted Publishing
 - See `docs/release/SETUP-GUIDE.md` for complete setup instructions
 - Tag format: `vX.Y.Z` triggers publish workflow
 
-## [0.10.3]
+## [0.10.3] - 2026-01-29
 
 ### x402 Adapter v0.2 Polish
 
@@ -3072,7 +3075,7 @@ Production hardening for the x402 offer/receipt adapter with deterministic verif
 - CAIP-2 reference segment allows hyphens (was restricted to alphanumeric)
 - Uses `TextEncoder` for byte length (no Node.js `Buffer` dependency)
 
-## [0.10.2]
+## [0.10.2] - 2026-01-27
 
 ### Workflow Correlation
 
@@ -3122,7 +3125,7 @@ Multi-agent orchestration support. Receipts now carry workflow context for DAG r
 - **docs/SPEC_INDEX.md** - Attestations and Extensions section (Agent Identity, Attribution, Dispute, Workflow Correlation)
 - **docs/CANONICAL_DOCS_INDEX.md** - Four normative specification entries added
 
-## [0.10.1]
+## [0.10.1] - 2026-01-27
 
 ### SSRF-Safe Network Utilities
 
@@ -3140,7 +3143,7 @@ New package for protocol-grade network operations with SSRF prevention.
   - 284 tests covering security, audit, and edge cases
   - Group folder pattern: `packages/net/node/` for future transport expansion
 
-## [0.10.0]
+## [0.10.0] - 2026-01-14
 
 ### Wire Format Normalization
 
@@ -3240,7 +3243,7 @@ This release normalizes all wire format identifiers to the `peac-<artifact>/<maj
 - **README.md** - Records-first positioning with glossary
 - **Conformance fixtures** - Updated with new format specifications
 
-## [0.9.31]
+## [0.9.31] - 2026-01-13
 
 ### Added
 
@@ -3270,7 +3273,7 @@ This release normalizes all wire format identifiers to the `peac-<artifact>/<maj
 - Security and Correctness Notes section in @peac/mappings-ucp README
 - UCP webhook Express example in `examples/ucp-webhook-express/`
 
-## [0.9.30]
+## [0.9.30] - 2026-01-12
 
 ### Added
 
@@ -3327,7 +3330,7 @@ This release normalizes all wire format identifiers to the `peac-<artifact>/<maj
 - #264: Crypto testkit subpath export and export-surface guard
 - #265: CI bundle vector drift gate
 
-## [0.9.29]
+## [0.9.29] - 2026-01-10
 
 ### Added
 
@@ -3372,7 +3375,7 @@ This release normalizes all wire format identifiers to the `peac-<artifact>/<maj
 - Go SDK packages not published to pkg.go.dev yet (local import only)
 - Cross-language conformance with TypeScript SDK maintained
 
-## [0.9.28]
+## [0.9.28] - 2026-01-09
 
 ### Added
 
@@ -3438,7 +3441,7 @@ The following items were originally planned for v0.9.28 but deferred to future r
 - All packages bumped to 0.9.28
 - Cross-referenced with quality audit: `reference/V0928_QUALITY_AUDIT.md`
 
-## [0.9.27]
+## [0.9.27] - 2026-01-07
 
 ### Added
 
@@ -3495,7 +3498,7 @@ The following items were originally planned for v0.9.28 but deferred to future r
   - Attestation temporal validity rules
 - **ROADMAP.md**: Updated to show v0.9.26 as current release
 
-## [0.9.26]
+## [0.9.26] - 2026-01-04
 
 ### Added
 
@@ -3544,7 +3547,7 @@ The following items were originally planned for v0.9.28 but deferred to future r
 - Guard script enhanced with attribution package exclusions for `issued_at` field
 - Publish list updated: 31 public packages (added `@peac/attribution`)
 
-## [0.9.25]
+## [0.9.25] - 2026-01-04
 
 ### Added
 
@@ -3596,7 +3599,7 @@ The following items were originally planned for v0.9.28 but deferred to future r
 - `@peac/schema` exports agent identity types from main entry point
 - `sdks/README.md` updated to reflect Go SDK availability (v0.9.25+)
 
-## [0.9.24]
+## [0.9.24] - 2026-01-03
 
 ### Added
 
@@ -3647,7 +3650,7 @@ The following items were originally planned for v0.9.28 but deferred to future r
 - `undeclared` is internal-only, never valid on wire (explicit `PEAC-Purpose: undeclared` returns 400)
 - Unknown purpose tokens preserved but cannot affect enforcement (forward-compat without bypass risk)
 
-## [0.9.23]
+## [0.9.23] - 2025-12-31
 
 ### Added
 
@@ -3681,7 +3684,7 @@ The following items were originally planned for v0.9.28 but deferred to future r
 - `formatRateLimit()` added for round-trip serialization
 - `EnforcementContext` simplified to only `receiptVerified` (deferred: humanAttested, customRequirementMet)
 
-## [0.9.22]
+## [0.9.22] - 2025-12-31
 
 ### Added
 
@@ -3712,7 +3715,7 @@ The following items were originally planned for v0.9.28 but deferred to future r
 - `TelemetryConfig.hashSalt` added for privacy-preserving identifier hashing
 - Protocol package now depends on `@peac/telemetry` (workspace dependency)
 
-## [0.9.21]
+## [0.9.21] - 2025-12-31
 
 ### Added
 
@@ -3741,7 +3744,7 @@ The following items were originally planned for v0.9.28 but deferred to future r
 - **Cycle detection**: Prevents infinite loops in nested object validation
 - **Node count cap**: Limits total JSON nodes to prevent memory exhaustion
 
-## [0.9.20]
+## [0.9.20] - 2025-12-30
 
 ### Added
 
@@ -3770,7 +3773,7 @@ The following items were originally planned for v0.9.28 but deferred to future r
 - The 3 adapter packages were never published to npm, so the rename has no migration impact
 - Existing code using `rail: "x402.<vendor>"` pattern should migrate to `rail: "x402"` + `facilitator: "<vendor>"`
 
-## [0.9.19]
+## [0.9.19] - 2025-12-24
 
 ### Added
 
@@ -3807,7 +3810,7 @@ The following items were originally planned for v0.9.28 but deferred to future r
 - x402 payment headers are headers-only (no body parsing, no Response dependency)
 - VPA hashing uses HMAC-SHA256; changing hash key changes all hashes (audit trail impact)
 
-## [0.9.18]
+## [0.9.18] - 2025-12-19
 
 ### Added
 
@@ -3870,7 +3873,7 @@ If you used `ai_search`:
 - For **AI search summaries / RAG grounding**: use `ai_input` (RSL: `ai-input`)
 - For **AI indexing / embedding index creation**: use `ai_index` (RSL: `ai-index`)
 
-## [0.9.17]
+## [0.9.17] - 2025-12-14
 
 ### Added
 
@@ -3913,7 +3916,7 @@ response.setHeader('PEAC-Receipt', result.jws);
 // result.subject_snapshot available if provided in opts
 ```
 
-## [0.9.16]
+## [0.9.16] - 2025-12-07
 
 ### Added
 
@@ -3927,7 +3930,7 @@ response.setHeader('PEAC-Receipt', result.jws);
 - `@peac/schema` now exports CAL, PaymentEvidence, and SubjectProfile validators
 - PROTOCOL-BEHAVIOR version set to 0.9.16 and extended with Section 8.4 privacy guidance
 
-## [0.9.15]
+## [0.9.15] - 2025-12-05
 
 ### Changed
 
@@ -3966,7 +3969,7 @@ import { enforce, verify } from '@peac/protocol';
 import type { Receipt } from '@peac/kernel';
 ```
 
-## [0.9.14]
+## [0.9.14] - 2025-09-28
 
 ### Changed
 
@@ -3989,7 +3992,7 @@ import type { Receipt } from '@peac/kernel';
 - `verify()`: Use `verifyReceipt()` instead
 - `verifyBulk()`: Use `verifyReceipt()` in a loop
 
-## [0.9.13.2]
+## [0.9.13.2] - 2025-09-17
 
 Intent: Zero-friction local enforcement/verification via a loopback sidecar.
 
@@ -4056,7 +4059,7 @@ Intent: Zero-friction local enforcement/verification via a loopback sidecar.
 - Receipt verification supports multiple keys with `kid` matching
 - Rate limiting now properly enforces RFC 9457 compliant headers
 
-## [0.9.6]
+## [0.9.6] - 2025-08-18
 
 ### Added
 

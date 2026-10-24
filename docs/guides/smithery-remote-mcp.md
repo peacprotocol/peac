@@ -19,7 +19,8 @@ truth.
 
 1. Provision your host to run:
    ```text
-   npx -y @peac/mcp-server@0.16.5 --issuer-key env:PEAC_ISSUER_KEY \
+   npx -y @peac/mcp-server@0.16.5 --transport http --trust-proxy loopback \
+     --issuer-key env:PEAC_ISSUER_KEY \
      --issuer-id https://your-service.example.com
    ```
    The pinned version tracks the canonical `smithery.yaml`; update
@@ -28,6 +29,10 @@ truth.
 3. Terminate TLS at the edge (reverse proxy). The HTTP transport
    limits JSON-RPC requests to 100 per minute per session or client
    address; apply any further rate limits at the edge.
+   `--trust-proxy loopback` applies when the proxy runs on the same host
+   and sets `X-Forwarded-For`, so limits key on the client address; use
+   `private` for a proxy on a private network address, and omit the flag
+   when clients connect directly.
 
 ## Smoke test (local, offline)
 
