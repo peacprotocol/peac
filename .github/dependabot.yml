@@ -26,3 +26,38 @@ updates:
     schedule:
       interval: 'weekly'
     open-pull-requests-limit: 10
+  - package-ecosystem: 'gomod'
+    directory: '/sdks/go'
+    schedule:
+      interval: 'weekly'
+    open-pull-requests-limit: 10
+  - package-ecosystem: 'gomod'
+    directory: '/sdks/go/bench'
+    schedule:
+      interval: 'weekly'
+    open-pull-requests-limit: 10
+  - package-ecosystem: 'gomod'
+    directory: '/sdks/go/middleware/chi'
+    schedule:
+      interval: 'weekly'
+    open-pull-requests-limit: 10
+  - package-ecosystem: 'gomod'
+    directory: '/sdks/go/middleware/echo'
+    schedule:
+      interval: 'weekly'
+    open-pull-requests-limit: 10
+  - package-ecosystem: 'gomod'
+    directory: '/sdks/go/middleware/gin'
+    schedule:
+      interval: 'weekly'
+    open-pull-requests-limit: 10
+  - package-ecosystem: 'gomod'
+    directory: '/sdks/go/middleware/nethttp'
+    schedule:
+      interval: 'weekly'
+    open-pull-requests-limit: 10
+  - package-ecosystem: 'gomod'
+    directory: '/sdks/go/middleware/paritytest'
+    schedule:
+      interval: 'weekly'
+    open-pull-requests-limit: 10

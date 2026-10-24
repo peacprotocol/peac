@@ -95,7 +95,6 @@ jobs:
               - '.prettierignore'
               - 'prettier.config.*'
               - '.dependency-cruiser.json'
-              - 'renovate.json'
             any_src:
               - 'packages/**'
               - 'specs/**'
@@ -494,6 +493,29 @@ jobs:
       - name: Tooling gates (tests/tooling)
         run: pnpm test:tooling
 
+  # Application package suites (@peac/mcp-server, @peac/server); not part of test:core.
+  # Turbo builds each package and its dependencies first.
+  server-tests:
+    name: MCP Server and Server Tests
+    needs: detect-changes
+    if: >-
+      github.ref == 'refs/heads/main' ||
+      needs.detect-changes.outputs.core == 'true' ||
+      needs.detect-changes.outputs.adapters == 'true' ||
+      needs.detect-changes.outputs.any_src == 'true' ||
+      needs.detect-changes.outputs.ci == 'true' ||
+      needs.detect-changes.outputs.root_config == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./.github/actions/setup-env
+
+      - name: MCP server and server tests
+        run: pnpm exec turbo run test --filter=@peac/mcp-server --filter=@peac/server
+
   # ---------------------------------------------------------------------------
   # Lane 3b: Protocol rollback-path matrix (release-class gate)
   #
@@ -795,6 +817,7 @@ jobs:
         type-build,
         tests-core,
         tooling-gates,
+        server-tests,
         examples-apps,
         pack-smoke,
         node-compat,
@@ -811,6 +834,7 @@ jobs:
           echo "type-build:    ${{ needs.type-build.result }}"
           echo "tests-core:    ${{ needs.tests-core.result }}"
           echo "tooling-gates: ${{ needs.tooling-gates.result }}"
+          echo "server-tests:  ${{ needs.server-tests.result }}"
           echo "examples-apps: ${{ needs.examples-apps.result }}"
           echo "pack-smoke:    ${{ needs.pack-smoke.result }}"
           echo "node-compat:   ${{ needs.node-compat.result }}"
@@ -834,6 +858,11 @@ jobs:
           # tests-core: required when it runs, OK when skipped
           if [[ "${{ needs.tests-core.result }}" == "failure" || "${{ needs.tests-core.result }}" == "cancelled" ]]; then
             echo "FAIL: tests-core failed"; exit 1
+          fi
+
+          # server-tests: required when it runs, OK when skipped
+          if [[ "${{ needs.server-tests.result }}" == "failure" || "${{ needs.server-tests.result }}" == "cancelled" ]]; then
+            echo "FAIL: server-tests failed"; exit 1
           fi
 
           # tooling-gates: must SUCCEED on every non-stamp PR (an unexpected
