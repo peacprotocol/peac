@@ -1,5 +1,5 @@
 /**
- * MCP Server binding -- ONLY file importing @modelcontextprotocol/sdk
+ * MCP Server binding -- the only module that registers tools with @modelcontextprotocol/sdk
  *
  * Registers pure tool handlers with the MCP server.
  * Injects _meta audit block into every response.
@@ -83,6 +83,9 @@ const BUNDLE_TOOL_ANNOTATIONS: ToolAnnotations = {
 };
 
 const MAX_INPUT_DEPTH = 10;
+
+// Largest legitimate input: a 256-receipt bundle call (259 elements); the rest is headroom.
+const MAX_TOOL_INPUT_ELEMENTS = 1024;
 
 function errorCallToolResult(
   meta: Record<string, unknown>,
@@ -272,7 +275,10 @@ export function createPeacMcpServer(options: ServerOptions): McpServer {
     { name: SERVER_NAME, version },
     // listChanged: false -- tool set is static per server instance (determined
     // at startup from CLI flags). The server never emits notifications/tools/list_changed.
-    { capabilities: { tools: { listChanged: false } } }
+    {
+      capabilities: { tools: { listChanged: false } },
+      maxToolInputElements: MAX_TOOL_INPUT_ELEMENTS,
+    }
   );
 
   // Bind with narrowed types to bridge workspace Zod <-> SDK Zod boundary

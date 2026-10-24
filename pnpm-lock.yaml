@@ -1865,8 +1865,8 @@ importers:
   packages/mcp-server:
     dependencies:
       '@modelcontextprotocol/sdk':
-        specifier: ~1.28.0
-        version: 1.28.0(zod@4.3.6)
+        specifier: 1.32.1
+        version: 1.32.1(zod@4.3.6)
       '@peac/crypto':
         specifier: workspace:*
         version: link:../crypto
@@ -4280,8 +4280,8 @@ packages:
       '@braidai/lang': 1.1.2
     dev: true
 
-  /@modelcontextprotocol/sdk@1.28.0(zod@4.3.6):
-    resolution: {integrity: sha512-gmloF+i+flI8ouQK7MWW4mOwuMh4RePBuPFAEPC6+pdqyWOUMDOixb6qZ69owLJpz6XmyllCouc4t8YWO+E2Nw==}
+  /@modelcontextprotocol/sdk@1.32.1(zod@4.3.6):
+    resolution: {integrity: sha512-2DdE+SJDtzLEEWzY1ZjY7Q+VcPhcV1KisD3zI4u0XZyktsjHum1mwbMI+JaulUBi2OZk+KJAi2uPXzxichPkdw==}
     engines: {node: '>=18'}
     peerDependencies:
       '@cfworker/json-schema': ^4.1.1
