@@ -640,7 +640,7 @@ describe('resolveJWKS (strict discovery)', () => {
         {
           kty: 'OKP',
           crv: 'Ed25519',
-          x: 'BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB',
+          x: 'BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBA',
           kid: 'reuse-001',
         },
       ],
@@ -714,7 +714,7 @@ describe('resolveJWKS (strict discovery)', () => {
         {
           kty: 'OKP',
           crv: 'Ed25519',
-          x: 'BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB',
+          x: 'BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBA',
           kid: 'shared-001',
         },
       ],
@@ -725,7 +725,8 @@ describe('resolveJWKS (strict discovery)', () => {
     expect(resultB.ok).toBe(true);
   });
 
-  it('skips kid reuse check for keys without kid or x', async () => {
+  it('keeps a key without kid out of kid reuse tracking and skips an entry without x', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const jwks = JSON.stringify({
       keys: [
         { kty: 'OKP', crv: 'Ed25519', kid: 'no-x-key' },
@@ -737,6 +738,13 @@ describe('resolveJWKS (strict discovery)', () => {
 
     const result = await resolveJWKS('https://api.example.com', { noCache: true });
     expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.jwks.keys).toHaveLength(1);
+      expect(result.jwks.keys[0].kid).toBeUndefined();
+    }
+    expect(getKidThumbprintSize()).toBe(0);
+    expect(warn).toHaveBeenCalledTimes(1);
+    warn.mockRestore();
   });
 
   // ------------------------------------------------------------------
@@ -818,7 +826,7 @@ describe('resolveJWKS (strict discovery)', () => {
         {
           kty: 'OKP',
           crv: 'Ed25519',
-          x: 'BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB',
+          x: 'BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBA',
           kid: 'leak-test-001',
         },
       ],
@@ -836,7 +844,7 @@ describe('resolveJWKS (strict discovery)', () => {
     if (!result.ok) {
       expect(result.message).toContain('leak-test-001'); // kid is expected
       expect(result.message).not.toContain('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'); // old key material must not leak
-      expect(result.message).not.toContain('BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB'); // new key material must not leak
+      expect(result.message).not.toContain('BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBA'); // new key material must not leak
     }
   });
 
@@ -913,7 +921,7 @@ describe('resolveJWKS (strict discovery)', () => {
         {
           kty: 'OKP',
           crv: 'Ed25519',
-          x: 'BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB',
+          x: 'BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBA',
           kid: 'new-key',
         },
       ],
@@ -927,5 +935,195 @@ describe('resolveJWKS (strict discovery)', () => {
 
     // Restore Date.now
     vi.spyOn(Date, 'now').mockImplementation(realDateNow);
+  });
+});
+
+describe('resolveJWKS (key entry validation)', () => {
+  const VALID_X = 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
+  const VALID_KEY = { kty: 'OKP', crv: 'Ed25519', x: VALID_X, kid: 'valid-key' };
+
+  beforeEach(() => {
+    clearJWKSCache();
+    clearKidThumbprints();
+    vi.resetAllMocks();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+    clearJWKSCache();
+    clearKidThumbprints();
+  });
+
+  async function resolveWithKeys(keys: unknown[]) {
+    mockSsrfSafeFetch.mockResolvedValueOnce(okResponse(VALID_ISSUER_CONFIG));
+    mockFetchJWKSSafe.mockResolvedValueOnce(okResponse(JSON.stringify({ keys })));
+    return resolveJWKS('https://api.example.com', { noCache: true });
+  }
+
+  it('returns a structured result for {"keys":[null]}', async () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const result = await resolveWithKeys([null]);
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.jwks.keys).toEqual([]);
+    }
+  });
+
+  it('returns E_VERIFY_JWKS_INVALID when the JWKS document is not an object with a keys array', async () => {
+    for (const body of [
+      'null',
+      '5',
+      'true',
+      '""',
+      '"keys"',
+      '[]',
+      '{}',
+      '{"keys":null}',
+      '{"keys":{}}',
+      '{"keys":"x"}',
+      '{"keys":{"length":1,"0":null}}',
+      '{"__proto__":{"keys":[]}}',
+    ]) {
+      mockSsrfSafeFetch.mockResolvedValueOnce(okResponse(VALID_ISSUER_CONFIG));
+      mockFetchJWKSSafe.mockResolvedValueOnce(okResponse(body));
+      const result = await resolveJWKS('https://api.example.com', { noCache: true });
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.code).toBe('E_VERIFY_JWKS_INVALID');
+      }
+    }
+  });
+
+  it.each([
+    ['null entry', null],
+    ['string entry', 'key'],
+    ['array entry', [VALID_KEY]],
+    ['wrong kty', { ...VALID_KEY, kty: 'EC' }],
+    ['lowercase kty', { ...VALID_KEY, kty: 'okp' }],
+    ['array kty', { ...VALID_KEY, kty: ['OKP'] }],
+    ['missing kty', { crv: 'Ed25519', x: VALID_X, kid: 'k' }],
+    ['wrong crv', { ...VALID_KEY, crv: 'X25519' }],
+    ['lowercase crv', { ...VALID_KEY, crv: 'ed25519' }],
+    ['array crv', { ...VALID_KEY, crv: ['Ed25519'] }],
+    ['missing x', { kty: 'OKP', crv: 'Ed25519', kid: 'k' }],
+    ['non-string x', { ...VALID_KEY, x: 12345 }],
+    ['array x', { ...VALID_KEY, x: [VALID_X] }],
+    ['x with trailing newline', { ...VALID_KEY, x: `${VALID_X}\n` }],
+    ['x with leading space', { ...VALID_KEY, x: ` ${VALID_X.slice(1)}` }],
+    ['x with full-width character', { ...VALID_KEY, x: `${VALID_X.slice(1)}\uff21` }],
+    ['short x', { ...VALID_KEY, x: VALID_X.slice(1) }],
+    ['long x', { ...VALID_KEY, x: `${VALID_X}A` }],
+    ['padded x', { ...VALID_KEY, x: `${VALID_X}=` }],
+    ['x with standard base64 characters', { ...VALID_KEY, x: `+/${VALID_X.slice(2)}` }],
+    ['x with non-zero trailing bits', { ...VALID_KEY, x: `${VALID_X.slice(0, 42)}B` }],
+    ['private key member d', { ...VALID_KEY, d: VALID_X }],
+    ['null private key member d', { ...VALID_KEY, d: null }],
+    ['empty private key member d', { ...VALID_KEY, d: '' }],
+    ['false private key member d', { ...VALID_KEY, d: false }],
+    ['use other than sig', { ...VALID_KEY, use: 'enc' }],
+    ['non-string use', { ...VALID_KEY, use: 1 }],
+    ['uppercase use', { ...VALID_KEY, use: 'SIG' }],
+    ['null use', { ...VALID_KEY, use: null }],
+    ['array use', { ...VALID_KEY, use: ['sig'] }],
+    ['unsupported alg', { ...VALID_KEY, alg: 'RS256' }],
+    ['non-string alg', { ...VALID_KEY, alg: null }],
+    ['lowercase alg', { ...VALID_KEY, alg: 'eddsa' }],
+    ['array alg', { ...VALID_KEY, alg: ['EdDSA'] }],
+    ['array kid', { ...VALID_KEY, kid: ['k'] }],
+    ['object kid', { ...VALID_KEY, kid: { a: 1 } }],
+    ['number kid', { ...VALID_KEY, kid: 7 }],
+  ])('skips an invalid entry (%s) and keeps valid keys', async (_label, entry) => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const result = await resolveWithKeys([entry, VALID_KEY]);
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.jwks.keys).toHaveLength(1);
+      expect(result.jwks.keys[0].kid).toBe('valid-key');
+    }
+    expect(warn).toHaveBeenCalledTimes(1);
+    const message = String(warn.mock.calls[0][0]);
+    expect(message).toContain('https://api.example.com');
+    expect(message).not.toContain(VALID_X);
+  });
+
+  it.each([
+    ['use sig', { ...VALID_KEY, use: 'sig' }],
+    ['alg EdDSA', { ...VALID_KEY, alg: 'EdDSA' }],
+    ['alg Ed25519', { ...VALID_KEY, alg: 'Ed25519' }],
+    ['x ending in a zero-bit character', { ...VALID_KEY, x: `${VALID_X.slice(0, 42)}w` }],
+  ])('accepts a valid entry (%s) without a warning', async (_label, entry) => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const result = await resolveWithKeys([entry]);
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.jwks.keys).toHaveLength(1);
+    }
+    expect(warn).not.toHaveBeenCalled();
+  });
+
+  it('uses the last value of a duplicate member', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const lastWrong = `{"keys":[{"kty":"OKP","kty":"RSA","crv":"Ed25519","x":"${VALID_X}","kid":"k"}]}`;
+    const lastRight = `{"keys":[{"kty":"RSA","kty":"OKP","crv":"Ed25519","x":"${VALID_X}","kid":"k"}]}`;
+
+    mockSsrfSafeFetch.mockResolvedValueOnce(okResponse(VALID_ISSUER_CONFIG));
+    mockFetchJWKSSafe.mockResolvedValueOnce(okResponse(lastWrong));
+    const rejected = await resolveJWKS('https://api.example.com', { noCache: true });
+    expect(rejected.ok && rejected.jwks.keys.length).toBe(0);
+
+    clearKidThumbprints();
+    mockSsrfSafeFetch.mockResolvedValueOnce(okResponse(VALID_ISSUER_CONFIG));
+    mockFetchJWKSSafe.mockResolvedValueOnce(okResponse(lastRight));
+    const accepted = await resolveJWKS('https://api.example.com', { noCache: true });
+    expect(accepted.ok && accepted.jwks.keys.length).toBe(1);
+    expect(warn).toHaveBeenCalledTimes(1);
+  });
+
+  it('skips an entry whose only member is an own __proto__ member', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const body = `{"keys":[{"__proto__":{"kty":"OKP","crv":"Ed25519","x":"${VALID_X}","kid":"k"}}]}`;
+    mockSsrfSafeFetch.mockResolvedValueOnce(okResponse(VALID_ISSUER_CONFIG));
+    mockFetchJWKSSafe.mockResolvedValueOnce(okResponse(body));
+
+    const result = await resolveJWKS('https://api.example.com', { noCache: true });
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.jwks.keys).toEqual([]);
+    }
+    expect(warn).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not let a non-string kid collide with a string kid in kid reuse tracking', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const otherX = 'BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBA';
+    const result = await resolveWithKeys([
+      { kty: 'OKP', crv: 'Ed25519', x: otherX, kid: ['k'] },
+      { kty: 'OKP', crv: 'Ed25519', x: VALID_X, kid: 'k' },
+    ]);
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.jwks.keys.map((k) => k.kid)).toEqual(['k']);
+    }
+    expect(warn).toHaveBeenCalledTimes(1);
+    expect(String(warn.mock.calls[0][0])).not.toContain(otherX);
+  });
+
+  it('does not cache invalid entries', async () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    mockSsrfSafeFetch.mockResolvedValueOnce(okResponse(VALID_ISSUER_CONFIG));
+    mockFetchJWKSSafe.mockResolvedValueOnce(
+      okResponse(JSON.stringify({ keys: [{ ...VALID_KEY, kid: 'with-d', d: VALID_X }, VALID_KEY] }))
+    );
+    await resolveJWKS('https://api.example.com');
+
+    const cached = await resolveJWKS('https://api.example.com');
+    expect(cached.ok).toBe(true);
+    if (cached.ok) {
+      expect(cached.fromCache).toBe(true);
+      expect(cached.jwks.keys.map((k) => k.kid)).toEqual(['valid-key']);
+    }
   });
 });

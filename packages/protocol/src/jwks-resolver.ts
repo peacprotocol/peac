@@ -6,7 +6,7 @@
  * 2. Validate issuer config (schema, issuer match)
  * 3. Validate jwks_uri is HTTPS (protocol-level enforcement)
  * 4. Fetch JWKS from jwks_uri (SSRF-safe, 64KB cap)
- * 5. Validate JWKS shape
+ * 5. Validate JWKS shape; skip entries that are not Ed25519 public verification keys
  *
  * No fallback paths: peac-issuer.json with jwks_uri is the only
  * supported key discovery mechanism.
@@ -387,6 +387,37 @@ function mapSSRFError(
 }
 
 // ---------------------------------------------------------------------------
+// Key Entry Validation
+// ---------------------------------------------------------------------------
+
+/** Unpadded base64url of exactly 32 bytes with zero trailing bits (canonical form). */
+const CANONICAL_ED25519_X = /^[A-Za-z0-9_-]{42}[AEIMQUYcgkosw048]$/;
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+/**
+ * Check one JWKS entry against the Ed25519 public verification key profile.
+ * Returns a short description of the first problem, or null if the entry is usable.
+ */
+function jwkEntryProblem(entry: unknown): string | null {
+  if (!isPlainObject(entry)) return 'not an object';
+  if (entry.kty !== 'OKP') return 'kty must be OKP';
+  if (entry.crv !== 'Ed25519') return 'crv must be Ed25519';
+  if (typeof entry.x !== 'string' || !CANONICAL_ED25519_X.test(entry.x)) {
+    return 'x must be a canonical base64url 32-byte value';
+  }
+  if (Object.prototype.hasOwnProperty.call(entry, 'd')) return 'private key member d present';
+  if (entry.kid !== undefined && typeof entry.kid !== 'string') return 'kid must be a string';
+  if (entry.use !== undefined && entry.use !== 'sig') return 'use must be sig';
+  if (entry.alg !== undefined && entry.alg !== 'EdDSA' && entry.alg !== 'Ed25519') {
+    return 'alg must be EdDSA or Ed25519';
+  }
+  return null;
+}
+
+// ---------------------------------------------------------------------------
 // Main Resolution
 // ---------------------------------------------------------------------------
 
@@ -513,9 +544,9 @@ export async function resolveJWKS(
   }
 
   // Step 7: Parse and validate JWKS
-  let jwks: JWKS;
+  let parsed: unknown;
   try {
-    jwks = JSON.parse(jwksResult.body) as JWKS;
+    parsed = JSON.parse(jwksResult.body);
   } catch {
     return {
       ok: false,
@@ -524,7 +555,8 @@ export async function resolveJWKS(
     };
   }
 
-  if (!jwks.keys || !Array.isArray(jwks.keys)) {
+  const rawKeys = isPlainObject(parsed) ? parsed.keys : undefined;
+  if (!Array.isArray(rawKeys)) {
     return {
       ok: false,
       code: 'E_VERIFY_JWKS_INVALID',
@@ -532,13 +564,30 @@ export async function resolveJWKS(
     };
   }
 
-  if (jwks.keys.length > VERIFIER_LIMITS.maxJwksKeys) {
+  if (rawKeys.length > VERIFIER_LIMITS.maxJwksKeys) {
     return {
       ok: false,
       code: 'E_VERIFY_JWKS_TOO_MANY_KEYS',
-      message: `JWKS has too many keys: ${jwks.keys.length} > ${VERIFIER_LIMITS.maxJwksKeys}`,
+      message: `JWKS has too many keys: ${rawKeys.length} > ${VERIFIER_LIMITS.maxJwksKeys}`,
     };
   }
+
+  const validKeys: JWK[] = [];
+  const skipped: string[] = [];
+  rawKeys.forEach((entry: unknown, index: number) => {
+    const problem = jwkEntryProblem(entry);
+    if (problem === null) {
+      validKeys.push(entry as JWK);
+    } else {
+      skipped.push(`#${index}: ${problem}`);
+    }
+  });
+  if (skipped.length > 0) {
+    console.warn(
+      `[peac:jwks] Skipped ${skipped.length} invalid JWKS entr${skipped.length === 1 ? 'y' : 'ies'} for ${normalizedIssuer} (${skipped.join('; ')})`
+    );
+  }
+  const jwks: JWKS = { keys: validKeys };
 
   // Step 8: Kid reuse detection (stateful MUST reject)
   const kidReuseError = checkKidReuse(normalizedIssuer, jwks, now);
