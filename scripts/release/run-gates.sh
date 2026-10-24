@@ -141,11 +141,6 @@ run_gate "test" pnpm test
 echo ""
 echo "--- Guards ---"
 run_gate "guard" bash scripts/guard.sh
-if [ -f scripts/check-planning-leak.sh ]; then
-  run_gate "planning-leak" bash scripts/check-planning-leak.sh
-else
-  echo "  [planning-leak] SKIP (gate script not present)"
-fi
 run_gate "format" pnpm format:check
 
 # --- Architecture ---
@@ -227,12 +222,6 @@ fi
 # --- Release State Coherence ---
 echo ""
 echo "--- Release State Coherence ---"
-if [ -f scripts/check-release-state-coherence.sh ]; then
-  run_gate "release-state-coherence" bash scripts/check-release-state-coherence.sh
-else
-  echo "  [release-state-coherence] SKIP (script not found)"
-fi
-
 # --- CHANGELOG Coverage ---
 echo ""
 echo "--- CHANGELOG Coverage ---"

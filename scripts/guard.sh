@@ -246,9 +246,6 @@ else
   echo "SKIP: scripts/check-json-dupes.mjs not found"
 fi
 
-# x403 typo check moved to local-only scripts (check-planning-leak.sh, commit-msg hook)
-# to avoid circular exclusion lists in tracked guard scripts
-
 echo "== discovery surface drift =="
 # Prevent protocol verifier code from bypassing peac-issuer.json and fetching JWKS directly.
 # The canonical path is: peac-issuer.json -> jwks_uri -> JWKS (via jwks-resolver.ts).

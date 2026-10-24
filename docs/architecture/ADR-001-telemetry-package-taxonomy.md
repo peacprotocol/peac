@@ -112,4 +112,3 @@ Rejected because:
 
 - [OpenTelemetry JavaScript](https://opentelemetry.io/docs/languages/js/)
 - [W3C Trace Context](https://www.w3.org/TR/trace-context/)
-- PEAC TELEMETRY_PLAN.md (local planning doc)

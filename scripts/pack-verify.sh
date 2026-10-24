@@ -3,7 +3,7 @@
 #
 # Reads packages from scripts/publish-manifest.json and verifies:
 #   1. No unresolved workspace:* dependencies in tarballs
-#   2. No planning artifacts, .env, or test fixtures in tarballs
+#   2. No .env, build cache, or test fixtures in tarballs
 #   3. @peac/* deps in tarballs have resolved version numbers
 #
 # Run: bash scripts/pack-verify.sh
@@ -79,7 +79,7 @@ for tarball in "${TARBALLS[@]}"; do
     echo "   OK: $pkg_name - no workspace:* refs"
   fi
 
-  # Check tarball hygiene: no planning artifacts, build cache, or sensitive files
+  # Check tarball hygiene: no workspace-only paths, build cache, or sensitive files
   BAD_FILES=$(tar -tzf "$tarball" | grep -E '(reference/|\.local\.md$|\.env|\.tsbuildinfo$|node_modules/|\.turbo/|\.log$)' || true)
   if [ -n "$BAD_FILES" ]; then
     echo "   FAIL: $pkg_name contains disallowed files:"

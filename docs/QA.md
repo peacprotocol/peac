@@ -71,9 +71,6 @@ rg "0\.9\.16|v0\.9\.16" --glob '!CHANGELOG.md' --glob '!archive/**' --glob '!pnp
 ```bash
 # Domain guard (no peac.dev references)
 ./scripts/guard.sh
-
-# Planning leak check
-./scripts/check-planning-leak.sh
 ```
 
 ## Post-Release Verification

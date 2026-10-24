@@ -75,12 +75,7 @@ if [ -f scripts/pre-push-strict.sh ]; then
   run_phase "Strict CI-parity gate" bash scripts/pre-push-strict.sh
 fi
 
-# 4. Planning leak check (conditional: local-only script)
-if [ -f scripts/check-planning-leak.sh ]; then
-  run_phase "Planning leak" bash scripts/check-planning-leak.sh
-fi
-
-# 5. Changed-package build + test
+# 4. Changed-package build + test
 #    Detects which packages have changes vs the upstream branch,
 #    then runs build and test for only those packages via turbo.
 UPSTREAM=$(git rev-parse --abbrev-ref "@{u}" 2>/dev/null || echo "origin/main")

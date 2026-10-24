@@ -465,7 +465,7 @@ describe('commerce-mandate: invalid event_kind (COMM-MAN-005)', () => {
   });
 
   it.each(
-    // Stale draft event_kind segments from earlier planning iterations.
+    // Stale draft event_kind segments that must not reappear.
     // Per-segment .join() so no contiguous stale event_kind substring
     // appears anywhere in this test source.
     [

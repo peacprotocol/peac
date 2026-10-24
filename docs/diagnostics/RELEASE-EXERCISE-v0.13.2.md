@@ -70,7 +70,7 @@ Validation:
 - Tooling tests (`pnpm exec vitest run tests/tooling`) green, including the internal-package invisibility test.
 - Build (`pnpm build`) green across the workspace.
 - Lint (`pnpm lint`) green.
-- `verify-local-doc-truth`, `verify-final-hygiene`, `forbid-strings`, `verify-dist-private-leaks` all clean.
+- The documentation, hygiene, `forbid-strings` and `verify-dist-private-leaks` checks all clean.
 - `pnpm publish --dry-run --recursive --no-git-checks`: workspace-private packages absent.
 - Pre-push gate ran the strict CI-parity profile and the full release-class profile on every push.
 

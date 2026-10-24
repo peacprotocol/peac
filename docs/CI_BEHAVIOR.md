@@ -44,7 +44,6 @@ Format, lint, security scans, forbidden strings, distribution and manifest check
 - Dependency architecture check (dep-cruiser)
 - Trojan Source detection (CVE-2021-42574) and targeted Unicode scan
 - Domain guard (`scripts/guard.sh`): 30+ safety invariants
-- Planning leak check (local-only)
 - Forbidden strings (`scripts/ci/forbid-strings.sh`)
 - Worker surface typechecks and distribution surface validation
 - Package hygiene (drift, duplicates, private + publishConfig)
@@ -232,7 +231,6 @@ dependency, so any failed cell hard-blocks publish.
 
 - `guard.sh` fast mode
 - `format:check`
-- Planning leak check (if exists locally)
 - Changed-package build + test via turbo filter
 
 **Tier 2 (optional, full CI-parity):** Runs `gate.sh`. Skippable with `PEAC_SKIP_FULL_PRE_PUSH=1`.

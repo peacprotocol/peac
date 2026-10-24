@@ -48,7 +48,7 @@ files:
 
 - `scripts/verify-trust-artifacts.mjs` checks that every linked test
   path under `docs/THREAT_MODEL.md` resolves to a tracked file and
-  that public docs do not link to the gitignored `reference/` tree.
+  that public docs do not link to untracked paths.
 - `scripts/release/api-surface-lock.sh` checks that every export
   named in the baseline's "Public API" table stays byte-stable in the
   per-package snapshot under `docs/releases/api-surface/`.

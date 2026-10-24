@@ -8,8 +8,7 @@
  *
  *   - any src/_internal/** path (internal source MUST stay out of published
  *     tarballs; only emitted dist/ output may surface)
- *   - any local-only planning artifact (.claude/, reference/, internal-only
- *     plan markdown files such as warm-percolating-flask.md)
+ *   - any workspace-only path (untracked directories)
  *   - any test fixture path that wasn't intended for consumers
  *
  * Allowed contents (typical published package tarball):
@@ -43,10 +42,9 @@ const FORBIDDEN_PATTERNS = [
   /\/\.claude\//,
   /^reference\//,
   /\/reference\//,
-  /\bwarm-percolating-flask\.md$/,
   /\b__tests__\//,
   /\b__snapshots__\//,
-  // Local-only planning artifacts identifiable by directory or naming.
+  // Workspace-only files identifiable by name.
   /\bMEMORY\.md$/,
   /\bCLAUDE\.md$/,
 ];

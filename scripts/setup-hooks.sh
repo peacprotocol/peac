@@ -20,7 +20,7 @@ chmod +x .githooks/pre-commit .githooks/pre-push
 
 echo ""
 echo "Installed hooks from .githooks/:"
-echo "  pre-commit : lint-staged (auto-format) + planning leak check"
+echo "  pre-commit : lint-staged (auto-format)"
 echo "  pre-push   : full CI-parity gate (scripts/gate.sh)"
 echo ""
 echo "Both hooks share the same checks that CI runs."

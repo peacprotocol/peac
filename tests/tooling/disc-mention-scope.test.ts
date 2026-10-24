@@ -19,10 +19,10 @@ import { fileURLToPath } from 'node:url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..', '..');
 
-// Public-surface tracked file globs to scan. archive/, reference/, .claude/,
-// node_modules/, dist/, this test, the migration doc, the CHANGELOG (which
-// is allowed to mention deprecated packages in historical entries), and the
-// publish-manifest are excluded by the allow-list logic below.
+// Public-surface tracked file globs to scan. Build output, this test, the
+// migration doc, the CHANGELOG (which is allowed to mention deprecated
+// packages in historical entries), and the publish-manifest are excluded by
+// the allow-list logic below.
 const SCAN_PATHS: readonly string[] = [
   'README.md',
   'docs',

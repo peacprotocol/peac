@@ -25,14 +25,14 @@ pnpm-lock.yaml
 .claude/
 .gstack/
 
-# local planning docs (gitignored)
+# workspace-only files (gitignored)
 CLAUDE.md
 reference/
 
 # local evidence pack outputs (gitignored)
 docs/evidence-pack/
 
-# paper artifacts (local only)
+# paper artifacts (gitignored)
 paper/
 
 # performance result snapshots (generated artifact)

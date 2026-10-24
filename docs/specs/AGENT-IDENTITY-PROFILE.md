@@ -635,7 +635,7 @@ Existing systems using `AgentIdentityAttestation` (v0.9.25) can adopt ActorBindi
 | `mtls`                                               | `x509-pki`                                     |
 | `jwk-thumbprint`                                     | `ed25519-cert-chain`                           |
 
-3. **Phase 3 (no longer on the roadmap)**: Unification of the transport-binding method enum with `ProofType` was considered and rejected in v0.13.0. The two surfaces stay separate because they answer different questions (how the key is proven in the moment vs. how the identity's trust root is rooted). Systems should continue to populate both fields when both signals exist.
+3. **Phase 3 (not pursued)**: Unification of the transport-binding method enum with `ProofType` was considered and rejected in v0.13.0. The two surfaces stay separate because they answer different questions (how the key is proven in the moment vs. how the identity's trust root is rooted). Systems should continue to populate both fields when both signals exist.
 
 ### 9.2 From No Identity to MVIS
 

@@ -2,8 +2,8 @@
  * The tracked schema snapshot must match its canonical source.
  *
  * Tests run against the app-local snapshot so a clean clone works. This test is the guard that the
- * snapshot has not drifted: it compares bytes with the canonical planning-repo copy WHEN that copy
- * is present, and reports a visible skip when it is not. It never refreshes the snapshot.
+ * snapshot has not drifted: it compares bytes with the canonical copy WHEN one is supplied, and
+ * reports a visible skip when it is not. It never refreshes the snapshot.
  */
 import { describe, it, expect } from 'vitest';
 import { createHash } from 'node:crypto';
