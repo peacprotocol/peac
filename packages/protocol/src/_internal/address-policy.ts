@@ -169,3 +169,13 @@ export function classifyAddress(ip: string): AddressVerdict {
   if (groups !== null) return classifyIPv6(groups);
   return { allowed: false, reason: 'private_ip' };
 }
+
+/**
+ * Return the IP literal carried by a URL hostname (brackets removed), or null
+ * for a domain name. WHATWG URL parsing has already normalised IPv4 forms.
+ */
+export function hostIpLiteral(hostname: string): string | null {
+  if (hostname.startsWith('[') && hostname.endsWith(']')) return hostname.slice(1, -1);
+  if (/^[0-9.]+$/.test(hostname)) return hostname;
+  return null;
+}

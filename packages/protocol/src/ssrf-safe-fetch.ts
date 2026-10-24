@@ -59,7 +59,7 @@
 
 import type { LookupAddress, LookupOptions } from 'dns';
 import { VERIFIER_LIMITS, VERIFIER_NETWORK } from '@peac/kernel';
-import { classifyAddress } from './_internal/address-policy.js';
+import { classifyAddress, hostIpLiteral } from './_internal/address-policy.js';
 
 // ---------------------------------------------------------------------------
 // SSRF Capability Model
@@ -373,6 +373,13 @@ interface DNSResolutionFailure {
 async function resolveHostname(
   hostname: string
 ): Promise<DNSResolutionResult | DNSResolutionFailure> {
+  // An IP literal is vetted as-is and never sent to DNS
+  const literal = hostIpLiteral(hostname);
+  if (literal !== null) {
+    const nodeRuntime = typeof process !== 'undefined' && Boolean(process.versions?.node);
+    return { ok: true, ips: [literal], browser: !nodeRuntime };
+  }
+
   // Node.js environment detection
   if (typeof process !== 'undefined' && process.versions?.node) {
     try {
@@ -433,6 +440,14 @@ async function resolveHostname(
 
 const NULL_BODY_STATUSES = new Set([101, 103, 204, 205, 304]);
 
+async function discardBody(response: Response): Promise<void> {
+  try {
+    await response.body?.cancel();
+  } catch {
+    // Body already closed
+  }
+}
+
 /**
  * GET a URL over HTTPS, connecting only to the given vetted addresses.
  *
@@ -447,6 +462,12 @@ async function fetchFromVettedAddresses(
   signal: AbortSignal
 ): Promise<Response> {
   const https = await import('https');
+  const { isIP } = await import('net');
+  const target = new URL(url);
+  const host = hostIpLiteral(target.hostname) ?? target.hostname;
+  if (addresses.length === 0 || (isIP(host) !== 0 && !addresses.includes(host))) {
+    throw new Error(`Refusing to connect to an address that was not vetted: ${host}`);
+  }
   const entries: LookupAddress[] = addresses.map((address) => ({
     address,
     family: address.includes(':') ? 6 : 4,
@@ -470,7 +491,7 @@ async function fetchFromVettedAddresses(
 
   return new Promise<Response>((resolve, reject) => {
     const req = https.request(
-      new URL(url),
+      target,
       { method: 'GET', headers, lookup, agent: false, signal },
       (res) => {
         try {
@@ -604,18 +625,16 @@ export async function ssrfSafeFetch(
     };
   }
 
-  // Step 3: Check each resolved IP (if not browser environment)
-  if (!dnsResult.browser) {
-    for (const ip of dnsResult.ips) {
-      const blockResult = isBlockedIP(ip);
-      if (blockResult.blocked) {
-        return {
-          ok: false,
-          reason: blockResult.reason,
-          message: `Blocked ${blockResult.reason} address: ${ip} for ${url}`,
-          blockedUrl: url,
-        };
-      }
+  // Step 3: Check each resolved IP (browsers resolve names themselves, so only literals are listed)
+  for (const ip of dnsResult.ips) {
+    const blockResult = isBlockedIP(ip);
+    if (blockResult.blocked) {
+      return {
+        ok: false,
+        reason: blockResult.reason,
+        message: `Blocked ${blockResult.reason} address: ${ip} for ${url}`,
+        blockedUrl: url,
+      };
     }
   }
 
@@ -653,6 +672,7 @@ export async function ssrfSafeFetch(
       // Step 5: Handle redirects
       if (response.status >= 300 && response.status < 400) {
         const location = response.headers.get('location');
+        await discardBody(response);
 
         if (!location) {
           return {
@@ -737,18 +757,16 @@ export async function ssrfSafeFetch(
           };
         }
 
-        // Check redirect target IPs for SSRF (if not browser environment)
-        if (!redirectDnsResult.browser) {
-          for (const ip of redirectDnsResult.ips) {
-            const blockResult = isBlockedIP(ip);
-            if (blockResult.blocked) {
-              return {
-                ok: false,
-                reason: blockResult.reason,
-                message: `Redirect to blocked ${blockResult.reason} address: ${ip}`,
-                blockedUrl: redirectUrl.href,
-              };
-            }
+        // Check redirect target IPs (browsers resolve names themselves, so only literals are listed)
+        for (const ip of redirectDnsResult.ips) {
+          const blockResult = isBlockedIP(ip);
+          if (blockResult.blocked) {
+            return {
+              ok: false,
+              reason: blockResult.reason,
+              message: `Redirect to blocked ${blockResult.reason} address: ${ip}`,
+              blockedUrl: redirectUrl.href,
+            };
           }
         }
 
@@ -760,6 +778,7 @@ export async function ssrfSafeFetch(
       // Step 6: Validate response size
       const contentLength = response.headers.get('content-length');
       if (contentLength && parseInt(contentLength, 10) > maxBytes) {
+        await discardBody(response);
         return {
           ok: false,
           reason: 'response_too_large',
