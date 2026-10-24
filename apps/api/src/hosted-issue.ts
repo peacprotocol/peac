@@ -12,6 +12,7 @@
  */
 
 import type { Context } from 'hono';
+import { bodyLimit } from 'hono/body-limit';
 import { z } from 'zod';
 import { issueWire02, IssueError } from '@peac/protocol';
 import { base64urlDecode } from '@peac/crypto';
@@ -21,6 +22,16 @@ import { deterministicStringify } from './utils.js';
 
 const PROBLEM_CONTENT_TYPE = 'application/problem+json';
 const MAX_BODY_SIZE = 256 * 1024; // 256 KB
+
+// Counts the body while it is read and rejects it once it passes the limit, for
+// bodies without a Content-Length header (chunked transfer). A declared
+// Content-Length is compared with the limit and trusted: the HTTP server is
+// expected to enforce Content-Length framing, as the Node HTTP parser does.
+const bodyLimitGuard = bodyLimit({
+  maxSize: MAX_BODY_SIZE,
+  onError: (c) =>
+    problemResponse(c, toProblemDetails('E_PAYLOAD_TOO_LARGE', { limit: String(MAX_BODY_SIZE) })),
+});
 
 /**
  * Hosted Issue request schema. Uses canonical EvidencePillarSchema from
@@ -74,8 +85,18 @@ export function createIssueV1Handler(opts?: IssueV1Options) {
       });
     }
 
-    // Actual body-size enforcement: read raw text with cap, then parse
-    // Read raw body text, then enforce actual byte-size cap (not char length)
+    // Reject a declared Content-Length over the limit before the body is read
+    // and count the body as it is read when none is declared, then enforce the
+    // byte-size cap on the decoded text (not char length).
+    let oversize: Response | void;
+    try {
+      oversize = await bodyLimitGuard(c, async () => {});
+    } catch {
+      // The body could not be read (for example, the client disconnected).
+      return problemResponse(c, toProblemDetails('E_INVALID_FORMAT'));
+    }
+    if (oversize) return oversize;
+
     let rawBody: string;
     try {
       rawBody = await c.req.text();
