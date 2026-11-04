@@ -1,9 +1,9 @@
 /**
  * Built `peac` bin surface test.
  *
- * Runs the built @peac/cli bin (`packages/cli/dist/index.cjs`, the file the
- * package.json `bin.peac` entry points to) from a working directory outside
- * the repository, and checks that:
+ * Runs the built @peac/cli bin (the file its package.json `bin.peac` entry
+ * points to) from a working directory outside the repository, and checks
+ * that:
  *
  *   1. `--version` prints the @peac/cli package version, so the result does
  *      not depend on where the bin is invoked from;
