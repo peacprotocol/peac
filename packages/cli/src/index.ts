@@ -14,6 +14,7 @@ import { policy } from './commands/policy.js';
 import { conformance } from './commands/conformance.js';
 import { samples } from './commands/samples.js';
 import { reconcileCommand } from './commands/reconcile.js';
+import { bundleCommand } from './commands/bundle.js';
 import { doctor } from './commands/doctor.js';
 import { DiscoverCommand } from './commands/discover.js';
 import { observeCommand } from './commands/observe-command.js';
@@ -308,6 +309,9 @@ program.addCommand(samples);
 
 // Reconcile evidence bundles (v0.11.3+)
 program.addCommand(reconcileCommand());
+
+// Dispute bundles: create, verify, info
+program.addCommand(bundleCommand);
 
 // CLI execution observation
 program.addCommand(observeCommand());

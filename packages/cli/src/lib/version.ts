@@ -5,39 +5,55 @@
  */
 
 import { join } from 'node:path';
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
+
+const PACKAGE_NAME = '@peac/cli';
+
+/**
+ * Read the version from a package.json path, accepting only this package's
+ * manifest. Returns undefined when the file is absent, unreadable, or belongs
+ * to another package.
+ */
+function readOwnPackageVersion(pkgPath: string): string | undefined {
+  try {
+    const pkg = JSON.parse(readFileSync(pkgPath, 'utf8')) as { name?: unknown; version?: unknown };
+    if (pkg.name === PACKAGE_NAME && typeof pkg.version === 'string' && pkg.version !== '') {
+      return pkg.version;
+    }
+  } catch {
+    // Absent or unreadable: the caller tries the next location
+  }
+  return undefined;
+}
 
 /**
  * Get CLI version from package.json
  *
- * Uses multiple strategies to find package.json:
- * 1. __dirname relative path (for CJS)
- * 2. Process.cwd() fallback
+ * Looks for package.json in this order:
+ * 1. Paths relative to this file (for CJS): the bin is the single bundled
+ *    file dist/index.cjs, one level below the package root; the unbundled
+ *    source file src/lib/version.ts is two levels below it
+ * 2. Process.cwd() fallback (running from the monorepo root)
  */
 export function getVersion(): string {
-  // Strategy 1: Try relative path from this file (dist/lib/version.js -> package.json)
+  // 1. Relative to this file
   try {
-    const pkgPath = join(__dirname, '..', '..', 'package.json');
-    if (existsSync(pkgPath)) {
-      const pkg = JSON.parse(readFileSync(pkgPath, 'utf8'));
-      if (pkg.version) return pkg.version;
+    for (const pkgPath of [
+      join(__dirname, '..', 'package.json'),
+      join(__dirname, '..', '..', 'package.json'),
+    ]) {
+      const version = readOwnPackageVersion(pkgPath);
+      if (version) return version;
     }
   } catch {
-    // Continue to next strategy
+    // __dirname is not defined in the ESM build; fall through
   }
 
-  // Strategy 2: Try from CWD (running in monorepo)
-  try {
-    const pkgPath = join(process.cwd(), 'packages', 'cli', 'package.json');
-    if (existsSync(pkgPath)) {
-      const pkg = JSON.parse(readFileSync(pkgPath, 'utf8'));
-      if (pkg.version) return pkg.version;
-    }
-  } catch {
-    // Continue to fallback
-  }
+  // 2. From CWD (running in monorepo)
+  const fromCwd = readOwnPackageVersion(join(process.cwd(), 'packages', 'cli', 'package.json'));
+  if (fromCwd) return fromCwd;
 
-  // Strategy 3: Fallback version (should rarely happen)
+  // 3. Fallback version (should rarely happen)
   return '0.0.0-unknown';
 }
 
