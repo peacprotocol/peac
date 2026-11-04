@@ -5,6 +5,16 @@ All notable changes to PEAC Protocol will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- `@peac/cli`: the `peac` bin registers the `bundle` command (`create`, `verify`,
+  `info`), and `peac --version` prints the installed package version instead of
+  `0.0.0-unknown`. The pack-install smoke now runs the bin installed from the
+  packed tarball and checks that it reports the package version and lists every
+  documented command.
+
 ## [0.16.5] - 2026-10-24
 
 Security and Maintenance Updates.

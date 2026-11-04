@@ -9,7 +9,10 @@
  *      every workspace dep declared by the package via npm, fetched
  *      from npm or workspace tarballs).
  *   3. Run a smoke script that imports the package's public surface and
- *      exercises a representative function.
+ *      exercises a representative function. For @peac/cli, also run the
+ *      installed `peac` bin: `--version` must print the packed package
+ *      version and `--help` must list every documented command
+ *      (scripts/lib/cli-documented-commands.mjs).
  *   4. Assert no `Cannot find module '@peac/<private>'` error: this catches
  *      regressions where a published package picks up a runtime dependency
  *      on a workspace-private package (which would 404 on external install).
@@ -42,6 +45,7 @@ import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { WORKSPACE_PACKAGE_MAP } from '../lib/workspace-package-map.mjs';
+import { findMissingDocumentedCommands } from '../lib/cli-documented-commands.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..', '..');
@@ -82,11 +86,62 @@ const SMOKE_SCRIPTS = {
     if (!binRel) { console.error('bin.peac missing from @peac/cli package.json'); process.exit(1); }
     const binAbs = path.join(path.dirname(require.resolve('@peac/cli/package.json')), binRel);
     if (!fs.existsSync(binAbs)) { console.error('bin entry not found at', binAbs); process.exit(1); }
-    // Loading it as a module would invoke commander; for smoke purposes,
-    // just confirm the file can be read.
+    // Loading it as a module would invoke commander; the installed bin is
+    // run by checkCliBin() after this script passes.
     fs.readFileSync(binAbs, 'utf8');
     console.log('@peac/cli smoke OK');
   `,
+};
+
+/**
+ * Run the `peac` bin installed in the temp project. On POSIX this goes through
+ * the npm-created `node_modules/.bin/peac` link, which also exercises the
+ * shebang and the executable bit; on Windows the target file is run with node.
+ */
+function runInstalledCliBin(tmpDir, args) {
+  const pkgDir = join(tmpDir, 'node_modules', '@peac', 'cli');
+  const pkg = readJson(join(pkgDir, 'package.json'));
+  const [file, argv] =
+    process.platform === 'win32'
+      ? [process.execPath, [join(pkgDir, pkg.bin.peac), ...args]]
+      : [join(tmpDir, 'node_modules', '.bin', 'peac'), args];
+  return execFileSync(file, argv, {
+    cwd: tmpDir,
+    encoding: 'utf8',
+    stdio: ['ignore', 'pipe', 'pipe'],
+  });
+}
+
+/**
+ * Installed-bin checks for @peac/cli. Returns an error message, or null when
+ * the bin reports the packed version and lists every documented command.
+ */
+function checkCliBin(tmpDir) {
+  const installed = readJson(join(tmpDir, 'node_modules', '@peac', 'cli', 'package.json'));
+  const problems = [];
+  try {
+    const version = runInstalledCliBin(tmpDir, ['--version']).trim();
+    if (version !== installed.version) {
+      problems.push(`peac --version printed '${version}', expected '${installed.version}'`);
+    }
+  } catch (err) {
+    problems.push(`peac --version failed: ${err.stderr?.toString() || err.message}`);
+  }
+  try {
+    const missing = findMissingDocumentedCommands((path) =>
+      runInstalledCliBin(tmpDir, [...path, '--help'])
+    );
+    if (missing.length > 0) {
+      problems.push(`peac --help does not list documented command(s): ${missing.join(', ')}`);
+    }
+  } catch (err) {
+    problems.push(`peac --help failed: ${err.stderr?.toString() || err.message}`);
+  }
+  return problems.length > 0 ? problems.join('; ') : null;
+}
+
+const BIN_CHECKS = {
+  '@peac/cli': checkCliBin,
 };
 
 function parseArgs() {
@@ -197,6 +252,10 @@ function smokeTarget(npmName) {
         cwd: tmpDir,
         encoding: 'utf8',
       });
+      const binError = BIN_CHECKS[npmName]?.(tmpDir) ?? null;
+      if (binError) {
+        return { npmName, status: 'bin-check-failed', error: binError };
+      }
       return { npmName, status: 'clean', output: out.trim() };
     } catch (err) {
       const stderr = err.stderr?.toString() ?? '';
