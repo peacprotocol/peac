@@ -180,7 +180,7 @@ describe('the Go workflow covers every module', () => {
       stepsOf(goSdk.jobs[name]).find((s) => s.name === 'Setup Go') as unknown as {
         with: Record<string, string>;
       };
-    // The floor job resolves its toolchain from the module's own `go` directive.
+    // The floor job resolves its toolchain from sdks/go/go.mod: the toolchain line, else the go directive.
     expect(setupOf('test').with['go-version-file']).toBe('sdks/go/go.mod');
     // The second job pins a newer release line than the floor.
     const newer = String(setupOf('test-newest-go').with['go-version']);
@@ -188,6 +188,18 @@ describe('the Go workflow covers every module', () => {
     const minor = (v: string) => Number(v.split('.')[1]);
     expect(minor(newer)).toBeGreaterThan(minor(floor as string));
     expect(goSdk.jobs['test-newest-go'].needs).toBe('lint');
+  });
+
+  it('every module and go.work name one exact toolchain on the floor release line', () => {
+    const toolchainOf = (text: string) => /^toolchain go(\S+)$/m.exec(text)?.[1];
+    const pinned = toolchainOf(goMod);
+    expect(pinned, 'sdks/go/go.mod has no toolchain line').toMatch(/^\d+\.\d+\.\d+$/);
+    expect(pinned?.startsWith(`${floor}.`)).toBe(true);
+    for (const file of [...modules.map((m) => `${m}/go.mod`), 'sdks/go/go.work']) {
+      const text = read(file);
+      expect(/^go (\d+\.\d+)/m.exec(text)?.[1], `${file} go directive`).toBe(floor);
+      expect(toolchainOf(text), `${file} toolchain line`).toBe(pinned);
+    }
   });
 
   it('Dependabot watches every module directory', () => {
