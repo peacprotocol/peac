@@ -66,7 +66,7 @@ All published packages are configured for OIDC trusted publishing through the `p
 
 ### SBOM
 
-SBOM generation (SPDX or CycloneDX) is planned but not yet configured. The turbo build pipeline includes an `sbom` task definition for future use.
+SBOMs are not generated for releases.
 
 ## Logging Boundaries
 
@@ -91,17 +91,19 @@ SBOM generation (SPDX or CycloneDX) is planned but not yet configured. The turbo
 
 No multi-tenant surface. All operations are in-process. Operators control all isolation boundaries.
 
-### Hosted Verify (planned)
+### Self-hosted verify API (`apps/api`)
 
-| Boundary             | Mechanism                                        |
-| -------------------- | ------------------------------------------------ |
-| Verification context | Per-API-key isolated; no shared mutable state    |
-| JWKS cache           | Per-tenant with TTL-bound expiry (5 min default) |
-| Rate limits          | Per-tenant; configurable; default 100 req/min    |
-| Logs                 | Tenant-scoped; `receipt_ref` only by default     |
-| Audit trail          | Per-tenant; exportable                           |
+The reference verify API is self-hosted and tenantless. One process serves every caller.
 
-See [Hosted Verify Contract](HOSTED_VERIFY_CONTRACT.md) for the full isolation design and threat mitigations.
+| Boundary             | Behavior                                                                                                                                                                    |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Verification context | No tenant isolation                                                                                                                                                         |
+| JWKS cache           | In-memory, process-wide, shared by all callers; `Cache-Control: max-age` clamped to 60-86,400 s (default 300 s)                                                             |
+| Rate limits          | Coarse built-in limits that are not a security control; deploy the API behind a gateway that authenticates callers and enforces rate limits. Requests are not authenticated |
+| Logs                 | Request contents are not logged; the process logs startup and shutdown only                                                                                                 |
+| Audit trail          | None                                                                                                                                                                        |
+
+See [Hosted Verify Contract](HOSTED_VERIFY_CONTRACT.md) for the HTTP contract.
 
 ## Data Residency
 
