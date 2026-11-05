@@ -539,8 +539,8 @@ jobs:
       matrix:
         legacy_path: ['0', '1']
         # Exact patch versions: a major-only selector floats and is not reproducible.
-        # 22.13.0 = declared engines minimum; 24.18.1 = primary release-validation runtime.
-        node-version: ['22.13.0', '24.18.1']
+        # 22.13.0 = declared engines minimum; 24.22.2 = primary release-validation runtime (.node-version).
+        node-version: ['22.13.0', '24.22.2']
 
     steps:
       - name: Checkout

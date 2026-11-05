@@ -40,6 +40,27 @@ const rootEngines = (
   JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8')) as { engines?: { node?: string } }
 ).engines?.node;
 
+/** The first list-valued `node-version` key under a parsed workflow node (a matrix axis). */
+function nodeVersionAxis(node: unknown): unknown[] | undefined {
+  if (!node || typeof node !== 'object') return undefined;
+  for (const [key, value] of Object.entries(node)) {
+    if (key === 'node-version' && Array.isArray(value)) return value;
+    const found = nodeVersionAxis(value);
+    if (found) return found;
+  }
+  return undefined;
+}
+
+const NODE_PIN = readFileSync(join(ROOT, '.node-version'), 'utf8').trim();
+const factsRuntime = (
+  JSON.parse(readFileSync(join(ROOT, 'docs', 'releases', 'facts.json'), 'utf8')) as {
+    runtime: {
+      node_canonical: string;
+      node_matrix: { supported_floor: string; primary_lts: string };
+    };
+  }
+).runtime;
+
 describe('the Node compatibility matrix is well formed', () => {
   it('declares exactly the three supported lines', () => {
     expect(lanes).toHaveLength(3);
@@ -80,6 +101,22 @@ describe('the Node compatibility matrix is well formed', () => {
   it('records the resolved version for the floating selector', () => {
     const steps = (nodeCompat.steps ?? []).map((s) => s.name ?? '');
     expect(steps.some((n) => /resolved/i.test(n))).toBe(true);
+  });
+});
+
+describe('exact Node pins agree with .node-version', () => {
+  it('.node-version is an exact release', () => {
+    expect(NODE_PIN).toMatch(/^\d+\.\d+\.\d+$/);
+  });
+
+  it('the rollback-path matrix pins the engines floor and the repository runtime', () => {
+    const axis = nodeVersionAxis(ci.jobs['protocol-rollback-path-matrix']);
+    expect(axis).toEqual([factsRuntime.node_matrix.supported_floor, NODE_PIN]);
+  });
+
+  it('facts.json records the repository runtime', () => {
+    expect(factsRuntime.node_canonical).toBe(NODE_PIN);
+    expect(factsRuntime.node_matrix.primary_lts).toBe(NODE_PIN);
   });
 });
 
