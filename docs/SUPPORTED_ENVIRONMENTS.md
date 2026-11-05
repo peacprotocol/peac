@@ -2,6 +2,8 @@
 
 **Last verified:** 2026-06 documentation review. Environment claims are substantiated by CI lanes in `.github/workflows/ci.yml` (Node 22/24/25 matrix, Go SDK lane) and by the `.node-version` (Node 24 canonical) and `sdks/go/go.mod` (Go 1.26) pins. Node floor is `>=22.13.0`.
 
+Run the current security patch release of each supported Node.js and Go line. The `engines.node` floor and the Go `go` directive are compatibility minimums, not recommended patch levels.
+
 ## Node.js
 
 | Version                      | Status            | Notes                                                           |
