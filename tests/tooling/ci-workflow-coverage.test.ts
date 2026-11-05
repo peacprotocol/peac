@@ -25,6 +25,8 @@ interface Step {
   name?: string;
   if?: string;
   run?: string;
+  uses?: string;
+  with?: Record<string, unknown>;
   env?: Record<string, string>;
 }
 interface Job {
@@ -188,6 +190,25 @@ describe('the Go workflow covers every module', () => {
     const minor = (v: string) => Number(v.split('.')[1]);
     expect(minor(newer)).toBeGreaterThan(minor(floor as string));
     expect(goSdk.jobs['test-newest-go'].needs).toBe('lint');
+  });
+
+  it('every Go setup step outside the newest-release job reads sdks/go/go.mod', () => {
+    const files = readdirSync(join(ROOT, '.github', 'workflows')).filter((f) => /\.ya?ml$/.test(f));
+    const offenders: string[] = [];
+    let seen = 0;
+    for (const file of files) {
+      for (const [jobId, job] of Object.entries(workflow(file).jobs ?? {})) {
+        for (const step of stepsOf(job)) {
+          if (!step.uses?.startsWith('actions/setup-go@')) continue;
+          seen++;
+          if (file === 'go-sdk.yml' && jobId === 'test-newest-go') continue;
+          if (step.with?.['go-version-file'] !== 'sdks/go/go.mod')
+            offenders.push(`${file}:${jobId}`);
+        }
+      }
+    }
+    expect(seen).toBeGreaterThan(0);
+    expect(offenders).toEqual([]);
   });
 
   it('every module and go.work name one exact toolchain on the floor release line', () => {
