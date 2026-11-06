@@ -29,19 +29,19 @@ The signing interface (`signWire02()`) accepts raw Ed25519 private keys. Organiz
 
 When organizations run `@peac/protocol` or `@peac/mcp-server` locally, all cryptographic operations execute in-process. There is no shared state, no external network calls during signing, and no multi-tenant surface.
 
-### Hosted Verify (planned)
+### Self-hosted verify API (`apps/api`)
 
-The Hosted Verify API uses per-API-key tenant isolation:
+The reference verify API is self-hosted: each deployment serves one tenant, and key caches are scoped to the process.
 
-| Boundary           | Isolation guarantee                                             |
-| ------------------ | --------------------------------------------------------------- |
-| Verification state | No shared state between API keys                                |
-| Logs               | Tenant-scoped; `receipt_ref` only by default                    |
-| Rate limits        | Per-tenant; configurable; default 100 req/min                   |
-| Cache              | Per-tenant JWKS cache with TTL-bound expiry                     |
-| Data retention     | Configurable per tenant; default 30-day log, 90-day receipt_ref |
+| Boundary           | Behavior                                                                                                                   |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| Verification state | Process-wide; the in-memory JWKS caches and rate-limit counters are shared by all callers                                  |
+| Logs               | Request contents are never logged                                                                                          |
+| Rate limits        | Built-in limits protect the process; authenticate callers and enforce per-caller limits at the gateway in front of the API |
+| Cache              | In-memory JWKS cache with TTL-bound expiry, shared by all callers                                                          |
+| Data retention     | Nothing is written to storage; caches and counters live in process memory                                                  |
 
-Cross-tenant data leakage is prevented by design: each API key resolves to an isolated verification context with no shared mutable state. See [Hosted Verify Contract](HOSTED_VERIFY_CONTRACT.md) for the full API design.
+See [Hosted Verify Contract](HOSTED_VERIFY_CONTRACT.md) for the HTTP contract.
 
 ## Procurement
 
@@ -55,10 +55,9 @@ PEAC Protocol is maintained by Originary. No formal foundation governance exists
 
 ### Support model
 
-| Tier                    | Scope                                  | SLA          |
-| ----------------------- | -------------------------------------- | ------------ |
-| Open source             | GitHub Issues, community contributions | Best-effort  |
-| Hosted Verify (planned) | API uptime, verification correctness   | Per-contract |
+| Tier        | Scope                                  | SLA         |
+| ----------- | -------------------------------------- | ----------- |
+| Open source | GitHub Issues, community contributions | Best-effort |
 
 ### Compliance alignment
 

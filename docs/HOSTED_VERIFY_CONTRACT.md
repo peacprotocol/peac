@@ -22,11 +22,11 @@ Verify a signed interaction record.
 }
 ```
 
-| Field        | Type   | Required | Description                                                                              |
-| ------------ | ------ | -------- | ---------------------------------------------------------------------------------------- |
-| `receipt`    | string | Yes      | Compact JWS (`interaction-record+jwt`)                                                   |
-| `public_key` | string | No       | Base64url Ed25519 public key. If omitted, issuer discovery and JWKS resolution are used. |
-| `policy`     | object | No       | Policy document for binding verification                                                 |
+| Field        | Type   | Required | Description                                                                                                                                                                                  |
+| ------------ | ------ | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `receipt`    | string | Yes      | Compact JWS (`interaction-record+jwt`)                                                                                                                                                       |
+| `public_key` | string | No       | Base64url Ed25519 public key. If omitted, the issuer must be allowlisted (`PEAC_TRUSTED_ISSUERS_JSON`) unless `PEAC_ISSUER_DISCOVERY=true`; the key is then resolved from the issuer's JWKS. |
+| `policy`     | object | No       | Policy document for binding verification                                                                                                                                                     |
 
 **Success response (200):**
 
@@ -83,23 +83,23 @@ All errors use RFC 9457 Problem Details with `type` URIs under `https://www.peac
 
 All error codes below are kernel-canonical (from `specs/kernel/errors.json`). Hosted error catalog implementations MUST use these exact codes.
 
-| Code                             | HTTP | Type URI suffix            | Detail                                                                                     |
-| -------------------------------- | ---- | -------------------------- | ------------------------------------------------------------------------------------------ |
-| `E_INVALID_FORMAT`               | 400  | `invalid-format`           | Input is not a valid compact JWS. Expected three base64url segments separated by dots.     |
-| `E_JWS_MISSING_KID`              | 400  | `missing-kid`              | JWS header is missing a `kid` field. Add a key identifier to the signing key.              |
-| `E_UNSUPPORTED_WIRE_VERSION`     | 400  | `unsupported-wire-version` | Wire version is not supported by this endpoint. Accepts `interaction-record+jwt`.          |
-| `E_INVALID_SIGNATURE`            | 422  | `invalid-signature`        | Ed25519 signature does not match the payload and key.                                      |
-| `E_ISS_NOT_CANONICAL`            | 422  | `iss-not-canonical`        | The `iss` field must start with `https://` or `did:`.                                      |
-| `E_CONSTRAINT_VIOLATION`         | 422  | `constraint-violation`     | Claims do not conform to the expected schema or kernel constraints.                        |
-| `E_POLICY_BINDING_FAILED`        | 422  | `policy-binding-failed`    | Policy digest does not match the local policy.                                             |
-| `E_EXPIRED`                      | 422  | `expired`                  | Receipt has exceeded its expiration time.                                                  |
-| `E_NOT_YET_VALID`                | 422  | `not-yet-valid`            | Receipt `nbf` or `iat` time is in the future.                                              |
-| `E_JWKS_FETCH_FAILED`            | 502  | `jwks-fetch-failed`        | Could not resolve JWKS for the issuer. Check the issuer's `/.well-known/peac-issuer.json`. |
-| `E_VERIFY_ISSUER_CONFIG_MISSING` | 502  | `issuer-config-missing`    | Issuer configuration not found at discovery URL.                                           |
-| `E_VERIFY_ISSUER_CONFIG_INVALID` | 502  | `issuer-config-invalid`    | Issuer configuration is malformed.                                                         |
-| `E_KEY_NOT_FOUND`                | 400  | `key-not-found`            | No key matching the `kid` was found in the issuer's JWKS.                                  |
-| `E_RATE_LIMITED`                 | 429  | `rate-limited`             | Request rate exceeded. See `RateLimit-*` headers.                                          |
-| `E_PAYLOAD_TOO_LARGE`            | 413  | `payload-too-large`        | Request body exceeds the maximum size for this surface.                                    |
+| Code                             | HTTP | Type URI suffix            | Detail                                                                                 |
+| -------------------------------- | ---- | -------------------------- | -------------------------------------------------------------------------------------- |
+| `E_INVALID_FORMAT`               | 400  | `invalid-format`           | Input is not a valid compact JWS. Expected three base64url segments separated by dots. |
+| `E_JWS_MISSING_KID`              | 400  | `missing-kid`              | JWS header is missing a `kid` field. Add a key identifier to the signing key.          |
+| `E_UNSUPPORTED_WIRE_VERSION`     | 400  | `unsupported-wire-version` | Wire version is not supported by this endpoint. Accepts `interaction-record+jwt`.      |
+| `E_INVALID_SIGNATURE`            | 422  | `invalid-signature`        | Ed25519 signature does not match the payload and key.                                  |
+| `E_ISS_NOT_CANONICAL`            | 422  | `iss-not-canonical`        | The `iss` field must start with `https://` or `did:`.                                  |
+| `E_CONSTRAINT_VIOLATION`         | 422  | `constraint-violation`     | Claims do not conform to the expected schema or kernel constraints.                    |
+| `E_POLICY_BINDING_FAILED`        | 422  | `policy-binding-failed`    | Policy digest does not match the local policy.                                         |
+| `E_EXPIRED`                      | 422  | `expired`                  | Receipt has exceeded its expiration time.                                              |
+| `E_NOT_YET_VALID`                | 422  | `not-yet-valid`            | Receipt `nbf` or `iat` time is in the future.                                          |
+| `E_JWKS_FETCH_FAILED`            | 502  | `jwks-fetch-failed`        | Could not resolve JWKS for the issuer.                                                 |
+| `E_VERIFY_ISSUER_CONFIG_MISSING` | 502  | `issuer-config-missing`    | Issuer configuration not found at discovery URL.                                       |
+| `E_VERIFY_ISSUER_CONFIG_INVALID` | 502  | `issuer-config-invalid`    | Issuer configuration is malformed.                                                     |
+| `E_KEY_NOT_FOUND`                | 400  | `key-not-found`            | No key matching the `kid` was found in the issuer's JWKS.                              |
+| `E_RATE_LIMITED`                 | 429  | `rate-limited`             | Request rate exceeded. See `RateLimit-*` headers.                                      |
+| `E_PAYLOAD_TOO_LARGE`            | 413  | `payload-too-large`        | Request body exceeds the maximum size for this surface.                                |
 
 **Notes:**
 
@@ -114,47 +114,46 @@ All error codes below are kernel-canonical (from `specs/kernel/errors.json`). Ho
 
 ## Issuer and JWKS Handling
 
-Resolution path: `iss` -> `/.well-known/peac-issuer.json` -> `jwks_uri` -> JWKS -> match `kid`.
+Resolution path (when `public_key` is omitted): issuer origin -> `/.well-known/jwks`, `/keys?keyID=<kid>`, `/.well-known/jwks.json` (tried in turn) -> match `kid`. `/.well-known/peac-issuer.json` is not read on this path.
 
-| Aspect          | Specification                                                         |
-| --------------- | --------------------------------------------------------------------- |
-| Cache TTL       | 5 minutes (default), configurable per tenant                          |
-| SSRF protection | Private IP rejection, no redirects to private ranges, SSRF-safe fetch |
-| Timeout         | 5 seconds per upstream request                                        |
-| Failure mode    | `E_JWKS_FETCH_FAILED` with issuer URI in `detail`                     |
+| Aspect          | Specification                                                                                                                                                                                                                                                     |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Cache TTL       | `Cache-Control: max-age` clamped to 60-86,400 s (default 300 s). A previously cached key is served stale for up to 48 hours (allowlisted issuers) or 10 minutes (issuer discovery) when every key fetch fails with a network error, a non-2xx status or a timeout |
+| SSRF protection | Private IP rejection, no redirects to private ranges, SSRF-safe fetch                                                                                                                                                                                             |
+| Timeout         | 5 seconds per upstream request                                                                                                                                                                                                                                    |
+| Failure mode    | `E_JWKS_FETCH_FAILED` with issuer URI in `detail`                                                                                                                                                                                                                 |
 
 ## Authentication and Tenancy
 
-| Aspect             | Specification                                                                                        |
-| ------------------ | ---------------------------------------------------------------------------------------------------- |
-| Auth method        | `Authorization: Bearer <api-key>`                                                                    |
-| Tenant isolation   | Per-API-key; no cross-tenant state, logs, or cache                                                   |
-| Rate limiting      | Configurable per key; default 100 req/min                                                            |
-| Rate limit headers | `RateLimit-Limit`, `RateLimit-Remaining`, `RateLimit-Reset` per draft-ietf-httpapi-ratelimit-headers |
+| Aspect             | Specification                                                                                                              |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| Authentication     | Delegated to the deployment: run the API behind a gateway that authenticates callers                                       |
+| Tenancy            | One deployment per tenant; key caches and rate-limit counters are scoped to the process                                    |
+| Rate limiting      | Built-in limits protect the process; authenticate callers and enforce per-caller limits at the gateway in front of the API |
+| Rate limit headers | `RateLimit-Limit`, `RateLimit-Remaining`, `RateLimit-Reset` per draft-ietf-httpapi-ratelimit-headers                       |
 
 ## Privacy and Retention
 
-| Aspect                | Default                                   |
-| --------------------- | ----------------------------------------- |
-| JWS logging           | `receipt_ref` only; full JWS never logged |
-| Identity fields       | DID/URL opt-in logging only               |
-| Log retention         | 30 days                                   |
-| Receipt ref retention | 90 days                                   |
-| Bundle exports        | Tenant-controlled                         |
+| Aspect                | Default                                                    |
+| --------------------- | ---------------------------------------------------------- |
+| JWS logging           | Request contents are never logged                          |
+| Identity fields       | Not logged                                                 |
+| Log retention         | Not applicable; the process logs startup and shutdown only |
+| Receipt ref retention | Not stored                                                 |
+| Bundle exports        | Not provided                                               |
 
 ## Threat Mitigations
 
-| Threat                            | Mitigation                                                            | Budget                                      |
-| --------------------------------- | --------------------------------------------------------------------- | ------------------------------------------- |
-| SSRF via JWKS                     | SSRF-safe fetch, private IP rejection, no redirects to private ranges | Existing `@peac/protocol` posture           |
-| JWKS cache poisoning              | TTL-bound cache, key-pinning option                                   | Cache TTL: 5 min default                    |
-| Oversized JWS                     | Reject above surface size budget                                      | 64 KB (MCP/A2A), 8 KB (HTTP header)         |
-| Pathological input                | Iterative JSON validation, depth/size limits from kernel constraints  | Existing kernel constraint enforcement      |
-| `receipt_url` fetch amplification | Semaphore, per-tenant quota, timeout                                  | Max 5 concurrent, 5s timeout, 10/min/tenant |
-| Cross-tenant leakage              | Per-API-key isolation, no shared state                                | Strict tenant isolation                     |
-| Log leakage                       | Default: log `receipt_ref` only                                       | Aligned with privacy defaults               |
-| Retry storms                      | Per-tenant rate limiting, circuit breaker on upstream JWKS            | 100 req/min default                         |
-| Timeout ceiling                   | Hard ceiling on verification time                                     | 10 seconds                                  |
+| Threat                            | Mitigation                                                                      | Budget                                   |
+| --------------------------------- | ------------------------------------------------------------------------------- | ---------------------------------------- |
+| SSRF via JWKS                     | SSRF-safe fetch, private IP rejection, no redirects to private ranges           | Existing `@peac/protocol` posture        |
+| JWKS cache poisoning              | TTL-bound cache, key-pinning option                                             | Cache TTL: 5 min default                 |
+| Oversized JWS                     | Reject request bodies above the size budget (`E_PAYLOAD_TOO_LARGE`)             | 256 KiB request body                     |
+| Pathological input                | Iterative JSON validation, depth/size limits from kernel constraints            | Existing kernel constraint enforcement   |
+| `receipt_url` fetch amplification | Not applicable: the API never fetches `receipt_url`                             | Not applicable                           |
+| Cross-tenant leakage              | One deployment per tenant; caches are scoped to the process                     | Run one instance per tenant              |
+| Log leakage                       | Request contents are never logged                                               | Not applicable                           |
+| Retry storms                      | Built-in rate limiting protects the process; upstream JWKS responses are cached | Enforce per-caller limits at the gateway |
 
 ## Response Headers
 
