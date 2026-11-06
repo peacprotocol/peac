@@ -8,13 +8,13 @@ For formal RFC, W3C, ISO/IEC, and FIPS status with code-level citation sites, se
 
 ## Status definitions
 
-| Status            | Meaning                                                      |
-| ----------------- | ------------------------------------------------------------ |
-| **Normative**     | PEAC implementation MUST conform to this standard            |
-| **Compatible**    | PEAC interoperates with this standard; deviations documented |
-| **Draft-tracked** | Standard is in draft; PEAC tracks the current draft version  |
-| **Informational** | Referenced for context; no conformance requirement           |
-| **Planned**       | Not yet implemented; tracked for a future release            |
+| Status              | Meaning                                                      |
+| ------------------- | ------------------------------------------------------------ |
+| **Normative**       | PEAC implementation MUST conform to this standard            |
+| **Compatible**      | PEAC interoperates with this standard; deviations documented |
+| **Draft-tracked**   | Standard is in draft; PEAC tracks the current draft version  |
+| **Informational**   | Referenced for context; no conformance requirement           |
+| **Not implemented** | Not provided by this repository                              |
 
 ## Cryptographic and Wire Standards
 
@@ -61,11 +61,11 @@ For formal RFC, W3C, ISO/IEC, and FIPS status with code-level citation sites, se
 
 ## Supply Chain and Provenance Standards
 
-| Standard         | Version | Status         | PEAC surface                                        |
-| ---------------- | ------- | -------------- | --------------------------------------------------- |
-| SLSA             | v1.2    | **Compatible** | `@peac/mappings-slsa`: provenance statement mapping |
-| in-toto          | v1.0    | **Compatible** | `@peac/mappings-intoto`: attestation bundle mapping |
-| SPDX / CycloneDX | Current | **Planned**    | Release SBOM generation                             |
+| Standard         | Version | Status              | PEAC surface                                        |
+| ---------------- | ------- | ------------------- | --------------------------------------------------- |
+| SLSA             | v1.2    | **Compatible**      | `@peac/mappings-slsa`: provenance statement mapping |
+| in-toto          | v1.0    | **Compatible**      | `@peac/mappings-intoto`: attestation bundle mapping |
+| SPDX / CycloneDX | Current | **Not implemented** | Release SBOM generation                             |
 
 ## Content and Signal Standards
 

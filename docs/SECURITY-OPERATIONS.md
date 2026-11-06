@@ -66,7 +66,7 @@ All published packages are configured for OIDC trusted publishing through the `p
 
 ### SBOM
 
-SBOM generation (SPDX or CycloneDX) is planned but not yet configured. The turbo build pipeline includes an `sbom` task definition for future use.
+Release integrity is established through npm provenance attestations and registry signatures; see [Verifying a release](VERIFY-RELEASE.md). The release SBOM status is listed in [STANDARDS_COMPLIANCE](STANDARDS_COMPLIANCE.md).
 
 ## Logging Boundaries
 
@@ -91,17 +91,19 @@ SBOM generation (SPDX or CycloneDX) is planned but not yet configured. The turbo
 
 No multi-tenant surface. All operations are in-process. Operators control all isolation boundaries.
 
-### Hosted Verify (planned)
+### Self-hosted verify API (`apps/api`)
 
-| Boundary             | Mechanism                                        |
-| -------------------- | ------------------------------------------------ |
-| Verification context | Per-API-key isolated; no shared mutable state    |
-| JWKS cache           | Per-tenant with TTL-bound expiry (5 min default) |
-| Rate limits          | Per-tenant; configurable; default 100 req/min    |
-| Logs                 | Tenant-scoped; `receipt_ref` only by default     |
-| Audit trail          | Per-tenant; exportable                           |
+The reference verify API is self-hosted: each deployment serves one tenant, and the gateway in front of it authenticates callers and applies per-caller limits.
 
-See [Hosted Verify Contract](HOSTED_VERIFY_CONTRACT.md) for the full isolation design and threat mitigations.
+| Boundary             | Behavior                                                                                                                   |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| Verification context | No tenant isolation                                                                                                        |
+| JWKS cache           | In-memory, process-wide, shared by all callers; `Cache-Control: max-age` clamped to 60-86,400 s (default 300 s)            |
+| Rate limits          | Built-in limits protect the process; authenticate callers and enforce per-caller limits at the gateway in front of the API |
+| Logs                 | Request contents are never logged; the process logs startup and shutdown                                                   |
+| Audit trail          | Provided by the deployment's gateway and log pipeline                                                                      |
+
+See [Hosted Verify Contract](HOSTED_VERIFY_CONTRACT.md) for the HTTP contract.
 
 ## Data Residency
 
