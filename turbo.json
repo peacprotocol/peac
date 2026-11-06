@@ -19,6 +19,12 @@
       "dependsOn": ["^build"],
       "outputs": ["dist/**", "build/**", "lib/**", "*.tsbuildinfo"]
     },
+    "@peac/app-verifier#build": {
+      "dependsOn": ["^build"],
+      "env": ["PEAC_VERIFIER_BUILD", "PEAC_VERIFIER_REQUIRE_CLEAN"],
+      "outputs": ["dist/**"],
+      "cache": false
+    },
     "test": {
       "dependsOn": ["build"],
       "outputs": ["coverage/**"]
