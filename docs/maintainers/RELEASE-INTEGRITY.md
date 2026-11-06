@@ -26,15 +26,6 @@ the manifest's `pendingTrustedPublishing` array.
 - [npm Trusted Publishers](https://docs.npmjs.com/trusted-publishers/)
 - npm positions OIDC as the replacement for long-lived publish tokens
 
-### GitHub Artifact Attestations
-
-Every release publish generates GitHub artifact attestations (Sigstore-based).
-Consumers can verify package provenance offline:
-
-```bash
-gh attestation verify <artifact> --owner peacprotocol
-```
-
 ### Dependency Review
 
 `.github/workflows/dependency-review.yml` blocks PRs that introduce dependencies
@@ -47,21 +38,14 @@ Uses GitHub's `dependency-review-action`.
 on every push to `main`/`release/*`, on PRs to `main`, and weekly. Covers
 JavaScript and TypeScript.
 
-### SBOM Generation
-
-Every release includes a CycloneDX SBOM generated during the publish workflow.
-The SBOM is attached to the GitHub release as a downloadable asset.
-
 ### Package Verification
 
-Consumers verify published packages via 5 methods documented in
-`docs/VERIFY-RELEASE.md`:
+Consumers verify published packages with npm provenance and registry signatures
+(`npm audit signatures` in a project that installs them). See
+`docs/VERIFY-RELEASE.md`.
 
-1. **Checksums:** SHA-256 of each tarball
-2. **SBOM:** CycloneDX bill of materials
-3. **npm Provenance:** `npm audit signatures`
-4. **GitHub Attestations:** `gh attestation verify`
-5. **Gate Report:** committed `docs/releases/<version>-gate-report.json`
+Releases do not include GitHub artifact attestations, an SBOM or a tarball
+checksum manifest.
 
 ### Maintainer Security
 
@@ -93,8 +77,9 @@ See DD-161 for rationale.
 Release decisions are made by `scripts/release/run-gates.sh --write-release-artifacts`.
 
 The `--write-release-artifacts` flag is the **authoritative** gate path. Without it,
-the script is a dry-run that never claims "ready to tag." The committed gate report
-JSON is the machine-verifiable release evidence.
+the script is a dry-run that never claims "ready to tag." With it, the script writes
+the gate report JSON to `docs/releases/<version>-gate-report.json`; gate reports are
+not committed for every release.
 
 ### Gate Categories
 

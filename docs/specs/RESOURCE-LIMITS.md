@@ -206,8 +206,9 @@ NOT skip any layer's cap.
 
 - **MCP server** (`@peac/mcp-server`): tool-call responses can carry a
   receipt under `_meta.org.peacprotocol/receipt_jws`. The receipt must
-  satisfy the kernel constraints; the MCP carrier itself does not add
-  a new size cap beyond what the JWS body imposes. See
+  satisfy the kernel constraints, and the MCP carrier is capped at
+  64 KiB (`MCP_MAX_CARRIER_SIZE`, UTF-8 bytes of the serialized
+  carrier). See
   [`docs/specs/MCP-EVIDENCE-PROFILE.md`](MCP-EVIDENCE-PROFILE.md).
 - **A2A mappings**: agent cards declare carrier sizes; observations
   attached to A2A messages must fit within `A2A_MAX_CARRIER_SIZE`. See

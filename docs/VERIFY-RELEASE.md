@@ -4,7 +4,7 @@ This document describes independent methods for verifying the integrity and prov
 
 ## 1. Gate Report (Authoritative Evidence)
 
-Each release includes a machine-generated gate report that records every quality gate result. For stable releases, this includes all DD-90 gates.
+`scripts/release/run-gates.sh --write-release-artifacts` writes a machine-generated gate report to `docs/releases/<version>-gate-report.json` that records every quality gate result. For stable releases, this includes all DD-90 gates. Gate reports are not committed for every release.
 
 ```bash
 # Generate the authoritative gate report (writes JSON artifact)
@@ -79,15 +79,9 @@ bash scripts/release/pack-install-smoke.sh
 
 This catches packaging errors that unit tests cannot detect: missing files in the `files` array, broken exports maps, missing bin entries, and CJS/ESM resolution failures.
 
-## 6. Attestations and SBOM (Pending)
+## 6. Attestations and SBOM
 
-The following verification methods are planned but not yet implemented:
-
-- **Sigstore attestations:** Per-package Sigstore attestation bundles (pending PR 6a: OIDC migration)
-- **SBOM generation:** CycloneDX or SPDX SBOM for each published package (pending tooling evaluation)
-- **Checksum manifest:** SHA-256 checksums for all published tarballs (pending release automation)
-
-These will be added as part of the publisher-trust work tracked in the stable release plan.
+**Not currently provided:** per-package Sigstore attestation bundles beyond npm provenance, SBOMs, and a tarball checksum manifest.
 
 ## Verification Checklist
 
