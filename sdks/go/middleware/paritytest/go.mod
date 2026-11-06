@@ -2,6 +2,8 @@ module github.com/peacprotocol/peac/sdks/go/middleware/paritytest
 
 go 1.26
 
+toolchain go1.26.10
+
 require (
 	github.com/peacprotocol/peac/sdks/go v0.9.29
 	github.com/peacprotocol/peac/sdks/go/middleware/chi v0.0.0

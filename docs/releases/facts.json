@@ -14,12 +14,12 @@
     "conformance_sections": 32
   },
   "runtime": {
-    "node_canonical": "24.18.1",
+    "node_canonical": "24.22.2",
     "node_minimum": ">=22.13.0",
     "node_compat": "22",
     "node_matrix": {
       "supported_floor": "22.13.0",
-      "primary_lts": "24.18.1",
+      "primary_lts": "24.22.2",
       "canary_major": "26",
       "canary_blocking": false,
       "canary_release_line": "Current",

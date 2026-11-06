@@ -500,7 +500,7 @@ See [SECURITY.md](../SECURITY.md), [Trust artifacts](TRUST-ARTIFACTS.md), [PROTO
 
 ## Development
 
-**Prerequisites:** Node.js 24.18 (tested, per `.node-version`); Node.js 22.13+ (per `engines`). Use the repository-pinned pnpm (8.15.0) via Corepack.
+**Prerequisites:** Node.js 24.22 (tested, per `.node-version`); Node.js 22.13+ (per `engines`). Use the repository-pinned pnpm (8.15.0) via Corepack.
 
 ```bash
 git clone https://github.com/peacprotocol/peac
