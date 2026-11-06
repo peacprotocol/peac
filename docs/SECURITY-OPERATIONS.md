@@ -66,7 +66,7 @@ All published packages are configured for OIDC trusted publishing through the `p
 
 ### SBOM
 
-SBOMs are not generated for releases.
+Release integrity is established through npm provenance attestations and registry signatures; see [Verifying a release](VERIFY-RELEASE.md). The release SBOM status is listed in [STANDARDS_COMPLIANCE](STANDARDS_COMPLIANCE.md).
 
 ## Logging Boundaries
 
@@ -93,15 +93,15 @@ No multi-tenant surface. All operations are in-process. Operators control all is
 
 ### Self-hosted verify API (`apps/api`)
 
-The reference verify API is self-hosted and tenantless. One process serves every caller.
+The reference verify API is self-hosted: each deployment serves one tenant, and the gateway in front of it authenticates callers and applies per-caller limits.
 
-| Boundary             | Behavior                                                                                                                                                                    |
-| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Verification context | No tenant isolation                                                                                                                                                         |
-| JWKS cache           | In-memory, process-wide, shared by all callers; `Cache-Control: max-age` clamped to 60-86,400 s (default 300 s)                                                             |
-| Rate limits          | Coarse built-in limits that are not a security control; deploy the API behind a gateway that authenticates callers and enforces rate limits. Requests are not authenticated |
-| Logs                 | Request contents are not logged; the process logs startup and shutdown only                                                                                                 |
-| Audit trail          | None                                                                                                                                                                        |
+| Boundary             | Behavior                                                                                                                   |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| Verification context | No tenant isolation                                                                                                        |
+| JWKS cache           | In-memory, process-wide, shared by all callers; `Cache-Control: max-age` clamped to 60-86,400 s (default 300 s)            |
+| Rate limits          | Built-in limits protect the process; authenticate callers and enforce per-caller limits at the gateway in front of the API |
+| Logs                 | Request contents are never logged; the process logs startup and shutdown                                                   |
+| Audit trail          | Provided by the deployment's gateway and log pipeline                                                                      |
 
 See [Hosted Verify Contract](HOSTED_VERIFY_CONTRACT.md) for the HTTP contract.
 

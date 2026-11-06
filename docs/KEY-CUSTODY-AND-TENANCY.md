@@ -31,15 +31,15 @@ When organizations run `@peac/protocol` or `@peac/mcp-server` locally, all crypt
 
 ### Self-hosted verify API (`apps/api`)
 
-The reference verify API is self-hosted and tenantless: one process serves every caller, with no tenant isolation.
+The reference verify API is self-hosted: each deployment serves one tenant, and key caches are scoped to the process.
 
-| Boundary           | Behavior                                                                                                                                                                    |
-| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Verification state | Process-wide; the in-memory JWKS caches and rate-limit counters are shared by all callers                                                                                   |
-| Logs               | Request contents are not logged                                                                                                                                             |
-| Rate limits        | Coarse built-in limits that are not a security control; deploy the API behind a gateway that authenticates callers and enforces rate limits. Requests are not authenticated |
-| Cache              | In-memory JWKS cache with TTL-bound expiry, shared by all callers                                                                                                           |
-| Data retention     | Nothing is written to storage; caches and counters live in process memory                                                                                                   |
+| Boundary           | Behavior                                                                                                                   |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| Verification state | Process-wide; the in-memory JWKS caches and rate-limit counters are shared by all callers                                  |
+| Logs               | Request contents are never logged                                                                                          |
+| Rate limits        | Built-in limits protect the process; authenticate callers and enforce per-caller limits at the gateway in front of the API |
+| Cache              | In-memory JWKS cache with TTL-bound expiry, shared by all callers                                                          |
+| Data retention     | Nothing is written to storage; caches and counters live in process memory                                                  |
 
 See [Hosted Verify Contract](HOSTED_VERIFY_CONTRACT.md) for the HTTP contract.
 

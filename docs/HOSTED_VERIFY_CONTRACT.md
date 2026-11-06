@@ -125,18 +125,18 @@ Resolution path (when `public_key` is omitted): issuer origin -> `/.well-known/j
 
 ## Authentication and Tenancy
 
-| Aspect             | Specification                                                                                                                               |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| Auth method        | None. Requests are not authenticated                                                                                                        |
-| Tenant isolation   | None. One process serves every caller; key caches and rate-limit counters are process-wide                                                  |
-| Rate limiting      | Coarse built-in limits that are not a security control; deploy the API behind a gateway that authenticates callers and enforces rate limits |
-| Rate limit headers | `RateLimit-Limit`, `RateLimit-Remaining`, `RateLimit-Reset` per draft-ietf-httpapi-ratelimit-headers                                        |
+| Aspect             | Specification                                                                                                              |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| Authentication     | Delegated to the deployment: run the API behind a gateway that authenticates callers                                       |
+| Tenancy            | One deployment per tenant; key caches and rate-limit counters are scoped to the process                                    |
+| Rate limiting      | Built-in limits protect the process; authenticate callers and enforce per-caller limits at the gateway in front of the API |
+| Rate limit headers | `RateLimit-Limit`, `RateLimit-Remaining`, `RateLimit-Reset` per draft-ietf-httpapi-ratelimit-headers                       |
 
 ## Privacy and Retention
 
 | Aspect                | Default                                                    |
 | --------------------- | ---------------------------------------------------------- |
-| JWS logging           | Not logged; request contents are not logged                |
+| JWS logging           | Request contents are never logged                          |
 | Identity fields       | Not logged                                                 |
 | Log retention         | Not applicable; the process logs startup and shutdown only |
 | Receipt ref retention | Not stored                                                 |
@@ -144,16 +144,16 @@ Resolution path (when `public_key` is omitted): issuer origin -> `/.well-known/j
 
 ## Threat Mitigations
 
-| Threat                            | Mitigation                                                                                 | Budget                                               |
-| --------------------------------- | ------------------------------------------------------------------------------------------ | ---------------------------------------------------- |
-| SSRF via JWKS                     | SSRF-safe fetch, private IP rejection, no redirects to private ranges                      | Existing `@peac/protocol` posture                    |
-| JWKS cache poisoning              | TTL-bound cache, key-pinning option                                                        | Cache TTL: 5 min default                             |
-| Oversized JWS                     | Reject request bodies above the size budget (`E_PAYLOAD_TOO_LARGE`)                        | 256 KiB request body                                 |
-| Pathological input                | Iterative JSON validation, depth/size limits from kernel constraints                       | Existing kernel constraint enforcement               |
-| `receipt_url` fetch amplification | Not applicable: the API does not fetch `receipt_url`                                       | Not applicable                                       |
-| Cross-tenant leakage              | None: there is no tenant model; caches are process-wide                                    | Not applicable                                       |
-| Log leakage                       | Request contents are not logged                                                            | Not applicable                                       |
-| Retry storms                      | Coarse built-in rate limiting, not a security control; no circuit breaker on upstream JWKS | Enforce rate limits at a gateway in front of the API |
+| Threat                            | Mitigation                                                                      | Budget                                   |
+| --------------------------------- | ------------------------------------------------------------------------------- | ---------------------------------------- |
+| SSRF via JWKS                     | SSRF-safe fetch, private IP rejection, no redirects to private ranges           | Existing `@peac/protocol` posture        |
+| JWKS cache poisoning              | TTL-bound cache, key-pinning option                                             | Cache TTL: 5 min default                 |
+| Oversized JWS                     | Reject request bodies above the size budget (`E_PAYLOAD_TOO_LARGE`)             | 256 KiB request body                     |
+| Pathological input                | Iterative JSON validation, depth/size limits from kernel constraints            | Existing kernel constraint enforcement   |
+| `receipt_url` fetch amplification | Not applicable: the API never fetches `receipt_url`                             | Not applicable                           |
+| Cross-tenant leakage              | One deployment per tenant; caches are scoped to the process                     | Run one instance per tenant              |
+| Log leakage                       | Request contents are never logged                                               | Not applicable                           |
+| Retry storms                      | Built-in rate limiting protects the process; upstream JWKS responses are cached | Enforce per-caller limits at the gateway |
 
 ## Response Headers
 
